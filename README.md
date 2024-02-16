@@ -15,13 +15,21 @@ This repository is only created so that existing FlinkISO QMS On-Premise users c
 1. Run following SQL commands in sequence 
 
 ALTER TABLE `document_downloads` CHANGE `reccord_id` `record_id` VARCHAR(36)  NULL DEFAULT NULL;
+
 ALTER TABLE `document_downloads` ADD `name` VARCHAR(255) NULL AFTER `sr_no`;
+
 ALTER TABLE `companies` ADD `change_management_table` VARCHAR(36) NULL AFTER `version`, ADD `change_management_table_fields` TEXT NULL AFTER `change_management_table`;
+
 ALTER TABLE `graph_panels` ADD `data_type` INT(1) NULL DEFAULT '0' COMMENT '0=count,1=sum,2=avg' AFTER `graph_type`;
+
 ALTER TABLE `graph_panels` ADD `value_field` VARCHAR(255) NULL AFTER `data_type`;
+
 ALTER TABLE `graph_panels` ADD `position` INT NULL DEFAULT'0' AFTER `color`, ADD `size` INT NULL DEFAULT '3' AFTER `position`;
+
 ALTER TABLE `graph_panels` ADD `title` VARCHAR(255) NULL DEFAULT NULL AFTER `sr_no`;
+
 ALTER TABLE `qc_documents` ADD `name` VARCHAR(255)  NOT NULL AFTER `sr_no`;
+
 ALTER TABLE `processes` CHANGE `process_objecttive_and_metrics` `process_objective_and_metrics` TEXT NULL DEFAULT NULL;
 
 # Auto Update
