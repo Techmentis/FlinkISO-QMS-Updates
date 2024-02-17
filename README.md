@@ -2,11 +2,20 @@
 
 This repository is only created so that existing FlinkISO QMS On-Premise users can update their already downloaded & installed application. If you are new to the application, visit [https://www.flinkiso.com/](https://www.flinkiso.com) for more details. You can register on the webisite and download the latest version of the application. 
 
-# Note: Do not use this repository to upgrade FlinkISO-Lite repository. 
-
 1. In order to download and install updates, first download and install full application from [https://www.flinkiso.com/](https://www.flinkiso.com)
 1. Follow the instructions from README
 1. Make sure you backup your existing application before running any updates
+
+##### Note: Do not use this repository to upgrade FlinkISO-Lite repository. 
+
+# Setup 
+In order to use this autoupdate from within the application, you must initially download 
+
+1. app/View/Elements/top-menu.ctp
+1. app/Controller/BillingController.php and 
+1. app/View/Billing 
+
+files to your installed application. Once copied, click on the Download icon at the top.
 
 # How to update Manually
 
@@ -35,3 +44,5 @@ ALTER TABLE `processes` CHANGE `process_objecttive_and_metrics` `process_objecti
 # Auto Update
 
 After this relase Update Icon is available on the Top menu of the application. When ever a new update or bug-fixes are released, we will notify all the registred users. Users can then update the application after login to application and by clicking the Update Icon. System will then back the existing application in <flinkiso_app>/backup<backup dat(YYYY-MM-DD)>/ folder and then update the application. Incase of a failure, user can restore the previously saved application.
+
+
