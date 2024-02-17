@@ -98,7 +98,7 @@ class BillingController extends AppController {
 
     public function downloading_update(){    
 
-        if(!@copy('http://www.flinkiso.com/flinkiso-updates/updates.zip', WWW_ROOT. 'updates' . DS . 'update.zip'))
+        if(!@copy('https://github.com/Techmentis/FlinkISO-QMS-Updates/archive/refs/heads/main.zip', WWW_ROOT. 'updates' . DS . 'update.zip'))
         {
             $errors = error_get_last();
             echo "<span class='text-danger'><strong>Failed error: ". json_encode($errors['message'].'</strong></span></br>');
@@ -140,7 +140,7 @@ class BillingController extends AppController {
    }
 
    public function copy_files(){
-        $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'update' . DS . 'app');
+        $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'app');
         $foldersTocopy = $downloadedFolder->copy(APP);
         // once successful, copy update files from updates to app
         $updateFolder = new Folder();
