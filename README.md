@@ -41,6 +41,8 @@ ALTER TABLE `qc_documents` ADD `name` VARCHAR(255)  NOT NULL AFTER `sr_no`;
 
 ALTER TABLE `processes` CHANGE `process_objecttive_and_metrics` `process_objective_and_metrics` TEXT NULL DEFAULT NULL;
 
+ALTER TABLE `users` ADD `pwd_last_modified` DATETIME NULL AFTER `email_token_expires`;
+
 # Auto Update
 
 After this relase Update Icon is available on the Top menu of the application. When ever a new update or bug-fixes are released, we will notify all the registred users. Users can then update the application after login to application and by clicking the Update Icon. System will then back the existing application in <flinkiso_app>/backup<backup dat(YYYY-MM-DD)>/ folder and then update the application. Incase of a failure, user can restore the previously saved application.
