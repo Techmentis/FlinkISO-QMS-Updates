@@ -1,15 +1,20 @@
 <style type="text/css">
 	canvas{
 		width: 100%;
-		min-height: 150px;
-		max-height: 250px;
+		min-height: 200px;
+		max-height: 215px;
+		margin: 0px;
+	}
+	.graph-panels{
+		min-height: 350px;
+/*		max-height: 350px;*/
 	}
 </style>
 <?php if($result['data']){ 
 	$graph = $graphTypes[$record['GraphPanel']['graph_type']];
 	?>
 	<?php $id = $this->request->params['pass'][0] ;?>
-	<div class="box box-default" style="background-image:none ;">  
+	<div class="box box-default  graph-panels" style="background-image:none ;">  
 		<div class="box-header">
 			<i class="fa fa-plus pull-right" id="fa<?php echo str_replace('-', '', $this->request->params['pass'][0]);?>" onclick="showhidetable<?php echo str_replace('-', '', $this->request->params['pass'][0]);?>()"></i>
 			<h4 class=" text-center">

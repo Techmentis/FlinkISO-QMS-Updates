@@ -54,6 +54,10 @@ class BillingController extends AppController {
     }
 
     public function update(){
+        if($this->Session->read('User.is_mr') == 0){
+            $this->Session->setFlash(__('Unauthorised Access'));
+            $this->redirect(array('controller'=>'users', 'action' => 'dashboard'));
+        }
 
     }
 
@@ -63,7 +67,8 @@ class BillingController extends AppController {
     }    
 
 
-    public function authentication(){            
+    public function authentication(){
+
         $result = $this->curl('get','users','authenticate');        
         $result = json_decode($result,true);  
         if($result['error']==0){

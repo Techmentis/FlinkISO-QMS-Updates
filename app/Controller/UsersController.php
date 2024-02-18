@@ -262,16 +262,21 @@ class UsersController extends AppController {
                 $newData['User']['password'] = Security::hash($this->request->data['User']['new_password'], 'md5', true);                
                 $old_pwd = $userData['User']['password'];
                 
-                $result = $this->requestAction(array('plugin' => 'password_setting_manager', 'controller' => 'password_settings', 'action' => 'check_password_validation', 
-                    $this->request->data['User']['new_password'], 
-                    $userData['User']['password'], 
-                    $userData['User']['username']
-                ));
-                
-                if (!$result['valid']) {
-                    $this->Session->setFlash(__($result['message']), 'default', array('class' => 'alert-danger'));
-                    $this->redirect(array('action' => 'change_password'));
-                }
+                $companyData = $this->User->Company->find('first', array(
+                    'fields'=>array('Company.id','Company.activate_password_setting'),
+                    'conditions' => array('id' => $this->Session->read('User.company_id')), 'recursive' => - 1));
+
+                if($companyData['Company']['activate_password_setting']){
+                    $result = $this->requestAction(array('plugin' => 'password_setting_manager', 'controller' => 'password_settings', 'action' => 'check_password_validation', 
+                        $this->request->data['User']['new_password'], 
+                        $userData['User']['password'], 
+                        $userData['User']['username']
+                    ));
+                    if (!$result['valid']) {
+                        $this->Session->setFlash(__($result['message']), 'default', array('class' => 'alert-danger'));
+                        $this->redirect(array('action' => 'change_password'));
+                    }
+                }                
                 
                 if (isset($old_pwd) && is_array($old_pwd) && count($old_pwd) > 0) {
                     if (!in_array($newData['User']['password'], $old_pwd)) {
@@ -393,7 +398,7 @@ class UsersController extends AppController {
                 $EmailConfig = new CakeEmail("fast");
                 
                 $EmailConfig->to($to);
-                $EmailConfig->subject('FlinkISO Cloud QMS: OTP');
+                $EmailConfig->subject('FlinkISO: Password reset OTP');
                 $EmailConfig->template('password_reset_request');
                 $EmailConfig->viewVars(array(                
                     'otp' => $otp,
@@ -485,13 +490,17 @@ class UsersController extends AppController {
                         }
                     }
                     
-                    $result = $this->requestAction(array('plugin' => 'password_setting_manager', 'controller' => 'password_settings', 'action' => 'get_password_change_remind', urlencode($user['User']['pwd_last_modified'])));
+                    if($companyData['Company']['activate_password_setting'] == 1){
+                        $result = $this->requestAction(array('plugin' => 'password_setting_manager', 'controller' => 'password_settings', 'action' => 'get_password_change_remind', urlencode($user['User']['pwd_last_modified'])));
                     
-                    if (!$result['valid']) {
-                        $this->Session->setFlash(__($result['msg']), 'default', array('class' => 'alert-danger'));
-                        $this->redirect(array('controller' => 'users', 'action' => 'reset_password'));
+                        if (!$result['valid']) {
+                            $this->Session->setFlash(__($result['msg']), 'default', array('class' => 'alert-danger'));
+                            $this->redirect(array('controller' => 'users', 'action' => 'reset_password'));
+                        }    
                     }
+                    
                     $this->User->read(null, $user['User']['id']);
+                    
                     if ($companyData['Company']['two_way_authentication'] == 1) {
                         $officeEmailId = $user['Employee']['office_email'];
                         $personalEmailId = $user['Employee']['personal_email'];

@@ -4,7 +4,7 @@
     $placeholderid = $filekey;
     $checkdatetime = date('Y-m-d H:i:s',strtotime("-30 seconds"));
     $currentdatetime = date('Y-m-d H:i:s');
-    $last_modified = date('Y-m-d H:i:s',strtotime($last_modified));
+    if($last_modified)$last_modified = date('Y-m-d H:i:s',strtotime($last_modified));
 
     if(
         ($last_saved == null || date('Y-m-d H:i:s',strtotime($last_modified)) < $checkdatetime) 
@@ -85,7 +85,7 @@ if($filetype != null){
             .onlyofficediv{width: 100%;height: 924px;display: block;float: left;}
         </style>
         <?php                 
-        $versionHistory = json_decode($version_keys,true);
+        if($version_keys)$versionHistory = json_decode($version_keys,true);
         $currentVersion = $versionHistory['serverVersion'];
         if(!$versions)$versions = '{}';
         else{
@@ -179,7 +179,7 @@ if($filetype != null){
                 $callbackUrl = Router::url('/',true) ."processes/save_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller ;
             
             $preversion = $version - 1;
-            $historyurl = str_replace('prev.'.$filetype, 'diff.zip', $previous['user']['url']);
+            if($previous['user']['url'])$historyurl = str_replace('prev.'.$filetype, 'diff.zip', $previous['user']['url']);
             
             $historyurl = str_replace($preversion.'-hist','',$historyurl);
             $historyurl = str_replace('/var/www/html/cloud/'.$this->Session->read('User.dir_name').'/app/webroot/files/', Router::url('/', true) . 'files/', $historyurl);

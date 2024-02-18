@@ -1836,22 +1836,24 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 
 	public function _clean_table_names($tableName = null){
-		$tableName = ltrim(rtrim($tableName));		
-		$tableName = str_replace('/', '_', $tableName);
-		$tableName = str_replace('-', '_', $tableName);
-		$tableName = str_replace('&', '_', $tableName);
-		$tableName = ltrim(rtrim(strtolower($tableName)));
-		$tableName = preg_replace('/[\@\.\;\()~!@#$%^&*_+" "-]+/', '_', $tableName);
-		$tableName = preg_replace('/ */', '', $tableName);
-		$tableName = preg_replace('/\\s+/', '_', $tableName); 
-		$tableName = preg_replace('/-*-/', '_', $tableName);
-		$tableName = preg_replace('/_*_/', '_', $tableName);
-		// $tableName = preg_replace('/[0-9]/', '', $tableName);
-		// $tableName = ltrim($tableName,'_');	
-		$tableName = preg_replace('/^([^a-zA-Z0-9])*/', '', $tableName);		
-		$tableName = rtrim($tableName,"_");
+		if($tableName){
+			$tableName = ltrim(rtrim($tableName));		
+			$tableName = str_replace('/', '_', $tableName);
+			$tableName = str_replace('-', '_', $tableName);
+			$tableName = str_replace('&', '_', $tableName);
+			$tableName = ltrim(rtrim(strtolower($tableName)));
+			$tableName = preg_replace('/[\@\.\;\()~!@#$%^&*_+" "-]+/', '_', $tableName);
+			$tableName = preg_replace('/ */', '', $tableName);
+			$tableName = preg_replace('/\\s+/', '_', $tableName); 
+			$tableName = preg_replace('/-*-/', '_', $tableName);
+			$tableName = preg_replace('/_*_/', '_', $tableName);
+			// $tableName = preg_replace('/[0-9]/', '', $tableName);
+			// $tableName = ltrim($tableName,'_');	
+			$tableName = preg_replace('/^([^a-zA-Z0-9])*/', '', $tableName);		
+			$tableName = rtrim($tableName,"_");
 
-		return $tableName;
+			return $tableName;
+		}		
 	}
 
 	public function save_doc() { 
@@ -2671,7 +2673,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				}
 			}
 
-			$additionalFiles = json_decode($this->request->data[$modelName]['additional_files'],true);
+			if($this->request->data[$modelName]['additional_files'])$additionalFiles = json_decode($this->request->data[$modelName]['additional_files'],true);
 
 			if($this->request->params['named']['parent_record_id']){
 				$this->request->data[$modelName]['parent_id'] = $this->request->params['named']['parent_record_id'];

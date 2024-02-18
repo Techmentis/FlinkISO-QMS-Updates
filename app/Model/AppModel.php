@@ -38,7 +38,7 @@ class AppModel extends Model
     public function beforeSave($options = [])
     {        
         foreach ($this->data[$this->alias] as $key => $value) {
-            $this->data[$this->alias][$key] = ltrim(rtrim($value));
+            if($value)$this->data[$this->alias][$key] = ltrim(rtrim($value));
         }
     }
 
