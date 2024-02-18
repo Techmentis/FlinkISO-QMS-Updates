@@ -153,43 +153,83 @@ class GraphPanelsController extends AppController {
 		}		
 	}
 
-	public function panel($id){		
-		$record = $this->GraphPanel->find('first',array('conditions'=>array('GraphPanel.id'=>$id), 'recursive'=>0));		
+	public function panel($id){
+		$record = $this->GraphPanel->find('first',array('conditions'=>array('GraphPanel.id'=>$id), 'recursive'=>0));
 		$tableName = Inflector::classify($record['CustomTable']['table_name']);
 		$this->loadModel($tableName);
-
 		$fields = json_decode($record['CustomTable']['fields'],true);
-		foreach($fields as $field){
-			if($field['field_name'] == $record['GraphPanel']['field_name']){
+		$virtualFields = array();
+		foreach($fields as $field){			
+			$foundFields = null;
+			if($field['field_name'] == $record['GraphPanel']['field_name'] && $field['data_type'] == 'radio' && $field['linked_to'] == -1){				
 				$foundFields = explode(',',$field['csvoptions']);
-				$cnt = 0;
+				$cnt = 0;				
 				foreach($foundFields as $foundField){
 					$virtualFields[$foundField] = 'select count(*) from `' . $record['CustomTable']['table_name'] . '` where `'.$record['CustomTable']['table_name'].'`.`'.$field['field_name'].'` = '.$cnt;
 					$vfields[] = $tableName.'.'.$foundField;
 					$cnt++;
 				}
 				
+			}elseif($field['field_name'] == $record['GraphPanel']['field_name'] && !empty($field['linked_to']) &&  $field['linked_to'] != -1 && $field['linked_to'] != 'Employees'){				
+				$foundFields = null;
+				// load data from linkedto table / display field
+				$linkedToModel = Inflector::classify($field['linked_to']);
+				try{
+					$this->loadModel($linkedToModel);
+					$recs = $this->$linkedToModel->find('list',array('conditions'=>array($linkedToModel.'.publish'=>1)));	
+				}catch(Exception $e){
+
+				}
+				foreach($recs as $id => $display){
+					if($record['GraphPanel']['data_type'] == 0){
+						$virtualFields[trim($display)] = 'select count(*) from `' . $record['CustomTable']['table_name'] . '` where `'.$record['CustomTable']['table_name'].'`.`'.$field['field_name'].'` = "' .$id .'"';
+
+						$vfields[] = $tableName.'.'.$display;
+						$cnt++;					
+					}
+
+					if($record['GraphPanel']['data_type'] == 1){
+						$virtualFields[trim($display)] = 'select SUM(`'.$record['GraphPanel']['value_field'].'`)  as `sumfield` from `' . $record['CustomTable']['table_name'] . '` where `'.$record['CustomTable']['table_name'].'`.`'.$field['field_name'].'` = "' .$id .'"';						
+						$vfields[] = $tableName.'.'.trim($display);
+						$cnt++;					
+					}
+
+					if($record['GraphPanel']['data_type'] == 2){
+						$virtualFields[trim($display)] = 'select AVG(`'.$record['GraphPanel']['value_field'].'`)  as `sumfield` from `' . $record['CustomTable']['table_name'] . '` where `'.$record['CustomTable']['table_name'].'`.`'.$field['field_name'].'` = "' .$id .'"';						
+						$vfields[] = $tableName.'.'.trim($display);
+						$cnt++;	
+					}					
+				}
 			}
 		}
-
-		$virtualFields['total'] = 'select count(*) from `' . $record['CustomTable']['table_name'] . '`';
-		$vfields[] = 'total';
-		$this->$tableName->virtualFields = 	$virtualFields;
 		
-		try{
-			$tableDetails = $this->$tableName->find('first',array('recursive'=>-1,'fields'=>$vfields));
-		}catch(Exception $e){
+		
+		if($vfields){
+			$this->$tableName->virtualFields = 	$virtualFields;
 
+			try{
+				$tableDetails = $this->$tableName->find('first',array('recursive'=>-1,'fields'=>$vfields));				
+			}catch(Exception $e){
+				
+			}			
+			if($tableDetails){
+				$x = 0;
+				foreach($tableDetails[$tableName] as $label => $data ){
+					if($data == null)$data = 0;
+					$result[$x]['labels'] = $label;
+					$result[$x]['data'] = $data;
+					// $result['color'][$x] = "#".substr(md5(rand()), 4, 6);
+					$x++;
+				}
+
+				$this->set('table',$record['CustomTable']['name']);
+				$this->set('field',Inflector::humanize($record['GraphPanel']['field_name']));
+				$this->set('result',$result);
+				$this->set('record',$record);
+			}			
+			$this->set('graphTypes',$this->GraphPanel->customArray['graphTypes']);
+			$this->set('dateConditions',$this->GraphPanel->customArray['dateConditions']);
 		}
-		if($tableDetails){
-			$this->set('table',$record['CustomTable']['name']);
-			$this->set('field',Inflector::humanize($record['GraphPanel']['field_name']));				
-			$this->set('result',$tableDetails[$tableName]);
-			$this->set('record',$record);
-		}		
-
-		$this->set('graphTypes',$this->GraphPanel->customArray['graphTypes']);
-		$this->set('dateConditions',$this->GraphPanel->customArray['dateConditions']);
 	}
 
 	public function update($id = null){
@@ -232,6 +272,7 @@ class GraphPanelsController extends AppController {
 			if(!empty($this->data['GraphPanel']['id'])){
 				$graphPanel = $this->GraphPanel->find('first',array('recursive'=>-1, 'conditions'=>array('GraphPanel.id'=>$this->request->data['GraphPanel']['id'])));
 				$graphPanel['GraphPanel']['title'] = $this->data['GraphPanel']['title'];
+				$graphPanel['GraphPanel']['color'] = $this->data['GraphPanel']['color'];
 				$graphPanel['GraphPanel']['branches'] = json_encode($this->data['GraphPanel']['branches']);
 				$graphPanel['GraphPanel']['departments'] = json_encode($this->data['GraphPanel']['departments']);
 				$graphPanel['GraphPanel']['designations'] = json_encode($this->data['GraphPanel']['designations']);

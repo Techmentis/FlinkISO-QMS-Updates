@@ -20,6 +20,10 @@
 				<div class="col-md-12"><?php echo $this->Form->input('branches',array('name'=>'data[GraphPanel][branches][]', 'options'=>$branches, 'default'=>json_decode($graphPanel['GraphPanel']['branches'],true), 'class'=>'form-control','multiple'));?></div>
 				<div class="col-md-12"><?php echo $this->Form->input('departments',array('name'=>'data[GraphPanel][departments][]','options'=>$departments, 'default'=>json_decode($graphPanel['GraphPanel']['departments'],true), 'class'=>'form-control','multiple'));?></div>
 				<div class="col-md-12"><?php echo $this->Form->input('designations',array('name'=>'data[GraphPanel][designations][]','options'=>$designations,'default'=>json_decode($graphPanel['GraphPanel']['designations'],true), 'class'=>'form-control','multiple'));?></div>
+				<?php if($graphPanel['GraphPanel']['graph_type'] == 4){
+					$colors = array('aqua'=>'Aqua','green'=>'Green','yellow'=>'Yellow','red'=>'Red'); ?>
+					<div class="col-md-12"><?php echo $this->Form->input('color',array('options'=>$colors,'default'=>json_decode($graphPanel['GraphPanel']['color'],true), 'class'=>'form-control'));?></div>
+				<?php } ?>
 			</div>
 		</div>
 		<div class="modal-footer">      	

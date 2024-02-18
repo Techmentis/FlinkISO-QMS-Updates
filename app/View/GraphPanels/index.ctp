@@ -1,7 +1,7 @@
 <?php echo $this->Html->script(array('chartjs/dist/chart.min')); ?>
 <?php echo $this->fetch('script'); ?>
 <div class="row" style="margin-bottom:0; margin-top:0">
-	<?php foreach($panels as $panel){ ?>
+	<?php foreach($panels as $panel){ ?>		
 		<div class="col-md-<?php echo $panel['GraphPanel']['size']?>" id="<?php echo $panel['GraphPanel']['id']?>_div">
 			<div id="<?php echo $panel['GraphPanel']['id']?>"><i class="fa fa-spin fa-refresh"></i></div>
 			<script type="text/javascript">

@@ -1,5 +1,5 @@
 <?php if($result){ 
-  $graph = $graphTypes[$record['GraphPanel']['graph_type']];
+$graph = $graphTypes[$record['GraphPanel']['graph_type']];
   if($record['GraphPanel']['color'] == '')$record['GraphPanel']['color'] = 'aqua';
   ?>
   <?php $id = $this->request->params['pass'][0] ;?>
@@ -11,10 +11,10 @@
          <?php 
          unset($result['total']);
          ksort($result);      	
-         foreach($result as $head => $data){ ?>
+         foreach($result as $r){ ?>
           <tr>
-           <td><?php echo $head;?></td>
-           <td><?php echo $data;?></td>
+           <td><?php echo $r['labels'];?></td>
+           <td><?php echo $r['data'];?></td>
          </tr>
        <?php }?>
      </table>
@@ -24,8 +24,6 @@
    <?php echo $result['total'];?>
  </div> 
 </div>
-
-
 <?php }else{ ?>
 	<script type="text/javascript">
 		$("#<?php echo $this->request->params['pass'][0]?>_div").remove();

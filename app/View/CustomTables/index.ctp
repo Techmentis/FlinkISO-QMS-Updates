@@ -91,22 +91,26 @@
 							<?php 
 							if($customTable['CustomTable']['table_type'] == 2)echo $customTable['CustomTable']['name']; 
 							else echo $customTable['CustomTable']['name'];?>
-							</h4><br />
-							<small>
-							<?php					
-							if(!$customTable['Process']['name']){
-								if(strlen($customTable['QcDocument']['title'])>45){
-									$doc = "<strong class='".$titleClass."' >".substr($customTable['QcDocument']['title'], 0,45) ."...</strong>: ". $customTable['QcDocument']['document_number'] ."-". $customTable['QcDocument']['revision_number'] .".". $customTable['QcDocument']['file_type'];	
-								}else{
-									$doc = "<strong class='".$titleClass."' >".substr($customTable['QcDocument']['title'], 0,45) ."</strong>: ". $customTable['QcDocument']['document_number'] ."-". $customTable['QcDocument']['revision_number'] .".". $customTable['QcDocument']['file_type'];
-								}
-								
+							<?php
+							if($this->request->params['named']['table_type'] != 3){
+								echo "</h4><br /><small>";
+								if(!$customTable['Process']['name']){
+									if(strlen($customTable['QcDocument']['title'])>45){
+										$doc = "<strong class='".$titleClass."' >".substr($customTable['QcDocument']['title'], 0,45) ."...</strong>: ". $customTable['QcDocument']['document_number'] ."-". $customTable['QcDocument']['revision_number'] .".". $customTable['QcDocument']['file_type'];	
+									}else{
+										$doc = "<strong class='".$titleClass."' >".substr($customTable['QcDocument']['title'], 0,45) ."</strong>: ". $customTable['QcDocument']['document_number'] ."-". $customTable['QcDocument']['revision_number'] .".". $customTable['QcDocument']['file_type'];
+									}
+									
 
-								echo $this->Html->link($doc,array('controller'=>'qc_documents','action'=>'view',$customTable['QcDocument']['id'],'timestamp'=>date('ymdhis')),array('target'=>'_blank','escape'=>false));	
+									echo $this->Html->link($doc,array('controller'=>'qc_documents','action'=>'view',$customTable['QcDocument']['id'],'timestamp'=>date('ymdhis')),array('target'=>'_blank','escape'=>false));	
+								}else{
+									$doc = "<strong class='".$titleClass."' >".$customTable['Process']['name'] ."</strong> <br /> <small>". $customTable['Process']['file_name'] ."</small>";
+									echo $this->Html->link($doc,array('controller'=>'processes','action'=>'view',$customTable['Process']['id'],'timestamp'=>date('ymdhis')),array('target'=>'_blank','escape'=>false));									
+								}
 							}else{
-								$doc = "<strong class='".$titleClass."' >".$customTable['Process']['name'] ."</strong> <br /> <small>". $customTable['Process']['file_name'] ."</small>";
-								echo $this->Html->link($doc,array('controller'=>'processes','action'=>'view',$customTable['Process']['id'],'timestamp'=>date('ymdhis')),array('target'=>'_blank','escape'=>false));									
-							}?>
+								echo "</h4>";
+							}
+							?>
 							</small>
 						<span class="pull-right badge btn-<?php echo $btnClass;?>"><?php echo $customTable['CustomTable']['linked'];?></span>
 					</div>
