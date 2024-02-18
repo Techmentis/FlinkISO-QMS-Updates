@@ -42,56 +42,54 @@
 						?>
 					</div>
 					<div class="col-md-12"><?php
-					if(isset($qcDocument) && $qcDocument['QcDocument']['it_categories'] == 3 || $qcDocument['QcDocument']['it_categories'] == null){
+					if(isset($qcDocument) && $qcDocument['QcDocument']['it_categories'] == 3){
 						echo $this->Form->input('password',array('class'=>'form-control'));		
 					}else{
 						echo $this->Form->input('password',array('class'=>'form-control','required'=>'required'));							
-					}
-					
-				?></div>
-				<div class="col-md-12 text-center">						
-					<label>Draw Your Signature Below</label></div>
-					<div class="col-md-12 text-center">
-						<div id="signed"></div>
-						<div class="wrapper1">
-							<canvas id="signature-pad" class="signature-pad" width=350 height=150></canvas>					        
+					}?></div>
+					<div class="col-md-12 text-center">						
+						<label>Draw Your Signature Below</label></div>
+						<div class="col-md-12 text-center">
+							<div id="signed"></div>
+							<div class="wrapper1">
+								<canvas id="signature-pad" class="signature-pad" width=350 height=150></canvas>					        
+							</div>
+							<?php echo $this->Form->hidden('signature',array('id'=>'digital-signature'));?>
 						</div>
-						<?php echo $this->Form->hidden('signature',array('id'=>'digital-signature'));?>
-					</div>
-					<div class="col-md-12 text-center ">
-						<div class="btn-group ">
-							<div class="btn tooltip1" onclick="copysign();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Copy Signature"><i class="fa fa-copy "></i></div>
-							<div class="btn tooltip1" onclick="getsignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Fetch Saved Signature"><i class="fa fa-folder-open"></i></div>
-							<div class="btn tooltip1" onclick="savesignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Save Signature"><i class="fa fa-save"></i></div>
-							<div class="btn tooltip1" onclick="clearCanvas();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Clear Signature"><i class="fa fa-eraser"></i></div>							
+						<div class="col-md-12 text-center ">
+							<div class="btn-group ">
+								<div class="btn tooltip1" onclick="copysign();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Copy Signature"><i class="fa fa-copy "></i></div>
+								<div class="btn tooltip1" onclick="getsignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Fetch Saved Signature"><i class="fa fa-folder-open"></i></div>
+								<div class="btn tooltip1" onclick="savesignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Save Signature"><i class="fa fa-save"></i></div>
+								<div class="btn tooltip1" onclick="clearCanvas();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Clear Signature"><i class="fa fa-eraser"></i></div>							
+							</div>
 						</div>
-					</div>
-					<div class="col-md-12">
-						<ul class="list-group">
-							<li class="list-group-item"><i class="fa fa-copy"></i> : Copy signature from earlier uploaded png file.</li>
-							<li class="list-group-item"><i class="fa fa-folder-open"></i> : Copy signature from earlier saved image.</li>
-							<li class="list-group-item"><i class="fa fa-save"></i> : Save current signature image.</li>
-							<li class="list-group-item"><i class="fa fa-eraser"></i> : Clear Canvas.</li>
-						</ul>
-					</div>
-			<?php
-			if($this->request->params['pass'][0]){ ?>
-					<?php 					
-					$font_face = array('Arial'=>'Arial','Times New Roman'=>'Times New Roman','Tahoma'=>'Tahoma','Helvetica'=>'Helvetica');
-					?>
-					<div class="col-md-6 "><?php echo $this->Form->input('font_size',array('default'=> 11 , 'class'=>'form-control'));?></div>
-					<div class="col-md-6 "><?php echo $this->Form->input('font_face',array('options'=> $font_face, 'default'=>'Arial', 'class'=>'form-control'));?></div>
-					<div class="col-md-12"><?php echo $this->Form->input('pdf_header_id',array('options'=>$pdfTemplateHeaders,'class'=>'select'));?></div>
-					<div class="col-md-12"><?php echo $this->Form->input('pdf_template_id',array('options'=>$pdfTemplates,'class'=>'select'));?></div>
-					<div class="col-md-12 text-center"><p><br /><?php 
-						if($pdfTemplates){
-							echo $this->Html->link('View Templates',array('controller'=>'pdf_templates','action'=>'index',$this->request->params['named']['custom_table_id'])) . ' | ';
-							echo $this->Html->link('Add New Template',array('controller'=>'pdf_templates','action'=>'add',$this->request->params['named']['custom_table_id']));
-						}else{
-							echo $this->Html->link('Add Template',array('controller'=>'pdf_templates','action'=>'add',$this->request->params['named']['custom_table_id']));	
-						} 
-					?></p>
-			<?php } ?>
+						<div class="col-md-12">
+							<ul class="list-group">
+								<li class="list-group-item"><i class="fa fa-copy"></i> : Copy signature from earlier uploaded png file.</li>
+								<li class="list-group-item"><i class="fa fa-folder-open"></i> : Copy signature from earlier saved image.</li>
+								<li class="list-group-item"><i class="fa fa-save"></i> : Save current signature image.</li>
+								<li class="list-group-item"><i class="fa fa-eraser"></i> : Clear Canvas.</li>
+							</ul>
+						</div>
+						<?php
+						if($this->request->params['pass'][0]){ ?>
+							<?php 					
+							$font_face = array('Arial'=>'Arial','Times New Roman'=>'Times New Roman','Tahoma'=>'Tahoma','Helvetica'=>'Helvetica');
+							?>
+							<div class="col-md-6 "><?php echo $this->Form->input('font_size',array('default'=> 11 , 'class'=>'form-control'));?></div>
+							<div class="col-md-6 "><?php echo $this->Form->input('font_face',array('options'=> $font_face, 'default'=>'Arial', 'class'=>'form-control'));?></div>
+							<div class="col-md-12"><?php echo $this->Form->input('pdf_header_id',array('options'=>$pdfTemplateHeaders,'class'=>'select'));?></div>
+							<div class="col-md-12"><?php echo $this->Form->input('pdf_template_id',array('options'=>$pdfTemplates,'class'=>'select'));?></div>
+							<div class="col-md-12 text-center"><p><br /><?php 
+							if($pdfTemplates){
+								echo $this->Html->link('View Templates',array('controller'=>'pdf_templates','action'=>'index',$this->request->params['named']['custom_table_id'])) . ' | ';
+								echo $this->Html->link('Add New Template',array('controller'=>'pdf_templates','action'=>'add',$this->request->params['named']['custom_table_id']));
+							}else{
+								echo $this->Html->link('Add Template',array('controller'=>'pdf_templates','action'=>'add',$this->request->params['named']['custom_table_id']));	
+							} 
+						?></p>
+					<?php } ?>
 				</div>
 
 				<?php echo $this->Form->hidden('record_id',array('default'=>$this->request->params['pass'][0]));?>
@@ -254,16 +252,5 @@
 		$("#pdf-spin").hide();
 		$('#pdf-download').modal('show');        
 		$('#DocumentDownloadAddForm').validate();
-
-    //     $("#task_submit_id").click(function(){
-    //     	if($('#DocumentDownloadAddForm').valid()){
-				// $("#task_submit_id").prop("disabled",true);
-				// $("#task_submit_indicator").show();
-				// $('#DocumentDownloadAddForm').submit();
-    //         }
-    //     });       
 	});
-
-    // var signature = signaturePad.toDataURL('image/png');
-    // $("#digital-signature").val(signature);
 </script>

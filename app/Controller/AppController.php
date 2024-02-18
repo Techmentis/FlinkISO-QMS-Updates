@@ -3801,7 +3801,12 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$output = str_replace($record_id, $this->request->params['named']['id'],$output);
 			$sign = $this->_sign_to_pdf($this->request->data['DocumentDownload']['signature'],$record_id,$this->request->data['DocumentDownload']['font_face'],$this->request->data['DocumentDownload']['font_size']);
 			$background = WWW_ROOT . 'files' . DS . 'samples' . DS . 'under-review.pdf';
-			$exec = Configure::read('PDFTkPath') . ' ' .$input .' multistamp ' .$sign.  ' output '. $output . ' user_pw '.$password.'';
+			
+			if($password && $password != ''){
+				$exec = Configure::read('PDFTkPath') . ' ' .$input .' multistamp ' .$sign.  ' output '. $output . ' user_pw '.$password.'';
+			}else{
+				$exec = Configure::read('PDFTkPath') . ' ' .$input .' multistamp ' .$sign.  ' output '. $output .'';
+			}
 			exec($exec);
 			unlink($input);
 			unlink($sign);
