@@ -1325,6 +1325,9 @@ return true;
                                 $this->CustomTable->RecordLock->deleteAll(array('RecordLock.lock_table_id'=>$customTable['CustomTable']['id']));
                                 $this->CustomTable->CustomTableTask->deleteAll(array('CustomTableTask.custom_table_id'=>$customTable['CustomTable']['id']));
                                 $this->CustomTable->GraphPanel->deleteAll(array('GraphPanel.custom_table_id'=>$customTable['CustomTable']['id']));
+                                $this->CustomTable->File->deleteAll(array('File.custom_table_id'=>$customTable['CustomTable']['id']));
+                                $this->CustomTable->CustomCode->deleteAll(array('CustomCode.custom_table_id'=>$customTable['CustomTable']['id']));
+                                $this->CustomTable->CustomTableProcess->deleteAll(array('CustomTableProcess.custom_table_id'=>$customTable['CustomTable']['id']));
 
                                 $this->Session->setFlash(__('Table Deleted'));
                                 $this->redirect(array('action' => 'index'));

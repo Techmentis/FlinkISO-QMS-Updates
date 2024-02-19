@@ -404,7 +404,7 @@ $pptarray = array('ppt','pptx');
                                   <td><?php echo $qcDocument['PreparedBy']['name']?></td>
                                   <td><?php echo $qcDocument['QcDocument']['created']?></td>
                                   <td><?php echo $qcDocument['QcDocument']['modified']?></td>
-                                  <td><?php echo $this->Html->link('Collaborate',array('controller'=>'qc_documents','action'=>'edit',$qcDocument['QcDocument']['id'],'timestamp'=>date('ymdhis')),array('class'=>'btn btn-sm btn-info'))?></td>
+                                  <td><?php echo $this->Html->link('Collaborate',array('controller'=>'qc_documents','action'=>'edit',$qcDocument['QcDocument']['id'],'timestamp'=>date('ymdhis')),array('class'=>'btn btn-xs btn-info'))?></td>
                                 </tr>
                               <?php } ?>             
                             </table>

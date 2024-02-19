@@ -427,14 +427,13 @@ class AppController extends Controller {
 				
 			);
 		}else{
-			$pubCon = array($modelName.'.publish '=>1);
+			$pubCon = array($modelName.'.publish'=>1);
 		}
 
 		if(isset($this->request->params['named']['published']) && $this->request->params['named']['published']==null)$con1 = null ; else $con1 = $pubCon;
 
-		if(isset($this->request->params['named']['soft_delete']) && $this->request->params['named']['soft_delete']==null)$con2 = null ; else $con2 = array($modelName.'.soft_delete'=>$this->request->params['named']['soft_delete']);
-		if(isset($this->request->params['named']['soft_delete']) && $this->request->params['named']['soft_delete']==null)$conditions=array($onlyBranch,$onlyOwn,$con1,$modelName.'.soft_delete'=>0);
-		else $conditions=array($onlyBranch,$onlyOwn,$con1,$con2);
+		if(isset($this->request->params['named']['published']))$conditions=array($onlyBranch,$onlyOwn,$con1);
+		else $conditions=array($onlyBranch,$onlyOwn,$con1);
 
 	}
 	else

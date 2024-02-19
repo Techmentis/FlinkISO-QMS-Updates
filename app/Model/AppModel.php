@@ -65,6 +65,12 @@ class AppModel extends Model
                 $folder = new Folder($path);
                 if($this->id)$folder->delete();
             }
+
+            if($this->alias == 'CustomTable'){
+                $path = Configure::read('files') . DS . 'custom_tables'. DS . $this->id;
+                $folder = new Folder($path);
+                if($this->id)$folder->delete();                
+            }
         }
     }    
 }
