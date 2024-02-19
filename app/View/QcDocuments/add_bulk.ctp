@@ -9,7 +9,7 @@ $pptarray = array('ppt','pptx');
 
 
 $fields = array('title','document_number','revision_number','date_created','date_of_issue','effective_from_date','document_type','prepared_by','approved_by');
-$values = array('Audit Schedule','Audit','Audit Findings','MRM','Customer Details','Customer Complaint','Suppliers','Device','Calibrations','Corrective Actions');
+$values = array('Audit Schedule','Audit Checklist','Audit Findings','MRM','Customer Details','Customer Complaint','Suppliers','Device','Calibrations','Corrective Actions');
 ?>
 <style type="text/css">
 	.childdoc, .childdoc a{color: #5c5c5c;}

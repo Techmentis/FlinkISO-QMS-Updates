@@ -11,8 +11,8 @@ App::uses('File', 'Utility');
 class TemplatesController extends AppController {
 
     public function index(){
-        $conditions = $this->_check_request();
-        $this->paginate = array('order' => array('Template.sr_no' => 'DESC'), 'conditions' => array($conditions,'Template.model'=>'Template'));
+        $conditions = $this->_check_request();        
+        $this->paginate = array('order' => array('Template.sr_no' => 'DESC'), 'conditions' => array('Template.model'=>'Template'));
         $this->Template->recursive = 0;
         $this->set('templates', $this->paginate());
         $this->_get_count();

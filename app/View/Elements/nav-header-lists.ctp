@@ -128,17 +128,19 @@ if($this->action == 'index' && $this->request->controller != 'usage_details' && 
 
     echo $this->Form->create(Inflector::classify($this->request->controller),array('action'=>'bulk_delete','style'=>'display:inline'),array('class'=>'in-line pull-left','style'=>'display:inline'));
     
-    echo '<label for="bulkDeleteSubmit" class="btn btn-app btn-default"><i class="fa fa-trash-o text-danger"></i></label>';
-    echo $this->Form->submit('&nbsp;',
-        array(
-            'id'=>'bulkDeleteSubmit',
-            'onClick'=>'bulkdelete()',
-            'div' => false, 
-            'class'=>'hide',                        
-        )
-    );
-    echo $this->Form->hidden('bulk_delete_ids',array('id'=>'bulk_delete_ids'));
-    echo $this->Form->end();
+    if(!in_array($this->request->controller, array('qc_documents','custom_tables','processes','standards'))){
+        echo '<label for="bulkDeleteSubmit" class="btn btn-app btn-default"><i class="fa fa-trash-o text-danger"></i></label>';
+        echo $this->Form->submit('&nbsp;',
+            array(
+                'id'=>'bulkDeleteSubmit',
+                'onClick'=>'bulkdelete()',
+                'div' => false, 
+                'class'=>'hide',                        
+            )
+        );
+        echo $this->Form->hidden('bulk_delete_ids',array('id'=>'bulk_delete_ids'));
+        echo $this->Form->end();
+    }    
 }
 
     echo $this->Html->link('<i class="fa fa-search"></i>','#',

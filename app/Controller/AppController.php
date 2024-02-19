@@ -441,7 +441,7 @@ class AppController extends Controller {
 		$conditions=array($onlyBranch,$onlyOwn,null,$modelName.'.soft_delete'=>0); 
 	}
 
-	return array_filter($conditions);
+	return array_filter($conditions);	
 
 }
 public function _get_count() {

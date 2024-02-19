@@ -38,7 +38,7 @@ class AppModel extends Model
     public function beforeSave($options = [])
     {        
         foreach ($this->data[$this->alias] as $key => $value) {
-            if($value)$this->data[$this->alias][$key] = ltrim(rtrim($value));
+            if($value && !is_array($value))$this->data[$this->alias][$key] = ltrim(rtrim($value));
         }
     }
 
@@ -69,7 +69,25 @@ class AppModel extends Model
             if($this->alias == 'CustomTable'){
                 $path = Configure::read('files') . DS . 'custom_tables'. DS . $this->id;
                 $folder = new Folder($path);
-                if($this->id)$folder->delete();                
+                if($this->id)$folder->delete();
+            }
+
+            if($this->alias == 'QcDocument'){
+                $path = Configure::read('files') . DS . 'qc_documents'. DS . $this->id;
+                $folder = new Folder($path);
+                if($this->id)$folder->delete();
+            }
+
+            if($this->alias == 'Process'){
+                $path = Configure::read('files') . DS . 'processes'. DS . $this->id;
+                $folder = new Folder($path);
+                if($this->id)$folder->delete();
+            }
+
+            if($this->alias == 'PdfTemplate'){
+                $path = Configure::read('files') . DS . 'pdf_template'. DS . $this->id;
+                $folder = new Folder($path);
+                if($this->id)$folder->delete();
             }
         }
     }    

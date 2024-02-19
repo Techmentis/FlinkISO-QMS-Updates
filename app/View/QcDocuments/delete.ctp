@@ -20,3 +20,8 @@
 	echo $this->Form->end();
 	?>	
 </div>
+<script type="text/javascript">
+	$().ready(function(){
+		$("#QcDocumentPassword").focus();
+	})
+</script>

@@ -375,45 +375,45 @@ class CustomTablesController extends AppController {
 
                 switch ($chkd['field_type']) {
                     case 0: // varchar
-                $type = 'varchar('.$chkd['length'].')';
-                break;
+                    $type = 'varchar('.$chkd['length'].')';
+                    break;
                     case 1: // text
+                    $type = 'text';
+                    break;
+                    case 2: // int
+                    $type = 'int('.$chkd['length'].')';
+                    break;
+                    case 3: // tinyint
+                    $type = 'tinyint('.$chkd['length'].')';
+                    break;
+                    case 4: // float
+                    $type = 'float('.$chkd['length'].')';
+                    break;
+                    case 5: // date
+                    $type = 'date';
+                    break;
+                    case 6: // datetime
+                    $type = 'datetime';
+                    break;
+                default: // text
                 $type = 'text';
                 break;
-                    case 2: // int
-                $type = 'int('.$chkd['length'].')';
-                break;
-                    case 3: // tinyint
-                $type = 'tinyint('.$chkd['length'].')';
-                break;
-                    case 4: // float
-                $type = 'float('.$chkd['length'].')';
-                break;
-                    case 5: // date
-                $type = 'date';
-                break;
-                    case 6: // datetime
-                $type = 'datetime';
-                break;
-                default: // text
-                    $type = 'text';
-                break;
+            }
+
+            if($chkd['mandetory'] == 1)$m = ' NOT ';
+            else $m = '';
+
+            if(!in_array($chkd['field_name'],$this->reserved_fields))$updatesql .= 'ALTER TABLE `'.$this->request->data['CustomTable']['table_name'].'` CHANGE `'.$chkd['old_field_name'].'` `'.$chkd['field_name'].'` '.$type. ' '. $m.' NULL;';
+
         }
 
-        if($chkd['mandetory'] == 1)$m = ' NOT ';
-        else $m = '';
+        if($chkd['drop'] == 1){
+            if(!in_array($chkd['field_name'],$this->reserved_fields))$dropsql .= 'ALTER TABLE `'.$this->request->data['CustomTable']['table_name'].'` DROP `'.$chkd['field_name'].'`;';
+        }
 
-        if(!in_array($chkd['field_name'],$this->reserved_fields))$updatesql .= 'ALTER TABLE `'.$this->request->data['CustomTable']['table_name'].'` CHANGE `'.$chkd['old_field_name'].'` `'.$chkd['field_name'].'` '.$type. ' '. $m.' NULL;';
+        if($chkd['new'] == 1){
 
-    }
-
-    if($chkd['drop'] == 1){
-        if(!in_array($chkd['field_name'],$this->reserved_fields))$dropsql .= 'ALTER TABLE `'.$this->request->data['CustomTable']['table_name'].'` DROP `'.$chkd['field_name'].'`;';
-    }
-
-    if($chkd['new'] == 1){
-
-        switch ($chkd['field_type']) {
+            switch ($chkd['field_type']) {
             case 0: // varchar
             $type = 'varchar('.$chkd['length'].')';
             break;
@@ -688,87 +688,53 @@ return true;
                         
                         if($result['error'] == 1){
                             echo "Something went wrong. Please try again";
-                        }else{
+                        }else{                            
                             $result = json_decode($result['response']['finalResult'],true);
-                            
                             if($result['controller']){
                                 $controller_file_name = Inflector::pluralize(Inflector::Classify($table_name)) . 'Controller.php';
-                                $folder = APP . DS . 'Controller';
-                                $controllerFolder = new Folder();
-                                $controllerFolder->create($folder);
-                                $file = $folder . DS . $controller_file_name;
-                                $controllerFile = new File($file);
-                                $controllerFile->create();
-                                $controllerFile->open();
-                                $controllerFile->write($result['controller'], 'w', true);
-                                $controllerFile->close();                                    
+                                $folder = APP . 'Controller';
+                                $file = $folder .  DS . $controller_file_name;
+                                $this->_write_to_file($folder,$file,$result['controller']);                                
                             }
 
                             if($result['model']){
 
                                 $name = Inflector::Classify($table_name) . '.php';
-
                                 $folder = APP . DS . 'Model';
-
                                 $file = $folder . DS . $name;
-                                $modelFile = new File($file);
-                                $modelFile->create();
-                                $modelFile->open();
-                                $modelFile->write($result['model'], 'w', true);
-                                $modelFile->close();                                    
-                            }
+                                $this->_write_to_file($folder,$file,$result['model']);
+                            }                            
 
                             $viewCode = json_decode($result['viewFile'],true);
 
+                            chmod(APP . 'View', 0777);
+                            $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
+                            $modelFolder = new Folder();
+                            $modelFolder->create($folder);
+                            chmod($folder, 0777);
+
                             if($viewCode['index']){
-                                $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
-                                $modelFolder = new Folder();
-                                $modelFolder->create($folder);
                                 $file = $folder . DS . 'index.ctp';
-                                $modelFile = new File($file);
-                                $modelFile->create();
-                                $modelFile->open();
-                                $modelFile->write($viewCode['index'], 'w', true);
-                                $modelFile->close();                                    
+                                $this->_write_to_file($folder,$file,$viewCode['index']);
                             }
 
                             if($viewCode['index']){
-                                $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
-                                $modelFolder = new Folder();
-                                $modelFolder->create($folder);
-                                $file = $folder . DS . 'view.ctp';
-                                $modelFile = new File($file);
-                                $modelFile->create();
-                                $modelFile->open();
-                                $modelFile->write($viewCode['view'], 'w', true);
-                                $modelFile->close();
+                                $file = $folder . DS . 'view.ctp';                                
+                                $this->_write_to_file($folder,$file,$viewCode['view']);
+                                
                             }
 
                             $addCode = json_decode($result['formFile'],true);
 
                             if($addCode['add']){
-                                $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
-                                $modelFolder = new Folder();
-                                $modelFolder->create($folder);
-                                $file = $folder . DS . 'add.ctp';
-                                $modelFile = new File($file);
-                                $modelFile->create();
-                                $modelFile->open();
-                                $modelFile->write($addCode['add'], 'w', true);
-                                $modelFile->close();
+                                $file = $folder . DS . 'add.ctp';                                
+                                $this->_write_to_file($folder,$file,$addCode['add']);
                                 
                             }
 
                             if($addCode['edit']){
-                                $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
-                                $modelFolder = new Folder();
-                                $modelFolder->create($folder);
-                                $file = $folder . DS . 'edit.ctp';
-                                $modelFile = new File($file);
-                                $modelFile->create();
-                                $modelFile->open();
-                                $modelFile->write($addCode['edit'], 'w', true);
-                                $modelFile->close();
+                                $file = $folder . DS . 'edit.ctp';                                
+                                $this->_write_to_file($folder,$file,$addCode['edit']);
                                 
                             }
                         }
@@ -1015,28 +981,16 @@ return true;
                     if($result['controller']){
                         $controller_file_name = Inflector::pluralize(Inflector::Classify($table_name)) . 'Controller.php';
                         $folder = APP . DS . 'Controller';
-                        $controllerFolder = new Folder();
-                        $controllerFolder->create($folder);
                         $file = $folder . DS . $controller_file_name;
-                        $controllerFile = new File($file);
-                        $controllerFile->create();
-                        $controllerFile->open();
-                        $controllerFile->write($result['controller'], 'w', true);
-                        $controllerFile->close();                                    
+                        $this->_write_to_file($folder,$file,$result['controller']);
                     }
 
                     if($result['model']){
 
                         $name = Inflector::Classify($table_name) . '.php';
-
                         $folder = APP . DS . 'Model';
-
                         $file = $folder . DS . $name;
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($result['model'], 'w', true);
-                        $modelFile->close();                                    
+                        $this->_write_to_file($folder,$file,$result['model']);
                     }
 
                     // $viewCode = json_decode($result['viewFile'],true);
@@ -1046,39 +1000,26 @@ return true;
                         $modelFolder = new Folder();
                         $modelFolder->create($folder);
                         $file = $folder . DS . 'index.ctp';
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($result['index'], 'w', true);
-                        $modelFile->close();                                    
+                        $this->_write_to_file($folder,$file,$result['index']);
                     }
 
                     $addCode = json_decode($result['formFile'],true);
                     
+                    $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
+                    $modelFolder = new Folder();
+                    $modelFolder->create($folder);
+                    
                     foreach($addCode as $file => $code){
-                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
-                        $modelFolder = new Folder();
-                        $modelFolder->create($folder);
                         $file = $folder . DS . $file.'.ctp';
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($code, 'w', true);
-                        $modelFile->close();
+                        $this->_write_to_file($folder,$file,$code);
                     }
                     
                     if($result['parentModelFile']){
 
                         $name = Inflector::Classify($customTable['CustomTable']['table_name']) . '.php';
-
                         $folder = APP . DS . 'Model';
-
                         $file = $folder . DS . $name;
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($result['parentModelFile'], 'w', true);
-                        $modelFile->close();                                    
+                        $this->_write_to_file($folder,$file,$result['parentModelFile']);
                     }                    
                 }
 
@@ -1176,171 +1117,171 @@ return true;
 
                     if ($customTable) {                            
                             // check if this field exists in any other tables
-                            $allTables = $this->CustomTable->find('all',array('recursive'=>-1));
-                            foreach($allTables as $allTable){
-                                $model = $allTable['CustomTable']['table_name'];
-                                $model = Inflector::classify($model);
-                                try{
-                                    $this->loadModel($model);                    
-                                    if(in_array(Inflector::classify($customTable['CustomTable']['name']),array_keys($this->$model->belongsTo) )){
-                                        $this->Session->setFlash(__('Can not delete this table due to dependency on '. $allTable['CustomTable']['name'] . ' table'));
-                                        $this->redirect(array('action' => 'view',$this->data['CustomTable']['id']));    
-                                    }    
-                                }catch(Exception $e){
+                        $allTables = $this->CustomTable->find('all',array('recursive'=>-1));
+                        foreach($allTables as $allTable){
+                            $model = $allTable['CustomTable']['table_name'];
+                            $model = Inflector::classify($model);
+                            try{
+                                $this->loadModel($model);                    
+                                if(in_array(Inflector::classify($customTable['CustomTable']['name']),array_keys($this->$model->belongsTo) )){
+                                    $this->Session->setFlash(__('Can not delete this table due to dependency on '. $allTable['CustomTable']['name'] . ' table'));
+                                    $this->redirect(array('action' => 'view',$this->data['CustomTable']['id']));    
+                                }    
+                            }catch(Exception $e){
 
-                                }
                             }
+                        }
 
-                            if ($customTable['CustomTable']['table_locked'] == 0) {
-                                $this->Session->setFlash(__('Can not recreate/delete locked table'));
-                                $this->redirect(array('action' => 'index'));
-                            }
+                        if ($customTable['CustomTable']['table_locked'] == 0) {
+                            $this->Session->setFlash(__('Can not recreate/delete locked table'));
+                            $this->redirect(array('action' => 'index'));
+                        }
 
                             // also delete child
-                            foreach (json_decode($customTable['CustomTable']['has_many'], true) as $childs) {                        
+                        foreach (json_decode($customTable['CustomTable']['has_many'], true) as $childs) {                        
                                 // delete files
-                                $folder = APP . 'Controller';
-                                $name = Inflector::pluralize(Inflector::Classify($childs['table_name'])) . 'Controller.php';
-                                if ($name) {
-                                    unlink($folder . DS . $name);
-                                }
-                                $folder = APP . 'Model';
-                                $name = Inflector::singularize(Inflector::Classify($childs['CustomTable']['table_name'])) . '.php';
-                                if ($name) {
-                                    unlink($folder . DS . $name);
-                                }
-                                $folder = APP . 'View';
-                                $name = Inflector::pluralize(Inflector::Classify($childs['table_name']));
-                                $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($childs['table_name']));
-                                if ($folder != APP . 'View') {
-                                    $modelFolder = new Folder();
-                                    $modelFolder->delete($folder);
-                                    $this->CustomTable->delete(array('CustomTable.id' => $id));
-                                }
-                                $sql = 'DROP TABLE `' . $childs['table_name'] . '`';
-                                try {
-                                    $q = $this->CustomTable->query($sql);
-                                }
-                                catch(Exception $e) {
-                                }
-                                $this->CustomTable->delete(array('CustomTable.table_name' => $childs['table_name']));
-                            }   
+                            $folder = APP . 'Controller';
+                            $name = Inflector::pluralize(Inflector::Classify($childs['table_name'])) . 'Controller.php';
+                            if ($name) {
+                                unlink($folder . DS . $name);
+                            }
+                            $folder = APP . 'Model';
+                            $name = Inflector::singularize(Inflector::Classify($childs['CustomTable']['table_name'])) . '.php';
+                            if ($name) {
+                                unlink($folder . DS . $name);
+                            }
+                            $folder = APP . 'View';
+                            $name = Inflector::pluralize(Inflector::Classify($childs['table_name']));
+                            $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($childs['table_name']));
+                            if ($folder != APP . 'View') {
+                                $modelFolder = new Folder();
+                                $modelFolder->delete($folder);
+                                $this->CustomTable->delete(array('CustomTable.id' => $id));
+                            }
+                            $sql = 'DROP TABLE `' . $childs['table_name'] . '`';
+                            try {
+                                $q = $this->CustomTable->query($sql);
+                            }
+                            catch(Exception $e) {
+                            }
+                            $this->CustomTable->delete(array('CustomTable.table_name' => $childs['table_name']));
+                        }   
 
-                            
-                            if ($customTable['CustomTable']['name']) {
+                        
+                        if ($customTable['CustomTable']['name']) {
                                 // delete files
-                                $folder = APP . 'Controller';
-                                $name = Inflector::pluralize(Inflector::Classify($customTable['CustomTable']['table_name'])) . 'Controller.php';
-                                if ($name) {
-                                    unlink($folder . DS . $name);
-                                }
-                                $folder = APP . 'Model';
-                                $name = Inflector::singularize(Inflector::Classify($customTable['CustomTable']['table_name'])) . '.php';
-                                if ($name) {
-                                    unlink($folder . DS . $name);
-                                }
-                                $folder = APP . 'View';
-                                $name = Inflector::pluralize(Inflector::Classify($customTable['CustomTable']['table_name']));
-                                $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($customTable['CustomTable']['table_name']));
-                                if ($folder != APP . 'View') {
-                                    $modelFolder = new Folder();
-                                    $modelFolder->delete($folder);
-                                    $this->CustomTable->delete(array('CustomTable.id' => $id));
-                                }
-                                
-                                $path = Configure::read('files') .  DS . 'custom_tables' . DS . $customTable['CustomTable']['id'];
-                                $filesFolder = new Folder($path);
-                                $filesFolder->delete();
+                            $folder = APP . 'Controller';
+                            $name = Inflector::pluralize(Inflector::Classify($customTable['CustomTable']['table_name'])) . 'Controller.php';
+                            if ($name) {
+                                unlink($folder . DS . $name);
+                            }
+                            $folder = APP . 'Model';
+                            $name = Inflector::singularize(Inflector::Classify($customTable['CustomTable']['table_name'])) . '.php';
+                            if ($name) {
+                                unlink($folder . DS . $name);
+                            }
+                            $folder = APP . 'View';
+                            $name = Inflector::pluralize(Inflector::Classify($customTable['CustomTable']['table_name']));
+                            $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($customTable['CustomTable']['table_name']));
+                            if ($folder != APP . 'View') {
+                                $modelFolder = new Folder();
+                                $modelFolder->delete($folder);
+                                $this->CustomTable->delete(array('CustomTable.id' => $id));
+                            }
+                            
+                            $path = Configure::read('files') .  DS . 'custom_tables' . DS . $customTable['CustomTable']['id'];
+                            $filesFolder = new Folder($path);
+                            $filesFolder->delete();
 
                                 // delete all records from files table
-                                $this->loadModel('File');
-                                $this->File->delete(array('File.controller' => $customTable['CustomTable']['table_name']));
-                                
-                                $sql = 'DROP TABLE `' . $customTable['CustomTable']['table_name'] . '`';
+                            $this->loadModel('File');
+                            $this->File->delete(array('File.controller' => $customTable['CustomTable']['table_name']));
+                            
+                            $sql = 'DROP TABLE `' . $customTable['CustomTable']['table_name'] . '`';
 
-                                try {
-                                    $q = $this->CustomTable->query($sql);
-                                }
-                                catch(Exception $e) {
-                                    
-                                }
+                            try {
+                                $q = $this->CustomTable->query($sql);
+                            }
+                            catch(Exception $e) {
+                                
+                            }
 
                                 // must also delete approvals
-                                $this->loadModel('Approval');
-                                
+                            $this->loadModel('Approval');
+                            
                                 // get child tables
-                                $child_tables = $this->CustomTable->find('all',array('conditions'=>array('CustomTable.custom_table_id'=>$this->data['CustomTable']['id'])));
-                                foreach($child_tables as $child_table){
+                            $child_tables = $this->CustomTable->find('all',array('conditions'=>array('CustomTable.custom_table_id'=>$this->data['CustomTable']['id'])));
+                            foreach($child_tables as $child_table){
                                     // delete files
-                                    $folder = APP . 'Controller';
-                                    $name = Inflector::pluralize(Inflector::Classify($child_table['CustomTable']['table_name'])) . 'Controller.php';
-                                    if ($name) {
-                                        unlink($folder . DS . $name);
-                                    }
-                                    $folder = APP . 'Model';
-                                    $name = Inflector::singularize(Inflector::Classify($child_table['CustomTable']['table_name'])) . '.php';
-                                    if ($name) {
-                                        unlink($folder . DS . $name);
-                                    }
-                                    $folder = APP . 'View';
-                                    $name = Inflector::pluralize(Inflector::Classify($child_table['CustomTable']['table_name']));
-                                    $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($child_table['CustomTable']['table_name']));
-                                    if ($folder != APP . 'View') {
-                                        $modelFolder = new Folder();
-                                        $modelFolder->delete($folder);
-                                        $this->CustomTable->delete(array('CustomTable.id' => $id));
-                                    }
-                                    // delete all folders in files folder
-                                    $path = Configure::read('files') . DS . 'custom_tables' . DS . $child_table['CustomTable']['id'];
-                                    $filesFolder = new Folder($path);                                    
-                                    $filesFolder->delete();
-                                    
-                                    $path = Configure::read('files') . DS . 'custom_tables' . DS . $child_table['CustomTable']['table_name'];
-                                    $filesFolder = new Folder($path);
-                                    $filesFolder->delete();
-                                    // delete all records from files table
-                                    $this->loadModel('File');
-                                    $this->File->delete(array('File.controller' => $child_table['CustomTable']['table_name']));
-                                    
-                                    $sql = 'DROP TABLE `' . $child_table['CustomTable']['table_name'] . '`';
-                                    try {                                
-                                        $q = $this->CustomTable->query($sql);
-                                    }
-                                    catch(Exception $e) {                                        
-                                    }
-                                    
-                                    $this->Approval->deleteAll(array('Approval.controller_name'=>$child_table['CustomTable']['table_name']),true);
+                                $folder = APP . 'Controller';
+                                $name = Inflector::pluralize(Inflector::Classify($child_table['CustomTable']['table_name'])) . 'Controller.php';
+                                if ($name) {
+                                    unlink($folder . DS . $name);
                                 }
+                                $folder = APP . 'Model';
+                                $name = Inflector::singularize(Inflector::Classify($child_table['CustomTable']['table_name'])) . '.php';
+                                if ($name) {
+                                    unlink($folder . DS . $name);
+                                }
+                                $folder = APP . 'View';
+                                $name = Inflector::pluralize(Inflector::Classify($child_table['CustomTable']['table_name']));
+                                $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($child_table['CustomTable']['table_name']));
+                                if ($folder != APP . 'View') {
+                                    $modelFolder = new Folder();
+                                    $modelFolder->delete($folder);
+                                    $this->CustomTable->delete(array('CustomTable.id' => $id));
+                                }
+                                    // delete all folders in files folder
+                                $path = Configure::read('files') . DS . 'custom_tables' . DS . $child_table['CustomTable']['id'];
+                                $filesFolder = new Folder($path);                                    
+                                $filesFolder->delete();
+                                
+                                $path = Configure::read('files') . DS . 'custom_tables' . DS . $child_table['CustomTable']['table_name'];
+                                $filesFolder = new Folder($path);
+                                $filesFolder->delete();
+                                    // delete all records from files table
+                                $this->loadModel('File');
+                                $this->File->delete(array('File.controller' => $child_table['CustomTable']['table_name']));
+                                
+                                $sql = 'DROP TABLE `' . $child_table['CustomTable']['table_name'] . '`';
+                                try {                                
+                                    $q = $this->CustomTable->query($sql);
+                                }
+                                catch(Exception $e) {                                        
+                                }
+                                
+                                $this->Approval->deleteAll(array('Approval.controller_name'=>$child_table['CustomTable']['table_name']),true);
+                            }
 
                                 // delete approvals
 
                                 // delete tables from custom_tables
-                                $this->CustomTable->deleteAll(array('CustomTable.custom_table_id'=>$this->data['CustomTable']['id']));
+                            $this->CustomTable->deleteAll(array('CustomTable.custom_table_id'=>$this->data['CustomTable']['id']));
 
 
-                                $this->CustomTable->delete($customTable['CustomTable']['id']);
-                                $this->Approval->deleteAll(array('Approval.controller_name'=>$customTable['CustomTable']['table_name']),true);
+                            $this->CustomTable->delete($customTable['CustomTable']['id']);
+                            $this->Approval->deleteAll(array('Approval.controller_name'=>$customTable['CustomTable']['table_name']),true);
 
-                                $this->CustomTable->CustomTrigger->deleteAll(array('CustomTrigger.custom_table_id'=>$customTable['CustomTable']['id']));
-                                $this->CustomTable->RecordLock->deleteAll(array('RecordLock.lock_table_id'=>$customTable['CustomTable']['id']));
-                                $this->CustomTable->CustomTableTask->deleteAll(array('CustomTableTask.custom_table_id'=>$customTable['CustomTable']['id']));
-                                $this->CustomTable->GraphPanel->deleteAll(array('GraphPanel.custom_table_id'=>$customTable['CustomTable']['id']));
-                                $this->CustomTable->File->deleteAll(array('File.custom_table_id'=>$customTable['CustomTable']['id']));
-                                $this->CustomTable->CustomCode->deleteAll(array('CustomCode.custom_table_id'=>$customTable['CustomTable']['id']));
-                                $this->CustomTable->CustomTableProcess->deleteAll(array('CustomTableProcess.custom_table_id'=>$customTable['CustomTable']['id']));
+                            $this->CustomTable->CustomTrigger->deleteAll(array('CustomTrigger.custom_table_id'=>$customTable['CustomTable']['id']));
+                            $this->CustomTable->RecordLock->deleteAll(array('RecordLock.lock_table_id'=>$customTable['CustomTable']['id']));
+                            $this->CustomTable->CustomTableTask->deleteAll(array('CustomTableTask.custom_table_id'=>$customTable['CustomTable']['id']));
+                            $this->CustomTable->GraphPanel->deleteAll(array('GraphPanel.custom_table_id'=>$customTable['CustomTable']['id']));
+                            $this->CustomTable->File->deleteAll(array('File.custom_table_id'=>$customTable['CustomTable']['id']));
+                            $this->CustomTable->CustomCode->deleteAll(array('CustomCode.custom_table_id'=>$customTable['CustomTable']['id']));
+                            $this->CustomTable->CustomTableProcess->deleteAll(array('CustomTableProcess.custom_table_id'=>$customTable['CustomTable']['id']));
 
-                                $this->Session->setFlash(__('Table Deleted'));
-                                $this->redirect(array('action' => 'index'));
-                            }
-
-                        } else {
-                            $this->Session->setFlash(__('Incorrect Password'));
-                            $this->redirect(array('action' => 'delete', $this->request->data['CustomTable']['id']));
+                            $this->Session->setFlash(__('Table Deleted'));
+                            $this->redirect(array('action' => 'index'));
                         }
-                     }else{
-                        $this->Session->setFlash(__('Can not delete this table.'));
-                        $this->Set('found',$found);
+
+                    } else {
+                        $this->Session->setFlash(__('Incorrect Password'));
+                        $this->redirect(array('action' => 'delete', $this->request->data['CustomTable']['id']));
                     }
+                }else{
+                    $this->Session->setFlash(__('Can not delete this table.'));
+                    $this->Set('found',$found);
+                }
             }            
         }        
         
@@ -1424,16 +1365,16 @@ return true;
                 chmod(APP . 'Model', 0777);
                 chmod(APP . 'View', 0777);
                 
-               $dir_writable_controller = substr(sprintf('%o', fileperms(APP . 'Controller')), -4) == "0777"  ? true : false;
-               $dir_writable_model = substr(sprintf('%o', fileperms(APP . 'Model')), -4) == "0777"  ? true : false;
-               $dir_writable_view = substr(sprintf('%o', fileperms(APP . 'View')), -4) == "0777"  ? true : false;
+                $dir_writable_controller = substr(sprintf('%o', fileperms(APP . 'Controller')), -4) == "0777"  ? true : false;
+                $dir_writable_model = substr(sprintf('%o', fileperms(APP . 'Model')), -4) == "0777"  ? true : false;
+                $dir_writable_view = substr(sprintf('%o', fileperms(APP . 'View')), -4) == "0777"  ? true : false;
 
-               if($dir_writable_controller == false || $dir_writable_model == false || $dir_writable_view == false){
+                if($dir_writable_controller == false || $dir_writable_model == false || $dir_writable_view == false){
                     $this->Session->setFlash(__('Unable to change directory permissions. Please manually change app/Controller, app/Model & app/View directories to writable.(0777)'));
                     $this->redirect(array('action' => 'recreate',$this->request->data['CustomTable']['id']));
-               }else{
+                }else{
 
-               }
+                }
 
                 // run update quieries
                 $sqlresult = $this->_add_new_table($table_name,$defaultfield,null,$this->request->data['CustomTableFields']);
@@ -1452,7 +1393,7 @@ return true;
                         'CustomTable.custom_table_id',
                         'CustomTable.table_version',
                     ))
-                );
+            );
 
                 if($findChilds){
                     $hasMany = array();
@@ -1471,85 +1412,51 @@ return true;
                     $this->redirect(array('action' => 'recreate',$this->request->data['CustomTable']['id']));
                 }else{
                     $result = json_decode($result['response']['finalResult'],true);
-                    
                     if($result['controller']){
                         $controller_file_name = Inflector::pluralize(Inflector::Classify($table_name)) . 'Controller.php';
-                        $folder = APP . DS . 'Controller';
-                        $controllerFolder = new Folder();
-                        $controllerFolder->create($folder);
-                        $file = $folder . DS . $controller_file_name;
-                        $controllerFile = new File($file);
-                        $controllerFile->create();
-                        $controllerFile->open();
-                        $controllerFile->write($result['controller'], 'w', true);
-                        $controllerFile->close();                                    
+                        $folder = APP . 'Controller';
+                        $file = $folder .  DS . $controller_file_name;
+                        $this->_write_to_file($folder,$file,$result['controller']);                                
                     }
 
                     if($result['model']){
 
                         $name = Inflector::Classify($table_name) . '.php';
-
                         $folder = APP . DS . 'Model';
-
                         $file = $folder . DS . $name;
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($result['model'], 'w', true);
-                        $modelFile->close();                                    
-                    }
+                        $this->_write_to_file($folder,$file,$result['model']);
+                    }                            
 
                     $viewCode = json_decode($result['viewFile'],true);
 
+                    chmod(APP . 'View', 0777);
+                    $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
+                    $modelFolder = new Folder();
+                    $modelFolder->create($folder);
+                    chmod($folder, 0777);
+
                     if($viewCode['index']){
-                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
-                        $modelFolder = new Folder();
-                        $modelFolder->create($folder);
                         $file = $folder . DS . 'index.ctp';
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($viewCode['index'], 'w', true);
-                        $modelFile->close();                                    
+                        $this->_write_to_file($folder,$file,$viewCode['index']);
                     }
 
                     if($viewCode['index']){
-                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
-                        $modelFolder = new Folder();
-                        $modelFolder->create($folder);
-                        $file = $folder . DS . 'view.ctp';
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($viewCode['view'], 'w', true);
-                        $modelFile->close();
+                        $file = $folder . DS . 'view.ctp';                                
+                        $this->_write_to_file($folder,$file,$viewCode['view']);
+                        
                     }
 
                     $addCode = json_decode($result['formFile'],true);
 
                     if($addCode['add']){
-                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
-                        $modelFolder = new Folder();
-                        $modelFolder->create($folder);
-                        $file = $folder . DS . 'add.ctp';
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($addCode['add'], 'w', true);    
-                        $modelFile->close();
+                        $file = $folder . DS . 'add.ctp';                                
+                        $this->_write_to_file($folder,$file,$addCode['add']);
                         
                     }
 
                     if($addCode['edit']){
-                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
-                        $modelFolder = new Folder();
-                        $modelFolder->create($folder);
-                        $file = $folder . DS . 'edit.ctp';
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($addCode['edit'], 'w', true);
-                        $modelFile->close();
+                        $file = $folder . DS . 'edit.ctp';                                
+                        $this->_write_to_file($folder,$file,$addCode['edit']);
                         
                     }
                 }
@@ -1729,12 +1636,12 @@ return true;
                 $dir_writable_model = substr(sprintf('%o', fileperms(APP . 'Model')), -4) == "0777"  ? true : false;
                 $dir_writable_view = substr(sprintf('%o', fileperms(APP . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name)))), -4) == "0777"  ? true : false;
 
-               if($dir_writable_controller == false || $dir_writable_model == false || $dir_writable_view == false){
+                if($dir_writable_controller == false || $dir_writable_model == false || $dir_writable_view == false){
                     $this->Session->setFlash(__('Unable to change directory permissions. Please manually change app/Controller, app/Model & app/View directories to writable.(0777)'));
                     $this->redirect(array('action' => 'recreate_child',$this->request->data['CustomTable']['id']));
-               }else{
+                }else{
 
-               }
+                }
 
                 if($result['error'] == 1){
                     echo "Something went wrong. Please try again";
@@ -1744,70 +1651,41 @@ return true;
                     if($result['controller']){
                         $controller_file_name = Inflector::pluralize(Inflector::Classify($table_name)) . 'Controller.php';
                         $folder = APP . DS . 'Controller';
-                        $controllerFolder = new Folder();
-                        $controllerFolder->create($folder);
                         $file = $folder . DS . $controller_file_name;
-                        $controllerFile = new File($file);
-                        $controllerFile->create();
-                        $controllerFile->open();
-                        $controllerFile->write($result['controller'], 'w', true);
-                        $controllerFile->close();                                    
+                        $this->_write_to_file($folder,$file,$result['controller']);
                     }
 
                     if($result['model']){
 
                         $name = Inflector::Classify($table_name) . '.php';
-
                         $folder = APP . DS . 'Model';
-
                         $file = $folder . DS . $name;
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($result['model'], 'w', true);
-                        $modelFile->close();                                    
+                        $this->_write_to_file($folder,$file,$result['model']);
                     }
 
                     $viewCode = json_decode($result['viewFile'],true);
+                    $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
+                    $modelFolder = new Folder();
+                    $modelFolder->create($folder);
 
-                    if($result['index']){
-                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
-                        $modelFolder = new Folder();
-                        $modelFolder->create($folder);
+                    if($result['index']){                        
                         $file = $folder . DS . 'index.ctp';
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($result['index'], 'w', true);
-                        $modelFile->close();                                    
+                        $this->_write_to_file($folder,$file,$result['index']);
                     }
 
                     $addCode = json_decode($result['formFile'],true);
 
                     foreach($addCode as $file => $code){
-                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
-                        $modelFolder = new Folder();
-                        $modelFolder->create($folder);
                         $file = $folder . DS . $file.'.ctp';
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($code, 'w', true);
-                        $modelFile->close();
+                        $this->_write_to_file($folder,$file,$code);
                     }                    
 
                     if($result['parentModelFile']){
 
                         $name = Inflector::Classify($customTable['CustomTable']['table_name']) . '.php';
-
                         $folder = APP . DS . 'Model';
-
                         $file = $folder . DS . $name;
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($result['parentModelFile'], 'w', true);
-                        $modelFile->close();                                    
+                        $this->_write_to_file($folder,$file,$result['parentModelFile']);
                     }                    
                 }
 
@@ -2462,82 +2340,45 @@ return true;
 
                         $controller_file_name = Inflector::pluralize(Inflector::Classify($table_name)) . 'Controller.php';
                         $folder = APP . DS . 'Controller';
-                        $controllerFolder = new Folder();
-                        $controllerFolder->create($folder);
-                        $file = $folder . DS . $controller_file_name;
-                        $controllerFile = new File($file);
-                        $controllerFile->create();
-                        $controllerFile->open();
-                        $controllerFile->write($viewCode['controller'], 'w', true);
-                        $controllerFile->close();                                    
+                        $file = $folder . DS . $controller_file_name;                        
+                        $this->_write_to_file($folder,$file,$viewCode['controller']);
                     }
 
                     if($viewCode['model']){
-
                         $name = Inflector::Classify($table_name) . '.php';
-
                         $folder = APP . DS . 'Model';
-
                         $file = $folder . DS . $name;
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($viewCode['model'], 'w', true);
-                        $modelFile->close();                                    
+                        $this->_write_to_file($folder,$file,$viewCode['model']);
                     }
                     $viewCode = '';
                     
                     $viewCode = json_decode($result['viewFile'],true);
 
                     if($viewCode['index']){
-                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
-                        $modelFolder = new Folder();
-                        $modelFolder->create($folder);
-                        $file = $folder . DS . 'index.ctp';
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($viewCode['index'], 'w', true);
-                        $modelFile->close();                                    
+                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name)); 
+                        $file = $folder . DS . 'index.ctp';                        
+                        $this->_write_to_file($folder,$file,$viewCode['index']);
                     }                
 
                     if($viewCode['view']){    
                         $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));
-                        $modelFolder = new Folder();
-                        $modelFolder->create($folder);
-                        $file = $folder . DS . 'view.ctp';
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($viewCode['view'], 'w', true);
-                        $modelFile->close();
-                    }                    
+                        $file = $folder . DS . 'view.ctp';                        
+                        $this->_write_to_file($folder,$file,$viewCode['view']);
+                    }
 
                     $addCode = json_decode($result['formFile'],true);
 
                     if($addCode['add']){
-                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
-                        $modelFolder = new Folder();
-                        $modelFolder->create($folder);
-                        $file = $folder . DS . 'add.ctp';
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($addCode['add'], 'w', true);
-                        $modelFile->close();
+                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));
+                        $file = $folder . DS . 'add.ctp';                        
+                        $this->_write_to_file($folder,$file,$addCode['add']);
                         
                     }
 
                     if($addCode['edit']){
-                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
-                        $modelFolder = new Folder();
-                        $modelFolder->create($folder);
-                        $file = $folder . DS . 'edit.ctp';
-                        $modelFile = new File($file);
-                        $modelFile->create();
-                        $modelFile->open();
-                        $modelFile->write($addCode['edit'], 'w', true);
-                        $modelFile->close();
+                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));                        
+                        $file = $folder . DS . 'edit.ctp';                        
+                        $this->_write_to_file($folder,$file,$addCode['edit']);
                         
                     }
                 }
@@ -2820,5 +2661,13 @@ return true;
             }            
         }   
         $this->redirect(array('action' => 'link_processes', $this->request->params['named']['id'], date('Ymdhis')));        
+    }
+
+
+    public function _write_to_file($folder = null, $file = null, $content = null){
+        chmod($folder,0777);
+        $fp = fopen($file, 'w');
+        fwrite($fp, $content);
+        fclose($fp);
     }
 }

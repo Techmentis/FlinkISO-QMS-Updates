@@ -89,16 +89,16 @@
 							}
 							?>
 							<?php 
-							if($customTable['CustomTable']['table_type'] == 2)echo $customTable['CustomTable']['name']; 
-							else echo $customTable['CustomTable']['name'];?>
+							if($customTable['CustomTable']['table_type'] == 2)echo $customTable['QcDocument']['name']; 
+							else echo $customTable['QcDocument']['name'];?>
 							<?php
 							if($this->request->params['named']['table_type'] != 3){
 								echo "</h4><br /><small>";
 								if(!$customTable['Process']['name']){
-									if(strlen($customTable['QcDocument']['title'])>45){
-										$doc = "<strong class='".$titleClass."' >".substr($customTable['QcDocument']['title'], 0,45) ."...</strong>: ". $customTable['QcDocument']['document_number'] ."-". $customTable['QcDocument']['revision_number'] .".". $customTable['QcDocument']['file_type'];	
+									if(strlen($customTable['QcDocument']['name'])>45){
+										$doc = "<strong class='".$titleClass."' >".substr($customTable['QcDocument']['name'], 0,45) ."...</strong>: ". $customTable['QcDocument']['document_number'] ."-". $customTable['QcDocument']['revision_number'] .".". $customTable['QcDocument']['file_type'];	
 									}else{
-										$doc = "<strong class='".$titleClass."' >".substr($customTable['QcDocument']['title'], 0,45) ."</strong>: ". $customTable['QcDocument']['document_number'] ."-". $customTable['QcDocument']['revision_number'] .".". $customTable['QcDocument']['file_type'];
+										$doc = "<strong class='".$titleClass."' >".substr($customTable['QcDocument']['name'], 0,45) ."</strong>: ". $customTable['QcDocument']['document_number'] ."-". $customTable['QcDocument']['revision_number'] .".". $customTable['QcDocument']['file_type'];
 									}
 									
 

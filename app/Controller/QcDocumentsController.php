@@ -1405,7 +1405,8 @@ class QcDocumentsController extends AppController {
     public function add_bulk(){
         if ($this->request->is('post') || $this->request->is('put')) {
             foreach($this->request->data['Docs'] as $qcDocument){                
-                $qcDocument['QcDocument']['title'] = $qcDocument['QcDocument']['name'] = ltrim(rtrim($qcDocument['QcDocument']['title']));
+                $qcDocument['QcDocument']['name'] = ltrim(rtrim($qcDocument['QcDocument']['title']));
+                $qcDocument['QcDocument']['title'] =ltrim(rtrim($this->_clean_table_names($qcDocument['QcDocument']['title'])));
                 $qcDocument['QcDocument']['document_number'] = ltrim(rtrim($qcDocument['QcDocument']['document_number']));
                 $qcDocument['QcDocument']['revision_number'] = ltrim(rtrim($qcDocument['QcDocument']['revision_number']));
                 $qcDocument['QcDocument']['standard_id'] = $this->request->data['QcDocument']['standard_id'];
