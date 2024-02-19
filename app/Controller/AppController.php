@@ -367,6 +367,7 @@ class AppController extends Controller {
 		$con1 = null;
 		$con2 = null;
 		$modelName = $this->modelClass;
+		$deptCon = array();
 		
 		// check if user/employee is involved departmentwise
 		// and if the user is HoD
@@ -382,7 +383,7 @@ class AppController extends Controller {
 					$department_field = $belongs['foreignKey'];
 					$department_field_class = $key;
 				}
-			} 
+			} 			
 			if($department_field){
 				$schema = $this->$modelName->schema(); 
 				// for json run condition 1
@@ -399,7 +400,7 @@ class AppController extends Controller {
 
 		if($this->Session->read('User.is_mr') == 0 && $this->request->controller != 'qc_documents' && $this->request->controller != 'custom_tables' && $this->request->controller != 'standards'){ $onlyBranch = array('or'=>array($deptCon,$modelName.'.branchid'=>json_decode($this->Session->read('User.assigned_branches'),false)));
 	}else{
-		$onlyBranch = $deptCon;
+		if($deptCon)$onlyBranch = $deptCon;
 	}
 		// if($this->Session->read('User.is_view_all') == 0 && $this->Session->read('User.assigned_branches' == null)){
 	if($this->Session->read('User.is_view_all') == 0){
@@ -417,7 +418,7 @@ class AppController extends Controller {
 	if($this->request->params['named'])
 	{
 
-		if($this->request->params['named']['published'] == 0){
+		if(isset($this->request->params['named']['published']) && $this->request->params['named']['published'] == 0){
 			$pubCon = array(
 				'or'=>array(
 					$modelName.'.publish' => 0,
@@ -429,10 +430,10 @@ class AppController extends Controller {
 			$pubCon = array($modelName.'.publish '=>1);
 		}
 
-		if($this->request->params['named']['published']==null)$con1 = null ; else $con1 = $pubCon;
+		if(isset($this->request->params['named']['published']) && $this->request->params['named']['published']==null)$con1 = null ; else $con1 = $pubCon;
 
-		if($this->request->params['named']['soft_delete']==null)$con2 = null ; else $con2 = array($modelName.'.soft_delete'=>$this->request->params['named']['soft_delete']);
-		if($this->request->params['named']['soft_delete']==null)$conditions=array($onlyBranch,$onlyOwn,$con1,$modelName.'.soft_delete'=>0);
+		if(isset($this->request->params['named']['soft_delete']) && $this->request->params['named']['soft_delete']==null)$con2 = null ; else $con2 = array($modelName.'.soft_delete'=>$this->request->params['named']['soft_delete']);
+		if(isset($this->request->params['named']['soft_delete']) && $this->request->params['named']['soft_delete']==null)$conditions=array($onlyBranch,$onlyOwn,$con1,$modelName.'.soft_delete'=>0);
 		else $conditions=array($onlyBranch,$onlyOwn,$con1,$con2);
 
 	}

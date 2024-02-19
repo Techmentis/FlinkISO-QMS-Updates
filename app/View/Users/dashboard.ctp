@@ -397,7 +397,7 @@ $pptarray = array('ppt','pptx');
                               <?php              
                               foreach($qcDocForCoEdit as $qcDocument){ ?>
                                 <tr>
-                                  <td><?php echo $qcDocument['QcDocument']['title']?></td>
+                                  <td><?php echo $qcDocument['QcDocument']['name']?></td>
                                   <td><?php echo $qcDocument['QcDocument']['document_number']?></td>
                                   <td><?php echo $qcDocument['Standard']['name']?></td>
                                   <td><?php echo $qcDocument['Clause']['title']?></td>

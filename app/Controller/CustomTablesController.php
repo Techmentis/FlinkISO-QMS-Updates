@@ -109,7 +109,7 @@ class CustomTablesController extends AppController {
         }
         
         $conditions = $this->_check_request();
-        if($this->request->params['named']['table_type'] == 1)$accessConditions[] = array('CustomTable.table_type'=>0);
+        if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 1)$accessConditions[] = array('CustomTable.table_type'=>0);
         else if($this->request->params['named']['table_type'] == 2)$accessConditions[] = array('CustomTable.table_type'=>1);
         else if($this->request->params['named']['table_type'] == 3)$accessConditions[] = array('CustomTable.table_type'=>2);
         else {$accessConditions[] = array('CustomTable.table_type'=>array(0,1));$this->request->params['named']['table_type'] = 4;}

@@ -32,11 +32,11 @@
 					<?php echo "<div class='col-md-2'>".$this->Form->input('password',array('type'=>'password', 'class'=>'form-control',)) . '</div>'; ?>
 					<?php echo "<div class='col-md-2'>".$this->Form->input('re-password',array('type'=>'password', 'class'=>'form-control',)) . '</div>'; ?>				
 					<?php 
-					if(!empty($this->request->params['named']['qc_document_id'])){
-						echo "<div class='col-md-12 hide'>".$this->Form->input('qc_document_id',array('class'=>'form-control','default'=>$this->request->params['named']['qc_document_id'])) . '</div>';					
+					if(!empty($this->request->params['named']['qc_document_id'])){						
+						echo "<div class='col-md-12 hide'>".$this->Form->hidden('qc_document_id',array('class'=>'form-control','default'=>$this->request->params['named']['qc_document_id'])) . '</div>';					
 					}
 					if(!empty($this->request->params['named']['process_id'])){
-						echo "<div class='col-md-12 hide'>".$this->Form->input('process_id',array('class'=>'form-control','default'=>$this->request->params['named']['process_id'])) . '</div>';
+						echo "<div class='col-md-12 hide'>".$this->Form->hidden('process_id',array('class'=>'form-control','default'=>$this->request->params['named']['process_id'])) . '</div>';
 					}
 					?>
 				</div>

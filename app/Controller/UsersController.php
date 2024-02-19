@@ -756,6 +756,7 @@ class UsersController extends AppController {
             'fields'=>array(
                 'QcDocument.id',
                 'QcDocument.title',
+                'QcDocument.name',
                 'QcDocument.document_number',
                 'QcDocument.standard_id',
                 'QcDocument.clause_id',
