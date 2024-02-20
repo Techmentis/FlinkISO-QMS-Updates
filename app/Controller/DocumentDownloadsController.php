@@ -482,8 +482,6 @@ public function _generate_template_content($fields = null, $record = null, $mode
 	td,th{background-color: #fff; text-align: left;}
 </style>";
 		
-	
-	
 	foreach($fields as $field){
 		if($field['linked_to'] != -1){
 			foreach($belongsTo as $modelname => $fieldDetails){
@@ -509,8 +507,8 @@ public function _generate_template_content($fields = null, $record = null, $mode
 	foreach($record as $modelN => $fs){
 		if($modelN != $model){
 			foreach($fs as $n => $val){
-				$f = '$record["'.$modelN.'"]["'.$n.'"]';				
-				$contents = str_replace($f, $val, $contents);
+				$f = '$record["'.$modelN.'"]["'.$n.'"]';
+				if($val && $f && !is_array($val))$contents = str_replace($f, $val, $contents);
 			}
 		}			
 	}

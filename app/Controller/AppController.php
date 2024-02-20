@@ -89,7 +89,7 @@ class AppController extends Controller {
 			$this->Session->setFlash(__('Login to continue'));
 			$this->redirect(array('controller' => 'users', 'action' => 'login'));
 		}else{
-			$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk');
+			$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template');
 
 			if (empty($this->Session->read('User.id')) && !in_array($this->action, $ignore)) {
 				try{
@@ -281,7 +281,7 @@ class AppController extends Controller {
 		$this->redirect($this->referer());
 	}
 	public function _access_redirect($n = null){ 
-		$ignore = array('install_updates', 'register','activate','send_otp', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk','change_password','check_password_validation');
+		$ignore = array('install_updates', 'register','activate','send_otp', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk','change_password','check_password_validation','save_template');
 		if(!in_array($this->action,$ignore) 
 			&& $this->request->controller != 'qc_documents' 
 			// && $this->request->controller != 'standards' 
@@ -3904,10 +3904,12 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 
 		public function _write_to_file($folder = null, $file = null, $content = null){
-	        chmod($folder,0777);
-	        $fp = fopen($file, 'w');
-	        fwrite($fp, $content);
-	        fclose($fp);
+			if($content){
+				chmod($folder,0777);
+		        $fp = fopen($file, 'w');
+		        fwrite($fp, $content);
+		        fclose($fp);
+			}	        
 	    }
 
 	}

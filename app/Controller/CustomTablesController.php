@@ -2581,14 +2581,16 @@ return true;
     }
 
     public function loadbegonstotablefields($m = null){
-        $model = Inflector::Classify($m);
-        $this->loadModel($model);
-        $skip = array('file_key','versions','version_keys','last_saved','update_custom_table_document','file_type','add_records','date_created','document_type','mark_for_cr_update','temp_date_of_issue','temp_effective_from_date','cr_id','old_cr_id','parent_id','linked_documents','user_id','cover_page','page_orientation','pdf_footer_id','user_session_id','signature');
+        if($m != -1 && $m != null){
+            $model = Inflector::Classify($m);
+            $this->loadModel($model);
+            $skip = array('file_key','versions','version_keys','last_saved','update_custom_table_document','file_type','add_records','date_created','document_type','mark_for_cr_update','temp_date_of_issue','temp_effective_from_date','cr_id','old_cr_id','parent_id','linked_documents','user_id','cover_page','page_orientation','pdf_footer_id','user_session_id','signature');
 
-        $allfields = array_diff(array_keys($this->$model->schema()),$skip);
-        // $allfields = array_keys($this->$model->schema());
-        $this->set('allfields',$allfields);
-        $this->set('belogsToModel',$model);
+            $allfields = array_diff(array_keys($this->$model->schema()),$skip);
+            // $allfields = array_keys($this->$model->schema());
+            $this->set('allfields',$allfields);
+            $this->set('belogsToModel',$model);
+        }        
     }
 
     public function add_belongs_to_fields($model = null, $id = null, $f = null,$field = null) {
