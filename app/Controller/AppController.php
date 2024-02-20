@@ -3907,4 +3907,11 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$this->render('/Elements/load_process');
 		}
 
+		public function _write_to_file($folder = null, $file = null, $content = null){
+	        chmod($folder,0777);
+	        $fp = fopen($file, 'w');
+	        fwrite($fp, $content);
+	        fclose($fp);
+	    }
+
 	}

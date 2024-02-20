@@ -510,12 +510,10 @@ class PdfTemplatesController extends AppController {
 
         $pdfTemplate = $this->PdfTemplate->find('first',array('conditions'=>array('PdfTemplate.id'=>$id)));
         
-        if($pdfTemplate){        
-            $templateFile = Configure::read('files') . DS .'pdf_template' . DS . $pdfTemplate['PdfTemplate']['id'] . DS . 'template.html';
-
-            $filetoread = new File($templateFile);
-            $html = $filetoread->read();            
-            $filetoread->write($html);
+        if($pdfTemplate){   
+            $folder = Configure::read('files') . DS .'pdf_template' . DS . $pdfTemplate['PdfTemplate']['id'];
+            $file = $folder . DS .  'template.html';
+            $this->_write_to_file($folder,$file,$html);
             
             $this->request->data = $pdfTemplate;
             $customTable = $this->PdfTemplate->CustomTable->find('first',array(

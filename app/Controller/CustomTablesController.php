@@ -694,7 +694,7 @@ return true;
                                 $controller_file_name = Inflector::pluralize(Inflector::Classify($table_name)) . 'Controller.php';
                                 $folder = APP . 'Controller';
                                 $file = $folder .  DS . $controller_file_name;
-                                $this->_write_to_file($folder,$file,$result['controller']);                                
+                                $this->_write_to_file($folder,$file,$result['controller']);
                             }
 
                             if($result['model']){
@@ -2662,12 +2662,5 @@ return true;
         }   
         $this->redirect(array('action' => 'link_processes', $this->request->params['named']['id'], date('Ymdhis')));        
     }
-
-
-    public function _write_to_file($folder = null, $file = null, $content = null){
-        chmod($folder,0777);
-        $fp = fopen($file, 'w');
-        fwrite($fp, $content);
-        fclose($fp);
-    }
+    
 }
