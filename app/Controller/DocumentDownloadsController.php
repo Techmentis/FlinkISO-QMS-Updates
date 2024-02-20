@@ -257,7 +257,7 @@ public function download(){
 					}else{
 						$this->_generate_header($qcDocument,$fontsize,$fontface,$record[$model]['id']);
 					}
-				
+					
 					$this->loadModel('PdfTemplate');
 					if($this->request->data['DocumentDownload']['pdf_template_id'] != -1){
 						$pdfTemplate = $this->PdfTemplate->find('first',array('conditions'=>array('PdfTemplate.id'=>$this->request->data['DocumentDownload']['pdf_template_id']),'recursive'=>-1));	
@@ -266,9 +266,9 @@ public function download(){
 						$templateFile = Configure::read('files') . DS . 'pdf_template' . DS . $pdfTemplate['PdfTemplate']['id'] . DS . 'template.html';
 						if($templateFile){
 						
-							$openFile = new File($templateFile);
-							$contents = $openFile->read();
-							$openFile->close();
+							$filetoread = fopen($templateFile, "r") or die("Unable to open file!");
+							$contents = fread($filetoread,filesize($templateFile));
+							fclose($filetoread);
 						
 							$content = $this->_generate_template_content($customTable['CustomTable']['fields'],$record,$model,$fontsize,$fontface,$contents,$pdfTemplate['PdfTemplate']['child_table_fields']);							
 						}						
@@ -387,9 +387,11 @@ public function download(){
 public function _generate_header($qcDocument = null, $fontsize = null,$fontface = null,$record_id = null){	
 
 	$headerFile = Configure::read('files') . DS . 'pdf_template' . DS . 'header/template.html';
+
 	if(file_exists($headerFile)){
-		$filetoread = new File($headerFile);
-        $table = $filetoread->read();
+		$filetoread = fopen($headerFile, "r") or die("Unable to open file!");
+		$table = fread($filetoread,filesize($headerFile));
+		fclose($filetoread);
 
         $fields = array(
             '$qcDocument["QcDocument"]["title"]'=>$qcDocument["QcDocument"]["title"],
@@ -408,11 +410,10 @@ public function _generate_header($qcDocument = null, $fontsize = null,$fontface 
             '$qcDocument["PreparedBy"]["name"]'=>$qcDocument["PreparedBy"]["name"],
             '$qcDocument["ApprovedBy"]["name"]'=>$qcDocument["ApprovedBy"]["name"],
         );
-	    
-	    foreach($fields as $field => $value){       
-	        $table = str_replace($field,$value, $table);
-	    }
-        $filetoread->close();
+
+        foreach($fields as $field => $value){       
+        	if($value)$table = str_replace($field,$value, $table);
+	    }        
 	}else{
 		$table ="<!DOCTYPE html><html><head>";
 		$table .= "<style>
@@ -443,12 +444,13 @@ public function _generate_header($qcDocument = null, $fontsize = null,$fontface 
 				</table>
 		";	
 		$table .= "</table></body></html>";	
-	}	
+	}		
 	$this->_write_html_file($qcDocument['QcDocument']['id'],$table,$record_id);
 }
 
 
 public function _write_html_file($filename = null, $content = null, $record_id = null){
+	
 	$path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id;	
 
 	$folder = new Folder();
@@ -744,7 +746,6 @@ public function _generate_content($fields = null, $record = null, $model = null,
 		if($file)$this->onlyoffice_pdf($file);
 	}
 	
-	
 	$this->_generate_pdf_file($header_file,$str,$filenamae,$record[$model]['id']);
 }
 
@@ -908,16 +909,10 @@ public function _generate_pdf_file($header_file = null,$content = null,$fileName
 			),
 		));
 	}
-	// exit;
-
-	
 
 	// check if logo if is available
 	$this->set('content',$content);
-	$CakePdf->template('pagecontent', 'pagecontent');
-	$CakePdf->viewVars($this->viewVars);
-	$pdf = $CakePdf->output();
-    $path = WWW_ROOT .'files'. DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id;
+	$path = WWW_ROOT .'files'. DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id;
 	
 	try{
 		$dir = WWW_ROOT .'files'. DS . 'pdf' . DS .$this->Session->read('User.id') . DS . $record_id;
@@ -936,7 +931,9 @@ public function _generate_pdf_file($header_file = null,$content = null,$fileName
 	$fileName = str_replace(' ','-',$fileName);
 
 	$fileName = '-remove-pdf-' . $fileName . '-'. date('his');
-	$pdf = $CakePdf->write($path . DS . $fileName.'.pdf');
+	$CakePdf->template('pagecontent', 'pagecontent');
+	$CakePdf->viewVars($this->viewVars);
+	$CakePdf->custom_write($path, $path . DS . $fileName.'.pdf');
 	$pdf = $path . DS . $fileName.'.pdf';
 	$fileName = $path . DS . $fileName.'.pdf';     
 	$this->add_password($fileName,null,$record_id);

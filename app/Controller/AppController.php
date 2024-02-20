@@ -243,9 +243,7 @@ class AppController extends Controller {
 			Configure::write("path", WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . $this->request->controller);
 			Configure::write("url", Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . $this->request->controller);
 			Configure::write("common_path", 'files' . DS . $this->Session->read('User.company_id') . DS . $this->request->controller);
-			
-			
-
+					
 			if(
 				($this->request->is('ajax') == true && $this->request->params['named']['allow_access_user'] != $this->Session->read('User.id')) || 
 				$this->request->data['Access']['skip_access_check'] == 1 && $this->request->data['Access']['allow_access_user'] == $this->Session->read('User.id')){
@@ -1527,8 +1525,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					
 				}				
 			}
-
-
 
 			$customArray = $this->$modal->customArray;
 			if($this->request->params['named']['custom_table_id']){
@@ -3767,7 +3763,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$response_data = file_get_contents($path, FALSE, $context);
 			$downloadUri = json_decode($response_data,true);
 			$downloadUri = $downloadUri['fileUrl'];
-			
+
 			if (file_get_contents($downloadUri) === FALSE) {
 				
 			} else {
@@ -3869,7 +3865,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			}
 
 			$pagecontentfilename = 'signpdf';
-			$pdf = $CakePdf->write($path . DS . $pagecontentfilename.'-.pdf');
+			$pdf = $CakePdf->custom_write($path,$path . DS . $pagecontentfilename.'-.pdf');
 			$pdf = $path . DS . $pagecontentfilename.'.pdf';
 			$pagecontentfilename = $path . DS . $pagecontentfilename.'-.pdf';   
 			
