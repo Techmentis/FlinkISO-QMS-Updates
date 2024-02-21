@@ -118,17 +118,22 @@ class StandardsController extends AppController {
             $this->request->data['Standard']['system_table_id'] = $this->_get_system_table_id();
             $this->request->data[$this->modelClass]['publish'] = $this->request->data['Approval']['Standard']['publish'];
             $this->Standard->create();
+            
             if ($this->Standard->save($this->request->data)) {
-                // add clauses
-                if(strpos($this->request->data['Standard']['clauses'], '\r\n') !== false){
-                    $clauses = explode('\r\n',$this->request->data['Standard']['clauses']);    
-                }else if(strpos($this->request->data['Standard']['clauses'], '\n') !== false){
-                    $clauses = explode('\n',$this->request->data['Standard']['clauses']);    
+                if(strpos($this->request->data['Standard']['clauses'], "\r\n") !== false){
+                $clauses = explode("\r\n",$this->request->data['Standard']['clauses']);    
+                }else if(strpos($this->request->data['Standard']['clauses'], "\n\r") !== false){
+                    $clauses = explode("\n\r",$this->request->data['Standard']['clauses']);    
+                }else if(strpos($this->request->data['Standard']['clauses'], "\n") !== false){
+                    $clauses = explode("\n",$this->request->data['Standard']['clauses']);    
                 }else if(strpos($this->request->data['Standard']['clauses'], PHP_EOL) !== false){                
                     $clauses = explode(PHP_EOL,$this->request->data['Standard']['clauses']);    
+                }else if(strpos($this->request->data['Standard']['clauses'], "\r") !== false){                
+                    $clauses = explode("\r",$this->request->data['Standard']['clauses']);    
                 }else{
-                    
+                    echo "error";
                 }
+
                 foreach ($clauses as $clause) {
                     $clause = explode(',', $clause);
                     if (ltrim(rtrim($clause[2]))) {

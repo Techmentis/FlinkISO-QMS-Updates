@@ -1,13 +1,13 @@
 <div id="standards_ajax">
 	<?php $placeholder = 
-	"1,,Scope;
-	2,,Normative references;
-	3,,Terms and Definitions;
-	4,,Context of the organization;
-	4,4.1, Understanding Context of the Organization;
-	4,4.2, Understanding the needs and expectations of interested parties;
-	4,4.3 Determining the scope of the quality management system;
-	4,4.4, Quality management system and its processes;
+"1,,Scope;
+2,,Normative references;
+3,,Terms and Definitions;
+4,,Context of the organization;
+4,4.1, Understanding Context of the Organization;
+4,4.2, Understanding the needs and expectations of interested parties;
+4,4.3 Determining the scope of the quality management system;
+4,4.4, Quality management system and its processes;
 	";
 	?>
 
@@ -19,9 +19,9 @@
 			<div class="row">
 				<?php
 				echo "<div class='col-md-12'>".$this->Form->input('name',array('class'=>'form-control')) . '</div>'; 
-				echo "<div class='col-md-12'>".$this->Form->input('details',array('class'=>'form-control','label'=>'Brief Description')) . '</div>';
 				echo "<div class='col-md-12'>".$this->Form->input('clauses',array('type'=>'textarea', 'placeholder'=>$placeholder, 'class'=>'form-control','label'=>'Enter clauses in CSV format')) . '</div>';
-				echo "<div class='col-md-12'>CSV : Comma Seperated Values. <br />Clause No.<strong>,</strong>Sub-Clause<strong>,</strong>Title/Name of the clause<strong>,</strong> Details(textual Description) < enter ><br /> Please avoid additional comma's inbetween at this stage. You can always edit these from Standard/Clauses page later.</div>"
+				echo "<div class='col-md-12'>CSV : Comma Seperated Values. <br />Clause No.<strong>,</strong>Sub-Clause<strong>,</strong>Title/Name of the clause<strong>,</strong> Details(textual Description) < enter ><br /> Please avoid additional comma's inbetween at this stage. You can always edit these from Standard/Clauses page later.</div>";
+				echo "<div class='col-md-12'>".$this->Form->input('details',array('class'=>'form-control','label'=>'Brief Description')) . '</div>';
 				?>
 				<?php
 				echo $this->Form->input('id');

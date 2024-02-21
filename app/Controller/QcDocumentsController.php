@@ -98,7 +98,8 @@ class QcDocumentsController extends AppController {
             'intdocunumber' => 'CAST(QcDocument.document_number as UNSIGNED)',
             'parent_id'=>'QcDocument.parent_document_id',
             'tables' => 'select count(*) from `custom_tables` where `custom_tables`.`qc_document_id` LIKE QcDocument.id', 
-            'active_tables' => 'select count(*) from `custom_tables` where `custom_tables`.`publish` = 1 AND `custom_tables`.`table_locked` = 0 AND `custom_tables`.`qc_document_id` LIKE QcDocument.id');
+            'active_tables' => 'select count(*) from `custom_tables` where `custom_tables`.`publish` = 1 AND `custom_tables`.`table_locked` = 0 AND `custom_tables`.`qc_document_id` LIKE QcDocument.id',
+            'childDoc'=>'select count(*) from qc_documents where qc_documents.parent_document_id LIKE QcDocument.id');
         
 
         $conditions = $this->_check_request();
@@ -119,9 +120,9 @@ class QcDocumentsController extends AppController {
             $accessConditions = array();
         }
 
-        $this->paginate = array('threaded', 
+        $this->paginate = array('all', 
             'fields'=>array(
-                'QcDocument.name','QcDocument.title','QcDocument.document_number','QcDocument.document_status','QcDocument.publish','QcDocument.parent_document_id','QcDocument.parent_id','QcDocument.prepared_by','QcDocument.approved_by','QcDocument.tables','QcDocument.active_tables','QcDocument.standard_id','QcDocument.file_type',
+                'QcDocument.name','QcDocument.title','QcDocument.document_number','QcDocument.document_status','QcDocument.publish','QcDocument.parent_document_id','QcDocument.parent_id','QcDocument.prepared_by','QcDocument.approved_by','QcDocument.tables','QcDocument.active_tables','QcDocument.standard_id','QcDocument.file_type','QcDocument.parent_document_id','QcDocument.childDoc',
                 'PreparedBy.id',
                 'PreparedBy.name',
                 'ApprovedBy.id',
@@ -134,12 +135,67 @@ class QcDocumentsController extends AppController {
             'order' => array('QcDocument.intdocunumber' => 'ASC','QcDocument.title'=>'ASC'), 
             'conditions' => array(
                 'QcDocument.archived !='=>1, 
+                'QcDocument.parent_document_id '=>-1, 
                 $accessConditions
             ));
         $this->QcDocument->recursive = 0;
 
         $this->set('qcDocuments', $this->paginate());
         $this->_get_count();
+        $this->_commons($this->Session->read('User.id'));
+    }
+
+    public function child_docs($id = null) {        
+        $this->QcDocument->virtualFields = array(
+            'intdocunumber' => 'CAST(QcDocument.document_number as UNSIGNED)',
+            'parent_id'=>'QcDocument.parent_document_id',
+            'tables' => 'select count(*) from `custom_tables` where `custom_tables`.`qc_document_id` LIKE QcDocument.id', 
+            'active_tables' => 'select count(*) from `custom_tables` where `custom_tables`.`publish` = 1 AND `custom_tables`.`table_locked` = 0 AND `custom_tables`.`qc_document_id` LIKE QcDocument.id',
+            'childDoc'=>'select count(*) from qc_documents where qc_documents.parent_document_id LIKE QcDocument.id');
+        
+
+        $conditions = $this->_check_request();
+
+        
+        if($this->Session->read('User.is_mr') == false){
+            $accessConditions = array(
+
+                'OR'=>array(
+                    'QcDocument.prepared_by'=>$this->Session->read('User.employee_id'),
+                    'QcDocument.branches LIKE' => '%'.$this->Session->read('User.branch_id').'%',
+                    'QcDocument.departments LIKE' => '%'.$this->Session->read('User.department_id').'%',
+                    // 'QcDocument.designations LIKE' => '%'.$this->Session->read('User.designation_id').'%',
+                    'QcDocument.user_id LIKE' => '%'.$this->Session->read('User.id').'%',
+                )
+            );
+        }else{
+            $accessConditions = array();
+        }
+
+        $childDocArray = array();
+        
+        $qcDocuments = $this->QcDocument->find('all', array(
+            'fields'=>array(
+                'QcDocument.name','QcDocument.title','QcDocument.document_number','QcDocument.document_status','QcDocument.publish','QcDocument.parent_document_id','QcDocument.parent_id','QcDocument.prepared_by','QcDocument.approved_by','QcDocument.tables','QcDocument.active_tables','QcDocument.standard_id','QcDocument.file_type','QcDocument.parent_document_id','QcDocument.childDoc',
+                'PreparedBy.id',
+                'PreparedBy.name',
+                'ApprovedBy.id',
+                'ApprovedBy.name',
+                'IssuedBy.id',
+                'IssuedBy.name',
+                'Standard.id',
+                'Standard.name'
+            ), 
+            'recursive'=>0,
+            'order' => array('QcDocument.intdocunumber' => 'ASC','QcDocument.title'=>'ASC'), 
+            'conditions' => array(
+                'QcDocument.archived !='=>1, 
+                'QcDocument.parent_document_id'=>$id, 
+                $accessConditions
+            )
+            )
+        );        
+        $this->set('qcDocuments',$qcDocuments);
         $this->_commons($this->Session->read('User.id'));
     }
     /**

@@ -1341,18 +1341,15 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		$conditions = array();
 		foreach($srcs as $s){
 
-			$conditions[] = array($model.'.'.$src .' LIKE ' => '%'.$s.'%');
+			$conditions[] = array('LOWER('.$model.'.'.$src .') LIKE ' => '%'.strtolower($s).'%');
 
 			foreach ($search_keys as $keys) {
 				if(in_array($keys, $fields)){
-					$field_condition = array($model.'.'.$keys.' LIKE' => '%'.$s.'%');
+					$field_condition = array('LOWER('.$model.'.'.$keys.') LIKE' => '%'.strtolower($s).'%');
 					$conditions[] = array('OR'=>array($conditions,$belongsToCondition, $field_condition));
 				}
 			} 
 		}
-
-
-
 
 		$this->paginate = array('limit'=>25, 'order' => array($model.'.id' => 'DESC'), 'conditions' => array($conditions));
 		$this->$model->recursive = 0;
