@@ -1387,10 +1387,10 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						$condition[] = array($modal . '.' . $field_name . ' <' => $details['value']);
 						break;
 						case '%*':
-						$condition[] = array($modal . '.' . $field_name . ' LIKE ' => '%' . $details['value']);
+						$condition[] = array('LOWER('.$modal . '.' . $field_name . ') LIKE ' => '%' . $details['value']);
 						break;
 						case '*%':
-						$condition[] = array($modal . '.' . $field_name . ' LIKE ' => $details['value'] . '%');
+						$condition[] = array('LOWER('.$modal . '.' . $field_name . ') LIKE ' => $details['value'] . '%');
 						break;
 						case 'between':
 						$dates = split('-', $details['value']);
@@ -1399,7 +1399,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						$condition[] = array('DATE(' . $modal . '.' . $field_name . ') BETWEEN ? and ? ' => array($startdate, $enddate));
 						break;
 						case '%*%':
-						$condition[] = array($modal . '.' . $field_name . ' LIKE ' => '%' . $details['value'] . '%');
+						$condition[] = array('LOWER('.$modal . '.' . $field_name . ') LIKE ' => '%' . $details['value'] . '%');
 						break;
 						default:
 							# code...
@@ -1426,15 +1426,15 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						$condition[] = array($modal . '.' . $field_name . ' <' => $details['value']);
 						break;
 						case '%*':
-						$condition[] = array($modal . '.' . $field_name . ' LIKE ' => '%' . $details['value']);
+						$condition[] = array('LOWER('.$modal . '.' . $field_name . ') LIKE ' => '%' . $details['value']);
 						break;
 						case '*%':
-						$condition[] = array($modal . '.' . $field_name . ' LIKE ' => $details['value'] . '%');
+						$condition[] = array('LOWER('.$modal . '.' . $field_name . ') LIKE ' => $details['value'] . '%');
 						break;
 						case 'between':
 						break;
 						case '%*%':
-						$condition[] = array($modal . '.' . $field_name . ' LIKE ' => '%' . $details['value'] . '%');
+						$condition[] = array('LOWER('.$modal . '.' . $field_name . ') LIKE ' => '%' . $details['value'] . '%');
 						break;
 						default:
 							# code...
@@ -1464,7 +1464,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$this->loadModel($modal);
 			$fields = $this->$modal->schema();
 			$belongs = $this->$modal->belongsTo;
-			$fields_to_unset = array('id', 'sr_no', 'system_table_id', 'company_id', 'modified', 'modified_by', 'branchid', 'departmentid', 'soft_delete', 'record_status', 'status_user_id', 'division_id','master_list_of_format_id', 'login_status', 'password', 'user_access', 'copy_acl_from', 'password_token', 'user_session_id', 'divisionid', 'document_status', 'parent_id', 'work_instructions', 'record', 'file_key', 'version_key', 'file_dir', 'result', 'file_status', 'file_content','version','version_keys','versions','update_custom_table_document','file_type','data_type','add_records','update_version','cr_status','mark_for_cr_update','pdf_footer_id','signature');
+			$fields_to_unset = array('id', 'sr_no', 'system_table_id', 'company_id', 'modified', 'modified_by', 'branchid', 'departmentid', 'soft_delete', 'record_status', 'status_user_id', 'division_id','master_list_of_format_id', 'login_status', 'password', 'user_access', 'copy_acl_from', 'password_token', 'user_session_id', 'divisionid', 'document_status', 'parent_id', 'work_instructions', 'record', 'file_key', 'version_key', 'file_dir', 'result', 'file_status', 'file_content','version','version_keys','versions','update_custom_table_document','file_type','data_type','add_records','update_version','cr_status','mark_for_cr_update','pdf_footer_id','signature','temp_date_of_issue','temp_effective_from_date');
 
 			foreach($fields_to_unset as $f){
 				unset($fields[$f]);
