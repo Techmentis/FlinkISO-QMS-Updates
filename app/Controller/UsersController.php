@@ -689,6 +689,7 @@ class UsersController extends AppController {
                 'CustomTable.qc_document_id',
                 'QcDocument.id',
                 'QcDocument.title',
+                'QcDocument.name',
                 'QcDocument.document_number',
                 'QcDocument.revision_number',
                 'QcDocument.file_type',

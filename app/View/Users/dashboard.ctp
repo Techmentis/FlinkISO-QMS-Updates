@@ -185,7 +185,7 @@ $pptarray = array('ppt','pptx');
                     <i class="fa fa-file-ppt-o" aria-hidden="true"></i>
                     <?php }?>&nbsp;
 
-                    <strong><?php echo $customTable['CustomTable']['name'];?></strong> : <small><?php echo $customTable['QcDocument']['title'];?> : <?php echo $customTable['QcDocument']['document_number'];?>-<?php echo $customTable['QcDocument']['revision_number'];?>.<?php echo $customTable['QcDocument']['file_type'];?></small></td>
+                    <strong><?php echo $customTable['CustomTable']['name'];?></strong> : <small><?php echo $customTable['QcDocument']['name'];?> : <?php echo $customTable['QcDocument']['document_number'];?>-<?php echo $customTable['QcDocument']['revision_number'];?>.<?php echo $customTable['QcDocument']['file_type'];?></small></td>
                     <td><?php 
                     if($last_updated)echo $last_updated['created'];
                     else echo "NIL";
