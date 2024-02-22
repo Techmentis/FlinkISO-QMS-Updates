@@ -89,6 +89,14 @@ class BillingController extends AppController {
                 'from' => APP,
                 'recursive' => true
             ));
+
+            $folder = ROOT . DS . 'backup' . DS . date('Y-m-d') . DS . 'lib';
+            $folderToCopy = new Folder(ROOT . DS . 'lib');
+            $folderToCopy->copy(array(
+                'to' => $folder,
+                'from' => ROOT . DS . 'lib',
+                'recursive' => true
+            ));
             echo "<h4>Downloading Files...</h4><br />Backup created at <br /><strong>".$folder."/</strong></br>";
         }else{
             echo "<span class='text-danger'>Unable create <strong>" . $folder . "</strong>. Please create the folder manually will write permission for backup.</span>";            
@@ -146,6 +154,8 @@ class BillingController extends AppController {
    }
 
    public function copy_files(){
+        $folder = ROOT . DS . 'backup' . DS . date('Y-m-d');
+        
         $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'app');
         $foldersTocopy = $downloadedFolder->copy(APP);
         // once successful, copy update files from updates to app
@@ -153,6 +163,16 @@ class BillingController extends AppController {
         $updateFolder->copy(array(
             'to' => $folder,
             'from' => APP,
+            'recursive' => true
+        ));
+
+        $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'lib');
+        $foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'lib');
+        // once successful, copy update files from updates to app
+        $updateFolder = new Folder();
+        $updateFolder->copy(array(
+            'to' => $folder,
+            'from' => ROOT . DS . 'lib',
             'recursive' => true
         ));
 

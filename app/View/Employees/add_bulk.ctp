@@ -72,8 +72,7 @@
 	<script>
 		$.validator.setDefaults({
 			ignore: null,
-			errorPlacement: function(error, element) {
-				console.log(element);
+			errorPlacement: function(error, element) {				
 				if(element['context']['className'] == 'form-control select error'){					
 					$(element).next('.chosen-container').addClass('error');
 				}else if(element.attr("fieldset") != ''){						
