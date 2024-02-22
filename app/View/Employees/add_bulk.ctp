@@ -8,7 +8,7 @@
 		<div class="nav panel panel-default">
 			<div class="employees form col-md-12">
 				<?php echo $this->Form->create('Employee',array('role'=>'form','class'=>'form')); ?>
-				<div class="row">
+				<div class="row">					
 					<?php
 					$str =
 					"Employee Number,Employee Name,Employee Email,Hod,Approver
@@ -19,12 +19,12 @@
 					.
 					";
 
-					echo "<div class='col-md-3'>".$this->Form->input('branch_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
-					echo "<div class='col-md-3'>".$this->Form->input('department_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
-					echo "<div class='col-md-3'>".$this->Form->input('designation_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
+					echo "<div class='col-md-3'>".$this->Form->input('branch_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>'; 
+					echo "<div class='col-md-3'>".$this->Form->input('department_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>'; 
+					echo "<div class='col-md-3'>".$this->Form->input('designation_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>'; 
 					echo "<div class='col-md-3'>".$this->Form->input('parent_id',array('class'=>'form-control', 'style'=>'')) . '</div>';
-
 					echo "<div class='col-md-12'>".$this->Form->input('name',array('class'=>'form-control','type'=>'textarea','placeholder'=>$str)) . '</div>'; 
+					echo "<div class='col-md-12'>Employee Number,Employee Name,Employee Email,Hod,Approver</div>";
 					?>
 					<?php
 					echo $this->Form->input('id');
@@ -73,35 +73,42 @@
 		$.validator.setDefaults({
 			ignore: null,
 			errorPlacement: function(error, element) {
-				if (
-					
-					$(element).attr('name') == 'data[Employee][branch_id]' ||
-					$(element).attr('name') == 'data[Employee][department_id]'
-					)
-				{	
-					$(element).next().after(error);
-				} else {
-					$(element).after(error);
+				console.log(element);
+				if(element['context']['className'] == 'form-control select error'){					
+					$(element).next('.chosen-container').addClass('error');
+				}else if(element.attr("fieldset") != ''){						
+					$(element).parent('fieldset').addClass('error-radio');
+				}else{			
+					$(element).after(error); 
 				}
 			},
 		});
 		
 		$().ready(function() {
+			$('select').chosen();
+
+			$('select').each(function(){
+				var id = this.id;		
+				$("#"+id).on('change',function(){			
+					$("#"+id).next('.chosen-container').removeClass('error').addClass('success');			
+				});
+			});
+
+
 			jQuery.validator.addMethod("greaterThanZero", function(value, element) {
+				console.log($("#"+element.id+" option:selected").text());
 				return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';
 			}, "Please select the value");
 
-			$('#EmployeeAddBulkForm').validate({        	
-				rules: {
-					"data[Employee][branch_id]": {
-						greaterThanZero: true,
-					},
-					"data[Employee][department_id]": {
-						greaterThanZero: true,
-					}
-					
+			
+			$('#EmployeeAddBulkForm').validate();
+			$('select').each(function() {				
+				if($(this).prop('required') == true){
+					$(this).rules('add', {
+						greaterThanZero: true
+					});	
 				}
-			}); 
+			});  
 			
 			$("#submit-indicator").hide();
 			$("#submit_id").click(function(){
@@ -110,19 +117,8 @@
 					$("#submit-indicator").show();
 					$('#EmployeeAddBulkForm').submit();
 				}
-
 			});
 
-			$('#EmployeeBranchId').change(function() {
-				if ($(this).val() != -1 && $(this).next().next('label').hasClass("error")) {
-					$(this).next().next('label').remove();
-				}
-			});
-			$('#EmployeeDepartmentId').change(function() {
-				if ($(this).val() != -1 && $(this).next().next('label').hasClass("error")) {
-					$(this).next().next('label').remove();
-				}
-			});
 			
 		});
 	</script>

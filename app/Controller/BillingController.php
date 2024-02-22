@@ -132,12 +132,10 @@ class BillingController extends AppController {
             $sql = fopen( WWW_ROOT. 'updates' . DS . 'update.sql', "r");
             $contents = stream_get_contents($sql);
             $contents = explode(PHP_EOL,$contents);
-
             foreach($contents as $sql){
                 if($sql && $sql != ''){
                     try{
                         $this->Billing->query($sql);
-                        $updatestr .= $sql;
                     }catch (Exception $e) {
                        echo "<span class='text-danger'>SQL Failed: " . $sql .'</span></br>';
                    }

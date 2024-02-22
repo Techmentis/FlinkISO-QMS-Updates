@@ -118,8 +118,7 @@ class EmployeesController extends AppController {
             $userids = $this->User->find('list', array('order' => array('User.name' => 'ASC'), 'conditions' => array('User.publish' => 1, 'User.soft_delete' => 0, 'User.is_approver' => 1)));
             $this->set(array('userids' => $userids, 'show_approvals' => $this->_show_approvals()));
         }
-        if ($this->request->is('post')) {
-            
+        if ($this->request->is('post')) {            
             $this->request->data['Employee']['system_table_id'] = $this->_get_system_table_id();
             
             $this->request->data['Employee']['name'] = str_replace('"','',$this->request->data['Employee']['name']);
@@ -136,7 +135,6 @@ class EmployeesController extends AppController {
             
             if($employees){
                 foreach($employees as $employee){
-                    
                     $data['Employee'] = $this->request->data['Employee'];
                     $rec = explode(',',trim($employee));
                     
@@ -148,23 +146,28 @@ class EmployeesController extends AppController {
                         if(trim($rec[3]) && (trim($rec[3]) == 'Yes' || trim($rec[3]) == 'yes'))$data['Employee']['is_hod'] = 1;
                         if(trim($rec[4]) && (trim($rec[4]) == 'Yes' || trim($rec[4]) == 'yes'))$data['Employee']['is_approver'] = 1;
                     }
-                    
-                    $exists = $this->Employee->find('count',array('conditions'=>array(
-                        'Employee.office_email'=>$data['Employee']['office_email'],                        
+                    if(filter_var($data['Employee']['office_email'], FILTER_VALIDATE_EMAIL)) {
+                        $exists = $this->Employee->find('count',array('conditions'=>array(
+                        'Employee.office_email'=>$data['Employee']['office_email'],
 
-                    )));
-                    $data['Employee']['publish'] = $this->request->data['Employee']['publish'];
-                    $data['Employee']['prepared_by'] = $data['Employee']['approved_by'] = $this->Session->read('User.employee_id');
-                    $data['Employee']['soft_delete'] = 0;
-                    if($exists == 0){                    
-                        try {
-                            $this->Employee->create();
-                            $this->Employee->save($data['Employee'],false);
-                            if($this->request->data['Employee']['create_users'] == 1)$this->_add_user($data,$this->Employee->id);
-                        } catch (Exception $e) {
-                            
-                        }        
+                        )));
+                        $data['Employee']['publish'] = $this->request->data['Employee']['publish'];
+                        $data['Employee']['prepared_by'] = $data['Employee']['approved_by'] = $this->Session->read('User.employee_id');
+                        $data['Employee']['soft_delete'] = 0;
+                        if($exists == 0){                    
+                            try {
+                                $this->Employee->create();
+                                $this->Employee->save($data['Employee'],false);
+                                if($this->request->data['Employee']['create_users'] == 1)$this->_add_user($data,$this->Employee->id);
+                            } catch (Exception $e) {
+                                
+                            }        
+                        }   
                     }
+                    else {
+                        $this->Session->setFlash(__('Employees could not be saved. Invalid Email'));
+                        $this->redirect(array('action' => 'add_bulk'));
+                    }                    
                 }
 
                 $this->Session->setFlash(__('Employees saved.'));
@@ -174,8 +177,7 @@ class EmployeesController extends AppController {
                 $this->redirect(array('action' => 'add_bulk'));
             }
             
-        }
-        // exit;
+        }        
         $this->_commons();
     }
 
