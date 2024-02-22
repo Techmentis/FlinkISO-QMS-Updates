@@ -94,6 +94,9 @@ class BillingController extends AppController {
             echo "<span class='text-danger'>Unable create <strong>" . $folder . "</strong>. Please create the folder manually will write permission for backup.</span>";            
         }
 
+        $deteleFileFolder = new Folder();
+        $deteleFileFolder->delete($folder. DS . 'webroot');
+
         $updateFolder = new Folder();
         $updateFolder->delete(WWW_ROOT. 'updates');
 
