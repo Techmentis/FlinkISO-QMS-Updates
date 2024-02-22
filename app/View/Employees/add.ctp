@@ -13,9 +13,9 @@
 					echo "<div class='col-md-4'>".$this->Form->input('name',array('class'=>'form-control',)) . '</div>'; 
 					echo "<div class='col-md-4'>".$this->Form->input('parent_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
 					echo "<div class='col-md-4'>".$this->Form->input('employee_number',array('class'=>'form-control',)) . '</div>'; 
-					echo "<div class='col-md-4'>".$this->Form->input('branch_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
-					echo "<div class='col-md-4'>".$this->Form->input('department_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
-					echo "<div class='col-md-4'>".$this->Form->input('designation_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
+					echo "<div class='col-md-4'>".$this->Form->input('branch_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>'; 
+					echo "<div class='col-md-4'>".$this->Form->input('department_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>'; 
+					echo "<div class='col-md-4'>".$this->Form->input('designation_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>'; 
 					echo "<div class='col-md-4'>".$this->Form->input('qualification',array('class'=>'form-control',)) . '</div>'; 
 					echo "<div class='col-md-4'>".$this->Form->input('joining_date',array('class'=>'form-control',)) . '</div>'; 
 					echo "<div class='col-md-4'>".$this->Form->input('date_of_birth',array('class'=>'form-control',)) . '</div>'; 
@@ -58,20 +58,16 @@
 	<script>
 		$.validator.setDefaults({
 			ignore: null,
-			errorPlacement: function(error, element) {
-				if (
-					
-					$(element).attr('name') == 'data[Employee][branch_id]' ||
-					$(element).attr('name') == 'data[Employee][department_id]' ||
-					$(element).attr('name') == 'data[Employee][designation_id]')
-				{	
-					$(element).next().after(error);
-				} else {
-					$(element).after(error);
+			errorPlacement: function(error, element) {				
+				if(element['context']['className'] == 'form-control select error'){					
+					$(element).next('.chosen-container').addClass('error');
+				}else if(element.attr("fieldset") != ''){						
+					$(element).parent('fieldset').addClass('error-radio');
+				}else{			
+					$(element).after(error); 
 				}
 			},
 		});
-		
 		$().ready(function() {
 			jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 				return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';

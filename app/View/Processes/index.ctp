@@ -13,14 +13,13 @@
 						<th><?php echo $this->Paginator->sort('qc_document_id','Document'); ?></th>
 						<th><?php echo $this->Paginator->sort('process_owners'); ?></th>
 						<th><?php echo $this->Paginator->sort('standards'); ?></th>
-						<th><?php echo $this->Paginator->sort('clauses'); ?></th>
-						<th>Tables</th>
+						<th><?php echo $this->Paginator->sort('clauses'); ?></th>						
 						<th width="100">Actions</th>
 					</tr>
 					<?php foreach ($processes as $process): ?>
 						<tr class="" onclick="addrec('<?php echo $process['Process']['id'];?>')" id="<?php echo $process['Process']['id'];?>_tr">
 							<td><?php echo $process['Process']['name'];?></td>
-							<td><?php echo $process['QcDocument']['title'];?></td>
+							<td><?php echo $process['QcDocument']['name'];?></td>
 							<td><?php foreach(json_decode($process['Process']['process_owners'],true) as $field ){
 								echo $processOwners[$field] .", ";
 							};?></td>
@@ -29,13 +28,7 @@
 							};?></td>
 							<td><?php foreach(json_decode($process['Process']['clauses'],true) as $field ){
 								echo $clauses[$field] .", ";
-							};?></td>
-							<td>
-								<div class="btn-group">
-									<div class="btn btn-xs btn-default"><?php echo h($process['Process']['tables']); ?></div>
-									<div class="btn btn-xs btn-success"><?php echo h($process['Process']['active_tables']); ?></div>
-								</div>
-							&nbsp;</td>
+							};?></td>							
 							<td class=" actions">	
 								<?php echo $this->element('actions', array('created' => $process['Process']['created_by'], 'postVal' => $process['Process']['id'],'qc_document_id' => $process['Process']['qc_document_id'], 'softDelete' => $process['Process']['soft_delete'],'custom_table_id'=>$this->request->params['named']['custom_table_id'])); ?>
 							</td>

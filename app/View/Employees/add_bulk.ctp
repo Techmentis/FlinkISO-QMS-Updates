@@ -94,8 +94,7 @@
 			});
 
 
-			jQuery.validator.addMethod("greaterThanZero", function(value, element) {
-				console.log($("#"+element.id+" option:selected").text());
+			jQuery.validator.addMethod("greaterThanZero", function(value, element) {				
 				return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';
 			}, "Please select the value");
 
