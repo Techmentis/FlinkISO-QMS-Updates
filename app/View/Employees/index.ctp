@@ -10,6 +10,7 @@
 			<table cellpadding="0" cellspacing="0" class="table table-responsive table-hover index" id="exportcsv">
 				<tr>										
 					<th><?php echo $this->Paginator->sort('name'); ?></th>
+					<th><?php echo $this->Paginator->sort('employee_number'); ?></th>
 					<th><?php echo $this->Paginator->sort('parent_id'); ?></th>					
 					<th><?php echo $this->Paginator->sort('branch_id'); ?></th>
 					<th><?php echo $this->Paginator->sort('department_id'); ?></th>
@@ -24,6 +25,7 @@
 					<?php foreach ($employees as $employee): ?>
 						<tr class="on_page_src" onclick="addrec('<?php echo $employee['Employee']['id'];?>')" id="<?php echo $employee['Employee']['id'];?>_tr">
 							<td><?php echo h($employee['Employee']['name']); ?>&nbsp;</td>
+							<td><?php echo h($employee['Employee']['employee_number']); ?>&nbsp;</td>
 							<td>
 
 								<?php 
