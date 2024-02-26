@@ -154,28 +154,20 @@ class BillingController extends AppController {
    }
 
    public function copy_files(){
-        $folder = ROOT . DS . 'backup' . DS . date('Y-m-d');
-        
+    
         $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'app');
-        $foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'app');
-        // // once successful, copy update files from updates to app
-        // $updateFolder = new Folder();
-        // $updateFolder->copy(array(
-        //     'to' => $folder,
-        //     'from' => APP,
-        //     'recursive' => true
-        // ));
+        if($foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'app')){
+            echo "Copy failed. Please roll-back chanages from the backup folder.";
+            exit;
+        }
+        
 
         $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'lib');
-        $foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'lib');
-        // once successful, copy update files from updates to app
-        // $updateFolder = new Folder();
-        // $updateFolder->copy(array(
-        //     'to' => $folder,
-        //     'from' => ROOT . DS . 'lib',
-        //     'recursive' => true
-        // ));
-
+        if($foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'lib')){
+            echo "Copy failed. Please roll-back chanages from the backup folder.";
+            exit;
+        }
+        
         echo "<span class='text-success'><h4>Update Complete!</span></h4></br>";
     }
 
