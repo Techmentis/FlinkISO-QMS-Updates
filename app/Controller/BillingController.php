@@ -157,24 +157,24 @@ class BillingController extends AppController {
         $folder = ROOT . DS . 'backup' . DS . date('Y-m-d');
         
         $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'app');
-        $foldersTocopy = $downloadedFolder->copy(APP);
-        // once successful, copy update files from updates to app
-        $updateFolder = new Folder();
-        $updateFolder->copy(array(
-            'to' => $folder,
-            'from' => APP,
-            'recursive' => true
-        ));
+        $foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'app');
+        // // once successful, copy update files from updates to app
+        // $updateFolder = new Folder();
+        // $updateFolder->copy(array(
+        //     'to' => $folder,
+        //     'from' => APP,
+        //     'recursive' => true
+        // ));
 
         $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'lib');
         $foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'lib');
         // once successful, copy update files from updates to app
-        $updateFolder = new Folder();
-        $updateFolder->copy(array(
-            'to' => $folder,
-            'from' => ROOT . DS . 'lib',
-            'recursive' => true
-        ));
+        // $updateFolder = new Folder();
+        // $updateFolder->copy(array(
+        //     'to' => $folder,
+        //     'from' => ROOT . DS . 'lib',
+        //     'recursive' => true
+        // ));
 
         echo "<span class='text-success'><h4>Update Complete!</span></h4></br>";
     }
