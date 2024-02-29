@@ -123,6 +123,8 @@
 				echo "<div class='col-md-4'>".$this->Form->input('clause_id',array('class'=>'form-control', 'style'=>'','required')) . '</div>'; 		
 				echo "<div class='col-md-4'>".$this->Form->input('qc_document_category_id',array('class'=>'form-control', 'style'=>'','required')) . '</div>'; 
 
+				echo "<div class='col-md-12'>".$this->Form->input('additional_clauses',array('name'=>'data[QcDocument][additional_clauses][]', 'class'=>'form-control', 'multiple', 'options'=>$clauses, 'style'=>'','selected'=>json_decode($this->request->data['QcDocument']['additional_clauses']))) . '</div>'; 
+				
 				echo "</div><div class='row'>";
 				
 				echo "<div class='col-md-12'>".$this->Form->input('document_type',array('default'=>0, 'type'=>'radio', 'class'=>'','options'=>$customArray['documentTypes'])) . '</div>'; 
@@ -296,6 +298,7 @@
 	$("#QcDocumentStandardId").on('change',function(){
 		$.get("<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'];?>/get_child_select/parent_id:" + $("#QcDocumentStandardId").val() +"/model:Clause/field:standard_id", function(data) {
 			$("#QcDocumentClauseId").html(data).trigger("chosen:updated");
+			$("#QcDocumentAdditionalClauses").html(data).trigger("chosen:updated");
 		});
 
 		$.get("<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'];?>/get_child_select/parent_id:" + $("#QcDocumentStandardId").val() +"/model:QcDocumentCategory/field:standard_id", function(data) {

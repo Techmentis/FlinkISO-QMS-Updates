@@ -61,7 +61,13 @@ class QcDocumentsController extends AppController {
         $this->set('usernames', $this->_get_usernames());
         if ($this->action == 'view' || $this->action == 'edit') $approvals = $this->get_approvals();
         $qcDocumentCategories = $this->QcDocument->QcDocumentCategory->find('list', array('conditions' => array('QcDocumentCategory.publish' => 1, 'QcDocumentCategory.soft_delete' => 0)));
-        $clauses = $this->QcDocument->Clause->find('list', array('conditions' => array('Clause.publish' => 1, 'Clause.soft_delete' => 0)));
+
+        if($this->request->data['QcDocument']['standard_id'] && $this->request->data['QcDocument']['standard_id'] != -1){
+            $clauses = $this->QcDocument->Clause->find('list', array('conditions' => array('Clause.publish' => 1, 'Clause.soft_delete' => 0,'Clause.standard_id'=>$this->request->data['QcDocument']['standard_id'])));    
+        }else{
+            $clauses = $this->QcDocument->Clause->find('list', array('conditions' => array('Clause.publish' => 1, 'Clause.soft_delete' => 0)));    
+        }
+        
         $standards = $this->QcDocument->Standard->find('list', array('conditions' => array('Standard.publish' => 1, 'Standard.soft_delete' => 0)));
         $approvedBies = $preparedBies = $issuedBies = $issuingAuthorities = $this->QcDocument->IssuingAuthority->find('list', array('conditions' => array('IssuingAuthority.publish' => 1, 'IssuingAuthority.soft_delete' => 0)));
         $crs = $this->QcDocument->Cr->find('list', array('conditions' => array('Cr.publish' => 1, 'Cr.soft_delete' => 0)));
@@ -350,6 +356,7 @@ class QcDocumentsController extends AppController {
             $this->request->data['QcDocument']['user_id'] = json_encode($this->request->data['QcDocument']['user_id']);
             $this->request->data['QcDocument']['editors'] = json_encode($this->request->data['QcDocument']['editors']);
             $this->request->data['QcDocument']['linked_document_ids'] = json_encode($this->request->data['QcDocument']['linked_document_ids']);
+            $this->request->data['QcDocument']['additional_clauses'] = json_encode($this->request->data['QcDocument']['additional_clauses']);
             // $this->request->data[$this->modelClass]['publish'] = $this->request->data['Approval']['publish'];
             $this->request->data['QcDocument']['version'] = 1;
 
@@ -734,6 +741,7 @@ class QcDocumentsController extends AppController {
             $this->request->data['QcDocument']['user_id'] = json_encode($this->request->data['QcDocument']['user_id']);
             $this->request->data['QcDocument']['editors'] = json_encode($this->request->data['QcDocument']['editors']);
             $this->request->data['QcDocument']['linked_document_ids'] = json_encode($this->request->data['QcDocument']['linked_document_ids']);
+            $this->request->data['QcDocument']['additional_clauses'] = json_encode($this->request->data['QcDocument']['additional_clauses']);
             $this->request->data['QcDocument']['publish'] = $this->request->data['Approval']['QcDocument']['publish'];
 
             if($this->request->data['QcDocument']['select_all_branches'] == 1){

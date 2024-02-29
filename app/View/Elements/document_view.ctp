@@ -10,7 +10,18 @@
 		</td></tr>
 		<tr><td><?php echo __('Clause'); ?></td>
 		<td>
-			<?php echo $this->Html->link($qcDocument['Clause']['title'], array('controller' => 'clauses', 'action' => 'view', $qcDocument['Clause']['id'])); ?>
+			<?php echo $qcDocument['Clause']['title']; ?>
+			&nbsp;
+		</td></tr>
+		<tr><td><?php echo __('Additional Clauses'); ?></td>
+		<td>
+			<?php if($qcDocument['QcDocument']['additional_clauses']){
+				$additionalClauses = json_decode($qcDocument['QcDocument']['additional_clauses']);
+				foreach($additionalClauses as $additionalClause){
+					echo $clauses[$additionalClause].', ';	
+				}
+				
+			}?>
 			&nbsp;
 		</td></tr>		
 		<tr><td><?php echo __('Issue Number'); ?></td>

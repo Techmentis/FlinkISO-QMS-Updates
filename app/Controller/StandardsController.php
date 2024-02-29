@@ -70,7 +70,10 @@ class StandardsController extends AppController {
 
         if($this->Session->read('User.is_mr') == false){            
             $accessConditions = array(
-                'QcDocument.clause_id' => $id,
+                'OR'=>array(
+                    'QcDocument.additional_clauses LIKE' => '%'.$id.'%',
+                    'QcDocument.clause_id' => $id,
+                ),
                 'QcDocument.archived' => 0,                
                 'OR'=>array(
                     'QcDocument.prepared_by'=> $this->Session->read('User.employee_id'),
@@ -83,8 +86,14 @@ class StandardsController extends AppController {
                 )
             );
         }else{
-            $accessConditions = array('QcDocument.clause_id' => $id,'QcDocument.archived' => 0);
+            $accessConditions = array(
+                'OR'=>array(
+                    'QcDocument.additional_clauses LIKE' => '%'.$id.'%',
+                    'QcDocument.clause_id' => $id,
+                ),              
+                'QcDocument.archived' => 0);
         }
+
         $qcDocuments = $this->QcDocument->find('all', array('conditions' =>$accessConditions, 'recursive' => 0));        
         $this->set(compact('qcDocuments'));
     }

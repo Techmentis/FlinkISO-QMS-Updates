@@ -205,10 +205,12 @@
 								echo "<div class='col-md-4'>".$this->Form->input('standard_id',array('default'=>$document['QcDocument']['standard_id'], 'class'=>'select2-drop-mask', 'style'=>'')) . '</div>'; 
 								echo "<div class='col-md-4'>".$this->Form->input('clause_id',array('default'=>$document['QcDocument']['clause_id'],'class'=>'form-control', 'style'=>'')) . '</div>'; 		
 								echo "<div class='col-md-4'>".$this->Form->input('qc_document_category_id',array('default'=>$document['QcDocument']['qc_document_category_id'],'class'=>'form-control', 'style'=>'')) . '</div>'; 
+								echo "<div class='col-md-12'>".$this->Form->input('additional_clauses',array('name'=>'data[QcDocument][additional_clauses][]', 'class'=>'form-control', 'multiple', 'options'=>$clauses, 'style'=>'','selected'=>json_decode($document['QcDocument']['additional_clauses']))) . '</div>'; 
 							}else{
 								echo "<div class='col-md-4'>".$this->Form->input('standard_id',array('class'=>'select2-drop-mask', 'style'=>'')) . '</div>'; 
 								echo "<div class='col-md-4'>".$this->Form->input('clause_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 		
 								echo "<div class='col-md-4'>".$this->Form->input('qc_document_category_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
+								echo "<div class='col-md-12'>".$this->Form->input('additional_clauses',array('name'=>'data[QcDocument][additional_clauses][]', 'class'=>'form-control', 'multiple', 'options'=>$clauses, 'style'=>'')) . '</div>'; 
 							}
 							
 							echo "</div><div class='row'>";
@@ -461,6 +463,7 @@
 				$("#QcDocumentStandardId").on('change',function(){
 					$.get("<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'];?>/get_child_select/parent_id:" + $("#QcDocumentStandardId").val() +"/model:Clause/field:standard_id", function(data) {
 						$("#QcDocumentClauseId").html(data).trigger("chosen:updated");
+						$("#QcDocumentAdditionalClauses").html(data).trigger("chosen:updated");
 					});
 
 					$.get("<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'];?>/get_child_select/parent_id:" + $("#QcDocumentStandardId").val() +"/model:QcDocumentCategory/field:standard_id", function(data) {
