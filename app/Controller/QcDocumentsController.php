@@ -481,7 +481,7 @@ class QcDocumentsController extends AppController {
         $file_type = $data['QcDocument']['file_type'];
         $file_name = $data['QcDocument']['title'];
         $document_number = $data['QcDocument']['document_number'];
-        $document_version = $data['QcDocument']['revision_number'];
+        $document_version = (int)$data['QcDocument']['revision_number'];
         
         $title = $file_name;
         

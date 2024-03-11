@@ -183,7 +183,7 @@
 						echo "<div class='col-md-3'>".$this->Form->input('document_number',
 							array('class'=>'form-control','label'=>'Document Number','default'=>$document_number, 'onChange'=>'check_duplicates("n",this.value,this.id);')) . '</div>'; 
 						echo "<div class='col-md-3'>".$this->Form->input('revision_number',
-							array('class'=>'form-control','label'=>'Rivision/Version',)) . '</div>'; 			
+							array('class'=>'form-control','label'=>'Revision/Version',)) . '</div>'; 			
 							?>
 							<div class="col-md-12 text-danger" style="min-height: auto;" id="duplicate_errors"></div>
 						</div>			

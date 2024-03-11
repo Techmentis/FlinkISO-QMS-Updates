@@ -103,7 +103,7 @@
 				
 				echo "<div class='col-md-6 hide'>".$this->Form->hidden('title',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
 				echo "<div class='col-md-3 hide'>".$this->Form->hidden('document_number',array('class'=>'form-control','label'=>'Document Number')) . '</div>'; 
-				echo "<div class='col-md-3 hide'>".$this->Form->hidden('revision_number',array('class'=>'form-control','label'=>'Rivision/Version')) . '</div>'; 
+				echo "<div class='col-md-3 hide'>".$this->Form->hidden('revision_number',array('class'=>'form-control','label'=>'Revision/Version')) . '</div>'; 
 				
 				echo "</div><div class='row'>";
 				

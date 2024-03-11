@@ -23,6 +23,7 @@
 					<br /><small>By <?php echo $field;?></small>
 				<?php }else{ ?>
 					<?php echo $record['GraphPanel']['title'];?>
+					<br /><small>By <?php echo $field;?></small>
 				<?php } ?>
 			<small><?php echo $dateConditions[$record['GraphPanel']['date_condition']];?></small>			
 		</h4>

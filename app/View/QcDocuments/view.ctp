@@ -186,7 +186,7 @@
 								// $file = preg_replace('/\\s+/', '_', $file);        
 								// $file = preg_replace('/-*-/', '_', $file);
 								// $file = preg_replace('/_*_/', '_', $file);
-								$file = $this->requestAction(array('action'=>'clean_table_names',$file));
+								$file = $this->requestAction(array('action'=>'clean_table_names',$file));								
 								$file = $file.'.'.$file_type;
 
 								if(file_exists(WWW_ROOT . DS . 'files' . DS . $this->Session->read('User.company_id') . DS . 'qc_documents' . DS . $file_path . DS . $file)){

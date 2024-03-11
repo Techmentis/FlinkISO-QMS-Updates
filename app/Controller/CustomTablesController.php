@@ -157,9 +157,6 @@ class CustomTablesController extends AppController {
             }
         }
 
-        if ($this->request->params['named']['approval_id']) {
-            $this->redirect(array('action' => 'recreate', $id, 'approval_id' => $this->request->params['named']['approval_id']));
-        }
         $this->CustomTable->virtualFields = array('linked' => 'select count(*) from `custom_tables` where `custom_tables`.`custom_table_id` LIKE CustomTable.id ',);
         $options = array('conditions' => array('CustomTable.' . $this->CustomTable->primaryKey => $id));
         $customTable = $this->CustomTable->find('first', $options);
@@ -172,6 +169,15 @@ class CustomTablesController extends AppController {
             $this->set(array('showApprovals' => $this->_show_approvals()));
         }
 
+        if($customTable['CustomTable']['created_by'] != $this->Session->read('User.id')){
+            $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
+            $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
+        }
+
+        if ($this->request->params['named']['approval_id']) {
+            $this->redirect(array('action' => 'recreate', $id, 'approval_id' => $this->request->params['named']['approval_id']));
+        }
+        
 
         // check if file exists, if not, add from latest qc file
 

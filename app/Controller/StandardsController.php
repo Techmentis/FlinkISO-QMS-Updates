@@ -147,6 +147,7 @@ class StandardsController extends AppController {
                     $clause = explode(',', $clause);
                     if (ltrim(rtrim($clause[2]))) {
                         $data['Clause']['title'] = ltrim(rtrim($clause[2]));
+                        $data['Clause']['standard'] = $this->request->data['Standard']['name'];
                         $data['Clause']['standard_id'] = $this->Standard->id;
                         $data['Clause']['clause'] = ltrim(rtrim($clause[0]));
                         $data['Clause']['sub-clause'] = ltrim(rtrim($clause[1]));

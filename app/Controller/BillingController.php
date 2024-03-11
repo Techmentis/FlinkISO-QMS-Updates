@@ -132,7 +132,7 @@ class BillingController extends AppController {
 
         echo "<span class='text-info'><h4>Downloading sql updates....</span></h4><hr /></br>";
 
-        if(!@copy('https://www.flinkiso.com/flinkiso-updates/'.$update->number.'/updates.sql', WWW_ROOT. 'updates' . DS . 'update.sql'))
+        if(!@copy('https://www.flinkiso.com/flinkiso-updates/updates.sql', WWW_ROOT. 'updates' . DS . 'update.sql'))
         {
             $errors= error_get_last();
             $updatestr .= "<span class='text-danger'><strong>Sql failed error ". json_encode($errors['message'].'</strong></span></br>');

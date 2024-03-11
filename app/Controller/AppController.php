@@ -571,10 +571,10 @@ public function _save_approvals($record_id = null) {
 				$this->Approval->create();
 				$this->Approval->save($approvaldata,false);
 				$this->_sent_approval_email(
-					$approvaldata['Approval'][$model]['user_id'],
+					$approvaldata['Approval']['user_id'],
 					0,
-					$approvaldata['Approval'][$model]['comments'], 
-					$approvaldata['Approval'][$model]['model_name']
+					$approvaldata['Approval']['comments'], 
+					$approvaldata['Approval']['model_name']
 				);
 					// lock record
 				$model = $approvaldata['Approval']['model_name'];
@@ -604,6 +604,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 	if($message == 1)$subject = 'FlinkISO: Record Approved';
 	else $subject = 'FlinkISO: Approval';
+
 	if ($email) {
 		try {
 			App::uses('CakeEmail', 'Network/Email');

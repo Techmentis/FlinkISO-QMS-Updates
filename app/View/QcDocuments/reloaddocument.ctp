@@ -1,8 +1,9 @@
 
 <div class="row">
-	<div class="col-md-12">		<?php         
-		$key = $qcDocument['QcDocument']['file_key'];
-		$file_type = $qcDocument['QcDocument']['file_type'];
+	<div class="col-md-12">		
+        <?php         
+        $key = $qcDocument['QcDocument']['file_key'];
+        $file_type = $qcDocument['QcDocument']['file_type'];
         $file_name = $qcDocument['QcDocument']['title'];
         $document_number = $qcDocument['QcDocument']['document_number'];
         $document_version = $qcDocument['QcDocument']['revision_number'];
@@ -16,37 +17,23 @@
         if($file_type == 'xls' || $file_type == 'xlsx'){
             $documentType = 'cell';
         }
-
-        $editors = json_decode($this->request->data['QcDocument']['editors'],true);
-        if($editors){
-            if(in_array($this->Session->read('User.id'), $editors)){
-                $mode = 'edit'; 
-            }else{
-                $mode = 'view';
-            }    
+        
+        if($this->action == 'edit'){
+            $editors = json_decode($this->request->data['QcDocument']['editors'],true);
+            if($editors){
+                if(in_array($this->Session->read('User.id'), $editors)){
+                    $mode = 'edit'; 
+                }else{
+                    $mode = 'view';
+                }    
+            }
         }else{
-            if($this->action == 'edit'){
-                $mode = 'edit'; 
-            }else{
-                $mode = 'view';
-            }    
-        }
-        
-
-        
+            $mode = 'view';
+        }    
 
         $file_path = $qcDocument['QcDocument']['id'];
-
         $file = $document_number.'-'.$file_name.'-'.$document_version;
-        $file = ltrim(rtrim($file));
-        $file = str_replace('-', '_', $file);
-        $file = ltrim(rtrim(strtolower($file)));
-        $file = preg_replace('/[\@\.\;\" "-]+/', '_', $file);
-        $file = preg_replace('/  */', '_', $file);
-        $file = preg_replace('/\\s+/', '_', $file);        
-        $file = preg_replace('/-*-/', '_', $file);
-        $file = preg_replace('/_*_/', '_', $file);
-
+        $file = $this->requestAction(array('action'=>'clean_table_names',$file));
         $file = $file.'.'.$file_type;
 
         echo $this->element('onlyoffice',array(
