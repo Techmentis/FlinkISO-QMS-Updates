@@ -133,7 +133,7 @@ class UsersController extends AppController {
                             $EmailConfig->viewVars(array(
                                 'username' => $user['User']['username'],
                                 'password' => $user['User']['username'],
-                                'url' => Router::url('/', true).'/users/login',
+                                'url' => Router::url('/', true).'users/login',
                             ));
                             $EmailConfig->emailFormat('html');
                             $EmailConfig->send();
