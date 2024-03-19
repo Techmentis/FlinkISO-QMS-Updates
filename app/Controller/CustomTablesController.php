@@ -706,7 +706,7 @@ return true;
                             if($result['model']){
 
                                 $name = Inflector::Classify($table_name) . '.php';
-                                $folder = APP . DS . 'Model';
+                                $folder = APP . 'Model';
                                 $file = $folder . DS . $name;
                                 $this->_write_to_file($folder,$file,$result['model']);
                             }                            
@@ -714,7 +714,7 @@ return true;
                             $viewCode = json_decode($result['viewFile'],true);
 
                             chmod(APP . 'View', 0777);
-                            $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
+                            $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
                             $modelFolder = new Folder();
                             $modelFolder->create($folder);
                             chmod($folder, 0777);
@@ -986,7 +986,7 @@ return true;
                     
                     if($result['controller']){
                         $controller_file_name = Inflector::pluralize(Inflector::Classify($table_name)) . 'Controller.php';
-                        $folder = APP . DS . 'Controller';
+                        $folder = APP . 'Controller';
                         $file = $folder . DS . $controller_file_name;
                         $this->_write_to_file($folder,$file,$result['controller']);
                     }
@@ -994,7 +994,7 @@ return true;
                     if($result['model']){
 
                         $name = Inflector::Classify($table_name) . '.php';
-                        $folder = APP . DS . 'Model';
+                        $folder = APP . 'Model';
                         $file = $folder . DS . $name;
                         $this->_write_to_file($folder,$file,$result['model']);
                     }
@@ -1002,7 +1002,7 @@ return true;
                     // $viewCode = json_decode($result['viewFile'],true);
 
                     if($result['index']){
-                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
+                        $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
                         $modelFolder = new Folder();
                         $modelFolder->create($folder);
                         $file = $folder . DS . 'index.ctp';
@@ -1011,7 +1011,7 @@ return true;
 
                     $addCode = json_decode($result['formFile'],true);
                     
-                    $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
+                    $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
                     $modelFolder = new Folder();
                     $modelFolder->create($folder);
                     
@@ -1023,7 +1023,7 @@ return true;
                     if($result['parentModelFile']){
 
                         $name = Inflector::Classify($customTable['CustomTable']['table_name']) . '.php';
-                        $folder = APP . DS . 'Model';
+                        $folder = APP . 'Model';
                         $file = $folder . DS . $name;
                         $this->_write_to_file($folder,$file,$result['parentModelFile']);
                     }                    
@@ -1428,7 +1428,7 @@ return true;
                     if($result['model']){
 
                         $name = Inflector::Classify($table_name) . '.php';
-                        $folder = APP . DS . 'Model';
+                        $folder = APP . 'Model';
                         $file = $folder . DS . $name;
                         $this->_write_to_file($folder,$file,$result['model']);
                     }                            
@@ -1436,7 +1436,7 @@ return true;
                     $viewCode = json_decode($result['viewFile'],true);
 
                     chmod(APP . 'View', 0777);
-                    $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
+                    $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
                     $modelFolder = new Folder();
                     $modelFolder->create($folder);
                     chmod($folder, 0777);
@@ -1656,7 +1656,7 @@ return true;
                     
                     if($result['controller']){
                         $controller_file_name = Inflector::pluralize(Inflector::Classify($table_name)) . 'Controller.php';
-                        $folder = APP . DS . 'Controller';
+                        $folder = APP . 'Controller';
                         $file = $folder . DS . $controller_file_name;
                         $this->_write_to_file($folder,$file,$result['controller']);
                     }
@@ -1664,13 +1664,13 @@ return true;
                     if($result['model']){
 
                         $name = Inflector::Classify($table_name) . '.php';
-                        $folder = APP . DS . 'Model';
+                        $folder = APP . 'Model';
                         $file = $folder . DS . $name;
                         $this->_write_to_file($folder,$file,$result['model']);
                     }
 
                     $viewCode = json_decode($result['viewFile'],true);
-                    $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
+                    $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
                     $modelFolder = new Folder();
                     $modelFolder->create($folder);
 
@@ -1689,7 +1689,7 @@ return true;
                     if($result['parentModelFile']){
 
                         $name = Inflector::Classify($customTable['CustomTable']['table_name']) . '.php';
-                        $folder = APP . DS . 'Model';
+                        $folder = APP . 'Model';
                         $file = $folder . DS . $name;
                         $this->_write_to_file($folder,$file,$result['parentModelFile']);
                     }                    
@@ -2330,8 +2330,6 @@ return true;
                 $result = $this->curl('post','custom_forms','create_masters',$data);            
                 $result = json_decode($result,true);
 
-
-
                 if($result['error'] == 1 || $result == null){
                     echo "Something went wrong. Please try again";
                 }else{
@@ -2341,18 +2339,25 @@ return true;
                     $result = json_decode($result['response']['finalResult'],true);
 
                     $viewCode = json_decode($result['controller_model'],true);
+
+
+                    chmod(APP . 'View', 0777);
+                    $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));        
+                    $viewFolder = new Folder();
+                    $viewFolder->create($folder);
+                    chmod($folder, 0777);
                     
                     if($viewCode['controller']){
 
                         $controller_file_name = Inflector::pluralize(Inflector::Classify($table_name)) . 'Controller.php';
-                        $folder = APP . DS . 'Controller';
+                        $folder = APP . 'Controller';
                         $file = $folder . DS . $controller_file_name;                        
                         $this->_write_to_file($folder,$file,$viewCode['controller']);
                     }
 
                     if($viewCode['model']){
                         $name = Inflector::Classify($table_name) . '.php';
-                        $folder = APP . DS . 'Model';
+                        $folder = APP . 'Model';
                         $file = $folder . DS . $name;
                         $this->_write_to_file($folder,$file,$viewCode['model']);
                     }
@@ -2361,13 +2366,13 @@ return true;
                     $viewCode = json_decode($result['viewFile'],true);
 
                     if($viewCode['index']){
-                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name)); 
+                        $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));                         
                         $file = $folder . DS . 'index.ctp';                        
-                        $this->_write_to_file($folder,$file,$viewCode['index']);
+                        $this->_write_to_file($folder,$file,$viewCode['index']);                        
                     }                
 
                     if($viewCode['view']){    
-                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));
+                        $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));
                         $file = $folder . DS . 'view.ctp';                        
                         $this->_write_to_file($folder,$file,$viewCode['view']);
                     }
@@ -2375,14 +2380,14 @@ return true;
                     $addCode = json_decode($result['formFile'],true);
 
                     if($addCode['add']){
-                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));
+                        $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));
                         $file = $folder . DS . 'add.ctp';                        
                         $this->_write_to_file($folder,$file,$addCode['add']);
                         
                     }
 
                     if($addCode['edit']){
-                        $folder = APP . DS . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));                        
+                        $folder = APP . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name));                        
                         $file = $folder . DS . 'edit.ctp';                        
                         $this->_write_to_file($folder,$file,$addCode['edit']);
                         

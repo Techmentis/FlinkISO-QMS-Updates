@@ -72,25 +72,31 @@
 		$mode = 'edit';
 		$file_path = $this->request->data['Template']['id'];
 		$file = $file_name.'.'.$file_type;
-
+		
 		echo $this->element('onlyoffice',array(
-			'url'=>$url,						
-			'user_id'=>$user_id,				
+			'url'=>$url,
 			'placeholderid'=>$placeholderid,
 			'panel_title'=>'Document Viewer',
-			'mode'=>$mode,						
-			'path'=>$file_path,				
+			'mode'=>$mode,
+			'path'=>$file_path,
 			'file'=>$file,
 			'filetype'=>$file_type,
 			'documentType'=>$documentType,
 			'userid'=>$this->Session->read('User.id'),
 			'username'=>$this->Session->read('User.username'),
-			'preparedby'=>$this->Session->read('User.name'),
+			'preparedby'=>$masterListOfFormat['PreparedBy']['name'],
 			'filekey'=>$key,            
 			'record_id'=>$this->request->data['Template']['id'],
 			'company_id'=>$this->Session->read('User.company_id'),
 			'controller'=>$this->request->controller,
+			'last_saved' => $this->request->data['Template']['last_saved'],
+			'last_modified' => $this->request->data['Template']['modified'],
+			'version_keys' => $this->request->data['Template']['version_keys'],
+			'version' => $this->request->data['Template']['version'],
+			'versions' => $this->request->data['Template']['versions'],
+			'docid'=> $this->request->data['Template']['id']
 		));
+
 		?>
 	</div>
 </div>
