@@ -3668,9 +3668,9 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 						}
 					}				
-				}
+				}				
 			}else{
-
+				
 				$field_details = json_decode(base64_decode($this->request->params['named']['field_details']),true);
 				$findModel = base64_decode($field_details['field_label']);
 				$newModel = $this->$thisModel->belongsTo[$findModel]['className'];
@@ -3678,8 +3678,8 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				
 				$fieldSchema = $this->$newModel->schema();
 				$field_details = $fieldSchema[$fieldTobeChanged];
-				
-				if($fieldDetails['type'] == 'boolean'){
+
+				if($fieldDetails['type'] == 'boolean'){					
 					// if field is publish
 					if($fieldTobeChanged == 'publish'){
 						$this->set('type','checkbox');					
@@ -3689,16 +3689,16 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					// try and get values from model
 				}
 
-				if($field_details['type'] == 'integer' && $field_details['length'] == null){
+				if($field_details['type'] == 'integer' && ($field_details['length'] == null || $field_details['length'] == 1)){					
 					//check in $customArray in Model
 					$customArray = $this->$newModel->customArray;
 					if($customArray[Inflector::pluralize(Inflector::variable($fieldTobeChanged))]){
 						$values = $customArray[Inflector::pluralize(Inflector::variable($fieldTobeChanged))];
-						$this->set('values',$values);
+						$this->set('values',$values);						
 					}					
 				}
 
-				if($field_details['type'] == 'string' && $field_details['length'] == 36){
+				if($field_details['type'] == 'string' && $field_details['length'] == 36){					
 					foreach($this->$newModel->belongsTo as $m => $d){
 						if($d['foreignKey'] == $fieldTobeChanged){
 							$newClass = $d['className'];

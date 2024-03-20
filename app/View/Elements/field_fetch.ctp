@@ -2,7 +2,6 @@
 $field_details = json_decode(base64_decode($this->request->params['named']['field_details']),true);
 
 	// add rules
-
 	// mandatory
 	if($field_details['mandatory'] == 0){
 		$required = false;
@@ -29,7 +28,7 @@ $field_details = json_decode(base64_decode($this->request->params['named']['fiel
 	}else{
 
 		// render text fields
-		if(($fieldDetails['type'] == 'string' || $fieldDetails['type'] == 'integer') && ($fieldDetails['length'] != 36 && $fieldDetails['length'] != null)){	
+		if(($fieldDetails['type'] == 'string' || $fieldDetails['type'] == 'integer') && ($fieldDetails['length'] != 36 && $fieldDetails['length'] != 1)){	
 			echo '<label>'.Inflector::humanize(Inflector::underscore($selectedModelName)).'</label>';	
 			echo $this->Form->input('belongsTos.'.$model.'.'.$fieldTobeChanged,array(
 			'default'=>$record_value,
@@ -49,7 +48,7 @@ $field_details = json_decode(base64_decode($this->request->params['named']['fiel
 
 		}
 
-		if($fieldDetails['type'] == 'integer' && $fieldDetails['length'] == null ){
+		if($fieldDetails['type'] == 'integer' && ($fieldDetails['length'] == null  || $fieldDetails['length'] == 1 )){
 			// load radio
 			echo '<label>'.Inflector::humanize(Inflector::underscore($selectedModelName)).'</label>';		
 			echo $this->Form->input('belongsTos.'.$model.'.'.$fieldTobeChanged,array(
