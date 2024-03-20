@@ -254,7 +254,7 @@ class AppController extends Controller {
 					'allow_access_user'=>$this->Session->read('User.id')
 				)); 
 			}else{
-				$skip = array('approval_comments','approvals','standards'); 
+				$skip = array('approval_comments','approvals','standards','processes'); 
 				if(!in_array($this->request->controller,$skip))$this->_check_access();
 			} 
 			$skip_track_history = array('check_invoice_dateTue','dir_size','advance_search','assigned_tasks','index','jwtencode','field_fetch','check_document','code_input_main');
@@ -996,6 +996,17 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 	
 	public function delete() {
+
+		if($this->request->controller == 'processes'){
+			$options = array('conditions' => array('Process.' . $this->Process->primaryKey => $id));
+	        $process = $this->Process->find('first', $options);
+
+	        if($this->Session->read('User.is_mr') == false && $process['Process']['created_by'] != $this->Session->read('User.id')){
+	            $this->Session->setFlash(__('You can not delete this process.'));
+	            $this->redirect(array('action' => 'index', 'process_id' => $this->request->params['named']['process_id'], 'custom_table_id' => $this->request->params['named']['custom_table_id']));
+	        }
+		}		
+
 		if ($this->request->controller != 'custom_tables') {
 			if ($this->request->is('post') || $this->request->is('put')) {
 				$model = $this->modelClass;

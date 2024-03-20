@@ -59,8 +59,7 @@ class StandardsController extends AppController {
         }else{
             $accessConditions = array();
         }
-
-
+        
         $sys = $this->CustomTable->find('all', array('recursive' => 1, 'conditions' => array($accessConditions, 'QcDocument.standard_id' => $standard_id, 'QcDocument.clause_id' => $id)));
         $this->set('tables', $sys);
         
@@ -68,12 +67,8 @@ class StandardsController extends AppController {
         // get master list of format
         $this->loadModel('QcDocument');
 
-        if($this->Session->read('User.is_mr') == false){            
+        if($this->Session->read('User.is_mr') == false){                    
             $accessConditions = array(
-                'OR'=>array(
-                    'QcDocument.additional_clauses LIKE' => '%'.$id.'%',
-                    'QcDocument.clause_id' => $id,
-                ),
                 'QcDocument.archived' => 0,                
                 'OR'=>array(
                     'QcDocument.prepared_by'=> $this->Session->read('User.employee_id'),
@@ -83,7 +78,11 @@ class StandardsController extends AppController {
                     'QcDocument.departments LIKE' => '%'.$this->Session->read('User.department_id').'%',
                     // 'QcDocument.designations LIKE' => '%'.$this->Session->read('User.designation_id').'%',
                     'QcDocument.user_id LIKE' => '%'.$this->Session->read('User.id').'%',
-                )
+                ),
+                'OR'=>array(
+                    'QcDocument.additional_clauses LIKE' => '%'.$id.'%',
+                    'QcDocument.clause_id' => $id,
+                ),
             );
         }else{
             $accessConditions = array(
@@ -94,6 +93,7 @@ class StandardsController extends AppController {
                 'QcDocument.archived' => 0);
         }
 
+        
         $qcDocuments = $this->QcDocument->find('all', array('conditions' =>$accessConditions, 'recursive' => 0));        
         $this->set(compact('qcDocuments'));
     }

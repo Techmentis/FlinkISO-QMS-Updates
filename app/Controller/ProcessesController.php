@@ -54,7 +54,7 @@ class ProcessesController extends AppController {
             'active_tables' => 'select count(*) from `custom_tables` where `custom_tables`.`publish` = 1 AND `custom_tables`.`table_locked` = 0 AND `custom_tables`.`process_id` LIKE Process.id'
         );
 
-        $conditions = $this->_check_request();
+        // $conditions = $this->_check_request();
         $this->paginate = array('order' => array('Process.sr_no' => 'DESC'), 'conditions' => array($conditions));
         $this->Process->recursive = 0;
         $this->set('processes', $this->paginate());
@@ -358,7 +358,8 @@ class ProcessesController extends AppController {
     public function edit($id = null) {
         if (!$this->Process->exists($id)) {
             throw new NotFoundException(__('Invalid Process'));
-        }
+        }        
+
         if ($this->_show_approvals()) {
             $this->set(array('showApprovals' => $this->_show_approvals()));
         }
@@ -416,6 +417,11 @@ class ProcessesController extends AppController {
         } else {
             $options = array('conditions' => array('Process.' . $this->Process->primaryKey => $id));
             $this->request->data = $this->Process->find('first', $options);
+
+            if($this->Session->read('User.is_mr') == false && $this->request->data['Process']['created_by'] != $this->Session->read('User.id')){
+                $this->Session->setFlash(__('You can not edit this process.'));
+                $this->redirect(array('action' => 'index', 'process_id' => $this->request->params['named']['process_id'], 'custom_table_id' => $this->request->params['named']['custom_table_id']));
+            }
         }
         $this->_commons($this->Session->read('User.id'));
     }
