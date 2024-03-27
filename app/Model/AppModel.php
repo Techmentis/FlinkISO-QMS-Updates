@@ -90,5 +90,17 @@ class AppModel extends Model
                 if($this->id)$folder->delete();
             }
         }
+
+        if($this->alias == 'CustomTable'){
+            // delete graph panels
+            $this->loadmodel('GraphPanel');
+            $this->GraphPanel->deleteAll(array('conditions'=>array('GraphPanel.custom_table_id'=>$this->id)));
+        }
+
+        if($this->alias == 'Standard'){
+            // delete clauses
+            $this->loadmodel('Clause');
+            $this->GraphPanel->deleteAll(array('conditions'=>array('Clause.standard_id'=>$this->id)));
+        }
     }    
 }

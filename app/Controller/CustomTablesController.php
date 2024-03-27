@@ -223,7 +223,7 @@ class CustomTablesController extends AppController {
 
     }
     public function edit($id = null) {
-        if($this->Session->read('User.is_mt') == false){
+        if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -885,7 +885,7 @@ return true;
      */
     public function add_child() {
 
-        if($this->Session->read('User.is_mt') == false){
+        if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -1107,7 +1107,7 @@ return true;
         $this->set('fields', array_keys($this->$model->schema()));
     }
     public function delete($id = null) {
-        if($this->Session->read('User.is_mt') == false){
+        if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -1554,7 +1554,7 @@ return true;
         return $existingHasManies;
     }
     public function recreate_child($id = null) {
-        if($this->Session->read('User.is_mt') == false){
+        if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -1950,7 +1950,7 @@ return true;
         }
     }
     public function publish($id = null) {
-        if($this->Session->read('User.is_mt') == false){
+        if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -1979,7 +1979,7 @@ return true;
         }
     }
     public function hold($id = null) {
-        if($this->Session->read('User.is_mt') == false){
+        if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -2008,7 +2008,7 @@ return true;
         }
     }
     public function delete_child($id = null) {
-        if($this->Session->read('User.is_mt') == false){
+        if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -2085,7 +2085,7 @@ return true;
         }        
     }
     public function update_field() {
-        if($this->Session->read('User.is_mt') == false){
+        if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -2176,7 +2176,7 @@ return true;
         }
     }
     public function update_child_field() {
-        if($this->Session->read('User.is_mt') == false){
+        if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }

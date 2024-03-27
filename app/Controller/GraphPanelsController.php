@@ -73,83 +73,85 @@ class GraphPanelsController extends AppController {
 	public function graph($id = null){		
 		$record = $this->GraphPanel->find('first',array('conditions'=>array('GraphPanel.id'=>$id), 'recursive'=>0));				
 		$tableName = Inflector::classify($record['CustomTable']['table_name']);
-		$this->loadModel($tableName);
-		$fields = json_decode($record['CustomTable']['fields'],true);
-		$virtualFields = array();
-		foreach($fields as $field){			
-			$foundFields = null;
-			if($field['field_name'] == $record['GraphPanel']['field_name'] && $field['data_type'] == 'radio' && $field['linked_to'] == -1){				
-				$foundFields = explode(',',$field['csvoptions']);
-				$cnt = 0;				
-				foreach($foundFields as $foundField){
-					$virtualFields[$foundField] = 'select count(*) from `' . $record['CustomTable']['table_name'] . '` where `'.$record['CustomTable']['table_name'].'`.`'.$field['field_name'].'` = '.$cnt;
-					$vfields[] = $tableName.'.'.$foundField;
-					$cnt++;
-				}
-				
-			}elseif($field['field_name'] == $record['GraphPanel']['field_name'] && !empty($field['linked_to']) &&  $field['linked_to'] != -1 && $field['linked_to'] != 'Employees'){				
+		if($tableName){			
+			$this->loadModel($tableName);
+			$fields = json_decode($record['CustomTable']['fields'],true);
+			$virtualFields = array();
+			foreach($fields as $field){			
 				$foundFields = null;
-				// load data from linkedto table / display field
-				$linkedToModel = Inflector::classify($field['linked_to']);
+				if($field['field_name'] == $record['GraphPanel']['field_name'] && $field['data_type'] == 'radio' && $field['linked_to'] == -1){				
+					$foundFields = explode(',',$field['csvoptions']);
+					$cnt = 0;				
+					foreach($foundFields as $foundField){
+						$virtualFields[$foundField] = 'select count(*) from `' . $record['CustomTable']['table_name'] . '` where `'.$record['CustomTable']['table_name'].'`.`'.$field['field_name'].'` = '.$cnt;
+						$vfields[] = $tableName.'.'.$foundField;
+						$cnt++;
+					}
+					
+				}elseif($field['field_name'] == $record['GraphPanel']['field_name'] && !empty($field['linked_to']) &&  $field['linked_to'] != -1 && $field['linked_to'] != 'Employees'){				
+					$foundFields = null;
+					// load data from linkedto table / display field
+					$linkedToModel = Inflector::classify($field['linked_to']);
+					try{
+						$this->loadModel($linkedToModel);
+						$recs = $this->$linkedToModel->find('list',array('conditions'=>array($linkedToModel.'.publish'=>1)));	
+					}catch(Exception $e){
+
+					}
+					foreach($recs as $id => $display){
+						if($record['GraphPanel']['data_type'] == 0){
+							$virtualFields[trim($display)] = 'select count(*) from `' . $record['CustomTable']['table_name'] . '` where `'.$record['CustomTable']['table_name'].'`.`'.$field['field_name'].'` = "' .$id .'"';
+
+							$vfields[] = $tableName.'.'.$display;
+							$cnt++;					
+						}
+
+						if($record['GraphPanel']['data_type'] == 1){
+							$virtualFields[trim($display)] = 'select SUM(`'.$record['GraphPanel']['value_field'].'`)  as `sumfield` from `' . $record['CustomTable']['table_name'] . '` where `'.$record['CustomTable']['table_name'].'`.`'.$field['field_name'].'` = "' .$id .'"';						
+							$vfields[] = $tableName.'.'.trim($display);
+							$cnt++;					
+						}
+
+						if($record['GraphPanel']['data_type'] == 2){
+							$virtualFields[trim($display)] = 'select AVG(`'.$record['GraphPanel']['value_field'].'`)  as `sumfield` from `' . $record['CustomTable']['table_name'] . '` where `'.$record['CustomTable']['table_name'].'`.`'.$field['field_name'].'` = "' .$id .'"';						
+							$vfields[] = $tableName.'.'.trim($display);
+							$cnt++;	
+						}					
+					}
+				}
+			}
+			
+			
+			if($vfields){
+				$this->$tableName->virtualFields = 	$virtualFields;
+
 				try{
-					$this->loadModel($linkedToModel);
-					$recs = $this->$linkedToModel->find('list',array('conditions'=>array($linkedToModel.'.publish'=>1)));	
+					$tableDetails = $this->$tableName->find('first',array('recursive'=>-1,'fields'=>$vfields));				
 				}catch(Exception $e){
-
+					
 				}
-				foreach($recs as $id => $display){
-					if($record['GraphPanel']['data_type'] == 0){
-						$virtualFields[trim($display)] = 'select count(*) from `' . $record['CustomTable']['table_name'] . '` where `'.$record['CustomTable']['table_name'].'`.`'.$field['field_name'].'` = "' .$id .'"';
-
-						$vfields[] = $tableName.'.'.$display;
-						$cnt++;					
-					}
-
-					if($record['GraphPanel']['data_type'] == 1){
-						$virtualFields[trim($display)] = 'select SUM(`'.$record['GraphPanel']['value_field'].'`)  as `sumfield` from `' . $record['CustomTable']['table_name'] . '` where `'.$record['CustomTable']['table_name'].'`.`'.$field['field_name'].'` = "' .$id .'"';						
-						$vfields[] = $tableName.'.'.trim($display);
-						$cnt++;					
-					}
-
-					if($record['GraphPanel']['data_type'] == 2){
-						$virtualFields[trim($display)] = 'select AVG(`'.$record['GraphPanel']['value_field'].'`)  as `sumfield` from `' . $record['CustomTable']['table_name'] . '` where `'.$record['CustomTable']['table_name'].'`.`'.$field['field_name'].'` = "' .$id .'"';						
-						$vfields[] = $tableName.'.'.trim($display);
-						$cnt++;	
-					}					
-				}
-			}
-		}
-		
-		
-		if($vfields){
-			$this->$tableName->virtualFields = 	$virtualFields;
-
-			try{
-				$tableDetails = $this->$tableName->find('first',array('recursive'=>-1,'fields'=>$vfields));				
-			}catch(Exception $e){
 				
+				if($tableDetails){
+					$x = 0;
+					foreach($tableDetails[$tableName] as $label => $data ){
+						if($data == null)$data = 0;
+						$result['labels'][$x] = $label;
+						$result['data'][$x] = $data;
+						$result['color'][$x] = "#".substr(md5(rand()), 4, 6);
+						$x++;
+					}
+
+					$this->set('table',$record['CustomTable']['name']);
+					$this->set('field',Inflector::humanize($record['GraphPanel']['field_name']));
+					$this->set('result',$result);
+					$this->set('record',$record);
+				}	
+
+				
+
+				$this->set('graphTypes',$this->GraphPanel->customArray['graphTypes']);
+				$this->set('dateConditions',$this->GraphPanel->customArray['dateConditions']);
 			}
-			
-			if($tableDetails){
-				$x = 0;
-				foreach($tableDetails[$tableName] as $label => $data ){
-					if($data == null)$data = 0;
-					$result['labels'][$x] = $label;
-					$result['data'][$x] = $data;
-					$result['color'][$x] = "#".substr(md5(rand()), 4, 6);
-					$x++;
-				}
-
-				$this->set('table',$record['CustomTable']['name']);
-				$this->set('field',Inflector::humanize($record['GraphPanel']['field_name']));
-				$this->set('result',$result);
-				$this->set('record',$record);
-			}	
-
-			
-
-			$this->set('graphTypes',$this->GraphPanel->customArray['graphTypes']);
-			$this->set('dateConditions',$this->GraphPanel->customArray['dateConditions']);
 		}		
 	}
 
