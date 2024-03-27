@@ -224,6 +224,7 @@ class StandardsController extends AppController {
                 if($clauses){
                     foreach($clauses as $clause){
                         $this->Standard->Clause->create();
+                        $clause['Clause']['standard'] = $this->request->data['Standard']['name'];
                         $clause['Clause']['publish'] = 1;
                         $clause['Clause']['soft_delete'] = 0;
                         $this->Standard->Clause->save($clause,false);

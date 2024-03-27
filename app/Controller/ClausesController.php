@@ -31,6 +31,10 @@ class ClausesController extends AppController {
         $this->set('clauses', $this->paginate());
         $this->_get_count();
     }
+
+    public function _commons($creator = null){
+
+    }
     /**
      * view method
      *
@@ -61,6 +65,8 @@ class ClausesController extends AppController {
             $this->request->data[$this->modelClass]['publish'] = $this->request->data['Approval'][$this->modelClass]['publish'];
             $this->request->data['Clause']['system_table_id'] = $this->_get_system_table_id();
             $this->Clause->create();
+            $standard = $this->Clause->Standard->find('first',array('conditions'=>array('Standard.id'=>$this->request->data['Clause']['standard_id']),'recursive'=>-1));
+            $this->request->data['Clause']['standard'] = $standard['Standard']['name'];
             if ($this->Clause->save($this->request->data)) {
                 if ($this->_show_approvals()) {
                     $this->loadModel('Approval');
@@ -112,6 +118,8 @@ class ClausesController extends AppController {
             
             $this->request->data['Clause']['system_table_id'] = $this->_get_system_table_id();
             $this->request->data[$this->modelClass]['publish'] = $this->request->data['Approval'][$this->modelClass]['publish'];
+            $standard = $this->Clause->Standard->find('first',array('conditions'=>array('Standard.id'=>$this->request->data['Clause']['standard_id']),'recursive'=>-1));
+            $this->request->data['Clause']['standard'] = $standard['Standard']['name'];
             if ($this->Clause->save($this->request->data)) {
                 if ($this->_show_approvals()) $this->_save_approvals();
                 if ($this->_show_evidence() == true) $this->redirect(array('action' => 'view', $id));

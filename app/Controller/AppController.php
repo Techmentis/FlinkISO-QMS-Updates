@@ -1341,7 +1341,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		$model = $this->modelClass;
 		$this->_pre_search();
 		$fields = array_keys($this->$model->schema());
-		$belongsToCondition = array();
+		
 		$x = 0;
 
 		$search_keys = array('id', 'name','title');
@@ -1351,21 +1351,20 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 		$srcs = explode(' ',$this->request->params['named']['search']);
 		$conditions = array();
-		foreach($srcs as $s){
-
+		
+		foreach($srcs as $s){			
 			$conditions[] = array('LOWER('.$model.'.'.$src .') LIKE ' => '%'.strtolower($s).'%');
-
 			foreach ($search_keys as $keys) {
 				if(in_array($keys, $fields)){
-					$field_condition = array('LOWER('.$model.'.'.$keys.') LIKE' => '%'.strtolower($s).'%');
-					$conditions[] = array('OR'=>array($conditions,$belongsToCondition, $field_condition));
+					$field_condition[] = array('LOWER('.$model.'.'.$keys.') LIKE' => '%'.strtolower($s).'%');
 				}
 			} 
 		}
-
-		$this->paginate = array('limit'=>25, 'order' => array($model.'.id' => 'DESC'), 'conditions' => array($conditions));
-		$this->$model->recursive = 0;
-		$this->set(Inflector::variable(Inflector::tableize($model)), $this->paginate()); 
+		if($field_condition)$conditions = array('OR'=>array_merge($conditions,$field_condition));					
+			$this->paginate = array('limit'=>25, 'order' => array($model.'.id' => 'DESC'), 'conditions' => array($conditions));
+			$this->$model->recursive = 0;			
+			$this->set(Inflector::variable(Inflector::tableize($model)), $this->paginate()); 
+			
 		$this->_commons(); 
 		$this->render('index');
 	}
