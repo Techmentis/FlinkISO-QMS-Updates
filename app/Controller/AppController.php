@@ -2753,7 +2753,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				// get hasMany
 
 				$hasManies = $this->$modelName->hasMany;
-
 				foreach($hasManies as $model => $fields){
 
 					if($this->request->data[$model]){
@@ -2762,7 +2761,15 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						unset($this->request->data[$model]['count']);
 						unset($this->request->data[$model]['file_id']);
 						unset($this->request->data[$model]['file_key']);
-						foreach($this->request->data[$model] as $cdata){
+						
+						foreach($this->request->data[$model] as $cdata_old){
+							foreach($cdata_old as $key => $value){
+								if(is_array($value)){
+									$cdata[$key] = json_encode($value);
+								}else{
+									$cdata[$key] = $value;
+								}	
+							}
 							$this->$model->create();
 							$cdata['parent_id'] = $this->$modelName->id;
 							$cdata['created'] = date('Y-m-d H:i:s');
@@ -2781,7 +2788,8 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						}
 					}
 				}
-
+				
+				
 				if ($this->_show_approvals()) $this->_save_approvals($this->$modelName->id);
 				$this->Session->setFlash(__('Record has been saved'));
 				try{
