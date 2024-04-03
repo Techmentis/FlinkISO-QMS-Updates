@@ -840,7 +840,7 @@ class QcDocumentsController extends AppController {
             }
         }
         $this->_commons($this->request->data['QcDocument']['created_by']);
-        $this->_doc_access($this->request->data,$access);
+        if($this->Session->read('User.id') != $this->request->data['QcDocument']['created_by'])$this->_doc_access($this->request->data,$access);
     }
     /**
      * approve method
