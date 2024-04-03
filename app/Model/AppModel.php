@@ -101,6 +101,9 @@ class AppModel extends Model
             // delete clauses
             $this->loadmodel('Clause');
             $this->GraphPanel->deleteAll(array('conditions'=>array('Clause.standard_id'=>$this->id)));
+
+            $this->loadmodel('Clause');
+            $this->GraphPanel->deleteAll(array('conditions'=>array('Clause.standard_id'=>$this->id)));
         }
     }    
 }

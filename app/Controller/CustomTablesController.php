@@ -331,11 +331,11 @@ class CustomTablesController extends AppController {
     public function _add_new_table($table_name = null,$defaultfield = null,$sqld = null,$fields = null){
         
         foreach($fields as $field){
-            if($field['default_field'] != 1)$newFields[] = $field;
+            // if($field['default_field'] != 1)
+            $newFields[] = $field;
         }
 
         $fields = $newFields;
-
 
         $sql = "CREATE TABLE IF NOT EXISTS `" . $table_name . "` ( ";
         $sql .= "`id` varchar(36) NOT NULL ,";
@@ -1325,8 +1325,7 @@ return true;
             $newFields = array();
             foreach($this->request->data['CustomTableFields'] as $fields){
                 if($fields['drop'] == 1){
-                    $toDrop[] = $fields;
-                    $sqlresult = $this->_add_new_table($table_name,$defaultfield,null,$toDrop);
+                    $toDrop[] = $fields;                    
                     unset($fields);
                 }else{
                     if($fields['who_can_edit'])$fields['who_can_edit'] = json_encode($fields['who_can_edit']);
@@ -1341,6 +1340,8 @@ return true;
                     $belongsTo[$fields['field_name']] = $fields['linked_to'];
                 }
             }
+
+            $sqlresult = $this->_add_new_table($table_name,$defaultfield,null,$toDrop);
             
             if(is_array($newFields)){
                 $this->request->data['CustomTable']['fields'] = json_encode($newFields);    
@@ -1580,24 +1581,32 @@ return true;
             $fieldTypes = $this->CustomTable->customArray['fieldTypes'];
             $table_name = $this->request->data['CustomTable']['table_name'];
 
-            $newFields = array();            
+
+            $newFields = array();
             foreach($this->request->data['CustomTableFields'] as $fields){
                 if($fields['drop'] == 1){
+                    $toDrop[] = $fields;                    
                     unset($fields);
                 }else{
-                    $fields['who_can_edit'] = json_encode($fields['who_can_edit']);
-                    $fields['show_comments'] = base64_encode($fields['show_comments']);
-                    $fields['field_label'] = Inflector::humanize($this->_clean_table_names($fields['field_label']));
-                    // $fields['formula'] = base64_encode($fields['formula']);
-                    $fields['field_label'] = base64_encode($fields['field_label']);
-                    $newFields[] = $fields;
-                }                
-            }            
+                    if($fields['who_can_edit'])$fields['who_can_edit'] = json_encode($fields['who_can_edit']);
+                    if($fields['show_comments'])$fields['show_comments'] = base64_encode($fields['show_comments']);
+                    $fields['field_name'] = $this->_clean_table_names($fields['field_name']);
+                    // $fields['field_label'] = Inflector::humanize($this->_clean_table_names($fields['field_label']));
+                    if($fields['field_label'])$fields['field_label'] = base64_encode($fields['field_label']);
+                    $newFields[] = $fields;                    
+                }
 
+                if($fields['display_type'] == 3 || $fields['display_type'] == 4){
+                    $belongsTo[$fields['field_name']] = $fields['linked_to'];
+                }
+            }
+
+            $sqlresult = $this->_add_new_table($table_name,$defaultfield,null,$toDrop);
+            
             if(is_array($newFields)){
                 $this->request->data['CustomTable']['fields'] = json_encode($newFields);    
                 $this->request->data['CustomTableFields'] = $newFields;
-            }            
+            }           
             
             $this->request->data['CustomTable']['system_table_id'] = $this->_get_system_table_id();
             $this->request->data['CustomTable']['password'] = Security::hash($this->request->data['CustomTable']['password'], 'md5', true);
@@ -1610,6 +1619,8 @@ return true;
             $hasManyExisting = $this->$model->hasMany;
             
             $hasMany[] = array('table_name' => $this->request->data['CustomTable']['table_name'], 'friendly_name' => $this->request->data['CustomTable']['name'], 'table_version' => $this->request->data['CustomTable']['table_version']);
+
+    
 
             
             $this->CustomTable->create();
