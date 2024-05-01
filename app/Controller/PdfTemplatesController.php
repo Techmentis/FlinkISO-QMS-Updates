@@ -163,12 +163,14 @@ class PdfTemplatesController extends AppController {
             if($this->request->params['pass'][0]){
                 
                 if($this->request->params['pass'][0] == 'HeaderTemplate'){
+
                     $qcDocument['QcDocument']['title'] = 'PDF Header';
                     $this->set('qcDocument',$qcDocument);
+
                     $headerFile = Configure::read('files') . DS . 'pdf_template' . DS . 'header/template.docx';
                     if(file_exists($headerFile)){
                         $this->set('headerFile',true);
-                    }else{                        
+                    }else{
                         $header = $this->_generate_header();                 
                     }
 
@@ -758,7 +760,7 @@ class PdfTemplatesController extends AppController {
                     </tr>
                 </table>
         ";  
-        $table .= "</table></body></html>"; 
+        $table .= "</table></body></html>";         
         $path = Configure::read('files') . DS . 'pdf_template' . DS . 'header';
         $headerFolder = new Folder();
         $headerFolder->create($path,0777);

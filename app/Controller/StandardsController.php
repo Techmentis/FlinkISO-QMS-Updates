@@ -60,7 +60,15 @@ class StandardsController extends AppController {
             $accessConditions = array();
         }
         
-        $sys = $this->CustomTable->find('all', array('recursive' => 1, 'conditions' => array($accessConditions, 'QcDocument.standard_id' => $standard_id, 'QcDocument.clause_id' => $id)));
+        $sys = $this->CustomTable->find('all', array('recursive' => 1, 'conditions' => array(
+            $accessConditions, 
+            'QcDocument.standard_id' => $standard_id, 
+                'OR'=>array(
+                    'QcDocument.additional_clauses LIKE' => '%'.$id.'%',
+                    'QcDocument.clause_id' => $id,
+                )
+            )
+        ));
         $this->set('tables', $sys);
         
         $accessConditions = array();

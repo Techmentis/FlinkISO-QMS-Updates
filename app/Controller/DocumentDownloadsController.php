@@ -359,15 +359,16 @@ public function download(){
 	}
 
 	$fields = array(
+		'$qcDocument["QcDocument"]["name"]'=>$qcDocument["QcDocument"]["name"],
         '$qcDocument["QcDocument"]["title"]'=>$qcDocument["QcDocument"]["title"],
         '$qcDocument["QcDocument"]["document_number"]'=>$qcDocument["QcDocument"]["document_number"],
         '$qcDocument["QcDocument"]["issue_number"]'=>$qcDocument["QcDocument"]["issue_number"],
-        '$qcDocument["QcDocument"]["date_of_next_issue"]'=>$qcDocument["QcDocument"]["date_of_next_issue"],
-        '$qcDocument["QcDocument"]["date_of_issue"]'=>$qcDocument["QcDocument"]["date_of_issue"],
-        '$qcDocument["QcDocument"]["effective_from_date"]'=>$qcDocument["QcDocument"]["effective_from_date"],
+        '$qcDocument["QcDocument"]["date_of_next_issue"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["date_of_next_issue"]))),
+        '$qcDocument["QcDocument"]["date_of_issue"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["date_of_issue"]))),
+        '$qcDocument["QcDocument"]["effective_from_date"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["effective_from_date"]))),
         '$qcDocument["QcDocument"]["revision_number"]'=>$qcDocument["QcDocument"]["revision_number"],
-        '$qcDocument["QcDocument"]["date_of_review"]'=>$qcDocument["QcDocument"]["date_of_review"],
-        '$qcDocument["QcDocument"]["revision_date"]'=>$qcDocument["QcDocument"]["revision_date"],
+        '$qcDocument["QcDocument"]["date_of_review"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["date_of_review"]))),
+        '$qcDocument["QcDocument"]["revision_date"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["revision_date"]))),
         '$qcDocument["Standard"]["name"]'=>$qcDocument["Standard"]["name"],
         '$qcDocument["Clause"]["name"]'=>$qcDocument["Clause"]["name"],
         '$qcDocument["Schedule"]["name"]'=>$qcDocument["Schedule"]["name"],
@@ -393,26 +394,27 @@ public function _generate_header($qcDocument = null, $fontsize = null,$fontface 
 		$table = fread($filetoread,filesize($headerFile));
 		fclose($filetoread);
 
-        $fields = array(
-            '$qcDocument["QcDocument"]["title"]'=>$qcDocument["QcDocument"]["title"],
-            '$qcDocument["QcDocument"]["document_number"]'=>$qcDocument["QcDocument"]["document_number"],
-            '$qcDocument["QcDocument"]["issue_number"]'=>$qcDocument["QcDocument"]["issue_number"],
-            '$qcDocument["QcDocument"]["date_of_next_issue"]'=>$qcDocument["QcDocument"]["date_of_next_issue"],
-            '$qcDocument["QcDocument"]["date_of_issue"]'=>$qcDocument["QcDocument"]["date_of_issue"],
-            '$qcDocument["QcDocument"]["effective_from_date"]'=>$qcDocument["QcDocument"]["effective_from_date"],
-            '$qcDocument["QcDocument"]["revision_number"]'=>$qcDocument["QcDocument"]["revision_number"],
-            '$qcDocument["QcDocument"]["date_of_review"]'=>$qcDocument["QcDocument"]["date_of_review"],
-            '$qcDocument["QcDocument"]["revision_date"]'=>$qcDocument["QcDocument"]["revision_date"],
-            '$qcDocument["Standard"]["name"]'=>$qcDocument["Standard"]["name"],
-            '$qcDocument["Clause"]["name"]'=>$qcDocument["Clause"]["name"],
-            '$qcDocument["Schedule"]["name"]'=>$qcDocument["Schedule"]["name"],
-            '$qcDocument["IssuedBy"]["name"]'=>$qcDocument["IssuedBy"]["name"],
-            '$qcDocument["PreparedBy"]["name"]'=>$qcDocument["PreparedBy"]["name"],
-            '$qcDocument["ApprovedBy"]["name"]'=>$qcDocument["ApprovedBy"]["name"],
-        );
+    $fields = array(
+    	'$qcDocument["QcDocument"]["name"]'=>$qcDocument["QcDocument"]["name"],
+        '$qcDocument["QcDocument"]["title"]'=>$qcDocument["QcDocument"]["title"],
+        '$qcDocument["QcDocument"]["document_number"]'=>$qcDocument["QcDocument"]["document_number"],
+        '$qcDocument["QcDocument"]["issue_number"]'=>$qcDocument["QcDocument"]["issue_number"],
+        '$qcDocument["QcDocument"]["date_of_next_issue"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["date_of_next_issue"]))),
+        '$qcDocument["QcDocument"]["date_of_issue"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["date_of_issue"]))),
+        '$qcDocument["QcDocument"]["effective_from_date"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["effective_from_date"]))),
+        '$qcDocument["QcDocument"]["revision_number"]'=>$qcDocument["QcDocument"]["revision_number"],
+        '$qcDocument["QcDocument"]["date_of_review"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["date_of_review"]))),
+        '$qcDocument["QcDocument"]["revision_date"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["revision_date"]))),
+        '$qcDocument["Standard"]["name"]'=>$qcDocument["Standard"]["name"],
+        '$qcDocument["Clause"]["name"]'=>$qcDocument["Clause"]["name"],
+        '$qcDocument["Schedule"]["name"]'=>$qcDocument["Schedule"]["name"],
+        '$qcDocument["IssuedBy"]["name"]'=>$qcDocument["IssuedBy"]["name"],
+        '$qcDocument["PreparedBy"]["name"]'=>$qcDocument["PreparedBy"]["name"],
+        '$qcDocument["ApprovedBy"]["name"]'=>$qcDocument["ApprovedBy"]["name"],
+    );
 
         foreach($fields as $field => $value){       
-        	if($value)$table = str_replace($field,$value, $table);
+        	if($value != '')$table = str_replace($field,$value, $table);
 	    }        
 	}else{
 		$table ="<!DOCTYPE html><html><head>";
@@ -423,7 +425,7 @@ public function _generate_header($qcDocument = null, $fontsize = null,$fontface 
 			td,th{background-color: #fff; text-align: left;}
 		</style></head><body>";
 
-		$table .= "<h2 style=\"font-size:24px;margin-bottom:10px\">". $qcDocument['QcDocument']['title']."</h2>";
+		$table .= "<h2 style=\"font-size:24px;margin-bottom:10px\">". $qcDocument['QcDocument']['name']."</h2>";
 		$table .= "<table style=\"background-color:#000\" width=\"100%\" border=\"1\" cellspacing=\"1\" cellpadding=\"5\">
 					<tr>
 						<th style=\"border:1px solid #ccc\">Document Number</th>
@@ -431,7 +433,7 @@ public function _generate_header($qcDocument = null, $fontsize = null,$fontface 
 						<th style=\"border:1px solid #ccc\">Revision Number</th>
 						<td style=\"border:1px solid #ccc\">". $qcDocument['QcDocument']['revision_number']."</td>
 						<th style=\"border:1px solid #ccc\">Date Of Issue</th>
-						<td style=\"border:1px solid #ccc\">". $document['QcDocument']['date_of_issue']."</td>
+						<td style=\"border:1px solid #ccc\">". date(Configure::read('dateFormat'),strtotime($qcDocument['QcDocument']['date_of_issue']))."</td>
 					</tr>
 					<tr>
 						<th style=\"border:1px solid #ccc\">Prepared By</th>
@@ -497,6 +499,9 @@ public function _generate_template_content($fields = null, $record = null, $mode
 			$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
 			$csvoptions = explode(',',$field['csvoptions']);			
 			$contents = str_replace($f, $csvoptions[$record[$model][$field['field_name']]], $contents);
+		}else if($field['field_type'] == 5){
+			$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
+			$contents = str_replace($f, date(Configure::read('dateFormat'),strtotime($record[$model][$field['field_name']])), $contents);			
 		}else{
 			$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
 			$contents = str_replace($f, $record[$model][$field['field_name']], $contents);
@@ -581,6 +586,8 @@ public function _generate_template_content($fields = null, $record = null, $mode
 							}else if($field['data_type'] == 'radio'){
 								$csvoptions = explode(',',$field['csvoptions']);
 								$chld .= "<td>".$csvoptions[$childRecord[$childTableModel][$field['field_name']]]."</td>";
+							}else if($field['field_type'] == 5){								
+								$chld .= "<td>".date(Configure::read('dateFormat',strtotime($childRecord[$childTableModel][$field['field_name']])))."</td>";
 							}else{
 								$chld .= "<td>".$childRecord[$childTableModel][$field['field_name']]."</td>";
 							}
@@ -600,12 +607,12 @@ public function _generate_template_content($fields = null, $record = null, $mode
         '$qcDocument["QcDocument"]["title"]'=>$this->viewVars['qcDocument']["QcDocument"]["title"],
         '$qcDocument["QcDocument"]["document_number"]'=>$this->viewVars['qcDocument']["QcDocument"]["document_number"],
         '$qcDocument["QcDocument"]["issue_number"]'=>$this->viewVars['qcDocument']["QcDocument"]["issue_number"],
-        '$qcDocument["QcDocument"]["date_of_next_issue"]'=>$this->viewVars['qcDocument']["QcDocument"]["date_of_next_issue"],
-        '$qcDocument["QcDocument"]["date_of_issue"]'=>$this->viewVars['qcDocument']["QcDocument"]["date_of_issue"],
-        '$qcDocument["QcDocument"]["effective_from_date"]'=>$this->viewVars['qcDocument']["QcDocument"]["effective_from_date"],
-        '$qcDocument["QcDocument"]["revision_number"]'=>$this->viewVars['qcDocument']["QcDocument"]["revision_number"],
-        '$qcDocument["QcDocument"]["date_of_review"]'=>$this->viewVars['qcDocument']["QcDocument"]["date_of_review"],
-        '$qcDocument["QcDocument"]["revision_date"]'=>$this->viewVars['qcDocument']["QcDocument"]["revision_date"],
+        '$qcDocument["QcDocument"]["date_of_next_issue"]'=>date(Configure::read('dateFormat'),strtotime($this->viewVars['qcDocument']["QcDocument"]["date_of_next_issue"])),
+        '$qcDocument["QcDocument"]["date_of_issue"]'=>date(Configure::read('dateFormat'),strtotime($this->viewVars['qcDocument']["QcDocument"]["date_of_issue"])),
+        '$qcDocument["QcDocument"]["effective_from_date"]'=>date(Configure::read('dateFormat'),strtotime($this->viewVars['qcDocument']["QcDocument"]["effective_from_date"])),
+        '$qcDocument["QcDocument"]["revision_number"]'=>date(Configure::read('dateFormat'),strtotime($this->viewVars['qcDocument']["QcDocument"]["revision_number"])),
+        '$qcDocument["QcDocument"]["date_of_review"]'=>date(Configure::read('dateFormat'),strtotime($this->viewVars['qcDocument']["QcDocument"]["date_of_review"])),
+        '$qcDocument["QcDocument"]["revision_date"]'=>date(Configure::read('dateFormat'),strtotime($this->viewVars['qcDocument']["QcDocument"]["revision_date"])),
         '$qcDocument["Standard"]["name"]'=>$this->viewVars['qcDocument']["Standard"]["name"],
         '$qcDocument["Clause"]["name"]'=>$this->viewVars['qcDocument']["Clause"]["name"],
         '$qcDocument["Schedule"]["name"]'=>$this->viewVars['qcDocument']["Schedule"]["name"],
@@ -661,6 +668,8 @@ public function _generate_content($fields = null, $record = null, $model = null,
 		}else if($field['data_type'] == 'radio'){
 			$csvoptions = explode(',',$field['csvoptions']);
 			$str .= "<tr><th width='30%'>".base64_decode($field['field_label'])."</th><td>".$csvoptions[$record[$model][$field['field_name']]]."</td>";
+		}else if($field['field_type'] == 5){
+			$str .= "<tr><th>".base64_decode($field['field_label'])."</th><td>".date(Configure::read('dateFormat'),strtotime($record[$model][$field['field_name']]))."</td>";
 		}else{
 			$str .= "<tr><th>".base64_decode($field['field_label'])."</th><td>".$record[$model][$field['field_name']]."</td>";
 		}
@@ -722,6 +731,8 @@ public function _generate_content($fields = null, $record = null, $model = null,
 					}else if($field['data_type'] == 'radio'){
 						$csvoptions = explode(',',$field['csvoptions']);
 						$str .= "<td>".$csvoptions[$childRecord[$childTableModel][$field['field_name']]]."</td>";
+					}else if($field['field_type'] == 5){						
+						$str .= "<td>".date(Configure::read('dateFormat',strtotime($childRecord[$childTableModel][$field['field_name']])))."</td>";
 					}else{
 						$str .= "<td>".$childRecord[$childTableModel][$field['field_name']]."</td>";
 					}

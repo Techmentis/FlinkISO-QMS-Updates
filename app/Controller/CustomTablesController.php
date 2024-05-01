@@ -365,12 +365,11 @@ class CustomTablesController extends AppController {
         ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
         ";
 
-
-
         if($this->CustomTable->query($sql)){
 
         }else{
-            // echo "Something went wrong";
+
+            echo "Something went wrong";
         }
 
     // run above sql first and then add alter table commands one by one
@@ -450,7 +449,7 @@ class CustomTablesController extends AppController {
         else $m = '';
         if($chkd['display_type'] != 7 && $chkd['display_type'] != 5){
             if(!in_array($chkd['field_name'],$this->reserved_fields)){
-                $addsql .=  'ALTER TABLE `'.$this->request->data['CustomTable']['table_name'].'` ADD `'.$chkd['field_name'].'` '.$type.' '. $m .' NULL AFTER `sr_no`;';
+                $addsqls[] =  'ALTER TABLE `'.$this->request->data['CustomTable']['table_name'].'` ADD `'.$chkd['field_name'].'` '.$type.' '. $m .' NULL AFTER `sr_no`;';
             }
         }
     }
@@ -460,7 +459,7 @@ if($updatesql){
     try{
         $this->CustomTable->query($updatesql);
     }catch(Exception $e){
-
+        
     }
 }
 
@@ -472,12 +471,15 @@ if($dropsql){
     }
 }
 
-if($addsql){
-    try{
+if($addsqls){
+    foreach($addsqls as $addsql){
+        try{
         $this->CustomTable->query($addsql);
-    }catch(Exception $e){
-        
+        }catch(Exception $e){
+           
+        }    
     }
+    
 }
 
 return true;
@@ -1265,8 +1267,17 @@ return true;
                             $this->CustomTable->deleteAll(array('CustomTable.custom_table_id'=>$this->data['CustomTable']['id']));
 
 
-                            $this->CustomTable->delete($customTable['CustomTable']['id']);
-                            $this->Approval->deleteAll(array('Approval.controller_name'=>$customTable['CustomTable']['table_name']),true);
+                            try{
+                                $this->CustomTable->delete($customTable['CustomTable']['id']);
+                            }catch (Exception $e){
+                                
+                            }
+                            try{
+                                $this->Approval->deleteAll(array('Approval.controller_name'=>$customTable['CustomTable']['table_name']),true);
+                            }catch (Exception $e){
+                                
+                            }
+                            
 
                             $this->CustomTable->CustomTrigger->deleteAll(array('CustomTrigger.custom_table_id'=>$customTable['CustomTable']['id']));
                             $this->CustomTable->RecordLock->deleteAll(array('RecordLock.lock_table_id'=>$customTable['CustomTable']['id']));
