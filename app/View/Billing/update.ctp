@@ -19,9 +19,7 @@
 						                	<p>Version : <?php echo $update->number;?><br />
 						                	Details : <?php echo $update->description;?><br />
 						                	Release Date : <?php echo $update->date;?>
-						                </p>
-						                	<hr />
-						                	<div class="btn btn-success btn-sm" id="update_btn">Install</div>
+						                </p>						                	
 				                		</div>
 				                	</div>
 				                <?php }else if($update->number == $company_message['Company']['version']){				                	
@@ -39,6 +37,8 @@
 				        echo "<h5 class='text-danger'> Can not access updates</small></h5>";
 				    }
 					?>
+					<hr />
+					<div class="btn btn-success btn-sm" id="update_btn">Install</div>
 					<small class="text-danger"><br />Update & Install action is not reversible. We strongly recomend to take backup of your existing installed application before updating it.</small>					
 				</div>
 			</div>
