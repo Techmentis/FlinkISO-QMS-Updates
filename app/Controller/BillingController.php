@@ -157,6 +157,8 @@ class BillingController extends AppController {
     
         $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'app');
         if($foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'app')){
+            echo "Update Successful";
+        }else{
             echo "Copy failed. Please roll-back chanages from the backup folder.";
             exit;
         }
@@ -164,6 +166,9 @@ class BillingController extends AppController {
 
         $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'lib');
         if($foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'lib')){
+            echo "Update Successful";
+            exit;
+        }else{
             echo "Copy failed. Please roll-back chanages from the backup folder.";
             exit;
         }
