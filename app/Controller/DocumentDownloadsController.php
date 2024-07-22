@@ -508,7 +508,7 @@ public function _generate_template_content($fields = null, $record = null, $mode
 		}
 
 	}
-
+	
 	foreach($record as $modelN => $fs){
 		if($modelN != $model){
 			foreach($fs as $n => $val){

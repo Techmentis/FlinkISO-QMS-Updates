@@ -1,3 +1,4 @@
+<?php echo $this->Session->flash();?>	
 <?php	
 	echo $this->Html->css(array(
 		'prism',
@@ -87,7 +88,10 @@
 			?>
 			<div class="col-md-4 "><?php echo $this->Form->input('PdfTemplates.font_size',array('default'=> 11 , 'class'=>'form-control'));?></div>
 			<div class="col-md-4 "><?php echo $this->Form->input('PdfTemplates.font_face',array('options'=> $font_face, 'default'=>'Arial', 'class'=>'form-control'));?></div>
-			<div class="col-md-4 "><?php echo $this->Form->input('PdfTemplates.Type',array('options'=> $edittype, 'default'=>'Doc', 'class'=>'form-control'));?></div>
+			<div class="col-md-4 "><?php echo $this->Form->input('PdfTemplates.Type',array('options'=> $edittype, 'default'=>'Doc', 'class'=>'form-control'));
+
+			echo $this->Form->hidden('html_cleanup',array('default'=>1));	
+		?></div>
 		<?php }?>
 		<div class="col-md-12">
 <?php	
@@ -162,7 +166,19 @@
 						<div class="panel-heading"><h5>QC Document: <?php echo $qcDocument['QcDocument']['title'];?></h5></div>
 						<div class="panel-body">							
 							<?php
-							$qcFields = array("title","document_number","document_number","issue_number","date_of_next_issue","date_of_issue","effective_from_date","revision_number","date_of_review","revision_date");
+							$qcFields = array(
+								"name",
+								"title",
+								"document_number",
+								"document_number",
+								"issue_number",
+								"date_of_next_issue",
+								"date_of_issue",
+								"effective_from_date",
+								"revision_number",
+								"date_of_review",
+								"revision_date"
+							);
 							foreach($qcFields as $qcField){
 								$jid = 'QcDocument'.Inflector::camelize($qcField);
 								echo $this->Form->input('data.PdfTempate.QcDocument.'.$qcField,array('type'=>'text', 'id'=>$jid, 'class'=>'txtfld','div'=>false,'label'=>false, 'default'=>'$qcDocument["QcDocument"]["'.$qcField.'"]')) .'<i class="fa fa-copy" onclick="myFunction(\''.$jid.'\')"></i>';
