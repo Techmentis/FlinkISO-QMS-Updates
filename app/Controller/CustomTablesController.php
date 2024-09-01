@@ -2531,19 +2531,22 @@ return true;
     public function check_before_delete($id = null){
         $customTable = $this->CustomTable->find('first',array('conditions'=>array('CustomTable.id'=>$id)));
         $cmodelName = Inflector::Classify($customTable['CustomTable']['table_name']);
-        
         $dataSource = ConnectionManager::getDataSource('default');
         $sources = $dataSource->listSources();
-        
         foreach($sources as $model){
-            $this->loadModel(Inflector::classify($model));
-            $m = Inflector::classify($model);
-            $s = $this->$m->belongsTo;
-            foreach($s as $pname => $fields){
-                if($fields['className'] == $cmodelName){
-                    $found[] = $model;
+            try{
+                $this->loadModel(Inflector::classify($model));
+                $m = Inflector::classify($model);
+                $s = $this->$m->belongsTo;
+                $s2 = $this->$m->schema();
+                foreach($s as $pname => $fields){
+                    if($fields['className'] == $cmodelName){
+                        $found[] = $model;
+                    }
                 }
-            }
+            }catch (Exception $e){
+
+            }            
         }
         return $found;
     }

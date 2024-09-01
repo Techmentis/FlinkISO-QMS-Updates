@@ -463,7 +463,7 @@ public function _write_html_file($filename = null, $content = null, $record_id =
 	}
 
 	$file = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id'). DS . $record_id . DS . $filename .".html" ;
-	$myfile = fopen($file, "w") or die("Unable to open file - 1");	
+	$myfile = fopen($file, "w") or die("Unable to open file - 1");
 	fwrite($myfile, $content);
 	fclose($myfile);	
 }

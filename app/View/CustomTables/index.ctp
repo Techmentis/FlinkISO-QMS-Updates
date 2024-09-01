@@ -91,7 +91,7 @@
 								?>
 								<?php 
 								if($customTable['CustomTable']['table_type'] == 2)echo $customTable['CustomTable']['name']; 
-								else echo $customTable['QcDocument']['name'];?>
+								else echo $customTable['CustomTable']['name'];?>
 								<?php
 								if($this->request->params['named']['table_type'] != 3){
 									echo "</h4><br /><small>";

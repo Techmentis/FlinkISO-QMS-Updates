@@ -281,7 +281,7 @@ class AppController extends Controller {
 		$this->redirect($this->referer());
 	}
 	public function _access_redirect($n = null){ 
-		$ignore = array('install_updates', 'register','activate','send_otp', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk','change_password','check_password_validation','save_template');
+		$ignore = array('install_updates', 'register','activate','send_otp', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk','change_password','check_password_validation','save_template','clean_table_names','jwtencode');
 		if(!in_array($this->action,$ignore) 
 			&& $this->request->controller != 'qc_documents' 
 			// && $this->request->controller != 'standards' 
