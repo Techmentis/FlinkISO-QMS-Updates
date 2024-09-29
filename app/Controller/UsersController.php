@@ -730,9 +730,13 @@ class UsersController extends AppController {
         // 'ApprovalComment.approval_statuses >'=> 0,
             'OR' => array('Approval.status is NULL', 'Approval.status' => 0),
         // 'Approval.status'=>0,
-            'ApprovalComment.response_status' => 0, 'ApprovalComment.user_id' => $this->Session->read('User.id')), 'group' => array('ApprovalComment.approval_id', 'ApprovalComment.user_id'), 'order' => array('ApprovalComment.sr_no' => 'DESC'),));
-        
-        
+            'ApprovalComment.response_status' => 0, 
+            'ApprovalComment.user_id' => $this->Session->read('User.id')
+        ), 
+            'group' => array('ApprovalComment.user_id','ApprovalComment.approval_id'), 
+            'order' => array('ApprovalComment.sr_no' => 'DESC'),
+        ));
+       
         $this->set('approvalComments', $approvalComments);
         $this->_get_user_list();        
         

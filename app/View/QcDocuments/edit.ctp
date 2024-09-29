@@ -15,76 +15,79 @@
 
 			</div>
 			<div class="row onlyofficedivshow">
-					<div class="col-md-12">
-						<?php 
-						$key = $this->data['QcDocument']['file_key'];
-						$file_type = $this->data['QcDocument']['file_type'];
-						$file_name = $this->data['QcDocument']['title'];
-						$document_number = $this->data['QcDocument']['document_number'];
-						$document_version = $this->data['QcDocument']['revision_number'];
+				<div class="col-md-12">
+					<?php 
+					$key = $this->data['QcDocument']['file_key'];
+					$file_type = $this->data['QcDocument']['file_type'];
+					$file_name = $this->data['QcDocument']['title'];
+					$document_number = $this->data['QcDocument']['document_number'];
+					$document_version = $this->data['QcDocument']['revision_number'];
 
-						$file_type = $this->data['QcDocument']['file_type'];
-						
-						if($file_type == 'doc' || $file_type == 'docx'){
-							$documentType = 'word';
-						}
+					$file_type = $this->data['QcDocument']['file_type'];
 
-						if($file_type == 'xls' || $file_type == 'xlsx'){
-							$documentType = 'cell';
-						}
+					if($file_type == 'doc' || $file_type == 'docx'){
+						$documentType = 'word';
+					}
 
-						$editors = json_decode($this->request->data['QcDocument']['editors'],true);
-						if($editors){
-							if(in_array($this->Session->read('User.id'), $editors)){
-								$mode = 'edit';	
-							}else{
-								$mode = 'view';
-							}	
-						}
-						
+					if($file_type == 'xls' || $file_type == 'xlsx'){
+						$documentType = 'cell';
+					}
 
-						
+					$editors = json_decode($this->request->data['QcDocument']['editors'],true);
+					if($editors){
+						if(in_array($this->Session->read('User.id'), $editors)){
+							$mode = 'edit';	
+						}else{
+							$mode = 'view';
+						}	
+					}
 
-						$file_path = $this->data['QcDocument']['id'];
 
-						$file = $document_number.'-'.$file_name.'-'.$document_version;
-						$file = ltrim(rtrim($file));
-						$file = str_replace('-', '_', $file);
-						$file = ltrim(rtrim(strtolower($file)));
-						$file = preg_replace('/[\@\.\;\" "-]+/', '_', $file);
-						$file = preg_replace('/  */', '_', $file);
-						$file = preg_replace('/\\s+/', '_', $file);        
-						$file = preg_replace('/-*-/', '_', $file);
-						$file = preg_replace('/_*_/', '_', $file);
-						$file = $this->requestAction(array('action'=>'clean_table_names',$file));
-						$file = $file.'.'.$file_type;
 
-						echo $this->element('onlyoffice',array(
-							'url'=>$url,
-							'placeholderid'=>$placeholderid,
-							'panel_title'=>'Document Viewer',
-							'mode'=>$mode,
-							'path'=>$file_path,
-							'file'=>$file,
-							'filetype'=>$file_type,
-							'documentType'=>$documentType,
-							'userid'=>$this->Session->read('User.id'),
-							'username'=>$this->Session->read('User.username'),
-							'preparedby'=>$masterListOfFormat['PreparedBy']['name'],
-							'filekey'=>$key,            
-							'record_id'=>$this->data['QcDocument']['id'],
-							'company_id'=>$this->Session->read('User.company_id'),
-							'controller'=>$this->request->controller,
-							'last_saved' => $this->data['QcDocument']['last_saved'],
-							'last_modified' => $this->data['QcDocument']['modified'],
-							'version_keys' => $this->data['QcDocument']['version_keys'],
-							'version' => $this->data['QcDocument']['version'],
-							'versions' => $this->data['QcDocument']['versions'],
-							'docid'=> $data['QcDocument']['id']
-						));
-						?>
-					</div>
+
+					$file_path = $this->data['QcDocument']['id'];
+
+					$file = $document_number.'-'.$file_name.'-'.$document_version;
+					$file = ltrim(rtrim($file));
+					$file = str_replace('-', '_', $file);
+					$file = ltrim(rtrim(strtolower($file)));
+					$file = preg_replace('/[\@\.\;\" "-]+/', '_', $file);
+					$file = preg_replace('/  */', '_', $file);
+					$file = preg_replace('/\\s+/', '_', $file);        
+					$file = preg_replace('/-*-/', '_', $file);
+					$file = preg_replace('/_*_/', '_', $file);
+					$file = $this->requestAction(array('action'=>'clean_table_names',$file));
+					$file = $file.'.'.$file_type;
+
+					echo $this->element('onlyoffice',array(
+						'url'=>$url,
+						'placeholderid'=>$placeholderid,
+						'panel_title'=>'Document Viewer',
+						'mode'=>$mode,
+						'path'=>$file_path,
+						'file'=>$file,
+						'filetype'=>$file_type,
+						'documentType'=>$documentType,
+						'userid'=>$this->Session->read('User.id'),
+						'username'=>$this->Session->read('User.username'),
+						'preparedby'=>$masterListOfFormat['PreparedBy']['name'],
+						'filekey'=>$key,            
+						'record_id'=>$this->data['QcDocument']['id'],
+						'company_id'=>$this->Session->read('User.company_id'),
+						'controller'=>$this->request->controller,
+						'last_saved' => $this->data['QcDocument']['last_saved'],
+						'last_modified' => $this->data['QcDocument']['modified'],
+						'version_keys' => $this->data['QcDocument']['version_keys'],
+						'version' => $this->data['QcDocument']['version'],
+						'versions' => $this->data['QcDocument']['versions'],
+						'docid'=> $data['QcDocument']['id']
+					));
+					?>
 				</div>
+				<div class="col-md-12">
+					<?php echo $this->element('dmtips');?>
+				</div>
+			</div>
 			<div class="row">
 				<?php				
 				echo "<div class='col-md-12'>".$this->Form->input('parent_document_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 

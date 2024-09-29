@@ -22,7 +22,7 @@ if($qcDocuments){
 					<i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i>
 				<?php }?>
 
-				<strong><?php echo $this->Html->link($childDoc['Standard']['name'], array('controller' => 'standards', 'action' => 'view', $childDoc['Standard']['id'])); ?></strong>: <strong><?php echo $this->Html->link($childDoc['QcDocument']['name'],array('action'=>'view',$childDoc['QcDocument']['id'])); ?>&nbsp; </strong> - <small><?php echo h($childDoc['QcDocument']['document_number']); ?>&nbsp;</small></td>
+				<strong><?php echo $this->Html->link($childDoc['Standard']['name'], array('controller' => 'standards', 'action' => 'view', $childDoc['Standard']['id'])); ?></strong>: <strong><?php echo $this->Html->link($childDoc['QcDocument']['name'],array('action'=>'view',$childDoc['QcDocument']['id'])); ?>&nbsp; </strong> - <small><?php echo h($childDoc['QcDocument']['document_number']); ?>&nbsp;-Rev.No.<?php echo h($childDoc['QcDocument']['revision_number']); ?></small></td>
 				<td><?php echo h($childDoc['PreparedBy']['name']); ?>&nbsp;</td>
 				<td><?php echo h($childDoc['ApprovedBy']['name']); ?>&nbsp;</td>
 				<td><?php echo h($childDoc['IssuedBy']['name']); ?>&nbsp;</td>

@@ -128,7 +128,7 @@ class QcDocumentsController extends AppController {
 
         $this->paginate = array('all', 
             'fields'=>array(
-                'QcDocument.name','QcDocument.title','QcDocument.document_number','QcDocument.document_status','QcDocument.publish','QcDocument.parent_document_id','QcDocument.parent_id','QcDocument.prepared_by','QcDocument.approved_by','QcDocument.tables','QcDocument.active_tables','QcDocument.standard_id','QcDocument.file_type','QcDocument.parent_document_id','QcDocument.childDoc',
+                'QcDocument.name','QcDocument.title','QcDocument.document_number','QcDocument.revision_number', 'QcDocument.document_status','QcDocument.publish','QcDocument.parent_document_id','QcDocument.parent_id','QcDocument.prepared_by','QcDocument.approved_by','QcDocument.tables','QcDocument.active_tables','QcDocument.standard_id','QcDocument.file_type','QcDocument.parent_document_id','QcDocument.childDoc',
                 'PreparedBy.id',
                 'PreparedBy.name',
                 'ApprovedBy.id',
@@ -182,7 +182,7 @@ class QcDocumentsController extends AppController {
         
         $qcDocuments = $this->QcDocument->find('all', array(
             'fields'=>array(
-                'QcDocument.name','QcDocument.title','QcDocument.document_number','QcDocument.document_status','QcDocument.publish','QcDocument.parent_document_id','QcDocument.parent_id','QcDocument.prepared_by','QcDocument.approved_by','QcDocument.tables','QcDocument.active_tables','QcDocument.standard_id','QcDocument.file_type','QcDocument.parent_document_id','QcDocument.childDoc',
+                'QcDocument.name','QcDocument.title','QcDocument.document_number','QcDocument.revision_number','QcDocument.document_status','QcDocument.publish','QcDocument.parent_document_id','QcDocument.parent_id','QcDocument.prepared_by','QcDocument.approved_by','QcDocument.tables','QcDocument.active_tables','QcDocument.standard_id','QcDocument.file_type','QcDocument.parent_document_id','QcDocument.childDoc',
                 'PreparedBy.id',
                 'PreparedBy.name',
                 'ApprovedBy.id',

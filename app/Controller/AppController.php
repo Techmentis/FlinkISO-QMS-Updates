@@ -2274,7 +2274,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		$response = curl_exec($curl);
 		$err = curl_error($curl);
 
-		
 		curl_close($curl);
 
 		if($err){
@@ -2863,21 +2862,25 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 		public function reloaddocument_copy(){
 			$additionalFiles = json_decode(base64_decode($this->request->params['pass'][3]),true);
-			if(count($additionalFiles)){
-				$this->loadModel('File');
-				foreach($additionalFiles as $additionalFile){
-					if($additionalFile != '' && strlen($additionalFiles[0]) == 36){
-						$file = $this->File->find('first',array( 'recursive'=>-1, 'conditions'=>array('File.id'=> $additionalFile)));
-						if($file){
-							$this->set('fileEdit',$file);
-							$this->set('is_qc',false);
-							$this->render('/Elements/load_extra_document');
+			if($additionalFiles){
+				if(count($additionalFiles)){
+					$this->loadModel('File');
+					foreach($additionalFiles as $additionalFile){
+						if($additionalFile != '' && strlen($additionalFiles[0]) == 36){
+							$file = $this->File->find('first',array( 'recursive'=>-1, 'conditions'=>array('File.id'=> $additionalFile)));
+							if($file){
+								$this->set('fileEdit',$file);
+								$this->set('is_qc',false);
+								$this->render('/Elements/load_extra_document');
+							}
 						}
 					}
+				}else{
+					
 				}
 			}else{
-				exit;
-			}
+				
+			}			
 		}
 
 		public function reloadfile($file_id = null){
@@ -3815,9 +3818,9 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$background = WWW_ROOT . 'files' . DS . 'samples' . DS . 'under-review.pdf';
 			
 			if($password && $password != ''){
-				$exec = Configure::read('PDFTkPath') . ' ' .$input .' multistamp ' .$sign.  ' output '. $output . ' user_pw '.$password.'';
+				$exec = Configure::read('PDFTkPath') . ' ' .$input .' multibackground ' .$sign.  ' output '. $output . ' user_pw '.$password.'';
 			}else{
-				$exec = Configure::read('PDFTkPath') . ' ' .$input .' multistamp ' .$sign.  ' output '. $output .'';
+				$exec = Configure::read('PDFTkPath') . ' ' .$input .' multibackground ' .$sign.  ' output '. $output .'';
 			}
 			exec($exec);
 			unlink($input);

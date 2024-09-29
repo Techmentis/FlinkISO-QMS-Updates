@@ -9,15 +9,15 @@
 				<?php echo $this->Form->create('Designation',array('role'=>'form','class'=>'form')); ?>
 				<div class="row">
 					<?php
-					$str =
-					"Designation 1
-					Designation 2
-					Designation 3
-					Designation 4
-					.
-					.
-					.
-					";
+$str =
+"Designation 1
+Designation 2
+Designation 3
+Designation 4
+.
+.
+.
+";
 					echo "<div class='col-md-12'>".$this->Form->input('parent_id',array('class'=>'form-control', 'style'=>'','options'=>$parentDesignations)) . '</div>';
 					echo "<div class='col-md-12'>".$this->Form->input('name',array('type'=>'textarea' ,'class'=>'form-control', 'placeholder'=>$str )) . '</div>'; 		
 					echo "<div class='col-md-12 help-text'>Add departments with < enter > as new record.</div>";

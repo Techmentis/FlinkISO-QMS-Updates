@@ -122,7 +122,7 @@ if($filetype != null){
                             ],
                             "permissions" => [
                                 "comment" => false,
-                                "download" => false,
+                                "download" => true,
                                 "edit" => false,
                                 "fillForms" => false,
                                 "modifyFilter" => false,

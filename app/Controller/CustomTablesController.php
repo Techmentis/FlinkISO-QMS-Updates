@@ -1383,10 +1383,10 @@ return true;
                 chmod(APP . 'Model', 0777);
                 chmod(APP . 'View', 0777);
                 
-                $dir_writable_controller = substr(sprintf('%o', fileperms(APP . 'Controller')), -4) == "0777"  ? true : false;
-                $dir_writable_model = substr(sprintf('%o', fileperms(APP . 'Model')), -4) == "0777"  ? true : false;
-                $dir_writable_view = substr(sprintf('%o', fileperms(APP . 'View')), -4) == "0777"  ? true : false;
-
+                $dir_writable_controller = substr(sprintf('%o', fileperms(APP . 'Controller')), -3) == "777"  ? true : false;
+                $dir_writable_model = substr(sprintf('%o', fileperms(APP . 'Model')), -3) == "777"  ? true : false;
+                $dir_writable_view = substr(sprintf('%o', fileperms(APP . 'View')), -3) == "777"  ? true : false;
+                
                 if($dir_writable_controller == false || $dir_writable_model == false || $dir_writable_view == false){
                     $this->Session->setFlash(__('Unable to change directory permissions. Please manually change app/Controller, app/Model & app/View directories to writable.(0777)'));
                     $this->redirect(array('action' => 'recreate',$this->request->data['CustomTable']['id']));
@@ -1660,9 +1660,9 @@ return true;
                 chmod(APP . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name)),0777);
                 
                 
-                $dir_writable_controller = substr(sprintf('%o', fileperms(APP . 'Controller')), -4) == "0777"  ? true : false;
-                $dir_writable_model = substr(sprintf('%o', fileperms(APP . 'Model')), -4) == "0777"  ? true : false;
-                $dir_writable_view = substr(sprintf('%o', fileperms(APP . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name)))), -4) == "0777"  ? true : false;
+                $dir_writable_controller = substr(sprintf('%o', fileperms(APP . 'Controller')), -3) == "777"  ? true : false;
+                $dir_writable_model = substr(sprintf('%o', fileperms(APP . 'Model')), -3) == "777"  ? true : false;
+                $dir_writable_view = substr(sprintf('%o', fileperms(APP . 'View' . DS . Inflector::pluralize(Inflector::classify($table_name)))), -3) == "777"  ? true : false;
 
                 if($dir_writable_controller == false || $dir_writable_model == false || $dir_writable_view == false){
                     $this->Session->setFlash(__('Unable to change directory permissions. Please manually change app/Controller, app/Model & app/View directories to writable.(0777)'));

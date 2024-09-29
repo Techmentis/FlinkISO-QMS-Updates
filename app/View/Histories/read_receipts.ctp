@@ -1,6 +1,5 @@
 <div  id="main">
-	<div class="histories ">		
-		<h4>Read Receipts</h4>
+	<div class="histories ">				
 		<?php $x = 0;?>
 		<script type="text/javascript">
 			$(document).ready(function() {
@@ -11,48 +10,71 @@
 				});
 			});
 		</script>
-		<div class="table-responsive">		
-			<table cellpadding="0" cellspacing="0" class="table table-hover">
-				<tr>
-					<th><?php echo $this->Paginator->sort('created_by','User'); ?></th>
-					<th><?php echo $this->Paginator->sort('action'); ?></th>
-					<th><?php echo $this->Paginator->sort('created','Date/Time'); ?></th>					
-				</tr>
-				<?php if($histories){ ?>
-					<?php foreach ($histories as $history): ?>
+		<div class="row">
+			<div class="col-md-12">
+				<h4>Shared With</h4>
+				<?php foreach($pending[0] as $pending_id => $pending_name){
+					echo $pending_name.', ';
+				}?>
+
+			</div>
+			<div class="col-md-8">
+				<h4>Read Receipts</h4>
+				<div class="table-responsive">		
+					<table cellpadding="0" cellspacing="0" class="table table-hover table-bordered">
 						<tr>
-							<td><?php echo h($users[$history['History']['created_by']]); ?>&nbsp;</td>
-							<td><?php echo h($history['History']['action']); ?>&nbsp;</td>
-							<td><?php echo h($history['History']['created']); ?>&nbsp;</td>		
+							<th><?php echo $this->Paginator->sort('created_by','User'); ?></th>
+							<th><?php echo $this->Paginator->sort('action'); ?></th>
+							<th><?php echo $this->Paginator->sort('created','Date/Time'); ?></th>					
 						</tr>
-						<?php $x++;?>			
-					<?php endforeach; ?>
-				<?php }else{ ?>
-					<tr><td colspan="3">No results found</td></tr>
-				<?php } ?>
-			</table>			
-		</div>
-		<p>
-			<?php
-			echo $this->Paginator->options(array(
-				'update' => '#tab_5',
-				'evalScripts' => true,
-				'before' => $this->Js->get('#busy-indicator')->effect('fadeIn', array('buffer' => false)),
-				'complete' => $this->Js->get('#busy-indicator')->effect('fadeOut', array('buffer' => false)),
-			));
-			
-			echo $this->Paginator->counter(array(
-				'format' => __('Page {:page} of {:pages}, showing {:current} records out of {:count} total, starting on record {:start}, ending on {:end}')
-			));
-		?>			</p>
-		<ul class="pagination">
-			<?php
-			echo "<li class='previous'>".$this->Paginator->prev('< ' . __('previous'), array(), null, array('class' => 'prev disabled'))."</li>";
-			echo "<li>".$this->Paginator->numbers(array('separator' => ''))."</li>";
-			echo "<li class='next'>".$this->Paginator->next(__('next') . ' >', array(), null, array('class' => 'next disabled'))."</li>";
-			?>
-		</ul>
-	</div>
+						<?php if($histories){ ?>
+							<?php foreach ($histories as $history): ?>
+								<tr>
+									<td><?php echo h($users[$history['History']['created_by']]); ?>&nbsp;</td>
+									<td><?php echo h($history['History']['action']); ?>&nbsp;</td>
+									<td><?php echo h($history['History']['created']); ?>&nbsp;</td>		
+								</tr>
+								<?php $x++;?>			
+							<?php endforeach; ?>
+						<?php }else{ ?>
+							<tr><td colspan="3">No results found</td></tr>
+						<?php } ?>
+					</table>			
+				</div>
+				<p>
+					<?php
+					echo $this->Paginator->options(array(
+						'update' => '#tab_5',
+						'evalScripts' => true,
+						'before' => $this->Js->get('#busy-indicator')->effect('fadeIn', array('buffer' => false)),
+						'complete' => $this->Js->get('#busy-indicator')->effect('fadeOut', array('buffer' => false)),
+					));
+					
+					echo $this->Paginator->counter(array(
+						'format' => __('Page {:page} of {:pages}, showing {:current} records out of {:count} total, starting on record {:start}, ending on {:end}')
+					));
+				?>			</p>
+				<ul class="pagination">
+					<?php
+					echo "<li class='previous'>".$this->Paginator->prev('< ' . __('previous'), array(), null, array('class' => 'prev disabled'))."</li>";
+					echo "<li>".$this->Paginator->numbers(array('separator' => ''))."</li>";
+					echo "<li class='next'>".$this->Paginator->next(__('next') . ' >', array(), null, array('class' => 'next disabled'))."</li>";
+					?>
+				</ul>
+			</div>				
+			<div class="col-md-4">
+				<h4>Pending</h4>
+				<div class="table-responsive">		
+					<table cellpadding="0" cellspacing="0" class="table table-hover table-bordered">
+						<?php foreach($pending[1] as $pending_user_id => $pending_user_name){ ?>
+							<tr><td><?php echo $pending_user_name;?></td></tr>
+						<?php } ?>
+					</table>
+				</div>
+
+			</div>
+		</div>	
+	</div>	
 </div>
 </div>	
 <?php echo $this->Js->writeBuffer(); ?>

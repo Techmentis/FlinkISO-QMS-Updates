@@ -232,6 +232,17 @@ class EmployeesController extends AppController {
             
             $this->request->data['Employee']['system_table_id'] = $this->_get_system_table_id();
             if ($this->Employee->save($this->request->data)) {
+
+
+
+                //update user- emaployee name if user exists
+                $user = $this->Employee->User->find('first',array('recursive'=>-1, 'conditions'=>array('User.employee_id'=>$id)));
+                if($user){
+                    $user['User']['name'] = $this->request->data['Employee']['name']; 
+                    $this->Employee->User->create();
+                    $this->Employee->User->save($user,false);
+                }
+                
                 if ($this->_show_approvals()) $this->_save_approvals();
                 if ($this->_show_evidence() == true) $this->redirect(array('action' => 'view', $id));
                 else $this->redirect(array('action' => 'index'));

@@ -22,19 +22,19 @@
 										<i class="fa fa-clock-o"></i> <?php echo h($approvalComment['ApprovalComment']['created']); ?>
 										<?php } ?>&nbsp;
 									</span>
-									<h3 class="timeline-header"><?php echo $approvalComment['User']['name'];?>&nbsp;</h3>
+									<!-- <h3 class="timeline-header"><?php echo $approvalComment['User']['name'];?>&nbsp;</h3> -->
 									<div class="timeline-body" id="<?php echo $approvalComment['ApprovalComment']['id']?>_td_to_update">
 										<p>
-											<strong><?php echo $approvalComment['From']['name'];?>&nbsp;</strong> <br />
 											<?php echo $approvalComment['ApprovalComment']['comments'] ?>
-											<span class="pull-right"><small><i class="fa  fa-clock-o"></i> <?php echo date('Y-m-d H:i:s',strtotime($approvalComment['ApprovalComment']['created'])) ?>&nbsp;&nbsp;</small></span>
+											<br />-<?php echo $approvalComment['From']['name'];?>&nbsp;</strong>											
 										</p>
 										<hr />
-										<?php echo $approvalComment['ApprovalComment']['response'] ?> <span class="pull-right"><i class="fa fa-check text-green"></i>&nbsp;</span>
+										<?php echo $approvalComment['ApprovalComment']['response'] ?> <span class="pull-right"><i class="fa fa-check text-green"></i>&nbsp;<small><?php echo date('Y-m-d H:i:s',strtotime($approvalComment['ApprovalComment']['created'])) ?>&nbsp;&nbsp;</small></span>
+										<br />-<?php echo $approvalComment['User']['name'];?>										
 									</div>
 								</div>
 							</li>
-						<?php }else{
+						<?php }else{							
 							if($approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.id') || $approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.employee_id')){
 								$replayClass = 'fa-mail-forward';
 								$iClass = 'yellow';
@@ -291,13 +291,17 @@
 							<div class="timeline-item">
 								<span class="time"><i class="fa fa-clock-o"></i> <?php echo h($approval['Approval']['created']); ?></span>
 								<h3 class="timeline-header"><?php echo h($approval['From']['name']); ?></h3>
-								<div class="timeline-body"><?php echo h($approval['Approval']['comments']); ?></div>
+								<div class="timeline-body">
+									<?php echo h($approval['Approval']['comments']); ?>
+									<br />-<?php echo h($approval['From']['name']); ?>
+								</div>
 								<div class="timeline-footer">
 									<div class="row">
 										<div class="col-md-12">																
 										</div>
 										<div class="col-md-12">
 											<?php echo $approval['Approval']['approver_comments'];?>&nbsp;		
+											<br />-<?php echo $approval['Employee']['name'];?>&nbsp;											
 										</div>
 										<div class="col-md-12">
 											

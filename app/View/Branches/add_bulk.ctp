@@ -9,15 +9,15 @@
            <?php echo $this->Form->create('Branch', array('role' => 'form', 'class' => 'form')); ?>
            <div class="row">
              <?php
-             $str =
-             "Factory
-             Branch 2
-             Branch 3
-             Branch 4
-             .
-             .
-             .
-             ";
+$str =
+"Factory
+Branch 2
+Branch 3
+Branch 4
+.
+.
+.
+";
              echo "<div class='col-md-12'>" . $this->Form->input('name', array('type'=>'textarea', 'class' => 'form-control','label'=>'Add multiple branches/locations','placeholder'=>$str)) . '</div>';
              echo "<div class='col-md-12 help-text'>Add branch/loction with < enter > as new record.</div>";
              ?>

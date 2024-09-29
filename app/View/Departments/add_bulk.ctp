@@ -10,15 +10,15 @@
 				<?php echo $this->Form->create('Department',array('role'=>'form','class'=>'form')); ?>
 				<div class="row">
 					<?php
-					$str =
-					"Department 1
-					Department 2
-					Department 3
-					Department 4
-					.
-					.
-					.
-					";
+$str =
+"Department 1
+Department 2
+Department 3
+Department 4
+.
+.
+.
+";
 					echo "<div class='col-md-12'>" . $this->Form->input('name', array('type'=>'textarea', 'class' => 'form-control','label'=>'Add multiple departments','placeholder'=>$str)) . '</div>';
 					echo "<div class='col-md-12 help-text'>Add departments with < enter > as new record.</div>";
 					?>
