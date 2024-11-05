@@ -50,7 +50,7 @@
 								<td><?php echo ($employee['Employee']['is_approver']?'<span class="fa fa-check text-success"></span>':'<span class="fa fa-close text-danger">');?></td>
 									<td width="60"><?php echo ($employee['Employee']['publish']?'<span class="fa fa-check text-success"></span>':'<span class="fa fa-close text-danger">');?></td>
 										<td class=" actions" style="width: 160px;">
-											<?php echo $this->element('actions', array('user'=>$employee['Employee']['user'], 'created' => $employee['Employee']['created_by'], 'postVal' => $employee['Employee']['id'], 'softDelete' => $employee['Employee']['soft_delete'])); ?>	
+											<?php echo $this->element('actions', array('user'=>$employee['Employee']['user'], 'created' => $employee['Employee']['created_by'], 'postVal' => $employee['Employee']['id'], 'softDelete' => $employee['Employee']['soft_delete'])); ?>
 										</td>
 									</tr>
 								<?php endforeach; ?>

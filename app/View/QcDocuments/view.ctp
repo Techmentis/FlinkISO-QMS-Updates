@@ -252,18 +252,20 @@
 										'docid'=> $qcDocument['QcDocument']['id']
 									)) .'</div>';
 								}else{
-									echo "<br /><br />";
-									echo $this->Form->create('QcDocument',array('action'=>'upload_qc_document','type'=>'file',),array('role'=>'form','class'=>'form'));
-									echo '<div class="col-md-8">'.$this->Form->hidden('file_type',array()).'</div>';?>
-									<div class="col-md-8">
-										<span class='control-fileupload'><i class='fa fa-file-o'></i>
-											<?php echo $this->Form->input('file',array('type'=>'file', 'label'=>'Upload Document', 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));'));?>
-										</span>
-									</div>
-									<?php 
-									echo '<div class="col-md-4">'. $this->Form->submit('Upload File',array('class'=>'btn btn-sm btn-info')).'</div>';
-									echo $this->Form->input('id',array('default'=>$qcDocument['QcDocument']['id']));
-									echo $this->Form->end();
+									if(in_array($this->Session->read('User.id'),json_decode($qcDocument['QcDocument']['editors'],true))){
+				                     	echo "<br /><br />";
+										echo $this->Form->create('QcDocument',array('action'=>'upload_qc_document','type'=>'file',),array('role'=>'form','class'=>'form'));
+										echo '<div class="col-md-8">'.$this->Form->hidden('file_type',array()).'</div>';?>
+										<div class="col-md-8">
+											<span class='control-fileupload'><i class='fa fa-file-o'></i>
+												<?php echo $this->Form->input('file',array('type'=>'file', 'label'=>'Upload Document', 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));'));?>
+											</span>
+										</div>
+										<?php 
+										echo '<div class="col-md-4">'. $this->Form->submit('Upload File',array('class'=>'btn btn-sm btn-info')).'</div>';
+										echo $this->Form->input('id',array('default'=>$qcDocument['QcDocument']['id']));
+										echo $this->Form->end();   
+				                    }									
 								}	
 							}
 

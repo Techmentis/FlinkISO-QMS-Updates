@@ -988,7 +988,13 @@ class QcDocumentsController extends AppController {
                     $this->autoRender = false;
                     $file_path = base64_decode($this->request->data['QcDocument']['url']);
                     $path1 = explode(DS , $file_path);
-                    $qcDocument = $this->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$path1[count($path1)-2]),'recursive'=>-1));                    
+                    $qcDocument = $this->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$path1[count($path1)-2]),'recursive'=>-1));
+                    
+                    if(!in_array($this->Session->read('User.id'),json_decode($qcDocument['QcDocument']['editors'],true))){
+                        $this->Session->setFlash(__('You are not authorized to delete this document'));
+                        $this->redirect(array('action' => 'view',$qcDocument['QcDocument']['id'],'timestamp'=>date('Ymdhis')));
+                    }
+                    
                     if($qcDocument){
                         $folder = Configure::read('path') . DS . $path1[count($path1)-2];
 
