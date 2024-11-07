@@ -553,7 +553,7 @@ if($filetype != null){
                                                 wrapEl[0].style.height = window.innerHeight + "px";
                                             }
                                         };                                        
-                                        <?php if($this->action == 'view'){ ?>
+                                        <?php if($this->action == 'view' && $this->request->controller != 'custom_tables'){ ?>
                                             $("#ofdcontainer<?php echo $placeholderid;?>").removeClass("collapsed-box");
                                             if (window.addEventListener) {
                                                 сonnectEditor();

@@ -95,7 +95,7 @@
 															)
 														);?>
 														<?php											
-														if($this->Session->read('User.id') != $approvalComment['Approval']['from']){
+														if($this->Session->read('User.is_approver') == true){
 															$approvalStatuses = array(0=>'Pending',1=>'Approved',2=>'Not Approved');
 															echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
 														// 'id'=>$approvalComment['ApprovalComment']['id'].'ResponseTxt',
