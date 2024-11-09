@@ -89,7 +89,7 @@ echo $this->fetch('script');
 	var width = $( window ).width() - 50;
 	var menuleft = $("#mega-menu").offset();
 	var pos = menuleft.left - 25; 
-	// console.log(menuleft.left);
+	
 	$(".get-size").attr("style","left:-"+pos+"px");
 	$(".get-size").width(width + 'px');
 
@@ -149,7 +149,6 @@ echo $this->fetch('script');
 			if(showdocs == 1){
 				$('#'+t.id+'_div_for_doc').remove();
 				$(t).next('div').after('<div id="'+t.id+'_div_for_doc"></div>');
-
 				$('#'+t.id+'_div_for_doc').load("<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/check_document/" + t.value + "/" + t.name +"/" + t.id + "/custom_table_id:<?php echo $this->request->params['named']['custom_table_id'];?>/record_id:<?php echo $this->request->params['pass'][0];?>/"+ $("#"+t.id).attr('model') + "/showdocs:" + showdocs + "/showdocs_mode:" + showdocs_mode + "/showdocs_copy:" + showdocs_copy );		
 			}
   }

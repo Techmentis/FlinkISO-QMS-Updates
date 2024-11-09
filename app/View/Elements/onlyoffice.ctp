@@ -87,7 +87,7 @@ if($filetype != null){
               <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus" id="ofccontainerbtn<?php echo $placeholderid;?>"></i></button>
           </div>            
       </div>          
-      <div class="box-body no-padding">    
+      <div class="box-body no-padding">
         <script type="text/javascript" src="<?php echo Configure::read('OnlyofficePath');?>"></script>
         <style type="text/css">
             .onlyofficediv{width: 100%;height: 924px;display: block;float: left;}
@@ -591,7 +591,7 @@ if($filetype != null){
                                 </script>
                                 <div class="">
                                     <div class="split col-md-12 no-margin  no-padding">
-                                        <div class="onlyofficediv">    
+                                        <div class="onlyofficediv">
                                             <div id="placeholder_<?php echo $filekey;?>"></div>
                                         </div>
                                     </div>

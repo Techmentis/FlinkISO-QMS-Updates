@@ -1,7 +1,7 @@
 <?php 
 if($this->request->params['named']['showdocs_mode'] == 0)$mode = 'view';
 else $mode = 'edit';	
-if($fileEdit){ 	
+if($fileEdit){
 	if($is_qc == false){
 		$key = $fileEdit['File']['file_key'];
 		$file_type = $fileEdit['File']['file_type'];

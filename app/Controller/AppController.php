@@ -3220,7 +3220,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		public function check_document(){
 			$this->layout = 'ajax';
 			$is_qc = false;
-
 			$field = str_replace('data['.$this->modelClass.'][','', $this->request->params['pass'][1]);
 			$field = str_replace(']','',$field);
 
@@ -3269,9 +3268,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			if($ref[1] == 'add')$action = 'add';
 			if($ref[1] == 'edit')$action = 'edit';
 			
-
-
-
 			foreach($belongs as $table => $data ){
 
 				if($data['foreignKey'] == $field){
@@ -3368,10 +3364,10 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 								// $this->loadModel('File');
 								$file = $this->File->find('first',array('conditions'=>array(
 									// 'File.record_id != '=>'',
-									'OR'=>array(
+									// 'OR'=>array(
 										'File.record_id'=>$this->request->params['named']['record_id'],
 										// 'File.record_id'=>'tmp',
-									),
+									// ),
 									
 									'File.qc_document_id'=>$qcfile['QcDocument']['id']
 								),'recursive'=>-1,'order'=>array('File.sr_no'=>'ASC')));
@@ -3386,8 +3382,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 									
 									$this->File->create();
 									if($this->File->save($file,false)){
-									}
-
+									}									
 								}else{									
 									$file_type = $qcfile['QcDocument']['file_type'];
 									$file_name = $file_name_without_ext = $this->_clean_table_names($qcfile['QcDocument']['title']);
@@ -3400,7 +3395,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 									$file_name_without_ext = $document_number.'-'.$file_name_without_ext.'-'.$document_version;
 									$file_name_without_ext = $this->_clean_table_names($file_name_without_ext);
 
-									$file['File']['id'] = $customTable['CustomTable']['id'];
+									// $file['File']['id'] = $customTable['CustomTable']['id'];
 									$file['File']['name'] = $file_name;
 									$file['File']['file_type'] = $qcfile['QcDocument']['file_type'];
 									// $file['File']['file_key'] = $qcfile['QcDocument']['file_key'];
