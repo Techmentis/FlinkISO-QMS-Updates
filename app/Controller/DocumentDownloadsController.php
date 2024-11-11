@@ -89,6 +89,8 @@ public function add() {
 			$this->set('pdfTemplateHeaders',$pdfTemplateHeaders);
 		}
 	}
+	
+	$this->set('controller_name',$this->request->params['named']['controller_name']);
 }
 
 
@@ -124,6 +126,7 @@ public function add_download_details($type = null, $id = null){
 }
 
 public function record_list(){
+	
 	// $this->autoRender = false;
 	if($this->request->data['DocumentDownload']['custom_table_id'] != null && $this->request->data['DocumentDownload']['custom_table_id'] != -1 && $this->request->data['DocumentDownload']['custom_table_id'] != ''){
 		$this->loadModel('CustomTable');
@@ -220,16 +223,92 @@ public function record_list(){
 	}	
 }
 
+public function _add_cover($data = null,$id = null){
+	if(isset($data['DocumentDownload']['qc_document_id']) && ($data['DocumentDownload']['qc_document_id'] != '-1' || $data['DocumentDownload']['qc_document_id'] != 0)){
+		$this->loadModel('QcDocument');
+		$qcDocument = $this->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$id)));		
+		if($qcDocument){
+			// load cover page
+			$cover = Configure::read('files') . DS . 'pdf_template' . DS . 'cover' . DS . 'template.html';
+			if(file_exists($cover)){
+				$filetoread = fopen($cover, "r") or die("Unable to open file!");
+				$contents = fread($filetoread,filesize($cover));
+				fclose($filetoread);
+
+				$contents = str_replace('&apos;', '"', $contents);
+            	$contents = str_replace('&quot;', '"', $contents);
+								
+				$fields = array(
+		    	'$qcDocument["QcDocument"]["name"]'=>$qcDocument["QcDocument"]["name"],
+		        '$qcDocument["QcDocument"]["title"]'=>$qcDocument["QcDocument"]["title"],
+		        '$qcDocument["QcDocument"]["document_number"]'=>$qcDocument["QcDocument"]["document_number"],
+		        '$qcDocument["QcDocument"]["issue_number"]'=>$qcDocument["QcDocument"]["issue_number"],
+		        '$qcDocument["QcDocument"]["date_of_next_issue"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["date_of_next_issue"]))),
+		        '$qcDocument["QcDocument"]["date_of_issue"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["date_of_issue"]))),
+		        '$qcDocument["QcDocument"]["effective_from_date"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["effective_from_date"]))),
+		        '$qcDocument["QcDocument"]["revision_number"]'=>$qcDocument["QcDocument"]["revision_number"],
+		        '$qcDocument["QcDocument"]["date_of_review"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["date_of_review"]))),
+		        '$qcDocument["QcDocument"]["revision_date"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["revision_date"]))),
+		        '$qcDocument["Standard"]["name"]'=>$qcDocument["Standard"]["name"],
+		        '$qcDocument["Clause"]["title"]'=>$qcDocument["Clause"]["title"],
+		        // '$qcDocument["Clause"]["name"]'=>$qcDocument["Clause"]["name"],
+		        '$qcDocument["Schedule"]["name"]'=>$qcDocument["Schedule"]["name"],
+		        '$qcDocument["IssuedBy"]["name"]'=>$qcDocument["IssuedBy"]["name"],
+		        '$qcDocument["PreparedBy"]["name"]'=>$qcDocument["PreparedBy"]["name"],
+		        '$qcDocument["ApprovedBy"]["name"]'=>$qcDocument["ApprovedBy"]["name"],
+		        '$qcDocument["QcDocumentCategory"]["name"]' => $qcDocument["QcDocumentCategory"]["name"],
+		        '$qcDocument["IssuingAuthority"]["name"]'=>$qcDocument["IssuingAuthority"]["name"]
+		    );
+
+		        foreach($fields as $field => $value){       
+		        	if($value != '')$contents = str_replace($field,$value, $contents);
+			    }
+
+				
+				if($id){
+					$path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $id;
+					$folderToEmpty = New Folder($path);
+					$folderToEmpty->delete();	
+				}
+
+				// $path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $id;
+				
+				// public function _generate_onlyoffice_pdf($url = null,$filetype = null,$outputtype = null, $password = null, $title = null,$record_id = null,$cover = null){
+				// ($folder = null, $file = null, $content = null){
+				
+					
+				$this->_write_html_file('template',$contents,$id);
+
+				// $this->_write_to_file(
+				// 	WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $id,
+				// 	WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $id . DS . 'template.html',
+				// 	$contents
+				// );
+
+				$url = Router::url('/', true) .'/files/pdf/'.$this->Session->read('User.id').'/'.$id .'/template.html';
+				$this->_generate_onlyoffice_pdf($url,'html', 'pdf' ,null, 'template' ,$id,true);
+				
+				return true;
+			}
+		}
+	}
+	return true;
+}
 public function download(){
 	
 	$this->set('addwatermark',false);
 	if($this->request->params['named']['type'] == 'rec'){
+		
 		if($this->request->params['named']['id']){
 			$path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $this->request->params['named']['id'];
 			$folderToEmpty = New Folder($path);
-			$folderToEmpty->delete();	
+			$folderToEmpty->delete();
 		}
 		
+		if($this->request->data['DocumentDownload']['add_cover'] > 0){			
+			$this->_add_cover($this->request->data,$this->request->params['named']['id']);
+			$this->set('addcover',false);
+		}	
 
 		//run file script
 		if($this->request->params['named']['model']){
@@ -283,8 +362,8 @@ public function download(){
 				foreach($additionalFiles as $additionalFile){
 					$aFile = $this->DownloadFile->find('first',array('conditions'=>array('DownloadFile.id'=>$additionalFile),'recursive'=>-1));
 					if($aFile && $aFile['DownloadFile']['model'] == 'QcDocument'){
-						$url = Router::url('/', true) .'/files/'.$this->Session->read('User.company_id') .'/files/'.$aFile['DownloadFile']['id'] .'/'. $aFile['DownloadFile']['name'].'.'.$aFile['DownloadFile']['file_type']; 						
-						$this->_generate_onlyoffice_pdf($url,$aFile['DownloadFile']['file_type'],'pdf', null, $aFile['DownloadFile']['name'], $aFile['DownloadFile']['qc_document_id']);
+						$url = Router::url('/', true) .'/files/'.$this->Session->read('User.company_id') .'/files/'.$aFile['DownloadFile']['id'] .'/'. $aFile['DownloadFile']['name'].'.'.$aFile['DownloadFile']['file_type'];
+						$this->_generate_onlyoffice_pdf($url,$aFile['DownloadFile']['file_type'],'pdf', null, $aFile['DownloadFile']['name'], $aFile['DownloadFile']['qc_document_id'],false);
 					}	
 				}
 			}
@@ -299,6 +378,17 @@ public function download(){
 
 		}
 	}else if($this->request->params['named']['type'] == 'qc'){
+		
+		if($this->request->params['named']['id']){
+			$path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $this->request->params['named']['id'];
+			$folderToEmpty = New Folder($path);
+			$folderToEmpty->delete();
+		}
+
+		if($this->request->data['DocumentDownload']['add_cover'] > 0){
+			$this->_add_cover($this->request->data,$this->request->params['named']['id']);
+			$this->set('addcover',false);
+		}
 		// run onlyoffice script
 		$this->loadModel('QcDocument');
 		$qcDocument = $this->QcDocument->find('first',array(
@@ -315,7 +405,7 @@ public function download(){
 
 		$url = Router::url('/', true) .'/files/'.$this->Session->read('User.company_id') .'/qc_documents/'.$qcDocument['QcDocument']['id'] .'/'. $file; 
 		
-		$this->_generate_onlyoffice_pdf($url,$qcDocument['QcDocument']['file_type'], 'pdf' ,null, $file_name ,$qcDocument['QcDocument']['id']);	
+		$this->_generate_onlyoffice_pdf($url,$qcDocument['QcDocument']['file_type'], 'pdf' ,null, $file_name ,$qcDocument['QcDocument']['id'],false);	
 
 		$pdfs = array();
 		$path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $this->request->params['named']['id'];	
@@ -371,6 +461,7 @@ public function download(){
         '$qcDocument["QcDocument"]["revision_date"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["revision_date"]))),
         '$qcDocument["Standard"]["name"]'=>$qcDocument["Standard"]["name"],
         '$qcDocument["Clause"]["name"]'=>$qcDocument["Clause"]["name"],
+        '$qcDocument["Clause"]["title"]'=>$qcDocument["Clause"]["title"],
         '$qcDocument["Schedule"]["name"]'=>$qcDocument["Schedule"]["name"],
         '$qcDocument["IssuedBy"]["name"]'=>$qcDocument["IssuedBy"]["name"],
         '$qcDocument["PreparedBy"]["name"]'=>$qcDocument["PreparedBy"]["name"],
@@ -388,7 +479,6 @@ public function download(){
 public function _generate_header($qcDocument = null, $fontsize = null,$fontface = null,$record_id = null){	
 
 	$headerFile = Configure::read('files') . DS . 'pdf_template' . DS . 'header/template.html';
-
 	if(file_exists($headerFile)){
 		$filetoread = fopen($headerFile, "r") or die("Unable to open file!");
 		$table = fread($filetoread,filesize($headerFile));
@@ -407,6 +497,7 @@ public function _generate_header($qcDocument = null, $fontsize = null,$fontface 
         '$qcDocument["QcDocument"]["revision_date"]'=>date(Configure::read('dateFormat',strtotime($qcDocument["QcDocument"]["revision_date"]))),
         '$qcDocument["Standard"]["name"]'=>$qcDocument["Standard"]["name"],
         '$qcDocument["Clause"]["name"]'=>$qcDocument["Clause"]["name"],
+        '$qcDocument["Clause"]["title"]'=>$qcDocument["Clause"]["title"],
         '$qcDocument["Schedule"]["name"]'=>$qcDocument["Schedule"]["name"],
         '$qcDocument["IssuedBy"]["name"]'=>$qcDocument["IssuedBy"]["name"],
         '$qcDocument["PreparedBy"]["name"]'=>$qcDocument["PreparedBy"]["name"],
@@ -446,7 +537,7 @@ public function _generate_header($qcDocument = null, $fontsize = null,$fontface 
 				</table>
 		";	
 		$table .= "</table></body></html>";	
-	}		
+	}	
 	$this->_write_html_file($qcDocument['QcDocument']['id'],$table,$record_id);
 }
 
@@ -615,6 +706,7 @@ public function _generate_template_content($fields = null, $record = null, $mode
         '$qcDocument["QcDocument"]["revision_date"]'=>date(Configure::read('dateFormat'),strtotime($this->viewVars['qcDocument']["QcDocument"]["revision_date"])),
         '$qcDocument["Standard"]["name"]'=>$this->viewVars['qcDocument']["Standard"]["name"],
         '$qcDocument["Clause"]["name"]'=>$this->viewVars['qcDocument']["Clause"]["name"],
+        '$qcDocument["Clause"]["title"]'=>$qcDocument["Clause"]["title"],
         '$qcDocument["Schedule"]["name"]'=>$this->viewVars['qcDocument']["Schedule"]["name"],
         '$qcDocument["IssuedBy"]["name"]'=>$this->viewVars['qcDocument']["IssuedBy"]["name"],
         '$qcDocument["PreparedBy"]["name"]'=>$this->viewVars['qcDocument']["PreparedBy"]["name"],
@@ -770,7 +862,7 @@ public function download_qc_document(){
 			$file_name = $file_name;
 
 			$url = Router::url('/', true) . 'files/'. $this->Session->read('User.company_id') . '/qc_documents/' . $qcDocument['QcDocument']['id']. '/' . $file_name . '.' . $qcDocument['QcDocument']['file_type'];						
-			$this->_generate_onlyoffice_pdf($url,$qcDocument['QcDocument']['file_type'], 'pdf' ,null, $file_name ,$qcDocument['QcDocument']['id']);	
+			$this->_generate_onlyoffice_pdf($url,$qcDocument['QcDocument']['file_type'], 'pdf' ,null, $file_name ,$qcDocument['QcDocument']['id'],false);	
 		}
 	}
 }
@@ -817,7 +909,7 @@ public function get_child_records($additionalTables = null,$id = null){
 
 public function onlyoffice_pdf($file = null){		
 	$url = Router::url('/', true) . 'files/'. $this->Session->read('User.company_id') . '/files/' . $file['DownloadFile']['id']. '/' . $file['DownloadFile']['name'] . '.' . $file['DownloadFile']['file_type'];	
-	$this->_generate_onlyoffice_pdf($url,$file['DownloadFile']['file_type'], 'pdf' ,null, $file['DownloadFile']['name'] ,$file['DownloadFile']['id']);	
+	$this->_generate_onlyoffice_pdf($url,$file['DownloadFile']['file_type'], 'pdf' ,null, $file['DownloadFile']['name'] ,$file['DownloadFile']['id'],false);	
 }
 
 public function _generate_pdf_file($header_file = null,$content = null,$fileName = null, $record_id = null){

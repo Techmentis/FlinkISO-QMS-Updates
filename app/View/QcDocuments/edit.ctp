@@ -80,7 +80,7 @@
 						'version_keys' => $this->data['QcDocument']['version_keys'],
 						'version' => $this->data['QcDocument']['version'],
 						'versions' => $this->data['QcDocument']['versions'],
-						'docid'=> $data['QcDocument']['id']
+						'docid'=> $this->data['QcDocument']['id']
 					));
 					?>
 				</div>

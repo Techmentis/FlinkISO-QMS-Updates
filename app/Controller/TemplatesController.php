@@ -106,7 +106,6 @@ class TemplatesController extends AppController {
     } 
 
     public function save_doc() {
-        
         $this->autoRender = false;
         $local = $this->request->params['named'];
         
@@ -122,6 +121,7 @@ class TemplatesController extends AppController {
             
             $this->loadModel('File');
             $file = $this->File->find('first',array('conditions'=>array('File.id'=>$local['record_id'])));
+            
             $this->log('File details => ' . json_encode($file));
             if($file){            
                 $file_type = $file['File']['file_type'];
@@ -159,8 +159,6 @@ class TemplatesController extends AppController {
                     
                 }
                 
-
-
                 $key = $this->_generate_onlyoffice_key($record_id . date('Ymdhis'));
                 $file['File']['file_key'] = $key;
                 $this->File->create();
@@ -168,6 +166,6 @@ class TemplatesController extends AppController {
             }
             
         }
-       
+        echo "{\"error\":0}";  
     }
 }

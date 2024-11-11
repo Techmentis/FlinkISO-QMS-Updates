@@ -16,10 +16,14 @@ unset($postData['options']['soft_delete']);
 unset($postData['options']['publish']);
 ?>
 <div class="row"> 
-    <div class="col-md-12"><h4><small><?php echo $this->element('breadcrumbs'); ?></small>
+    <div class="col-md-12"><h4><small><?php echo $this->element('breadcrumbs',array('defaultTitle'=>$postData['defaultTitle'])); ?></small>
     <?php 
     if($postData["friendlyName"])echo h($postData["friendlyName"]); 
     else echo h($postData["pluralHumanName"]); 
+    
+    if($postData['defaultTitle']){
+        echo "<small> /</small> ". $postData['defaultTitle'];
+    }
     ?>
 </h4>
 </div>
@@ -206,9 +210,9 @@ $str .= 'timestamp:'.date('ymdhis');
 
     function openpdf(){
         <?php if($this->request->controller == 'qc_documents' ){ ?>
-            $("#pdf_open").load("<?php echo Router::url('/', true); ?>document_downloads/add/qc_document_id:<?php echo $this->request->params['pass'][0];?>");
+            $("#pdf_open").load("<?php echo Router::url('/', true); ?>document_downloads/add/qc_document_id:<?php echo $this->request->params['pass'][0];?>/controller_name:<?php echo $this->request->controller;?>");
         <?php }else{ ?>
-            $("#pdf_open").load("<?php echo Router::url('/', true); ?>document_downloads/add/custom_table_id:<?php echo $this->request->params['named']['custom_table_id'];?>/qc_document_id:<?php echo $this->request->params['named']['qc_document_id'];?>/process_id:<?php echo $this->request->params['named']['process_id'];?>/<?php echo $this->request->params['pass'][0];?>");
+            $("#pdf_open").load("<?php echo Router::url('/', true); ?>document_downloads/add/custom_table_id:<?php echo $this->request->params['named']['custom_table_id'];?>/qc_document_id:<?php echo $this->request->params['named']['qc_document_id'];?>/process_id:<?php echo $this->request->params['named']['process_id'];?>/<?php echo $this->request->params['pass'][0];?>/controller_name:<?php echo $this->request->controller;?>");
         <?php }?>        
         
     }

@@ -22,7 +22,7 @@
 
 <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'PDF Templates','modelClass'=>'PdfTemplate','options'=>array("sr_no"=>"Sr No","name"=>"Name"),'pluralVar'=>'pdfDepartments'))); ?>
 <style type="text/css">
-	.txtfld{width: 96%; border: none; margin: 5px 0}
+	.txtfld{width: 96%; border: none; margin: 5px 0; font-family: 'Arial';font-size:120%}
 	.childtables ul { list-style-type: none; margin: 0; padding: 0; margin-bottom: 10px; }
   	.childtables li { margin: 5px; padding: 5px; width: 150px; border:1px solid #ccc; width:100% }  
   	#return_value_for_dropdown{height: 650px}
@@ -31,7 +31,7 @@
 <?php echo $this->Form->create('PdfTemplate',array('action'=>'add'),array('class'=>'form-control')) ?>
 <div class="main">
 	<div class="row">
-<?php if($this->request->params['pass'][0] != 'HeaderTemplate'){ ?>		
+<?php if($this->request->params['pass'][0] != 'HeaderTemplate'){ ?>
 			<div class="col-md-4"><?php echo $this->Form->input('custom_table_id',array('options'=>$customTables, 'default'=>$this->request->params['pass'][0]));?></div>
 <?php } ?>
 <?php if($this->request->params['pass'][0]){ ?>
@@ -80,10 +80,17 @@
 		</div>
 
 		<?php }	?>			
-		<?php if($header == true){ 
-			echo '<div class="col-md-12 "><h5>HTML Preview</h5>'.$headerFileHtml.'</div>';
+		<?php if($header == true){ ?>
+			<div class="">
+				<div class="col-md-12">
+					<h4>HTML Preview</h4>
+					<div class="box panel-body">
+						<?php echo $headerFileHtml;?>
+					</div>
+				</div>
+			</div>
 
-			$font_face = array('Arial'=>'Arial','Times New Roman'=>'Times New Roman','Tahoma'=>'Tahoma','Helvetica'=>'Helvetica');
+		<?php $font_face = array('Arial'=>'Arial','Times New Roman'=>'Times New Roman','Tahoma'=>'Tahoma','Helvetica'=>'Helvetica');
 			$edittype = array('Doc'=>'Document','Html'=>'HTML');
 			?>
 			<div class="col-md-4 "><?php echo $this->Form->input('PdfTemplates.font_size',array('default'=> 11 , 'class'=>'form-control'));?></div>
@@ -154,11 +161,10 @@
 		));
 	}	
 
-?>	
-<p><strong>View Only. You can edit this template from edit section, after saving the template.</strong></p>
-<p>Do not add header and footer to the document. Header & Footer is generated seperatly and added in runtime</p>
+?>
+
 	</div>	
-	<div class="col-md-12">Available Fields
+	<div class="col-md-12"><h5>Available Fields</h5>
 			<div class="row">
 				<?php if(!$customTable){ ?>
 				<div class="col-md-6">

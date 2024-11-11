@@ -31,6 +31,10 @@
             $mode = 'view';
         }    
 
+        if($action == 'view'){
+            $mode = 'view';
+        }
+
         $file_path = $qcDocument['QcDocument']['id'];
         $file = $document_number.'-'.$file_name.'-'.$document_version;
         $file = $this->requestAction(array('action'=>'clean_table_names',$file));

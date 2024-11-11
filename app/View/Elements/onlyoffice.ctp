@@ -1,3 +1,8 @@
+<?php 
+if($action == 'view'){
+    $mode = 'view';
+}
+?>
 <div id="ofcon<?php echo $filekey;?>">
     <style>
         .split, .load_version_document{border-bottom: 1px solid #ccc;}
@@ -10,7 +15,7 @@
     <?php
     if(!$filekey)$filekey = $fileData['File']['new_file_key'];                
     $placeholderid = $filekey;
-    $checkdatetime = date('Y-m-d H:i:s',strtotime("-30 seconds"));
+    $checkdatetime = date('Y-m-d H:i:s',strtotime("-10 seconds"));
     $currentdatetime = date('Y-m-d H:i:s');
     if($last_modified)$last_modified = date('Y-m-d H:i:s',strtotime($last_modified));
 
@@ -25,7 +30,7 @@
         if($this->request->controller == 'qc_documents'){
         if($this->request->data['QcDocument']['document_status'] == 0){ // check if draft and apply draft rules
             if($this->action != 'view' &&  ($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || in_array($this->Session->read('User.id'), json_decode($this->request->data['QcDocument']['user_id'],true)))){
-                $mode = 'edit';
+                if(!$mode)$mode = 'edit';
             }else{
                 $mode = 'view';
             }
@@ -35,7 +40,7 @@
                 $this->Session->read('User.employee_id') == $this->request->data['QcDocument']['prepared_by'] ||
                 $this->Session->read('User.employee_id') == $this->request->data['QcDocument']['issued_by']
             ){
-                $mode = 'edit';
+                if(!$mode)$mode = 'edit';
         }else{
             $mode = 'embedded';
         }
@@ -126,7 +131,7 @@ if($filetype != null){
         }else if(!in_array($this->request->controller, $comarray) && ($this->action == 'add' || $this->action == 'edit' || $this->action == 'view') && $document['QcDocument']['data_type'] != 1)
         {      
             if($this->action == 'edit' || $this->action == 'add'){
-                $mode = 'edit';
+                if(!$mode)$mode = 'edit';
                 echo "<div class='data_type_notification'>Document setting is Document/Both. Loding document in Edit mode.</div>";
             }else{
                 $mode = 'view';
@@ -169,11 +174,17 @@ if($filetype != null){
             $callbackUrl = Router::url('/',true) ."custom_tables/save_rec_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller;
 
         }else if($this->request->controller == 'pdf_templates'){  
-            $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'pdf_template'. '/' . $record_id . '/template.docx';
-            $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'pdf_template'. '/' . $record_id . '/' . 'diff.zip';
+            if($cover == true){
+                $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'pdf_template'. '/cover/template.docx';
+                $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'pdf_template/cover/diff.zip';
+                echo ">> Rec?" . $record_id;
+                $callbackUrl = Router::url('/',true) ."pdf_templates/save_template/record_id:cover" .'/company_id:'.$company_id .'/controller:'.$controller;
+            }else{
+                $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'pdf_template'. '/' . $record_id . '/template.docx';
+                $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'pdf_template'. '/' . $record_id . '/' . 'diff.zip';
 
-            $callbackUrl = Router::url('/',true) ."pdf_templates/save_template/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller;
-
+                $callbackUrl = Router::url('/',true) ."pdf_templates/save_template/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller;
+            }            
         }else{    
             $url = Configure::read('url') . '/' . $path . '/' .$file;
             $historyurl = Configure::read('url') . '/' . $path . '/' .'diff.zip';                        
@@ -789,14 +800,14 @@ if($filetype != null){
             $().ready(function(){
                 $("#ofcrefresh<?php echo $placeholderid;?>").on('click',function(){
                     $("#ofcrefresh<?php echo $placeholderid;?>").addClass('fa-spin');
-                    $("#ofcon<?php echo $placeholderid;?>").load("<?php echo Router::url('/', true); ?><?php echo $this->request->controller;?>/reloadrecordfile/<?php echo $fileEdit['File']['id'];?>")
+                    $("#ofcon<?php echo $placeholderid;?>").load("<?php echo Router::url('/', true); ?><?php echo $this->request->controller;?>/reloadrecordfile/<?php echo $fileEdit['File']['id'];?>/<?php echo $action;?>")
                 })
             });
         <?php }else{ ?>
             $().ready(function(){
                 $("#ofcrefresh<?php echo $placeholderid;?>").on('click',function(){
                     $("#ofcrefresh<?php echo $placeholderid;?>").addClass('fa-spin');
-                    $("#ofcon<?php echo $placeholderid;?>").load("<?php echo Router::url('/', true); ?>qc_documents/reloaddocument/<?php echo $docid;?>")
+                    $("#ofcon<?php echo $placeholderid;?>").load("<?php echo Router::url('/', true); ?>qc_documents/reloaddocument/<?php echo $docid;?>/<?php echo $action;?>")
                 })
             });
         <?php } ?>
@@ -860,8 +871,6 @@ if($filetype != null){
             });
 
             <?php } ?>        
-        }
-
+        }      
     </script>
-
 </div>

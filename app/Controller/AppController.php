@@ -83,13 +83,13 @@ class AppController extends Controller {
 		Configure::write("url", Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . $this->request->controller);
 		Configure::write("common_path", 'files' . DS . $this->Session->read('User.company_id') . DS . $this->request->controller);
 		
-		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk');
+		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file');
 		
 		if (empty($this->Session->read('User.id')) && !in_array($this->action, $ignore)) {
 			$this->Session->setFlash(__('Login to continue'));
 			$this->redirect(array('controller' => 'users', 'action' => 'login'));
 		}else{
-			$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template');
+			$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file');
 
 			if (empty($this->Session->read('User.id')) && !in_array($this->action, $ignore)) {
 				try{
@@ -115,9 +115,9 @@ class AppController extends Controller {
 		}
 		if($this->Session->read('User.user_session_id')){
 			$this->loadModel('UserSession');
-	        $this->UserSession->read(null,$this->Session->read('User.user_session_id'));
-	        $this->UserSession->set('end_time',date('Y-m-d H:i:s'));
-	        $this->UserSession->save(); 
+			$this->UserSession->read(null,$this->Session->read('User.user_session_id'));
+			$this->UserSession->set('end_time',date('Y-m-d H:i:s'));
+			$this->UserSession->save(); 
 		}		
 	}
 	
@@ -235,6 +235,7 @@ class AppController extends Controller {
 	}
 
 	public function beforeFilter() {
+		$this->_check_login();
 		if($this->Session->read('User')){
 
 			Configure::write("files", WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id'));
@@ -243,7 +244,7 @@ class AppController extends Controller {
 			Configure::write("path", WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . $this->request->controller);
 			Configure::write("url", Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . $this->request->controller);
 			Configure::write("common_path", 'files' . DS . $this->Session->read('User.company_id') . DS . $this->request->controller);
-					
+
 			if(
 				($this->request->is('ajax') == true && $this->request->params['named']['allow_access_user'] != $this->Session->read('User.id')) || 
 				$this->request->data['Access']['skip_access_check'] == 1 && $this->request->data['Access']['allow_access_user'] == $this->Session->read('User.id')){
@@ -281,7 +282,7 @@ class AppController extends Controller {
 		$this->redirect($this->referer());
 	}
 	public function _access_redirect($n = null){ 
-		$ignore = array('install_updates', 'register','activate','send_otp', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk','change_password','check_password_validation','save_template','clean_table_names','jwtencode');
+		$ignore = array('install_updates', 'register','activate','send_otp', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk','change_password','check_password_validation','save_template','clean_table_names','jwtencode','save_doc','save_rec_doc','save_custom_docs','save_file');
 		if(!in_array($this->action,$ignore) 
 			&& $this->request->controller != 'qc_documents' 
 			// && $this->request->controller != 'standards' 
@@ -532,7 +533,7 @@ public function _get_approver_list($creator = null) {
 			'conditions' => array(
 				'Employee.is_approver' => 1 
 			))
-		);
+	);
 		$this->set('approversList', $approversList);		
 	}	
 }
@@ -999,12 +1000,12 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 		if($this->request->controller == 'processes'){
 			$options = array('conditions' => array('Process.' . $this->Process->primaryKey => $id));
-	        $process = $this->Process->find('first', $options);
+			$process = $this->Process->find('first', $options);
 
-	        if($this->Session->read('User.is_mr') == false && $process['Process']['created_by'] != $this->Session->read('User.id')){
-	            $this->Session->setFlash(__('You can not delete this process.'));
-	            $this->redirect(array('action' => 'index', 'process_id' => $this->request->params['named']['process_id'], 'custom_table_id' => $this->request->params['named']['custom_table_id']));
-	        }
+			if($this->Session->read('User.is_mr') == false && $process['Process']['created_by'] != $this->Session->read('User.id')){
+				$this->Session->setFlash(__('You can not delete this process.'));
+				$this->redirect(array('action' => 'index', 'process_id' => $this->request->params['named']['process_id'], 'custom_table_id' => $this->request->params['named']['custom_table_id']));
+			}
 		}		
 
 		if ($this->request->controller != 'custom_tables') {
@@ -1036,13 +1037,13 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		// find other tables
 		$this->loadModel('QcDocument');
 		$docs = $this->QcDocument->find('all',array('conditions'=>array(
-				'QcDocument.parent_document_id'=>$record[$model]['qc_document_id'],
-				),					
-			'fields'=>array(
-				'QcDocument.id',
-				'QcDocument.title',
-			)
-		));
+			'QcDocument.parent_document_id'=>$record[$model]['qc_document_id'],
+		),					
+		'fields'=>array(
+			'QcDocument.id',
+			'QcDocument.title',
+		)
+	));
 
 		if($docs){
 			foreach($docs as $doc){
@@ -1361,10 +1362,10 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			} 
 		}
 		if($field_condition)$conditions = array('OR'=>array_merge($conditions,$field_condition));					
-			$this->paginate = array('limit'=>25, 'order' => array($model.'.id' => 'DESC'), 'conditions' => array($conditions));
-			$this->$model->recursive = 0;			
-			$this->set(Inflector::variable(Inflector::tableize($model)), $this->paginate()); 
-			
+		$this->paginate = array('limit'=>25, 'order' => array($model.'.id' => 'DESC'), 'conditions' => array($conditions));
+		$this->$model->recursive = 0;			
+		$this->set(Inflector::variable(Inflector::tableize($model)), $this->paginate()); 
+
 		$this->_commons(); 
 		$this->render('index');
 	}
@@ -1796,11 +1797,11 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 
 	public function get_default($model = null){
-        $this->autoRender = false;
-        $this->loadModel($model);
-        return $this->$model->displayField;
+		$this->autoRender = false;
+		$this->loadModel($model);
+		return $this->$model->displayField;
 
-    }
+	}
 
 	public function _table_menu(){ 
 		$this->loadModel('CustomTable');
@@ -2318,34 +2319,34 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 
 	public function _file_clean_up(){
-        $this->loadModel('File');
-        $files = $this->File->find('all',array('conditions'=>array('File.record_id'=>'tmp'), 'fields'=>array('File.id','File.name','File.file_type'),'recursive'=>-1));
-        foreach($files as $file){
-            $check_files = Configure::read('files') . DS . 'files' . DS . $file['File']['id'] . DS . $file['File']['name'] .'.'.$file['File']['file_type'];
-            if(!file_exists($check_files)){
-                $this->File->delete($file['File']['id']);
-            }
-        }        
+		$this->loadModel('File');
+		$files = $this->File->find('all',array('conditions'=>array('File.record_id'=>'tmp'), 'fields'=>array('File.id','File.name','File.file_type'),'recursive'=>-1));
+		foreach($files as $file){
+			$check_files = Configure::read('files') . DS . 'files' . DS . $file['File']['id'] . DS . $file['File']['name'] .'.'.$file['File']['file_type'];
+			if(!file_exists($check_files)){
+				$this->File->delete($file['File']['id']);
+			}
+		}        
 
         // remove empty folders
-        $file_folder = New Folder(Configure::read('files') . DS . 'files');
-        $folders = $file_folder->read();
-        foreach($folders[0] as $check_folder){
-            $folder_to_check = New Folder(Configure::read('files') . DS . 'files' . DS . $check_folder);
-            $check_files = $folder_to_check->read();
-            if(count($check_files[1]) == 0){
+		$file_folder = New Folder(Configure::read('files') . DS . 'files');
+		$folders = $file_folder->read();
+		foreach($folders[0] as $check_folder){
+			$folder_to_check = New Folder(Configure::read('files') . DS . 'files' . DS . $check_folder);
+			$check_files = $folder_to_check->read();
+			if(count($check_files[1]) == 0){
                 //delete folder and also dete file table record
                 // $file = $this->File->find('first',array('conditions'=>array('File.id'=>$check_folder)));
-                $this->File->delete($check_folder);
-                $folder_to_check->delete();
-            }else{
-                $file = $this->File->find('count',array('conditions'=>array('File.id'=>$check_folder)));
-                if($file == 0){
-                    $folder_to_check->delete();
-                }
-            }
-        }        
-     }
+				$this->File->delete($check_folder);
+				$folder_to_check->delete();
+			}else{
+				$file = $this->File->find('count',array('conditions'=>array('File.id'=>$check_folder)));
+				if($file == 0){
+					$folder_to_check->delete();
+				}
+			}
+		}        
+	}
 
 
 	public function _prepare_update(){	
@@ -2477,8 +2478,8 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					'File.record_id'=>'tmp',
 					'File.user_id'=>$this->Session->read('User.id'),
 					'File.custom_table_id'=>$customTable['CustomTable']['id']),
-					'recursive'=>-1,
-				));
+				'recursive'=>-1,
+			));
 
 				foreach($files_to_delete as $file_to_delete){
 					unlink(Configure::read('files') . DS . 'files' . $file_to_delete['File']['id'] . 'DS '. $file_to_delete['File']['name'].'.'.$file_to_delete['File']['file_type']);
@@ -2885,24 +2886,24 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 		public function reloadfile($file_id = null){
 			if($file_id){
-        		$this->loadModel('File');
-	            $file = $this->File->find('first',array('conditions'=>array('File.record_id'=>$file_id)));
-	            $this->set('fileEdit',$file);
+				$this->loadModel('File');
+				$file = $this->File->find('first',array('conditions'=>array('File.record_id'=>$file_id)));
+				$this->set('fileEdit',$file);
 				$this->set('is_qc',false);	      
-	        }
-	        $this->render('/Elements/load_extra_document');
-	    }
+			}
+			$this->render('/Elements/load_extra_document');
+		}
 
-	    public function reloadrecordfile($file_id = null){
+		public function reloadrecordfile($file_id = null){
 			if($file_id){
-        		$this->loadModel('File');
-	            $file = $this->File->find('first',array('conditions'=>array('File.id'=>$file_id)));
-	            $this->set('fileEdit',$file);
+				$this->loadModel('File');
+				$file = $this->File->find('first',array('conditions'=>array('File.id'=>$file_id)));
+				$this->set('fileEdit',$file);
 				$this->set('is_qc',false);	 
 				$this->set('controller',$file['File']['controller']);
-	        }
-	        $this->render('/Elements/load_extra_document');
-	    }
+			}
+			$this->render('/Elements/load_extra_document');
+		}
 
 		public function _trigger_email($existingRecord = null){
 			$modelName = $this->modelClass;
@@ -3293,7 +3294,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 								$this->set('fileEdit',$file);
 								$fileloaded = true;
 							}
-														
+
 							if($fileloaded == false){
 								if($action == 'add'){								
 									if($this->request->params['named']['showdocs_mode'] == 1 && $this->request->params['named']['showdocs_copy'] == 1){	
@@ -3365,7 +3366,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 								$file = $this->File->find('first',array('conditions'=>array(
 									// 'File.record_id != '=>'',
 									// 'OR'=>array(
-										'File.record_id'=>$this->request->params['named']['record_id'],
+									'File.record_id'=>$this->request->params['named']['record_id'],
 										// 'File.record_id'=>'tmp',
 									// ),
 									
@@ -3413,19 +3414,19 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 									$file['File']['data_received'] = 'added from copy file 2';	
 
 									$this->File->create();
-										if($this->File->save($file,false)){											
-											$doc  = WWW_ROOT . DS . 'files' . DS . $this->Session->read('User.company_id') . DS . 'qc_documents' . DS . $qcfile['QcDocument']['id'] . DS . $file['File']['name'].'.'.$file['File']['file_type'];
-											
-											$docsave = WWW_ROOT . DS . 'files' . DS . $this->Session->read('User.company_id') . DS . 'files' . DS . $this->File->id . DS . $file['File']['name'].'.'.$file['File']['file_type'];
-											
-											if(!file_exists($docsave)){
-												$newFolder = new Folder();
-												$newFolder->create(WWW_ROOT . DS . 'files' . DS . $this->Session->read('User.company_id') . DS . 'files' . DS . $this->File->id,0777);
-												copy($doc,$docsave);	
-											}
-											
+									if($this->File->save($file,false)){											
+										$doc  = WWW_ROOT . DS . 'files' . DS . $this->Session->read('User.company_id') . DS . 'qc_documents' . DS . $qcfile['QcDocument']['id'] . DS . $file['File']['name'].'.'.$file['File']['file_type'];
+
+										$docsave = WWW_ROOT . DS . 'files' . DS . $this->Session->read('User.company_id') . DS . 'files' . DS . $this->File->id . DS . $file['File']['name'].'.'.$file['File']['file_type'];
+
+										if(!file_exists($docsave)){
+											$newFolder = new Folder();
+											$newFolder->create(WWW_ROOT . DS . 'files' . DS . $this->Session->read('User.company_id') . DS . 'files' . DS . $this->File->id,0777);
+											copy($doc,$docsave);	
 										}
-										$file['File']['id'] = $this->File->id;
+
+									}
+									$file['File']['id'] = $this->File->id;
 								}
 								$this->set('is_qc',false);
 								$this->set('fileEdit',$file);
@@ -3445,7 +3446,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 								}
 							}
 						}
-							
+
 					}
 				}
 			}
@@ -3455,17 +3456,17 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 
 
-	public function delete_document(){
-		if($this->request->controller != 'qc_documents'){
-			$this->view = '/Elements/delete_document';
-			if ($this->request->is('post')) {
-	            $this->loadModel('User');
-	            $user = $this->User->find('first', array('conditions' => array('User.status' => 1, 'User.soft_delete' => 0, 'User.publish' => 1, 'User.username' => $this->Session->read('User.username'))));
-	            if ($user) {
-	                if (trim($user['User']['password']) != trim(Security::hash($this->request->data[Inflector::classify($this->request->controller)]['password'], 'md5', true))) {
-	                    $this->Session->setFlash(__('Incorrect password', true), 'default', array('class' => 'alert-danger'));                    
-	                } else {
-	                    	$getid = explode('/',base64_decode($this->request->data[Inflector::classify($this->request->controller)]['url']));
+		public function delete_document(){
+			if($this->request->controller != 'qc_documents'){
+				$this->view = '/Elements/delete_document';
+				if ($this->request->is('post')) {
+					$this->loadModel('User');
+					$user = $this->User->find('first', array('conditions' => array('User.status' => 1, 'User.soft_delete' => 0, 'User.publish' => 1, 'User.username' => $this->Session->read('User.username'))));
+					if ($user) {
+						if (trim($user['User']['password']) != trim(Security::hash($this->request->data[Inflector::classify($this->request->controller)]['password'], 'md5', true))) {
+							$this->Session->setFlash(__('Incorrect password', true), 'default', array('class' => 'alert-danger'));                    
+						} else {
+							$getid = explode('/',base64_decode($this->request->data[Inflector::classify($this->request->controller)]['url']));
 							$id = $getid[count($getid)-2];
 							$name = $getid[count($getid)-1];
 							
@@ -3473,15 +3474,15 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 							$this->File->delete($id,false);
 							unlink(Configure::read("files") . DS . 'files' . DS . $id . DS . $name);							
 							$this->Session->setFlash(__('File Deleted', true), 'default', array('class' => 'alert-success'));
-				            $this->redirect($this->request->data[Inflector::classify($this->request->controller)]['ref']);
+							$this->redirect($this->request->data[Inflector::classify($this->request->controller)]['ref']);
 
-	                }
-	            }
-	        } else {            
-	            $this->set('ref', $this->referer());
-	        }		
-        }
-	}
+						}
+					}
+				} else {            
+					$this->set('ref', $this->referer());
+				}		
+			}
+		}
 
 		public function _returnDetaultField($allFields = null){
 
@@ -3639,6 +3640,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$customTable = $this->CustomTable->find('first',array('recursive'=>-1, 'fields'=>array('CustomTable.id','CustomTable.name','CustomTable.fields'), 'conditions'=>array('CustomTable.table_name LIKE '=> $tableName)));
 			
 			if($customTable){
+
 				$customTableFields = json_decode($customTable['CustomTable']['fields'],true);
 				if($fieldDetails['type'] == 'boolean'){
 					// if field is publish
@@ -3675,7 +3677,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					}				
 				}				
 			}else{
-				
+
 				$field_details = json_decode(base64_decode($this->request->params['named']['field_details']),true);
 				$findModel = base64_decode($field_details['field_label']);
 				$newModel = $this->$thisModel->belongsTo[$findModel]['className'];
@@ -3694,8 +3696,9 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					// try and get values from model
 				}
 
-				if($field_details['type'] == 'integer' && ($field_details['length'] == null || $field_details['length'] == 1)){					
+				if($field_details['type'] == 'integer' && ($field_details['length'] == null || $field_details['length'] == 1)){
 					//check in $customArray in Model
+					$fieldDetails['length'] = 1;
 					$customArray = $this->$newModel->customArray;
 					if($customArray[Inflector::pluralize(Inflector::variable($fieldTobeChanged))]){
 						$values = $customArray[Inflector::pluralize(Inflector::variable($fieldTobeChanged))];
@@ -3724,14 +3727,17 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 
 
-		public function _generate_onlyoffice_pdf($url = null,$filetype = null,$outputtype = null, $password = null, $title = null,$record_id = null){
+		public function _generate_onlyoffice_pdf($url = null,$filetype = null,$outputtype = null, $password = null, $title = null,$record_id = null,$cover = null,$attach_cover = null){
+
 			$this->set('addwatermark',true);
 			
-			$delpath =  New Folder(WWW_ROOT .'files'. DS . 'pdf' . DS .$this->Session->read('User.id') . DS . $record_id);
-			if($record_id){
-				$delpath->delete();	
-			}
+			// if($cover != true){
+			// 	$delpath =  New Folder(WWW_ROOT .'files'. DS . 'pdf' . DS .$this->Session->read('User.id') . DS . $record_id);
+			// 	if($record_id){
+			// 		$delpath->delete();	
+			// 	}
 
+			// }			
 
 			$path = Configure::read('OnlyofficeConversionApi'). '/ConvertService.ashx';
 			$key = $this->_generate_onlyoffice_key($record_id . date('Ymdhis'));
@@ -3778,48 +3784,87 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$downloadUri = json_decode($response_data,true);
 			$downloadUri = $downloadUri['fileUrl'];
 
+
 			if (file_get_contents($downloadUri) === FALSE) {
 				
 			} else {
 				
 				$savepath = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id;
-				$folder = new Folder();
-				if ($folder->create($savepath,0777)) {
-				} else {
-					echo "Folder creation failed";
-					exit;
-				}
 
-				$new_data = file_get_contents($downloadUri);
-				$file_for_save = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id . DS .  '-remove-pdf-'. $title . '-' . date('his') .'.'.$outputtype;
-				if (file_put_contents($file_for_save, $new_data)) {				
-					$this->add_password($file_for_save,null,$record_id);
-				} else {
+				if(!file_exists($savepath)){
+					$folder = new Folder();
+					if ($folder->create($savepath,0777)) {
+					} else {
+						echo "Folder creation failed";
+						exit;
+					}
+				}				
 
-				}
+				if($cover == false){
+					$new_data = file_get_contents($downloadUri);
+					$file_for_save = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id . DS .  '-remove-pdf-'. $title . '-' . date('his') .'.'.$outputtype;
+					if (file_put_contents($file_for_save, $new_data)) {				
+						$this->add_password($file_for_save,null,$record_id);
+					} else {
 
+					}
+				}else{
+					$new_data = file_get_contents($downloadUri);
+
+					$file_for_save = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id . DS .  'cover-pdf'.'.'.$outputtype;					
+					if (file_put_contents($file_for_save, $new_data)) {				
+						unlink(WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id . DS . 'template.html');
+					} else {
+
+					}
+				}			
 			}
-
-		
 		}
 
 		public function add_password($pdf = null, $password = null, $record_id = null){
-			
+
 			$password = $this->request->data['DocumentDownload']['password'];
-			$input = $pdf;
-			$output = str_replace('-remove-pdf-', '', $pdf);
-			$output = str_replace($record_id, $this->request->params['named']['id'],$output);
-			$sign = $this->_sign_to_pdf($this->request->data['DocumentDownload']['signature'],$record_id,$this->request->data['DocumentDownload']['font_face'],$this->request->data['DocumentDownload']['font_size']);
-			$background = WWW_ROOT . 'files' . DS . 'samples' . DS . 'under-review.pdf';
-			
-			if($password && $password != ''){
-				$exec = Configure::read('PDFTkPath') . ' ' .$input .' multibackground ' .$sign.  ' output '. $output . ' user_pw '.$password.'';
+			// check if cover pdf exists, if yes, attach it
+			$cover = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id . DS .  'cover-pdf.pdf';
+			if(file_exists($cover)){
+				$input = $pdf;
+				$newoutput = str_replace('-remove-pdf-', '-add-cover-', $pdf);
+				$exec = Configure::read('PDFTkPath') . ' A=' .$cover .' B=' .$input.  ' cat A B output '. $newoutput .'';	
+				exec($exec);
+
+				$input = $pdf;
+				$output = str_replace('-add-cover-', '', $newoutput);
+				$output = str_replace($record_id, $this->request->params['named']['id'],$output);
+				$sign = $this->_sign_to_pdf($this->request->data['DocumentDownload']['signature'],$record_id,$this->request->data['DocumentDownload']['font_face'],$this->request->data['DocumentDownload']['font_size']);
+				
+				if($password && $password != ''){
+					$exec = Configure::read('PDFTkPath') . ' ' .$newoutput .' multibackground ' .$sign.  ' output '. $output . ' user_pw '.$password.'';
+				}else{
+					$exec = Configure::read('PDFTkPath') . ' ' .$newoutput .' multibackground ' .$sign.  ' output '. $output .'';
+				}
+				exec($exec);
+				unlink($newoutput);
+				unlink($cover);
+				unlink($input);
+				unlink($sign);
 			}else{
-				$exec = Configure::read('PDFTkPath') . ' ' .$input .' multibackground ' .$sign.  ' output '. $output .'';
+				$input = $pdf;
+				$output = str_replace('-remove-pdf-', '', $pdf);
+				$output = str_replace($record_id, $this->request->params['named']['id'],$output);
+				$sign = $this->_sign_to_pdf($this->request->data['DocumentDownload']['signature'],$record_id,$this->request->data['DocumentDownload']['font_face'],$this->request->data['DocumentDownload']['font_size']);
+				
+				if($password && $password != ''){
+					$exec = Configure::read('PDFTkPath') . ' ' .$input .' multibackground ' .$sign.  ' output '. $output . ' user_pw '.$password.'';
+				}else{
+					$exec = Configure::read('PDFTkPath') . ' ' .$input .' multibackground ' .$sign.  ' output '. $output .'';
+				}
+				exec($exec);
+				unlink($input);
+				unlink($sign);
 			}
-			exec($exec);
-			unlink($input);
-			unlink($sign);
+			
+			
+			
 		}
 
 		public function _sign_to_pdf($sign = null,$record_id = null,$font_face = null, $font_size = null){	
@@ -3920,10 +3965,10 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		public function _write_to_file($folder = null, $file = null, $content = null){
 			if($content){
 				chmod($folder,0777);
-		        $fp = fopen($file, 'w');
-		        fwrite($fp, $content);
-		        fclose($fp);
+				$fp = fopen($file, 'w');
+				fwrite($fp, $content);
+				fclose($fp);
 			}	        
-	    }
+		}
 
 	}

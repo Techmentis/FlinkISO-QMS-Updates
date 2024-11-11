@@ -1150,10 +1150,17 @@ class QcDocumentsController extends AppController {
         }        
     }
 
-    public function reloaddocument($docid = null){        
+    public function reloaddocument($docid = null,$action = null){
+        $docid = $this->request->params['pass'][0];
+        $action = $this->request->params['pass'][1];
         if($docid){
             $qcDocument = $this->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$docid)));
             $this->set('qcDocument',$qcDocument);
+            $this->set('docid',$docid);
+        }
+
+        if($action){
+            $this->set('action',$action);
         }
     }
 

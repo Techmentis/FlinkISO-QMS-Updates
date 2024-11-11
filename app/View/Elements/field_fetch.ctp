@@ -1,6 +1,5 @@
 <?php 	
 $field_details = json_decode(base64_decode($this->request->params['named']['field_details']),true);
-
 	// add rules
 	// mandatory
 	if($field_details['mandatory'] == 0){

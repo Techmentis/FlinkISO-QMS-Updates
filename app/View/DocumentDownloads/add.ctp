@@ -72,6 +72,27 @@
 								<li class="list-group-item"><i class="fa fa-eraser"></i> : Clear Canvas.</li>
 							</ul>
 						</div>
+						<?php 
+						$cover = Configure::read('files') . DS . 'pdf_template' . DS . 'cover' . DS . 'template.html';
+						if(file_exists($cover)){
+							$cover_page_options = array(
+								0=>'No',
+								1=>'Yes',
+								2=>'QC Documents Only',
+								3=>'All'
+							);
+							
+							if(isset($this->request->params['named']['custom_table_id'])){
+								unset($cover_page_options[1]);
+							}
+
+							if(isset($this->request->params['named']['controller_name']) && $this->request->params['named']['controller_name'] == 'qc_documents'){								
+								unset($cover_page_options[2]);
+								unset($cover_page_options[3]);
+							}
+							echo '<div class="col-md-12">'.$this->Form->input('add_cover',array('type'=>'radio', 'default'=>0, 'options'=>$cover_page_options)).'</div>';
+						}
+						?>
 						<?php
 						if($this->request->params['pass'][0]){ ?>
 							<?php 					
@@ -219,7 +240,7 @@
 					$(".modal-dialog").animate({width:'60%'});
 					$(".modal-title").html("Your PDFs files are ready for download.");
 				},
-				error: function(request, status, error) {                    
+				error: function(request, status, error) {
 					alert('Action failed!');
 				}
 			});

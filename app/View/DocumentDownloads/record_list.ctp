@@ -76,7 +76,7 @@
 <?php echo $this->Form->hidden('signature',array());?>
 <?php echo $this->Form->hidden('pdf_template_id',array());?>
 <?php echo $this->Form->hidden('pdf_header_id',array());?>
-
+<?php echo $this->Form->hidden('add_cover',array());?>
 
 
 

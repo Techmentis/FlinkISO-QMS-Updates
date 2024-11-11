@@ -15,8 +15,10 @@
 		<div class="table-responsive">
 			<?php echo $this->Form->create(array('class'=>'no-padding no-margin no-background'));?>
 			<?php
-			if($headerFileExists == true)echo $this->Html->link('Update Default Header File',array('action'=>'add','HeaderTemplate'),array('class'=>'btn btn-sm btn-success pull-right')).'<br /><br />';
-			else echo $this->Html->link('Create Default Header File',array('action'=>'add','HeaderTemplate'),array('class'=>'btn btn-sm btn-warning pull-right')).'<br /><br />';
+			if($headerFileExists == true)echo $this->Html->link('Update Default Header File',array('action'=>'add','HeaderTemplate'),array('class'=>'btn btn-sm btn-success pull-right'));
+			else echo $this->Html->link('Create Default Header File',array('action'=>'add','HeaderTemplate'),array('class'=>'btn btn-sm btn-warning pull-right'));
+
+			echo $this->Html->link('Create QC Document Cover File',array('action'=>'add_cover','CoverTemplate'),array('class'=>'btn btn-sm btn-info pull-right')).'<br /><br />';	
 			?>				
 			<table id="pdfTempates" cellpadding="0" cellspacing="0" class="table table-hover index" id="exportcsv">
 				<tr>
@@ -31,7 +33,14 @@
 					<?php foreach ($pdfTemplates as $pdfTemplate): ?>
 						<tr class="on_page_src" onclick="addrec('<?php echo $pdfTemplate['PdfTemplate']['id'];?>')" id="<?php echo $pdfTemplate['PdfTemplate']['id'];?>_tr">
 							<td><?php echo h($pdfTemplate['PdfTemplate']['name']); ?>&nbsp;</td>
-							<td><?php echo h($pdfTemplate['PdfTemplate']['template_type']?'Header':'Content'); ?>&nbsp;</td>
+							<!-- <td><?php echo h($pdfTemplate['PdfTemplate']['template_type']?'Header':'Content'); ?>&nbsp;</td> -->
+							<td>
+								<?php 
+									if($pdfTemplate['PdfTemplate']['template_type'] == 3)echo 'Cover';
+									if($pdfTemplate['PdfTemplate']['template_type'] == 0)echo 'Content';
+									if($pdfTemplate['PdfTemplate']['template_type'] == 1)echo 'Header';
+								?>
+							</td>
 							<td><?php echo h($pdfTemplate['CustomTable']['name']); ?>&nbsp;</td>														
 							<td><?php echo h($pdfTemplate['ModifiedBy']['name']); ?>&nbsp;</td>
 							<td><?php echo h($pdfTemplate['PdfTemplate']['modified']); ?>&nbsp;</td>

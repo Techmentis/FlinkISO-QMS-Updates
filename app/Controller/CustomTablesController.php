@@ -828,7 +828,8 @@ return true;
     public function _set_file($id = null,$type = null){        
         // before form submit
         // create call back folder
-        $folder = WWW_ROOT . 'files' . DS . $this->Session->read('company_id') . DS . 'save_doc' . DS . $id;
+        $folder = WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . 'save_doc' . DS . $id;
+        
         $callbackFolder = new Folder();
         $callbackFolder->create($folder);
         // generate key
