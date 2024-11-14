@@ -3784,7 +3784,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$downloadUri = json_decode($response_data,true);
 			$downloadUri = $downloadUri['fileUrl'];
 
-
 			if (file_get_contents($downloadUri) === FALSE) {
 				
 			} else {
@@ -3827,6 +3826,8 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			// check if cover pdf exists, if yes, attach it
 			$cover = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id . DS .  'cover-pdf.pdf';
 			if(file_exists($cover)){
+				
+
 				$input = $pdf;
 				$newoutput = str_replace('-remove-pdf-', '-add-cover-', $pdf);
 				$exec = Configure::read('PDFTkPath') . ' A=' .$cover .' B=' .$input.  ' cat A B output '. $newoutput .'';	
@@ -3835,8 +3836,8 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				$input = $pdf;
 				$output = str_replace('-add-cover-', '', $newoutput);
 				$output = str_replace($record_id, $this->request->params['named']['id'],$output);
-				$sign = $this->_sign_to_pdf($this->request->data['DocumentDownload']['signature'],$record_id,$this->request->data['DocumentDownload']['font_face'],$this->request->data['DocumentDownload']['font_size']);
-				
+				$sign = $this->_sign_to_pdf($this->request->data['DocumentDownload']['signature'],$record_id,$this->request->data['DocumentDownload']['font_face'],$this->request->data['DocumentDownload']['font_size']);				
+
 				if($password && $password != ''){
 					$exec = Configure::read('PDFTkPath') . ' ' .$newoutput .' multibackground ' .$sign.  ' output '. $output . ' user_pw '.$password.'';
 				}else{
@@ -3920,11 +3921,12 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				}
 				chmod($dir,0777);
 				chmod($path,0777);
-			}catch(Exception $e){            
+			}catch(Exception $e){
+				
 			}
 
 			$pagecontentfilename = 'signpdf';
-			$pdf = $CakePdf->custom_write($path,$path . DS . $pagecontentfilename.'-.pdf');
+			$pdf = $CakePdf->custom_write($path,$path . DS . $pagecontentfilename.'.pdf');
 			$pdf = $path . DS . $pagecontentfilename.'.pdf';
 			$pagecontentfilename = $path . DS . $pagecontentfilename.'-.pdf';   
 			

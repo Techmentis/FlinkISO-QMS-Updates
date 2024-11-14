@@ -177,7 +177,6 @@ if($filetype != null){
             if($cover == true){
                 $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'pdf_template'. '/cover/template.docx';
                 $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'pdf_template/cover/diff.zip';
-                echo ">> Rec?" . $record_id;
                 $callbackUrl = Router::url('/',true) ."pdf_templates/save_template/record_id:cover" .'/company_id:'.$company_id .'/controller:'.$controller;
             }else{
                 $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'pdf_template'. '/' . $record_id . '/template.docx';

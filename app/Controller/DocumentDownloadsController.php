@@ -110,8 +110,9 @@ public function add_download_details($type = null, $id = null){
 		$doc['DocumentDownload']['record_id'] = $file['File']['record_id'];
 	}
 
-	$doc['DocumentDownload']['name'] = $this->data['n'];
-	$doc['DocumentDownload']['download_by'] = $doc['DocumentDownload']['prepared_by'] = $doc['DocumentDownload']['approved_by'] = $this->Session->read('User.employee_id');
+	$doc['Documentdownload']['download_by'] = $this->Session->read('User.employee_id');
+	$doc['DocumentDownload']['name'] = $this->data['n'];	
+	$doc['DocumentDownload']['prepared_by'] = $doc['DocumentDownload']['approved_by'] = $this->Session->read('User.employee_id');	 
 	$doc['DocumentDownload']['signature'] = $this->data['s'];
 	$doc['DocumentDownload']['created_by'] = $this->Session->read('User.id');
 	$doc['DocumentDownload']['created_by'] = 1;
@@ -119,9 +120,14 @@ public function add_download_details($type = null, $id = null){
 	$doc['DocumentDownload']['soft_delete'] = 0;
 	$doc['DocumentDownload']['publish'] = $doc['DocumentDownload']['add_document'] = 1;
 	$doc['DocumentDownload']['issue'] = $qcDocument['QcDocument']['issue_number'];
-
+	$doc = array_merge($doc['DocumentDownload'],array('download_by'=>$this->Session->read('User.employee_id')));
+	
 	$this->DocumentDownload->create();
-	$this->DocumentDownload->save($doc,false);
+	if($this->DocumentDownload->save($doc,false)){
+		return true;
+	}else{
+		return false;
+	}
 	exit;
 }
 
@@ -309,7 +315,6 @@ public function download(){
 			$this->_add_cover($this->request->data,$this->request->params['named']['id']);
 			$this->set('addcover',false);
 		}	
-
 		//run file script
 		if($this->request->params['named']['model']){
 			$model = $this->request->params['named']['model'];			
@@ -389,6 +394,7 @@ public function download(){
 			$this->_add_cover($this->request->data,$this->request->params['named']['id']);
 			$this->set('addcover',false);
 		}
+
 		// run onlyoffice script
 		$this->loadModel('QcDocument');
 		$qcDocument = $this->QcDocument->find('first',array(
