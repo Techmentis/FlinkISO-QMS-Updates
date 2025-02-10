@@ -25,7 +25,7 @@
 						echo "<div class='col-md-12'>".$this->element('process_doc_header',array('document'=>$process))."</div>"; 
 					?>	
 					
-					<?php echo "<div class='col-md-4'>".$this->Form->input('name',array('class'=>'form-control','required','default'=>$qcDocument['QcDocument']['title'])) . '</div>'; ?>
+					<?php echo "<div class='col-md-4'>".$this->Form->input('name',array('class'=>'form-control','required','default'=> Inflector::Humanize($qcDocument['QcDocument']['title']))) . '</div>'; ?>
 					<?php echo "<div class='col-md-3'>".$this->Form->input('table_name',array('class'=>'form-control', 'readonly', 'default'=>$table_name)) . '</div>'; ?>
 					<?php echo "<div class='col-md-1'>".$this->Form->input('table_version',array('class'=>'form-control','label'=>'Version',  'readonly', 'default'=>$table_version)) . '</div>'; ?>
 					<?php echo "<div class='col-md-12 hide'>".$this->Form->hidden('fields',array('class'=>'form-control',)) . '</div>'; ?>

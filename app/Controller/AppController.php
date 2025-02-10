@@ -83,13 +83,13 @@ class AppController extends Controller {
 		Configure::write("url", Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . $this->request->controller);
 		Configure::write("common_path", 'files' . DS . $this->Session->read('User.company_id') . DS . $this->request->controller);
 		
-		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file');
+		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind');
 		
 		if (empty($this->Session->read('User.id')) && !in_array($this->action, $ignore)) {
 			$this->Session->setFlash(__('Login to continue'));
 			$this->redirect(array('controller' => 'users', 'action' => 'login'));
 		}else{
-			$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file');
+			$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind');
 
 			if (empty($this->Session->read('User.id')) && !in_array($this->action, $ignore)) {
 				try{
@@ -1842,7 +1842,9 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 	public function _clean_table_names($tableName = null){
 		if($tableName){
-			$tableName = ltrim(rtrim($tableName));		
+			$tableName = ltrim(rtrim($tableName));
+			$tableName = preg_replace('/[\x00-\x1F\x7F]/u', '', $tableName);
+			$tableName = preg_replace('/[[:^print:]]/', '', $tableName);
 			$tableName = str_replace('/', '_', $tableName);
 			$tableName = str_replace('-', '_', $tableName);
 			$tableName = str_replace('&', '_', $tableName);
@@ -1853,10 +1855,12 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$tableName = preg_replace('/-*-/', '_', $tableName);
 			$tableName = preg_replace('/_*_/', '_', $tableName);
 			// $tableName = preg_replace('/[0-9]/', '', $tableName);
-			// $tableName = ltrim($tableName,'_');	
+			// $tableName = ltrim($tableName,'_');
+			$tableName = substr($tableName, 0, 25);
+
 			$tableName = preg_replace('/^([^a-zA-Z0-9])*/', '', $tableName);		
 			$tableName = rtrim($tableName,"_");
-
+			
 			return $tableName;
 		}		
 	}
@@ -1943,7 +1947,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						} 
 					} 
 				}else{
-
 					$this->loadModel('QcDocument');
 					$qcdoc = $this->QcDocument->find('first', array('recursive' => - 1, 'conditions' => array('QcDocument.id' => $this->request->params['named']['record_id'])));
 					

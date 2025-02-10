@@ -22,10 +22,10 @@
 <div  id="users_ajax">
     <?php echo $this->Session->flash(); ?>
     <div class="row">
-        <div class="col-md-7">
+        <div class="col-md-4">
             <?php echo $this->element('display_policy', array(), array('plugin' => 'PasswordSettingManager'));?>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading"><h4>Reset Password</h4></div>
                 <div class="panel-body">
@@ -33,8 +33,12 @@
                         <?php echo $this->Form->create('User', array('role' => 'form', 'class' => 'form')); ?>
                         <fieldset>                              
                             <?php
-                                // echo $this->Form->input('sr_no');
-                            echo "<div class='col-md-12'>" . $this->Form->input('username',array('class'=>'form-control','label'=>'Enter your userame')) . "</div>";
+                            if($this->Session->read('User.username')){
+                                echo "<div class='col-md-12'>" . $this->Form->input('username',array('class'=>'form-control','label'=>'Enter your userame', 'readonly'=>'readonly', 'default'=>$this->Session->read('User.username'))) . "</div>";
+                            }else{                            
+                                echo "<div class='col-md-12'>" . $this->Form->input('username',array('class'=>'form-control','label'=>'Enter your userame')) . "</div>";
+                            }
+                            
                             echo "<div class='col-md-12'>" . $this->Form->input('password', array('class'=>'form-control', 'label' => __('New Password'), 'type' => 'password', 'div' => false, 'placeholder' => '*******'))."</div>";
                             echo "<div class='col-md-12'>" . $this->Form->input('temppassword', array('class'=>'form-control', 'label' => __('Confirm Password'), 'type' => 'password', 'div' => false, 'placeholder' => '*******'))."</div>";
                             ?>
@@ -55,6 +59,7 @@
                 </div>
             </div>                  
         </div>
+        <div class="col-md-4"></div>
     </div>  
 </div>
 </div>

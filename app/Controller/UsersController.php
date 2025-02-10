@@ -331,7 +331,8 @@ class UsersController extends AppController {
                 )));
 
                 if($user){
-                    $user['User']['password'] = Security::hash($this->request->data['User']['temppassword'], 'md5', true);                    
+                    $user['User']['password'] = Security::hash($this->request->data['User']['temppassword'], 'md5', true); 
+                    $user['User']['pwd_last_modified'] = date('Y-m-d H:i:s');
                     $this->User->create();
                     $this->User->save($user,false);
                     $this->Session->setFlash(__('Your password has been change'));
@@ -490,15 +491,6 @@ class UsersController extends AppController {
                         }
                     }
                     
-                    if($companyData['Company']['activate_password_setting'] == 1){
-                        $result = $this->requestAction(array('plugin' => 'password_setting_manager', 'controller' => 'password_settings', 'action' => 'get_password_change_remind', urlencode($user['User']['pwd_last_modified'])));
-                    
-                        if (!$result['valid']) {
-                            $this->Session->setFlash(__($result['msg']), 'default', array('class' => 'alert-danger'));
-                            $this->redirect(array('controller' => 'users', 'action' => 'reset_password'));
-                        }    
-                    }
-                    
                     $this->User->read(null, $user['User']['id']);
                     
                     if ($companyData['Company']['two_way_authentication'] == 1) {
@@ -602,7 +594,18 @@ class UsersController extends AppController {
 
                         $this->_check_updates();
 
-                        $this->redirect(array('action' => 'dashboard'));                        
+                        
+                        if($companyData['Company']['activate_password_setting'] == 1){
+                        
+                        $result = $this->requestAction(array('plugin' => 'password_setting_manager', 'controller' => 'password_settings', 'action' => 'get_password_change_remind', urlencode($user['User']['pwd_last_modified'])));
+
+                        if (!$result['valid']) {
+                            $this->Session->setFlash(__($result['msg']), 'default', array('class' => 'alert-danger'));
+                            $this->redirect(array('controller' => 'users', 'action' => 'reset_password'));
+                            }    
+                        }
+
+                        $this->redirect(array('action' => 'dashboard'));
                     }
                 }
             }
@@ -839,7 +842,7 @@ class UsersController extends AppController {
         $this->request->data['User'] = json_decode($data,TRUE);
         
         if(!$this->request->data['User'] && $this->request->data['register']['email']){
-            echo "make curl call";
+            
             $curl = curl_init();
             $auth = base64_encode('abc:123');
             $head ='Authorization: Basic '. $auth;
@@ -854,7 +857,7 @@ class UsersController extends AppController {
               CURLOPT_TIMEOUT => 30,
               CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
               CURLOPT_CUSTOMREQUEST => "GET",
-              CURLOPT_HTTPHEADER => array(            
+              CURLOPT_HTTPHEADER => array(
               ),
           ));
 
@@ -864,19 +867,17 @@ class UsersController extends AppController {
             $err = curl_error($curl);
             curl_close($curl);
             
-
             $this->request->data['User'] = $user;
-
             if($err){
 
-            }       
+            }
 
             if($response){
                 // return $response;
             }
         }
 
-        if ($this->request->data['User']) {            
+        if ($this->request->data['User']) {
 
             //create Company
             $description = '<p>FlinkISO is a web based application (available On-Cloud well as On-Premise) which automates the entire ISO documentation process and facilitates customers to electronically store &amp;
@@ -922,15 +923,16 @@ class UsersController extends AppController {
                 'recursive' => -1
             ));
             if ($companyFind) {
-                $companyId     = $companyFind['Company']['id'];
+                $companyId = $companyFind['Company']['id'];
                 $alreadyExists = true;
-            } else {                
+            } else {
                 if (($this->Company->save($company['Company'], false))) {
                     $companyId     = $this->Company->id;
                     $alreadyExists = false;
                 }
             }            
             
+
             if ($companyId != null) {
                 $branch_name                      = $this->request->data['User']['Customer']['city'] ? $this->request->data['User']['Customer']['city'] : 'Default';
                 $branch['Branch']['name']         = $branch_name;
@@ -958,7 +960,7 @@ class UsersController extends AppController {
                         $branchId = $this->Branch->id;
                     }
                 }
-                
+
                 if ($branchId != null) {
                     
                     $department['Department']['name']         = 'Quality Management';
@@ -1011,7 +1013,7 @@ class UsersController extends AppController {
                     $employee['Employee']['employee_number']    = substr(strtoupper($this->request->data['User']['OnPremiseUser']['company']), 0, 3) . '00' . ($employeeCount + 1);
                     $employee['Employee']['department_id']      = $departmentId;
                     $employee['Employee']['branch_id']          = $branchId;
-                    $employee['Employee']['designation_id']     = $$departmentId;
+                    $employee['Employee']['designation_id']     = $departmentId;
                     $employee['Employee']['company_id']         = $companyId;
                     $employee['Employee']['joining_date']       = date('Y-m-d');
                     $employee['Employee']['publish']            = 1;
@@ -1031,7 +1033,7 @@ class UsersController extends AppController {
                     $employee['Employee']['system_table_id']          = '5297b2e7-959c-4892-b073-2d8f0a000005';
                     $employee['Employee']['master_list_of_format_id'] = '523ab4b6-cf7c-4de5-918b-6f22c6c3268c';
                     
-                    
+
                     $this->Employee->create();
                     if ($this->Employee->save($employee, false)) {
                         
@@ -1049,7 +1051,7 @@ class UsersController extends AppController {
                         $user['User']['status']                   = 1;
                         $user['User']['agree']                    = 0;
                         $user['User']['department_id']            = $departmentId;
-                        $user['User']['branch_id']                = $branchId;                        
+                        $user['User']['branch_id']                = $branchId;
                         $user['User']['publish']                  = 1;
                         $user['User']['soft_delete']              = 0;
                         $user['User']['master_list_of_format_id'] = '523ae34c-bcc0-4c7d-b7aa-75cec6c3268c';
@@ -1067,6 +1069,7 @@ class UsersController extends AppController {
                         $user['User']['copy_acl_from']            = '';
                         $user['User']['user_access']              = $this->Ctrl->get_defaults();
                         $this->User->create();
+                        
                         
                         if ($this->User->save($user, false)) {
                             
@@ -1100,7 +1103,7 @@ class UsersController extends AppController {
                             $data['Company']['company_id'] = $companyId;
                             $data['Company']['flinkiso_start_date'] = date('Y-m-d');
                             $data['Company']['flinkiso_end_date']   = date('Y-m-d',strtotime('1 month'));
-                            $this->Company->save($data['Company'], false);                                                        
+                            $this->Company->save($data['Company'], false);
 
                             $EmailConfig = null;
                             
@@ -1160,13 +1163,8 @@ class UsersController extends AppController {
             }
             
         } else{
-            // later add to check if any user exits; if not run this function.
-            // $this->set('register',true);
-
-
-        }       
-        // $this->set('url',$this->request->data['User']['dir_name']);
-        // $this->redirect(array('action' => 'register'));
+            $this->Session->setFlash(__('Incorrect user.'), 'default', array('class' => 'alert-danger'));
+        }
     }
 
 
@@ -1212,5 +1210,5 @@ class UsersController extends AppController {
         // Once the SQL is run, update version in companies table with new version number.
         // redirect to login.
 
-    }    
+    }
 }

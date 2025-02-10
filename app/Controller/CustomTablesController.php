@@ -368,8 +368,8 @@ class CustomTablesController extends AppController {
         if($this->CustomTable->query($sql)){
 
         }else{
-
-            echo "Something went wrong";
+            $this->Session->setFlash(__('Something went wrong'), 'default', array('class' => 'alert alert-danger'));
+            $this->redirect($this->referer());          
         }
 
     // run above sql first and then add alter table commands one by one

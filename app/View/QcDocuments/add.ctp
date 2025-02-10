@@ -11,6 +11,13 @@
 		margin: 0 0 0 0 !important;
 	}
 </style>
+
+<style>
+    .chosen-choices{
+        max-height:80px;
+        overflow: auto;
+    }
+</style>
 <script type="text/javascript">
 	function addfiletype(filetype){
 		$("#QcDocumentFileType").val(filetype);	
