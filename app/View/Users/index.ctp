@@ -10,7 +10,9 @@
                     <th><?php echo $this->Paginator->sort('username', __('Username')); ?></th>
                     <th><?php echo $this->Paginator->sort('is_mr', __('Admin')); ?></th>
                     <th><?php echo $this->Paginator->sort('is_view_all', __('View')); ?></th>
+                    <th><?php echo $this->Paginator->sort('is_creator', __('Creator')); ?></th>                    
                     <th><?php echo $this->Paginator->sort('is_approver', __('Approver')); ?></th>
+                    <th><?php echo $this->Paginator->sort('is_publisher', __('Publisher')); ?></th>
                     <th><?php echo $this->Paginator->sort('department_id', __('Department')); ?></th>
                     <th><?php echo $this->Paginator->sort('branch_id', __('Branch')); ?></th>                                        
                     <th><?php echo $this->Paginator->sort('last_login', __('Last Login')); ?></th>
@@ -72,6 +74,29 @@
                     </td>
 
                     <td>
+                            <?php 
+
+                            if($user['User']['is_creator']){
+                                $str = base64_encode($user['User']['id'].',is_creator,0');
+                                echo $this->Html->link('<i class="fa fa-check"></i>','javascript:void(0)', array(
+                                    'class'=>'btn btn-sm text-success',
+                                    'onClick'=>'reset_access(\''.$user['User']['id'].'\', \''.$str.'\',this.id,\'is_creator\', 0)',
+                                    'id'=>$user['User']['id'].'is_creator',
+                                    'escape'=>false
+                                ));
+                            }else{
+                                $str = base64_encode($user['User']['id'].',is_creator,1');
+                                echo $this->Html->link('<i class="fa fa-remove"></i>','#', array(
+                                    'class'=>'btn btn-sm text-danger',
+                                    'onClick'=>'reset_access(\''.$user['User']['id'].'\', \''.$str.'\',this.id,\'is_creator\', 1)',
+                                    'id'=>$user['User']['id'].'is_creator',
+                                    'escape'=>false
+                                ));
+                            }
+                        ?>&nbsp;
+                    </td>
+
+                    <td>
                         <?php 
 
                         if($user['User']['is_approver']){
@@ -93,6 +118,29 @@
                         }
                     ?>&nbsp;
                 </td>
+
+                <td>
+                            <?php 
+
+                            if($user['User']['is_publisher']){
+                                $str = base64_encode($user['User']['id'].',is_publisher,0');
+                                echo $this->Html->link('<i class="fa fa-check"></i>','javascript:void(0)', array(
+                                    'class'=>'btn btn-sm text-success',
+                                    'onClick'=>'reset_access(\''.$user['User']['id'].'\', \''.$str.'\',this.id,\'is_publisher\', 0)',
+                                    'id'=>$user['User']['id'].'is_publisher',
+                                    'escape'=>false
+                                ));
+                            }else{
+                                $str = base64_encode($user['User']['id'].',is_publisher,1');
+                                echo $this->Html->link('<i class="fa fa-remove"></i>','#', array(
+                                    'class'=>'btn btn-sm text-danger',
+                                    'onClick'=>'reset_access(\''.$user['User']['id'].'\', \''.$str.'\',this.id,\'is_publisher\', 1)',
+                                    'id'=>$user['User']['id'].'is_publisher',
+                                    'escape'=>false
+                                ));
+                            }
+                        ?>&nbsp;
+                    </td>
 
                 <td>
                     <?php echo $this->Html->link($user['Department']['name'], array('controller' => 'departments', 'action' => 'view', $user['Department']['id'])); ?>

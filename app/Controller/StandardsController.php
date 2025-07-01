@@ -44,7 +44,7 @@ class StandardsController extends AppController {
         $this->set('clause', $clause_record);
         $this->loadModel('CustomTable');
 
-        if($this->Session->read('User.is_mr') == false){            
+        if($this->Session->read('User.is_mr') == false){
             $accessConditions = array(                
                 'OR'=>array(
                     'QcDocument.prepared_by'=> $this->Session->read('User.employee_id'),
@@ -62,22 +62,27 @@ class StandardsController extends AppController {
         
         $sys = $this->CustomTable->find('all', array('recursive' => 1, 'conditions' => array(
             $accessConditions, 
-            'QcDocument.standard_id' => $standard_id, 
-                'OR'=>array(
-                    'QcDocument.additional_clauses LIKE' => '%'.$id.'%',
-                    'QcDocument.clause_id' => $id,
-                )
+            'QcDocument.standard_id' => $standard_id,
+            'OR'=>array(
+                'QcDocument.additional_clauses LIKE' => '%'.$id.'%',
+                'QcDocument.clause_id' => $id,
             )
-        ));
+        )
+    ));
         $this->set('tables', $sys);
         
         $accessConditions = array();
         // get master list of format
         $this->loadModel('QcDocument');
 
-        if($this->Session->read('User.is_mr') == false){                    
+        $causeCondition = array(
+        'OR'=>array(
+            'QcDocument.additional_clauses LIKE' => '%'.$id.'%',
+            'QcDocument.clause_id' => $id,
+        ));
+
+        if($this->Session->read('User.is_mr') == false){
             $accessConditions = array(
-                'QcDocument.archived' => 0,                
                 'OR'=>array(
                     'QcDocument.prepared_by'=> $this->Session->read('User.employee_id'),
                     'QcDocument.approved_by'=> $this->Session->read('User.employee_id'),
@@ -86,23 +91,23 @@ class StandardsController extends AppController {
                     'QcDocument.departments LIKE' => '%'.$this->Session->read('User.department_id').'%',
                     // 'QcDocument.designations LIKE' => '%'.$this->Session->read('User.designation_id').'%',
                     'QcDocument.user_id LIKE' => '%'.$this->Session->read('User.id').'%',
-                ),
-                'OR'=>array(
-                    'QcDocument.additional_clauses LIKE' => '%'.$id.'%',
-                    'QcDocument.clause_id' => $id,
-                ),
+                )
             );
         }else{
-            $accessConditions = array(
-                'OR'=>array(
-                    'QcDocument.additional_clauses LIKE' => '%'.$id.'%',
-                    'QcDocument.clause_id' => $id,
-                ),              
-                'QcDocument.archived' => 0);
+            
         }
 
+        $documentStatusConditions = array(            
+                'QcDocument.document_status != ' => 4,
+                'QcDocument.archived' => 0
+        );
         
-        $qcDocuments = $this->QcDocument->find('all', array('conditions' =>$accessConditions, 'recursive' => 0));        
+        $qcDocuments = $this->QcDocument->find('all', array('conditions' =>array(
+            $causeCondition,
+            $accessConditions,  
+            $documentStatusConditions              
+            ), 
+        'recursive' => 0));        
         $this->set(compact('qcDocuments'));
     }
     /**
@@ -138,7 +143,7 @@ class StandardsController extends AppController {
             
             if ($this->Standard->save($this->request->data)) {
                 if(strpos($this->request->data['Standard']['clauses'], "\r\n") !== false){
-                $clauses = explode("\r\n",$this->request->data['Standard']['clauses']);    
+                    $clauses = explode("\r\n",$this->request->data['Standard']['clauses']);    
                 }else if(strpos($this->request->data['Standard']['clauses'], "\n\r") !== false){
                     $clauses = explode("\n\r",$this->request->data['Standard']['clauses']);    
                 }else if(strpos($this->request->data['Standard']['clauses'], "\n") !== false){
@@ -159,6 +164,7 @@ class StandardsController extends AppController {
                         $data['Clause']['standard_id'] = $this->Standard->id;
                         $data['Clause']['clause'] = ltrim(rtrim($clause[0]));
                         $data['Clause']['sub-clause'] = ltrim(rtrim($clause[1]));
+                        $data['Clause']['details'] = ltrim(rtrim($clause[3]));
                         $data['Clause']['branchid'] = $this->Session->read('User.branch_id');
                         $data['Clause']['departmentid-clause'] = $this->Session->read('User.branch_id');
                         $data['Clause']['created_by'] = $this->Session->read('User.id');
@@ -232,9 +238,9 @@ class StandardsController extends AppController {
                 if($clauses){
                     foreach($clauses as $clause){
                         $this->Standard->Clause->create();
-                        $clause['Clause']['standard'] = $this->request->data['Standard']['name'];
-                        $clause['Clause']['publish'] = 1;
-                        $clause['Clause']['soft_delete'] = 0;
+                        $clause['standard'] = $this->request->data['Standard']['name'];
+                        $clause['publish'] = 1;
+                        $clause['soft_delete'] = 0;
                         $this->Standard->Clause->save($clause,false);
                     }
                 }
@@ -287,8 +293,8 @@ class StandardsController extends AppController {
                         if($clauses){
                             foreach($clauses as $clause){
                                 $this->Standard->Clause->create();
-                                $clause['Clause']['publish'] = 0;
-                                $clause['Clause']['soft_delete'] = 1;
+                                $clause['publish'] = 0;
+                                $clause['soft_delete'] = 1;
                                 $this->Standard->Clause->save($clause,false);
                             }
                         }

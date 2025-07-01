@@ -43,12 +43,12 @@ Configure::write('CakePdf', array(
 		'header-line' => true,
 		'enable-local-file-access' => true,
 		'header-font-name' => 'Trebuchet MS', 'footer-font-name' => 'Trebuchet MS',), 
-	'margin' => array(
-		'bottom' => 10, 
-		'left' => 10, 
-		'right' => 10, 
-		'top' => 25
-	), 
+		'margin' => array(
+			'bottom' => 10, 
+			'left' => 10, 
+			'right' => 10, 
+			'top' => 25
+		), 
 	'title' => 'Generated via FlinkISO', 
 	'orientation' => 'portrait', 
 	'download' => true,
@@ -282,7 +282,7 @@ class AppController extends Controller {
 		$this->redirect($this->referer());
 	}
 	public function _access_redirect($n = null){ 
-		$ignore = array('install_updates', 'register','activate','send_otp', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk','change_password','check_password_validation','save_template','clean_table_names','jwtencode','save_doc','save_rec_doc','save_custom_docs','save_file');
+		$ignore = array('install_updates', 'register','activate','send_otp', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk','change_password','check_password_validation','save_template','clean_table_names','jwtencode','save_doc','save_rec_doc','save_custom_docs','save_file','clean_table_names');
 		if(!in_array($this->action,$ignore) 
 			&& $this->request->controller != 'qc_documents' 
 			// && $this->request->controller != 'standards' 
@@ -323,35 +323,61 @@ class AppController extends Controller {
 							)
 						)
 					)); 
-					// if($sharing == 0)$this->_access_redirect(1);
+					if($sharing == 0){
+						$this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
+						$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));
+					}
 				}else{ 
-					$this->loadModel('User');
-					// $access = $this->User->find('first',array('fields'=>array('User.id','User.user_access'), 'conditions'=>array('User.id'=>$this->Session->read('User.id'))));
-					$access = json_decode($access['User']['user_access'],true);
-					$access = $access['user_access'];
-					
-					if(isset($access) && in_array($this->request->controller,array_keys($access))){
-						if($access[$this->request->controller][$this->action] == 1){
-							
-						}else{
-							$this->_access_redirect(2);
+
+					//check if its qcDocument controller and if yes, check access with param 0
+					if($this->request->controller == 'qc_documents' && isset($this->request->params['pass'][0])){
+						$this->loadModel('QcDocument');
+						$sharing = $this->QcDocument->find('count',array(
+						// 'recursive'=>-1,
+						// 'fields'=>array('QcDocument.branches','QcDocument.departments','QcDocument.designations','QcDocument.user_id','QcDocument.id'),
+							'conditions'=>array(
+								'QcDocument.id'=>$this->request->params['pass'][0],
+								'OR'=>array(
+									'QcDocument.prepared_by'=> $this->Session->read('User.employee_id'),
+									'QcDocument.approved_by'=> $this->Session->read('User.employee_id'),
+									'QcDocument.issued_by'=> $this->Session->read('User.employee_id'),
+									'QcDocument.branches LIKE' => '%'.$this->Session->read('User.branch_id').'%',
+									'QcDocument.departments LIKE' => '%'.$this->Session->read('User.department_id').'%',
+									'QcDocument.user_id LIKE' => '%'.$this->Session->read('User.id').'%',
+								)
+							)
+						)); 
+						if($sharing == 0){
+							$this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
+							$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));
 						}
 					}else{
-
-						// if delete
-						// check if the user is creator // admin // hod 
-						// if not access denied error
-						$model = $this->modelClass;						
-						if($this->request->data[$model]['prepared_by'] && $this->action == 'delete'){
-							if($this->request->data[$model]['prepared_by'] == $this->Session->read('User.employee_id') || $this->Session->read('User.is_mr') == 1){
+						$this->loadModel('User');
+						// $access = $this->User->find('first',array('fields'=>array('User.id','User.user_access'), 'conditions'=>array('User.id'=>$this->Session->read('User.id'))));
+						$access = json_decode($access['User']['user_access'],true);
+						$access = $access['user_access'];
+						if(isset($access) && in_array($this->request->controller,array_keys($access))){
+							if($access[$this->request->controller][$this->action] == 1){
 								
 							}else{
-								$this->_access_redirect(3);
+								$this->_access_redirect(2);
 							}
 						}else{
-							$this->_access_redirect(3); 
-						}
+							// if delete
+							// check if the user is creator // admin // hod 
+							// if not access denied error
+							$model = $this->modelClass;						
+							if($this->request->data[$model]['prepared_by'] && $this->action == 'delete'){
+								if($this->request->data[$model]['prepared_by'] == $this->Session->read('User.employee_id') || $this->Session->read('User.is_mr') == 1){
+									
+								}else{
+									$this->_access_redirect(3);
+								}
+							}else{
+								$this->_access_redirect(3); 
+							}
 
+						}
 					}
 				} 
 			}else{
@@ -511,16 +537,7 @@ public function get_approval($id = null, $creator = null) {
 	$this->loadModel('Approval');
 	$approval = $this->Approval->find('first', array('conditions' => array('Approval.id' => $id)));
 	$this->set('approval', $approval);
-}
-	// public function _get_approver_list($creator = null) {
-	// $this->loadModel('User');
-	// $approversList = $this->User->find('list', array(
-	// 'conditions' => array(
-	// 'User.is_approver' => 1 
-	// ))
-	// );
-	// $this->set('approversList', $approversList);
-	// }
+}	
 
 public function _get_approver_list($creator = null) {
 
@@ -541,7 +558,7 @@ public function _get_approver_list($creator = null) {
 public function _save_approvals($record_id = null) {
 	
 	$this->loadModel('Approval');
-		// get approval cycle
+	// get approval cycle
 	$model = $this->modelClass;
 	if(!$record_id)$record_id = $this->request->data['Approval'][$model]['id'];
 	$this->request->data['Approval'][$model]['record'] = $record_id;
@@ -676,8 +693,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				$model = $approvaldata['Approval']['model_name'];
 				$this->loadModel($model);
 				$rec = $this->$model->find('first', array('conditions' => array($model . '.id' => $this->request->data['ApprovalComment']['record']), 'recursive' => - 1));
-				$rec[$model]['record_status'] = 1;
-				// $rec[$this->modelClass]['record_status'] = 1;
+				$rec[$model]['record_status'] = 1;				
 				$this->$model->create();
 				$this->$model->save($rec);
 			}
@@ -816,6 +832,9 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					'QcDocument.archived',
 					'QcDocument.parent_document_id',
 					'QcDocument.parent_id',
+					'QcDocument.branches',
+					'QcDocument.departments',
+					'QcDocument.designations',
 					'QcDocument.user_id',
 					'QcDocument.editors',
 					'QcDocument.publish',
@@ -1345,7 +1364,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		
 		$x = 0;
 
-		$search_keys = array('id', 'name','title');
+		$search_keys = array('id', 'name','title','document_number');
 
 		$src = $this->$model->displayField;
 
@@ -1687,16 +1706,13 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		
 		foreach (json_decode($table['CustomTable']['fields'], true) as $fields) {
 			if ($fields['linked_to'] != - 1) {
-				$linkedFields[Inflector::Classify($fields['field_name']) ] = $fields['field_name'];
-				// array('field'=>$fields['field_name'],'linkedTo'=>$fields['linked_to']);
+				$linkedFields[Inflector::Classify($fields['field_name']) ] = $fields['field_name'];				
 				
 			}
-			if (in_array($fields['field_type'], array(2, 3, 4))) {
-				// $numberFields[] = array('field'=>$fields['field_name'],'type'=>$fields['field_name']);
+			if (in_array($fields['field_type'], array(2, 3, 4))) {				
 				$numberFields[$fields['field_name']] = $fields['field_name'];
 			}
-			if (in_array($fields['field_type'], array(4, 5, 6))) {
-				// $dateFields[] = array('field'=>$fields['field_name'],'type'=>$fields['field_name']);
+			if (in_array($fields['field_type'], array(4, 5, 6))) {				
 				$dateFields[$fields['field_name']] = $fields['field_name'];
 			}
 		}
@@ -1733,8 +1749,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 						foreach ($lists as $key => $name) {
 							if($find['result_type'] == 0){
-								$result[$name] = $this->$modelName->find(
-								// $resultTypes[$this->request->data['Reports']['result_type']],
+								$result[$name] = $this->$modelName->find(								
 									'count', array('conditions' => array($modelName . '.' . $details['foreignKey'] => $key)));
 							}
 
@@ -1814,8 +1829,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					'fields'=>array('CustomTable.id','CustomTable.name','CustomTable.table_name','CustomTable.table_version','CustomTable.qc_document_id','CustomTable.process_id'), 
 					'conditions'=>array(
 						'QcDocument.standard_id'=>$key,
-						'CustomTable.publish' => 1, 
-						// 'QcDocument.add_records' => 1, 
+						'CustomTable.publish' => 1, 						
 						'QcDocument.document_type'=>$dkey,
 						'QcDocument.parent_document_id'=> -1,
 						'CustomTable.table_locked' => 0, 
@@ -1854,8 +1868,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$tableName = preg_replace('/\\s+/', '_', $tableName); 
 			$tableName = preg_replace('/-*-/', '_', $tableName);
 			$tableName = preg_replace('/_*_/', '_', $tableName);
-			// $tableName = preg_replace('/[0-9]/', '', $tableName);
-			// $tableName = ltrim($tableName,'_');
 			$tableName = substr($tableName, 0, 25);
 
 			$tableName = preg_replace('/^([^a-zA-Z0-9])*/', '', $tableName);		
@@ -1986,7 +1998,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					$changesData = file_get_contents($data["changesurl"]);
 					file_put_contents($history_file_for_save. DS . "diff.zip", $changesData, LOCK_EX);
 
-						// adding prev.ext file
+					// adding prev.ext file
 					$fromFile = new File($file_for_save);
 					$fromFile->copy($preFile_for_save,true);
 
@@ -2006,7 +2018,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 					file_put_contents($history_file_for_save . DS . "changes.json", json_encode($newHistory), LOCK_EX);
 
-						// adding key.txt file
+					// adding key.txt file
 					file_put_contents($history_file_for_save . DS . "key.txt", $data['key'], LOCK_EX);
 
 					$downloadUri = $data["url"];
@@ -2022,14 +2034,10 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						if (file_put_contents($file_for_save, $new_data,LOCK_EX)) {
 
 							$key = $this->_generate_onlyoffice_key($record_id . date('Ymdhis'));
-							// $key = $data["key"];
-							
 							if(is_array($updates)){
 								$last_modified = date('Y-m-d H:i:s');
-								// $updates[] = array('version_key'=>$key,'modified'=>$last_modified,'by'=>$local['user']);
 							}else{
 								$last_modified = date('Y-m-d H:i:s');
-								// $updates[] = array('version_key'=>$key,'modified'=>$last_modified,'by'=>$local['user']);
 							}
 
 							$qcdoc['QcDocument']['version_keys'] = json_encode($data['history']);
@@ -2037,17 +2045,9 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 							$qcdoc['QcDocument']['file_status'] = 1;
 							$qcdoc['QcDocument']['last_saved'] = $last_modified;
 
-							// if($qcdoc['QcDocument']['update_version'] == 1){
 							$qcdoc['QcDocument']['version'] = $version + 1;
 							$qcdoc['QcDocument']['versions'] = json_encode($versions);
 
-								// $history_data = file_get_contents($historyData);
-								// if (file_put_contents($history_file_for_save, $history_data)) {
-								// }
-							// }else{
-							// // $qcdoc['QcDocument']['versions'] = json_encode($qcdoc['QcDocument']['versions']);
-							// }
-							
 							$this->QcDocument->create();
 							if($this->QcDocument->save($qcdoc['QcDocument'])){
 								
@@ -2561,8 +2561,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						// $this->redirect(array('action' => 'index','table_type'=>$this->request->params['named']['table_type']));
 						}
 					}else{
-
-
 						// open same file in view mode						
 						$data['File']['id'] = $customTable['CustomTable']['id'];
 						$data['File']['name'] = $file_name_without_ext;
@@ -2578,10 +2576,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						$data['File']['created_by'] = $data['File']['user_id'] = $this->Session->read('User.id');
 						$data['File']['record_id'] = 'tmp';
 						$data['File']['file_status'] = 0;
-						$data['File']['data_received'] = 'added from prepare_update';
-
-						
-
+						$data['File']['data_received'] = 'added from prepare_update';					
 						return $data;
 					}					
 				} 
@@ -2603,7 +2598,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 
 		public function _view(){
-		// check if this document has linked documents with table
+			// check if this document has linked documents with table
 			$this->loadModel('CustomTable');
 			$linkedTables = $this->CustomTable->find('all',array(
 				'recursive'=>0,
@@ -2620,8 +2615,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				'conditions'=>array(
 					'CustomTable.table_type !=' => 2,
 					'QcDocument.parent_document_id' => $this->request->params['named']['qc_document_id'],
-				// 'CustomTable.field_name'=>,
-				// 'CustomTable.field_value'=>,
 				)));
 			$t = 0;
 			foreach($linkedTables as $linkedTable){
@@ -2796,15 +2789,12 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				if ($this->_show_approvals()) $this->_save_approvals($this->$modelName->id);
 				$this->Session->setFlash(__('Record has been saved'));
 				try{
-				// trigger email here
+					// trigger email here
 					$this->_trigger_email($existingRecord); 
 				}catch(Exception $e){
 					$this->Session->setFlash(__('Email Trigger failed.')); 
 				}
-
-
 			 	// if parent record id is available, redirect to parent record view page
-
 				$this->loadModel('QcDocument');
 				$this->loadModel('CustomTable');
 				if(isset($this->request->params['named']['parent_record_id']) && $this->request->params['named']['parent_record_id']){ 
@@ -2817,19 +2807,10 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						'recursive'=>-1, 
 						'conditions'=>array('QcDocument.id'=>$this->request->params['named']['qc_document_id']))); 
 
-
 					if($this_document){
-						$parent_document = $this->QcDocument->find('first',array(
-						// 'fields'=>array(
-						// 'QcDocument.id',
-						// 'QcDocument.title',
-						// 'QcDocument.parent_document_id',
-						// ),
-					// 'recursive'=>-1, 
-							'conditions'=>array('QcDocument.id'=>$this_document['QcDocument']['parent_document_id']))); 
+						$parent_document = $this->QcDocument->find('first',array(						
+						'conditions'=>array('QcDocument.id'=>$this_document['QcDocument']['parent_document_id']))); 
 					}
-
-
 
 					if($parent_document){
 						foreach($parent_document['CustomTable'] as $cTable){
@@ -2856,7 +2837,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						}
 					}
 				}
-
 
 				$this->redirect(array('action' => 'index','custom_table_id'=>$this->request->params['named']['custom_table_id'],'qc_document_id'=>$this->request->params['named']['qc_document_id'],'process_id'=>$this->request->params['named']['process_id']));
 			} else {
@@ -2925,8 +2905,8 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			if($this->action == 'add')$action = 0;
 			if($this->action == 'edit')$action = 1;
 
-		// check for field changes
-		// this idealy only should execute for edit
+			// check for field changes
+			// this idealy only should execute for edit
 			if($this->action == 'edit'){
 				$triggers = $this->CustomTrigger->find('all',array('recursive'=>-1, 'conditions'=>array(
 					'CustomTrigger.custom_table_id'=>$this->request->params['named']['custom_table_id'],
@@ -2934,7 +2914,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				)
 			));
 				if($triggers){
-				// check for each field change and if there is a change, trigger email as per conditions
+					// check for each field change and if there is a change, trigger email as per conditions
 					foreach($triggers as $trigger){
 						if(
 							$this->request->data[$modelName][$trigger['CustomTrigger']['field_name']] != $existingRecord[$modelName][$trigger['CustomTrigger']['field_name']] && 
@@ -2953,7 +2933,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 			$subject = $message = '';
 			$trigger = array();
-		// action based trigger 
+			// action based trigger 
 			$trigger = $this->CustomTrigger->find('first',array('recursive'=>-1, 'conditions'=>array(
 				'CustomTrigger.custom_table_id'=>$this->request->params['named']['custom_table_id'],
 				'CustomTrigger.action'=>$action,
@@ -3000,7 +2980,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				}
 			}
 
-
 			$employee = array(); 
 			if($trigger['CustomTrigger']['notify_users']){
 				$notify_users = json_decode($trigger['CustomTrigger']['notify_users'],true); 
@@ -3014,8 +2993,8 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 			$employee = array();
 			if($trigger['CustomTrigger']['notify_hods'] == true && $department_field){
-			// get HoDs for these departments 
-			// get added daprtments
+				// get HoDs for these departments 
+				// get added daprtments
 				$departments = json_decode($this->request->data[$modelName][$department_field],true);
 				if($departments){
 					foreach($departments as $department){
@@ -3028,7 +3007,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			}
 
 			if($trigger['CustomTrigger']['hod_departments']){
-			// get HoDs for these departments 
+				// get HoDs for these departments 
 				$notify_hods = $this->Employee->find('list',array('fields'=>array('Employee.id','Employee.office_email'), 'conditions'=>array('Employee.is_hod'=>1, 'Employee.department_id'=>json_decode($trigger['CustomTrigger']['hod_departments'],true))));
 				foreach($notify_hods as $employee){
 					$tos[$employee['Employee']['office_email']] = $employee['Employee']['office_email'];
@@ -3042,8 +3021,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			try{
 				App::uses('CakeEmail', 'Network/Email');
 				$EmailConfig = new CakeEmail("fast");
-				$EmailConfig->to($tos);
-			// $EmailConfig->to('mayureshvaidya@gmail.com');
+				$EmailConfig->to($tos);			
 				$EmailConfig->subject($subject);
 				$EmailConfig->template('emailTrigger'); 
 				$EmailConfig->viewVars(array(
@@ -3125,8 +3103,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						$file['File']['file_key'] = $this->_generate_onlyoffice_key($file['File']['id'].date('Ymdhis'));
 						$file['File']['file_status'] = 0;
 						$file['File']['data_received'] = 'added from fetch_file: mostly edit';
-						// $file['File']['version_keys'] = $file['File']['version_keys'].','.$file['File']['file_key'];
-						
 						$this->File->create();
 						$this->File->save($file,false);
 						return $file; 
@@ -3357,28 +3333,35 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 							}							
 						}
 						// for qc documents
-					}else{									
+					}else{
 						$is_qc = true;
 						$this->loadModel('QcDocument');
-						$qcfile = $this->QcDocument->find('first',array('recursive'=>-1,'conditions'=>array('QcDocument.id'=>$this->request->params['pass'][0])));
-						
+						$qcfile = $this->QcDocument->find('first',array('recursive'=>-1,
+							'conditions'=>array(
+								'QcDocument.id'=>$this->request->params['pass'][0],
+								'OR'=>array(
+									'QcDocument.prepared_by'=> $this->Session->read('User.employee_id'),
+									'QcDocument.approved_by'=> $this->Session->read('User.employee_id'),
+									'QcDocument.issued_by'=> $this->Session->read('User.employee_id'),
+									'QcDocument.branches LIKE' => '%'.$this->Session->read('User.branch_id').'%',
+									'QcDocument.departments LIKE' => '%'.$this->Session->read('User.department_id').'%',
+								// 'QcDocument.designations LIKE' => '%'.$this->Session->read('User.designation_id').'%',
+									'QcDocument.user_id LIKE' => '%'.$this->Session->read('User.id').'%',
+								)
+							)
+						));						
 						// check if file already exists
 						if($qcfile && $showdocs_copy != 0){
 							if($showdocs_copy == 1){								
 								// $this->loadModel('File');
 								$file = $this->File->find('first',array('conditions'=>array(
-									// 'File.record_id != '=>'',
-									// 'OR'=>array(
 									'File.record_id'=>$this->request->params['named']['record_id'],
-										// 'File.record_id'=>'tmp',
-									// ),
-									
 									'File.qc_document_id'=>$qcfile['QcDocument']['id']
 								),'recursive'=>-1,'order'=>array('File.sr_no'=>'ASC')));
+								
 								// add new file to files table
 								// copy qc file to new files id folder								
 								if($file){									
-									
 									$file['File']['modified_by'] = $this->Session->read('User.employee_id');
 									$file['File']['modified'] = date('Y-m-d h:i:s');
 									$file['File']['file_status'] = 0;
@@ -3394,15 +3377,10 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 									$document_version = $qcfile['QcDocument']['revision_number'];
 									$file_name = $document_number.'-'.$file_name.'-'.$document_version;
 									$file_name = $this->_clean_table_names($file_name);
-									// $file_name = $file_name .'.'.$file_type;
-
 									$file_name_without_ext = $document_number.'-'.$file_name_without_ext.'-'.$document_version;
 									$file_name_without_ext = $this->_clean_table_names($file_name_without_ext);
-
-									// $file['File']['id'] = $customTable['CustomTable']['id'];
 									$file['File']['name'] = $file_name;
 									$file['File']['file_type'] = $qcfile['QcDocument']['file_type'];
-									// $file['File']['file_key'] = $qcfile['QcDocument']['file_key'];
 									$file['File']['file_key'] = $this->_generate_onlyoffice_key($qcfile['QcDocument']['file_type'].date('Ymdhis'));
 									$file['File']['qc_document_id'] = $qcfile['QcDocument']['id'];
 									$file['File']['process_id'] = $process['Process']['id'];
@@ -3427,13 +3405,11 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 											$newFolder->create(WWW_ROOT . DS . 'files' . DS . $this->Session->read('User.company_id') . DS . 'files' . DS . $this->File->id,0777);
 											copy($doc,$docsave);	
 										}
-
 									}
 									$file['File']['id'] = $this->File->id;
 								}
 								$this->set('is_qc',false);
 								$this->set('fileEdit',$file);
-
 							}else{	
 
 								if($qcfile){									
@@ -3577,6 +3553,22 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			exit;
 		}
 
+		public function fetch_last_record($model = null, $field = null, $order = null, $id = null){
+			$this->autoRender = false;		
+			try{
+				$this->loadModel($model);
+				$rec = $this->$model->find('first',array('order'=>array($model.'.'.$field => 'DESC'),'recursive'=>-1));
+				if($rec){				
+					return $rec[$model][$field];
+				}else{					
+					return 0;
+				}
+			}catch (Exception $e){
+				return false;
+			}			
+			exit;
+		}
+
 		public function fetch_record($model = null, $key = null, $field = null, $order = null, $id = null){
 			$this->autoRender = false;
 			$parent = Inflector::Classify($model);
@@ -3614,36 +3606,24 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			}catch(Exception $e){
 
 			}
-			
-
-			
 
 			$this->set('selectedModelName',$selectedModelName);
 			$thisModel = $this->modelClass;
-			
-			$selectedModel = $this->$thisModel->belongsTo[$model];						
-
+			$selectedModel = $this->$thisModel->belongsTo[$model];
 			$model = $selectedModel['className'];
-			$this->loadModel($model);
-			
+			$this->loadModel($model);			
 			$fields = $this->$model->schema();
 			$fieldOnForm = $selectedModel['foreignKey'];
-			
-
 			$fieldDetails = $fields[$fieldTobeChanged];
-			
-
-			$tableName = $this->$model->useTable;
+			$tableName = $this->$model->useTable;			
 			
 			// check if model exists in custome table
-
 			$this->loadModel('CustomTable');
 			$table = Inflector::underscore($selectedModel['className']);
 			$this->loadModel('CustomTable');
 			$customTable = $this->CustomTable->find('first',array('recursive'=>-1, 'fields'=>array('CustomTable.id','CustomTable.name','CustomTable.fields'), 'conditions'=>array('CustomTable.table_name LIKE '=> $tableName)));
 			
 			if($customTable){
-
 				$customTableFields = json_decode($customTable['CustomTable']['fields'],true);
 				if($fieldDetails['type'] == 'boolean'){
 					// if field is publish
@@ -3718,7 +3698,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 							$this->set('values',$options);
 						}
 					}
-
 				}
 
 			}					
@@ -3734,14 +3713,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 			$this->set('addwatermark',true);
 			
-			// if($cover != true){
-			// 	$delpath =  New Folder(WWW_ROOT .'files'. DS . 'pdf' . DS .$this->Session->read('User.id') . DS . $record_id);
-			// 	if($record_id){
-			// 		$delpath->delete();	
-			// 	}
-
-			// }			
-
 			$path = Configure::read('OnlyofficeConversionApi'). '/ConvertService.ashx';
 			$key = $this->_generate_onlyoffice_key($record_id . date('Ymdhis'));
 			$payload = array(
@@ -3762,9 +3733,9 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				'key'=>$key,			     
 			];
 
-    	// add header token
+    		// add header token
 			$headerToken = "";
-			$jwtHeader = 'jvFdQcdBMMyhOCNsva9z';
+			$jwtHeader = Configure::read('onlyofficesecret');
 
 			$headerToken = $this->jwtEncode([ "payload" => $arr ]);
 			$arr["token"] = $this->jwtEncode($arr);	    
@@ -3828,9 +3799,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$password = $this->request->data['DocumentDownload']['password'];
 			// check if cover pdf exists, if yes, attach it
 			$cover = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id . DS .  'cover-pdf.pdf';
-			if(file_exists($cover)){
-				
-
+			if(file_exists($cover)){				
 				$input = $pdf;
 				$newoutput = str_replace('-remove-pdf-', '-add-cover-', $pdf);
 				$exec = Configure::read('PDFTkPath') . ' A=' .$cover .' B=' .$input.  ' cat A B output '. $newoutput .'';	
@@ -3866,9 +3835,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				unlink($input);
 				unlink($sign);
 			}
-			
-			
-			
 		}
 
 		public function _sign_to_pdf($sign = null,$record_id = null,$font_face = null, $font_size = null){	

@@ -1,4 +1,4 @@
-<?php echo $this->Html->script(array('jquery.validate.min', 'jquery-form.min')); ?>
+<?php echo $this->Html->script(array('jquery.validate.min', 'jquery-form.min','tinymce/js/tinymce/tinymce.min')); ?>
 <?php echo $this->fetch('script'); ?><div id="clauses_ajax">
 	<?php echo $this->Session->flash();?>	
 
@@ -58,6 +58,22 @@
 			});
 			
 			$().ready(function() {
+				tinymce.init({
+					selector: 'textarea#ClauseDetails',
+					menubar: false,					
+					height: 500,
+					plugins: [
+						'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+						'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+						'insertdatetime', 'media', 'table', 'help', 'wordcount'
+					],
+					toolbar: 'undo redo | blocks | ' +
+					'bold italic backcolor | alignleft aligncenter ' +
+					'alignright alignjustify | bullist numlist outdent indent |  image | table | code | ' +
+					'removeformat | help',
+					content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px }'
+				});
+
 				jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 					return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';
 				}, "Please select the value");
@@ -74,6 +90,12 @@
 				$("#submit-indicator").hide();
 				$("#submit_id").click(function(){
 					if($('#ClauseEditForm').valid()){
+
+						e.preventDefault();
+						tinyMCE.triggerSave();
+        				var content = tinyMCE.get('tinymce').getContent();
+
+
 						$("#submit_id").prop("disabled",true);
 						$("#submit-indicator").show();
 						$('#ClauseEditForm').submit();

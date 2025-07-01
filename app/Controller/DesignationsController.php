@@ -122,7 +122,7 @@ class DesignationsController extends AppController {
             $this->set(array('userids' => $userids, 'show_approvals' => $this->_show_approvals()));
         }
         if ($this->request->is('post')) {
-            
+
             $this->request->data['Desigation']['system_table_id'] = $this->_get_system_table_id();
             
             $this->request->data['Designation']['name'] = str_replace('"','',$this->request->data['Designation']['name']);
@@ -133,12 +133,12 @@ class DesignationsController extends AppController {
             }else if(strpos($this->request->data['Designation']['name'], PHP_EOL) !== false){                
                 $designations = explode(PHP_EOL,$this->request->data['Designation']['name']);    
             }else{
-                
+
             }
             $parent_id = $this->request->data['Designation']['parent_id'];
             if($designations){
                 foreach($designations as $designation){
-                    
+
                     $data['Designation'] = $this->request->data['Designation'];
                     $data['Designation']['name'] = trim($designation);
                     $data['Designation']['parent_id'] = $parent_id;
@@ -153,7 +153,7 @@ class DesignationsController extends AppController {
                             $this->Designation->save($data['Designation'],false);
                             
                         } catch (Exception $e) {
-                            
+
                         }
                     }                    
                 }
@@ -205,5 +205,44 @@ class DesignationsController extends AppController {
         $this->Designation->set('parent_id',$value);
         $this->Designation->save();
         return true;
+    }
+
+    public function org_chart($result = array()) {
+        $designations = $this->Designation->find('threaded', array(            
+            'conditions' => array('Designation.publish' => 1),
+            'fields'=>array(              
+            )
+        ));
+        foreach ($designations as $designation) {            
+            $imagepath = Router::url('/', true) . "img/img/avatar.png";
+            
+            if ($designation['children']){
+                $result[] = array('id' => $designation['Designation']['id'], 'name' => $designation['Designation']['name'], 'title' => $designation['Designation']['name'], 'className' => 'top-level', 'children' => $this->renderPosts($designation['children'], $result));
+            } else {
+                $result[] = array($designation['Designation']['name'], 'name' => $designation['Designation']['name'], 'title' => $designation['Designation']['name'], 'className' => 'top-level','imagepath'=>$imagepath);
+            }
+        }        
+        $this->set('employees_orgchart', $result);
+    }
+    public function renderPosts($designationsArray, $tmpModel) {
+        if (!isset($return)) {
+            $return = array();
+        }
+        foreach ($designationsArray as $child_designation) {
+
+            $imagepath = Router::url('/', true) . "img/img/avatar.png";              
+            
+            if (!empty($child_designation['children'])) {
+                $children['id'] = $child_designation['Designation']['id'];
+                $children['className'] = 'middle-level';
+                $children['name'] = $child_designation['Designation']['name'];
+                $children['title'] = $child_designation['Designation']['name'];
+                $children['children'] = $this->renderPosts($child_designation['children'], $tmpModel);
+                $return[] = $children;
+            } else {
+                $return[] = array('id' => $child_designation['Designation']['id'], 'name' => $child_designation['Designation']['name'], 'title' => $child_designation['Designation']['name'], 'className' => 'middle-level','imagepath'=>$imagepath);
+            }
+        }
+        return $return;
     }
 }

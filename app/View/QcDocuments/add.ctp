@@ -31,7 +31,7 @@
 			const arr = pathfile.length;
 			const ext = pathfile[arr-1];
 			
-			var earr = ["doc","docx","xls","xlsx","pdf","ppt","odt","txt"];
+			var earr = ["doc","docx","xls","xlsx","pdf","ppt","odt","txt","pptx","pptm"];
 			
 			if($.inArray(ext,earr) > -1){
 				
@@ -318,8 +318,9 @@
 												<?php 
 												
 												echo "<div class='col-md-6'><br /><div class='nomargin-checkbox'><label>Do you want this document to be shared with users for scheduled data enrty? If yes, click YES below. You must define schedule & data type.</label>".$this->Form->input('add_records',array('type'=>'checkbox','label'=>'Yes')) . '</div></div>'; 
-												echo "<div class='col-md-3'>".$this->Form->input('schedule_id',array()) . '</div>'; 
-												echo "<div class='col-md-3'>".$this->Form->input('data_type',array('required', 'options'=>$customArray['dataTypes'])) . '</div>'; 
+												echo "<div class='col-md-2'>".$this->Form->input('schedule_id',array()) . '</div>'; 
+												echo "<div class='col-md-2'>".$this->Form->input('data_type',array('required', 'options'=>$customArray['dataTypes'])) . '</div>'; 
+												echo "<div class='col-md-2'>".$this->Form->input('data_update_type',array('required','options'=>$customArray['dataUpdateTypes'],'default'=>-1)) . '</div>';
 											?>
 											</div>
 										</div>
@@ -430,23 +431,30 @@
 					}
 					
 					
-					$("#"+id).val(str);    		
+					$("#"+id).val(str);
 					$.ajax({
 						url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/check_duplicates/field:"+field+"/value:"+$("#"+id).val(),
-						success: function(data, result) {						    		
+						success: function(data, result) {
+							console.log(data);
+							if(data == 2){
+								$("#duplicate_errors").html("Document Number should not be more that 7 characters long");
+								$("#QcDocumentDocumentNumber").val('');
+								return false;
+							}
+							
 							if(data == 1){
 								if(field == "t"){
 									name = "Title";
 								}else if(field == "n"){
 									name = "Document Number";
-							// clean_document_number(value);
+									// clean_document_number(value);
 								}
 
 								$("#"+id).val('');
 								$("#duplicate_errors").html(name + " already exists");
 							}else{
 								$("#duplicate_errors").html("");
-						// clean_document_number(value);
+								// clean_document_number(value);
 							}
 						},
 					});	

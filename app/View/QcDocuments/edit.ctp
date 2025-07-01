@@ -212,8 +212,9 @@
 									
 									echo "<div class='col-md-6'><br /><div class='nomargin-checkbox'><label>Do you want this document to be shared with users for scheduled data enrty? If yes, click YES below. You must define schedule.</label>".$this->Form->input('add_records',array('type'=>'checkbox','label'=>'Yes')) . '</div></div>'; 
 									
-									echo "<div class='col-md-3'>".$this->Form->input('schedule_id',array()) . '</div>'; 
-									echo "<div class='col-md-3'>".$this->Form->input('data_type',array('required','options'=>$customArray['dataTypes'])) . '</div>'; 
+									echo "<div class='col-md-2'>".$this->Form->input('schedule_id',array()) . '</div>'; 
+									echo "<div class='col-md-2'>".$this->Form->input('data_type',array('required','options'=>$customArray['dataTypes'])) . '</div>'; 
+									echo "<div class='col-md-2'>".$this->Form->input('data_update_type',array('required','options'=>$customArray['dataUpdateTypes'],'default'=>-1)) . '</div>'; 
 								?></div>
 							</div>
 						</div>

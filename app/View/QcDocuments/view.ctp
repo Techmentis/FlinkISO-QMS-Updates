@@ -253,7 +253,7 @@
 									)) .'</div>';
 								}else{
 									if(in_array($this->Session->read('User.id'),json_decode($qcDocument['QcDocument']['editors'],true))){
-				                     	echo "<br /><br />";
+										echo "<br /><br />";
 										echo $this->Form->create('QcDocument',array('action'=>'upload_qc_document','type'=>'file',),array('role'=>'form','class'=>'form'));
 										echo '<div class="col-md-8">'.$this->Form->hidden('file_type',array()).'</div>';?>
 										<div class="col-md-8">
@@ -265,7 +265,7 @@
 										echo '<div class="col-md-4">'. $this->Form->submit('Upload File',array('class'=>'btn btn-sm btn-info')).'</div>';
 										echo $this->Form->input('id',array('default'=>$qcDocument['QcDocument']['id']));
 										echo $this->Form->end();   
-				                    }									
+									}									
 								}	
 							}
 
@@ -384,31 +384,31 @@
 					</tbody>
 				</table>
 			</p>			
-		</div>
-		<div class="col-md-6 text-left">
-			<?php     
-			echo "&nbsp;" . $this->Html->link('<i class="fa fa-edit fa-lg"></i>',array('action'=>'edit',$qcDocument['QcDocument']['id']),array('class'=>'btn btn-lg btn-warning tooltip1','data-original-title'=>'Edit Document','data-toggle'=>'tooltip','data-trigger'=>'hover','data-placement'=>'bottom','escape'=>false));
-			echo "&nbsp;" . $this->Html->link('<i class="fa fa-database fa-lg"></i>',array('controller'=>'custom_tables', 'action'=>'add', 'qc_document_id'=> $qcDocument['QcDocument']['id']),array('class'=>'btn btn-lg btn-info tooltip1','data-original-title'=>'Create table using FlinkISO APIs','data-toggle'=>'tooltip','data-trigger'=>'hover','data-placement'=>'bottom','escape'=>false));        
-			?>
-		</div>
-		<div class="col-md-6 text-right">
-			<?php     
-			echo $this->Html->link('<i class="fa fa-trash-o fa-lg"></i>',array('action'=>'delete',$qcDocument['QcDocument']['id']),array('confirm'=>'You are about to delete this document?. This action can not be reversed. Do you want to procced?', 'class'=>'btn btn-lg btn-danger pull-right tooltip1','data-original-title'=>'Delete?','data-toggle'=>'tooltip','data-trigger'=>'hover','data-placement'=>'bottom','escape'=>false));
-			?>
-		</div>	
-		<div class="col-md-12">
-			<p><br /></p>
-		</div>
-	</div>			
+		</div>				
+	</div>		
+	<div class="col-md-6 text-left">
+		<?php     
+		echo "&nbsp;" . $this->Html->link('<i class="fa fa-edit fa-lg"></i>',array('action'=>'edit',$qcDocument['QcDocument']['id']),array('class'=>'btn btn-lg btn-warning tooltip1','data-original-title'=>'Edit Document','data-toggle'=>'tooltip','data-trigger'=>'hover','data-placement'=>'bottom','escape'=>false));
+		echo "&nbsp;" . $this->Html->link('<i class="fa fa-database fa-lg"></i>',array('controller'=>'custom_tables', 'action'=>'add', 'qc_document_id'=> $qcDocument['QcDocument']['id']),array('class'=>'btn btn-lg btn-info tooltip1','data-original-title'=>'Create table using FlinkISO APIs','data-toggle'=>'tooltip','data-trigger'=>'hover','data-placement'=>'bottom','escape'=>false));        
+		?>
+	</div>
+	<div class="col-md-6 text-right">
+		<?php     
+		echo $this->Html->link('<i class="fa fa-trash-o fa-lg"></i>',array('action'=>'delete',$qcDocument['QcDocument']['id']),array('confirm'=>'You are about to delete this document?. This action can not be reversed. Do you want to procced?', 'class'=>'btn btn-lg btn-danger pull-right tooltip1','data-original-title'=>'Delete?','data-toggle'=>'tooltip','data-trigger'=>'hover','data-placement'=>'bottom','escape'=>false));
+		?>
+	</div>
+	<div class="col-md-12">
+		<p><br /></p>
+	</div>
+</div>			
 </div>	
 
 <div class="tab-pane" id="read_receipts">
+	<?php echo $this->Js->writeBuffer();?>
+</div>
 <div class="row">
 	<div class="col-md-12">		
-		<?php if($this->request->params['named']['approval_id'])echo $this->element('approval_form',array('approval'=>$approval));?>
 		<?php echo $this->element('approval_history',array('approvals'=>$approvals,'current_approval'=>$this->request->params['named']['approval_id'],'approvalComments',$approvalComments));?>
 	</div>
-</div>
-<?php echo $this->Js->writeBuffer();?>
 </div>
 <script>$.ajaxSetup({beforeSend:function(){$("#busy-indicator").show();},complete:function(){$("#busy-indicator").hide();}});</script>

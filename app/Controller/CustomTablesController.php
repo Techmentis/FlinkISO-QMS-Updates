@@ -36,7 +36,9 @@ class CustomTablesController extends AppController {
         $preparedBies = $approvedBies = $this->CustomTable->PreparedBy->find('list', array('conditions' => array('PreparedBy.publish' => 1, 'PreparedBy.soft_delete' => 0)));
         $createdBies = $modifiedBies = $this->CustomTable->CreatedBy->find('list', array('conditions' => array('CreatedBy.publish' => 1, 'CreatedBy.soft_delete' => 0)));
         $qcDocuments = $this->CustomTable->QcDocument->find('list', array('conditions' => array('QcDocument.publish' => 1, 'QcDocument.soft_delete' => 0)));
-        $this->set(compact('companies', 'preparedBies', 'approvedBies', 'createdBies', 'modifiedBies'));
+        $users = $this->_get_user_list();
+        $approvers = $this->_get_approver_list();
+        $this->set(compact('companies', 'preparedBies', 'approvedBies', 'createdBies', 'modifiedBies','users','approvers'));
         $count = $this->CustomTable->find('count');
         $publish = $this->CustomTable->find('count', array('conditions' => array('CustomTable.publish' => 1)));
         $unpublish = $this->CustomTable->find('count', array('conditions' => array('CustomTable.publish' => 0)));
@@ -205,7 +207,32 @@ class CustomTablesController extends AppController {
             }
         }
 
-        
+        // get branch users
+        $this->loadModel('User');
+        $this->loadModel('Employee');
+        $this->Employee->Behaviors->load('Containable');
+        $branchUsers = $this->User->find('list',array('conditions'=>array('User.branch_id'=> json_decode($qcDocument['QcDocument']['branches'],true))));
+        // debug($branchUsers);
+
+        $departmentUsers = $this->User->find('list',array('conditions'=>array('User.department_id'=> json_decode($qcDocument['QcDocument']['departments'],true))));
+        // debug($departmentUsers);
+
+        $this->Employee->contain('User.id','User.name');
+        $dUsers = $this->Employee->find('all',array(
+            'fields'=>array('Employee.id','Employee.designation_id'),
+            'recursive'=>0,            
+            'conditions'=>array('Employee.designation_id'=> json_decode($qcDocument['QcDocument']['designations'],true))));
+        // debug($dUsers);
+        if($dUsers){
+            foreach($dUsers as $dusers){
+                foreach($dusers['User'] as $duser){
+                    $designationUsers[$duser['id']] = $duser['name'];
+                }
+
+            }
+        }
+
+        $this->set('branchUsers','departmentUsers','designationUsers');        
         $this->set('qcDocument', $qcDocument);
         $this->set('process', $this->_process_header($customTable['CustomTable']['process_id']));
         $this->_commons($this->Session->read('User.id'));
@@ -320,23 +347,18 @@ class CustomTablesController extends AppController {
             if($field['field_name'] == $field_name){
                 $fieldDetails = $field;
             }
-        }
-        
+        }        
         $this->set('fieldDetails', $fieldDetails);
         $this->_commons($this->Session->read('User.id'));
     }
 
 
     // 1st step add new table
-    public function _add_new_table($table_name = null,$defaultfield = null,$sqld = null,$fields = null){
-        
-        foreach($fields as $field){
-            // if($field['default_field'] != 1)
+    public function _add_new_table($table_name = null,$defaultfield = null,$sqld = null,$fields = null){        
+        foreach($fields as $field){            
             $newFields[] = $field;
         }
-
         $fields = $newFields;
-
         $sql = "CREATE TABLE IF NOT EXISTS `" . $table_name . "` ( ";
         $sql .= "`id` varchar(36) NOT NULL ,";
         $sql .= "`sr_no` int(11) NOT NULL AUTO_INCREMENT,";
@@ -372,7 +394,7 @@ class CustomTablesController extends AppController {
             $this->redirect($this->referer());          
         }
 
-    // run above sql first and then add alter table commands one by one
+        // run above sql first and then add alter table commands one by one
         foreach ($fields as $chkd) {
 
             
@@ -533,23 +555,7 @@ return true;
             }    
         }else{
             $this->Session->setFlash(__('You are creating HTML form without any document.'));            
-        }
-
-        // else if($this->request->params['named']['process_id']){
-        //     $options = array('recursive' => - 1, 'conditions' => array('Process.id' => $this->request->params['named']['process_id']));
-        //     $proDoc = $this->CustomTable->Process->find('first', $options);
-        //     $this->set('proDoc', $proDoc);
-        //     $file_type = $proDoc['Process']['file_type'];
-        //     $file_name = $proDoc['Process']['file_name'];
-        
-        //     $file_name = $file_name;
-        //     $proFile = WWW_ROOT .  'files' . DS . $this->Session->read('User.company_id') . DS . 'processes' . DS . $this->request->params['named']['process_id'] . DS . $file_name;
-        
-        //     if (!file_exists($proFile)) {                    
-        //         $this->Session->setFlash(__('Can not add HTML form without Process Document. Please add document first.'));
-        //         $this->redirect(array('controller'=>'processes', 'action' => 'view', $this->request->params['named']['process_id']));
-        //     }
-        // }
+        }        
 
         $this->_commons($this->Session->read('User.id'));
         
@@ -666,8 +672,6 @@ return true;
                             }    
                         }
 
-                        
-                        
                         $rec = $this->CustomTable->find('first', array('recursive' => - 1, 'conditions' => array('CustomTable.id' => $this->CustomTable->id)));
                         $rec['CustomTable']['file_key'] = $key;
                         $this->CustomTable->create();
@@ -748,10 +752,8 @@ return true;
                         }
 
                         $sqlresult = $this->_add_new_table($table_name,$defaultfield,$sqld,$this->request->data['CustomTableFields']);
-
-                            // $this->_clear_cake_cache();
-                        
-                            // everything run properly -- now create table
+                        // $this->_clear_cake_cache();
+                        // everything run properly -- now create table
                         if ($this->_show_approvals()) $this->_save_approvals($this->CustomTable->id);
                         $this->Session->setFlash(__('Form created'));
                         $this->redirect(array('action' => 'recreate',$this->CustomTable->id, 'qc_document_id' => $this->request->params['named']['qc_document_id'],'process_id' => $this->request->params['named']['process_id']));
@@ -1605,7 +1607,7 @@ return true;
                     $fields['field_name'] = $this->_clean_table_names($fields['field_name']);
                     // $fields['field_label'] = Inflector::humanize($this->_clean_table_names($fields['field_label']));
                     if($fields['field_label'])$fields['field_label'] = base64_encode($fields['field_label']);
-                    $newFields[] = $fields;                    
+                    $newFields[] = $fields;
                 }
 
                 if($fields['display_type'] == 3 || $fields['display_type'] == 4){
@@ -1810,8 +1812,6 @@ return true;
                 }catch (Exception $e){
                     
                 }
-                
-                
                 $downloadUri = $data["url"];
 
                 if (file_get_contents($downloadUri) === FALSE) {
@@ -2298,12 +2298,40 @@ return true;
         $this->render('/Elements/reports');
         $this->_commons($this->Session->read('User.id'));
     }
-    public function last_updated_record($table_name = null, $user_id = null) {
-        $model = Inflector::classify($table_name);            
+    public function last_updated_record($table_name = null, $user_id = null,$option = null) {
+        $model = Inflector::classify($table_name);  
         try{
-            // echo "asd";
             $this->loadModel($model);
-            $last_updated = $this->$model->find('first', array('fields' => array($model . '.created', $model . '.id'), 'conditions' => array($model . '.created_by' => $this->Session->read('User.id')), 'order' => array($model . '.created' => 'DESC')));
+
+            // options
+            // shared with all the users
+            // shared with branches
+            // shared with departments
+
+            switch ($option) {
+                    case 0: // varchar
+                    $condition = array($model . '.created_by' => $this->Session->read('User.id'));
+                    break;
+                    case 1: // text
+                    $condition = array($model . '.branchid' => $this->Session->read('User.branch_id'));
+                    break;
+                    case 2: // int
+                    $condition = array($model . '.departmentid' => $this->Session->read('User.department_id'));
+                    break;                    
+                    default: // text
+                    $condition = array();
+                    break;
+            }            
+            $last_updated = $this->$model->find('first', array('fields' => array(
+                $model . '.created', 
+                $model . '.id',
+                $model . '.branchid',
+                $model . '.departmentid',
+            ), 
+                'conditions' => $condition, 
+                'order' => array($model . '.created' => 'DESC')
+                )
+            );
             if ($last_updated) {
                 return $last_updated[$model];
             } else {
@@ -2700,6 +2728,40 @@ return true;
             }            
         }   
         $this->redirect(array('action' => 'link_processes', $this->request->params['named']['id'], date('Ymdhis')));        
+    }
+
+    public function updateaccess($id = null){
+        if ($this->request->is('post')) {
+            if($this->Session->read('User.is_mr') == true){
+                $customTable = $this->CustomTable->find('first',array('conditions'=>array('CustomTable.id'=>$id)));
+                if($customTable){
+                    if($this->request->data['CustomTable']['creators']){
+                        $customTable['CustomTable']['creators'] = json_encode($this->request->data['CustomTable']['creators']);
+                    }
+
+                    if($this->request->data['CustomTable']['editors']){
+                        $customTable['CustomTable']['editors'] = json_encode($this->request->data['CustomTable']['editors']);
+                    }
+
+                    if($this->request->data['CustomTable']['viewers']){
+                       $customTable['CustomTable']['viewers'] = json_encode($this->request->data['CustomTable']['viewers']);
+                    }
+
+                    if($this->request->data['CustomTable']['approvers']){
+                       $customTable['CustomTable']['approvers'] = json_encode($this->request->data['CustomTable']['approvers']);
+                    }
+
+                    $this->CustomTable->create();
+                    $this->CustomTable->save($customTable,false);
+                    
+                    $this->Session->setFlash(__('Access Updated.'));
+                    $this->redirect(array('action' => 'view', $id, date('Ymdhis')));
+                }
+            }else{
+                $this->Session->setFlash(__('Invalid Access.'));
+                $this->redirect(array('action' => 'view', $id, date('Ymdhis')));
+            }
+        }
     }
     
 }

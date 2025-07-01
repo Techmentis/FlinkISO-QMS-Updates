@@ -120,6 +120,7 @@ class ClausesController extends AppController {
             $this->request->data[$this->modelClass]['publish'] = $this->request->data['Approval'][$this->modelClass]['publish'];
             $standard = $this->Clause->Standard->find('first',array('conditions'=>array('Standard.id'=>$this->request->data['Clause']['standard_id']),'recursive'=>-1));
             $this->request->data['Clause']['standard'] = $standard['Standard']['name'];
+
             if ($this->Clause->save($this->request->data)) {
                 if ($this->_show_approvals()) $this->_save_approvals();
                 if ($this->_show_evidence() == true) $this->redirect(array('action' => 'view', $id));

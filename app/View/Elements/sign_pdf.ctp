@@ -23,7 +23,7 @@
             <div class="pull-right" ><input type="button" value="Clear Sketchpad" id="clearbutton" onclick="clearCanvas();"></div>          
         </div>
     </div>
-    <?php echo $this->Form->submit('Create and Doenload PDF',array('class'=>'btn btn-sm btn-success'));?>
+    <?php echo $this->Form->submit('Create and Download PDF',array('class'=>'btn btn-sm btn-success'));?>
     <?php echo $this->Form->end();?>
 </div>
 <script type="text/javascript">

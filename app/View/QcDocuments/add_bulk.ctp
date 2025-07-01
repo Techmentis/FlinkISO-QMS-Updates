@@ -31,9 +31,9 @@ $values = array('Audit Schedule','Audit Checklist','Audit Findings','MRM','Custo
 			</div>
 			<?php echo $this->Form->create('QcDocument',array('role'=>'form','class'=>'form','type'=>'file')); ?>
 			<div class="row">
-				<div class="col-md-4"><?php echo $this->Form->input('standard_id',array('class'=>'form-control','required'=>'required','default'=>'58511238-fba8-4db9-aad0-833fc20b8995','readonly'));?></div>
-				<div class="col-md-4"><?php echo $this->Form->input('clause_id',array('class'=>'form-control','required'=>'required','default'=>'33457b87-110e-4bba-bf46-24f34952d44b','readonly'));?></div>
-				<div class="col-md-4"><?php echo $this->Form->input('qc_document_category_id',array('class'=>'form-control','required'=>'required','default'=>'584dbb5d-f880-44a3-8b0d-2e7ec20b8995','readonly'));?></div>
+				<div class="col-md-4"><?php echo $this->Form->input('standard_id',array('class'=>'form-control','required'=>'required','default'=>'58511238-fba8-4db9-aad0-833fc20b8995'));?></div>
+				<div class="col-md-4"><?php echo $this->Form->input('clause_id',array('class'=>'form-control','required'=>'required','default'=>'33457b87-110e-4bba-bf46-24f34952d44b'));?></div>
+				<div class="col-md-4"><?php echo $this->Form->input('qc_document_category_id',array('class'=>'form-control','required'=>'required','default'=>'584dbb5d-f880-44a3-8b0d-2e7ec20b8995'));?></div>
 				<div class="col-md-12"><hr /></div>				
 			</div>
 			<table cellpadding="0" cellspacing="0" class="table table-responsive table-hover index">
@@ -55,8 +55,8 @@ $values = array('Audit Schedule','Audit Checklist','Audit Findings','MRM','Custo
 				for($x = 0; $x <= 8; $x++){
 					foreach($fields as $field){
 						
-						if($field == 'title')$default = $values[$x];
-						else if($field == 'document_number')$default = 'QMS-0'.$x+1;
+						if($field == 'title')$default = '';
+						else if($field == 'document_number')$default = '';
 						else if($field == 'revision_number')$default = 0;
 						else if($field == 'date_created')$default = date('Y-m-d');
 						else if($field == 'date_of_issue')$default = date('Y-m-d');
@@ -66,7 +66,7 @@ $values = array('Audit Schedule','Audit Checklist','Audit Findings','MRM','Custo
 						else if($field == 'document_type')$default = 6;
 						else $default = '';							
 
-						if($field != 'document_number' && $field != 'revision_number' && $field != 'title')$readonly = 'readonly';
+						if($field != 'document_number' && $field != 'revision_number' && $field != 'title')$readonly = '';
 						else $readonly = '';
 						
 						echo "<td>" . $this->Form->input('Docs.'.$x.'.QcDocument.'.$field,array('class'=>'form-control', $readonly , 'label'=>false,'div'=>false,'required'=>'required','value'=>$default)) . "</td>";

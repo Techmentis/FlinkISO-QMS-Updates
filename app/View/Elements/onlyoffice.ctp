@@ -1,6 +1,6 @@
 <?php 
-if($action == 'view'){
-    $mode = 'view';
+if($action == 'view' || $action == 'mini_view'){
+    $mode = 'view';    
 }
 ?>
 <div id="ofcon<?php echo $filekey;?>">
@@ -29,7 +29,7 @@ if($action == 'view'){
         $file = urldecode($file);
         if($this->request->controller == 'qc_documents'){
         if($this->request->data['QcDocument']['document_status'] == 0){ // check if draft and apply draft rules
-            if($this->action != 'view' &&  ($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || in_array($this->Session->read('User.id'), json_decode($this->request->data['QcDocument']['user_id'],true)))){
+            if($this->action != 'view' && $this->action != 'mini_view' &&  ($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || in_array($this->Session->read('User.id'), json_decode($this->request->data['QcDocument']['user_id'],true)))){
                 if(!$mode)$mode = 'edit';
             }else{
                 $mode = 'view';

@@ -321,10 +321,15 @@ array(
 		0=>'Document',
 		1=>'Data',
 		2=>'Both'
+	),'dataUpdateTypes'=>array(
+		0=>'Any User',
+		1=>'Every User',
+		2=>'Branch',
+		3=>'Department'
 	),
 	'documentStatuses' => array(
 		'0' => 'Draft',
-		'1' => 'Published/Issued',
+		'1' => 'Issued',
 		'2' => 'Approved',
 		'3' => 'Under Revision',
 		'4' => 'Archived',
@@ -337,7 +342,7 @@ array(
 		'0' => 'Confidential',
 		'1' => 'Internal',
 		'2' => 'Restricted',
-		'3' => 'Public'
+		'3' => 'Public/ Uncontrolled'
 	),'documentTypes' => 
 	array(
 		'0'=>'Manual',
@@ -349,6 +354,7 @@ array(
 		'6'=>'Formats',
 		'7'=>'Template',
 		'8'=>'Masters',
+		'9'=>'Certificate'
 	)
 );
 

@@ -26,7 +26,7 @@ $pptarray = array('ppt','pptx');
 			<table cellpadding="0" cellspacing="0" class="table table-responsive table-hover index">
 				<tr>
 					<th><?php echo $this->Paginator->sort('standard_id'); ?> : <?php echo $this->Paginator->sort('title'); ?> - <?php echo $this->Paginator->sort('intdocunumber','Document Number'); ?> - Rev.No.</th>
-					<th><?php echo $this->Paginator->sort('prepared_by'); ?></th>		
+					<th><?php echo $this->Paginator->sort('prepared_by'); ?></th>
 					<th><?php echo $this->Paginator->sort('approved_by'); ?></th>		
 					<th><?php echo $this->Paginator->sort('issued_by'); ?></th>
 					<th><?php echo $this->Paginator->sort('document_status'); ?></th>
@@ -59,80 +59,115 @@ $pptarray = array('ppt','pptx');
 								<?php }?>
 								&nbsp;
 								<strong><?php echo $this->Html->link($qcDocument['Standard']['name'], array('controller' => 'standards', 'action' => 'view', $qcDocument['Standard']['id']),array('class'=>$revisionClasss)); ?></strong>: 
-								<strong><?php echo $this->Html->link($qcDocument['QcDocument']['name'],array('action'=>'view',$qcDocument['QcDocument']['id']),array('class'=>$revisionClasss)); ?>&nbsp; </strong> - <small><?php echo h($qcDocument['QcDocument']['document_number']); ?>&nbsp;-Rev.No.<?php echo $qcDocument['QcDocument']['revision_number']; ?></small></td>
-								<td><?php echo h($qcDocument['PreparedBy']['name']); ?>&nbsp;</td>
-								<td><?php echo h($qcDocument['ApprovedBy']['name']); ?>&nbsp;</td>
-								<td><?php echo h($qcDocument['IssuedBy']['name']); ?>&nbsp;</td>
-								<td><?php echo h($customArray['documentStatuses'][$qcDocument['QcDocument']['document_status']]); ?>&nbsp;</td>
-								<td>
-									<div class="btn-group">
-										<div class="btn btn-xs btn-default"><?php echo h($qcDocument['QcDocument']['tables']); ?></div>
-										<div class="btn btn-xs btn-success"><?php echo h($qcDocument['QcDocument']['active_tables']); ?></div>
-									</div>
-								&nbsp;</td>
+								<strong><?php echo $this->Html->link($qcDocument['QcDocument']['name'],array('action'=>'view',$qcDocument['QcDocument']['id']),array('class'=>$revisionClasss)); ?>&nbsp; </strong> - <small><?php echo h($qcDocument['QcDocument']['document_number']); ?>&nbsp;-Rev.No.<?php echo $qcDocument['QcDocument']['revision_number']; ?></small></td>								
+									<td><?php echo h($qcDocument['PreparedBy']['name']); ?>&nbsp;</td>
+									<td><?php echo h($qcDocument['ApprovedBy']['name']); ?>&nbsp;</td>
+									<td><?php echo h($qcDocument['IssuedBy']['name']); ?>&nbsp;</td>
+									<td><?php echo h($customArray['documentStatuses'][$qcDocument['QcDocument']['document_status']]); ?>&nbsp;</td>
+									<td>
+										<div class="btn-group">
+											<div class="btn btn-xs btn-default"><?php echo h($qcDocument['QcDocument']['tables']); ?></div>
+											<div class="btn btn-xs btn-success"><?php echo h($qcDocument['QcDocument']['active_tables']); ?></div>
+										</div>
+									&nbsp;</td>
 
-								<td width="60">
-									<?php if($qcDocument['QcDocument']['publish'] == 1) { ?>
-										<span class="btn btn-sm fa fa-check"></span>
-									<?php } else { ?>
-										<span class="btn btn-sm fa fa-cross"></span>
-										<?php } ?>&nbsp;</td>
+									<td width="60">
+										<?php if($qcDocument['QcDocument']['publish'] == 1) { ?>
+											<span class="btn btn-sm fa fa-check"></span>
+										<?php } else { ?>
+											<span class="btn btn-sm fa fa-cross"></span>
+											<?php } ?>&nbsp;</td>
 
-										<td class="" >	
-											<div class="btn-group btn-no-border">
-												<?php echo $this->Html->link('<i class="fa fa-television"></i>',array('controller'=>'qc_documents','action'=>'view',$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View'));?>
-												
-												<?php echo $this->Html->link('<i class="fa fa-edit"></i>',array('controller'=>'qc_documents','action'=>'edit',$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Edit'));?>
+											<td class="" >	
+												<div class="btn-group btn-no-border">
+													<?php echo $this->Html->link('<i class="fa fa-television"></i>',array('controller'=>'qc_documents','action'=>'view',$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View'));?>
 
-												<?php // echo $this->Html->link('<i class="fa fa-database"></i>',array('controller'=>'custom_tables','action'=>'add','qc_document_id'=>$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Create Table'));?>
-											</div>
-										</td>
-									</tr>
-									<?php if($qcDocument['QcDocument']['childDoc'] > 0){?>
-										<script type="text/javascript">
-											$.ajax({
-												url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/child_docs/<?php echo $qcDocument['QcDocument']['id']?>",
+													<?php echo $this->Html->link('<i class="fa fa-edit"></i>',array('controller'=>'qc_documents','action'=>'edit',$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Edit'));?>
+
+													<?php // echo $this->Html->link('<i class="fa fa-database"></i>',array('controller'=>'custom_tables','action'=>'add','qc_document_id'=>$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Create Table'));?>
+												</div>
+											</td>
+										</tr>
+										<?php if($qcDocument['QcDocument']['childDoc'] > 0){?>
+											<script type="text/javascript">
+												$.ajax({
+													url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/child_docs/<?php echo $qcDocument['QcDocument']['id']?>",
 													success: function(data, result) {
 														// $(".fa-spin").removeClass('show').addClass('hide');
 														// $("#downloadpdf").html(data);
 														$("#<?php echo $qcDocument['QcDocument']['id'];?>_tr").after(data);
 													},
-											});
+												});
 
 											// $("#<?php echo $qcDocument['QcDocument']['id']?>_childdocs").load("<?php echo Router::url('/', true); ?>/qc_documents/child_docs/<?php echo $qcDocument['QcDocument']['id'];?>");
-										</script>
-										
-									<?php } ?>
-								<?php endforeach; ?>
-							<?php }else{ ?>
-								<tr><td colspan=144>No results found</td></tr>
-							<?php } ?>
-						</table>
-						<?php echo $this->Form->end();?>			
-					</div>
-					<p>
-						<?php
-						echo $this->Paginator->options(array(
-							'update' => '#main',
-							'evalScripts' => true,
-							'before' => $this->Js->get('#busy-indicator')->effect('fadeIn', array('buffer' => false)),
-							'complete' => $this->Js->get('#busy-indicator')->effect('fadeOut', array('buffer' => false)),
-						));
+											</script>
 
-						echo $this->Paginator->counter(array(
-							'format' => __('Page {:page} of {:pages}, showing {:current} records out of {:count} total, starting on record {:start}, ending on {:end}')
-						));
-					?>			</p>
-					<ul class="pagination">
-						<?php
-						echo "<li class='previous'>".$this->Paginator->prev('< ' . __('previous'), array(), null, array('class' => 'prev disabled'))."</li>";
-						echo "<li>".$this->Paginator->numbers(array('separator' => ''))."</li>";
-						echo "<li class='next'>".$this->Paginator->next(__('next') . ' >', array(), null, array('class' => 'next disabled'))."</li>";
-						?>
-					</ul>
+										<?php } ?>
+									<?php endforeach; ?>
+								<?php }else{ ?>
+									<tr><td colspan=144>No results found</td></tr>
+								<?php } ?>
+							</table>
+							<?php echo $this->Form->end();?>			
+						</div>
+						<p>
+							<?php
+							echo $this->Paginator->options(array(
+								'update' => '#main',
+								'evalScripts' => true,
+								'before' => $this->Js->get('#busy-indicator')->effect('fadeIn', array('buffer' => false)),
+								'complete' => $this->Js->get('#busy-indicator')->effect('fadeOut', array('buffer' => false)),
+							));
+
+							echo $this->Paginator->counter(array(
+								'format' => __('Page {:page} of {:pages}, showing {:current} records out of {:count} total, starting on record {:start}, ending on {:end}')
+							));
+						?>			</p>
+						<ul class="pagination">
+							<?php
+							echo "<li class='previous'>".$this->Paginator->prev('< ' . __('previous'), array(), null, array('class' => 'prev disabled'))."</li>";
+							echo "<li>".$this->Paginator->numbers(array('separator' => ''))."</li>";
+							echo "<li class='next'>".$this->Paginator->next(__('next') . ' >', array(), null, array('class' => 'next disabled'))."</li>";
+							?>
+						</ul>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-	<script>$.ajaxSetup({beforeSend:function(){$("#busy-indicator").show();},complete:function(){$("#busy-indicator").hide();}});</script>
-	<script type="text/javascript">	$().ready(function(){$(".tooltip1").tooltip();});</script>
+		<script>
+			function changedocumentnumber(id,value){
+				$.ajax({
+					url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/updatedocumentnumber/"+id+"/"+btoa(value),
+					success: function(data, result) {														
+						
+						$("#"+id+"_dnum").html('');
+						if(data == 'Exists'){
+							$("#"+id+"_dnum").html('Document Number already exists. Try different number.');
+						}
+
+						if(data == 'DocDontExists'){
+							$("#"+id+"_dnum").html('Unable to find the document.');
+						}
+
+						if(data == 'Toolong'){
+							$("#"+id+"_dnum").html('Document Number should not be more than 7 characters long.');
+						}
+
+						if(data == 'BkpFoldFailed'){
+							$("#"+id+"_dnum").html('Unable to backup existing folder.');
+						}
+
+						if(data == 'Success'){
+							$("#"+id+"_dnum").html('Document Number Updated.');
+						}
+
+						if(data == 'notsame'){
+							$("#"+id+"_dnum").html('Old & New Document Numbers must be same length.');
+						}						
+					},
+				});
+
+			}
+		</script>
+		<script>$.ajaxSetup({beforeSend:function(){$("#busy-indicator").show();},complete:function(){$("#busy-indicator").hide();}});</script>
+		<script type="text/javascript">	$().ready(function(){$(".tooltip1").tooltip();});</script>

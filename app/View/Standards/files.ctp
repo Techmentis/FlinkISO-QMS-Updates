@@ -5,7 +5,7 @@
         height: 924px;
         display: block;
         float: left;        
-    }
+    }    
 </style>
 
 
@@ -23,7 +23,7 @@
                     <h3 class="box-title"><?php echo $clause['Clause']['title'];?></h3>
                 </div>
                 <div class="box-body">
-                    <?php echo nl2br($clause['Clause']['details']) ?> 
+                    <?php echo $clause['Clause']['details'] ?> 
 
                     <?php if($clause['additional_details']){ ?>                  
                         <h3 class="box-title">Notes</h3><?php echo $clause['Clause']['additional_details'] ?>
@@ -41,7 +41,7 @@
     <?php if($qcDocuments){ ?> 
         <div class="row">
             <div class="col-md-12">        
-                
+
                 <div id="tabs"> 
                     <ul>
                         <?php

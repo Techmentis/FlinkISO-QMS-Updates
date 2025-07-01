@@ -40,9 +40,9 @@ class QcDocumentsController extends AppController {
         if($editors != null){
             if(!in_array($this->Session->read('User.id'), $editors)){
                 if($access['allow_access_user'] == $this->Session->read('User.id')){
-                    
+
                 }else{
-                    
+
                     $this->Session->setFlash(__('You do not have permission to edit this document'));
                     $this->redirect(array('controller'=>'users', 'action' => 'access_denied'));    
                 }
@@ -199,8 +199,8 @@ class QcDocumentsController extends AppController {
                 'QcDocument.parent_document_id'=>$id, 
                 $accessConditions
             )
-            )
-        );        
+        )
+    );        
         $this->set('qcDocuments',$qcDocuments);
         $this->_commons($this->Session->read('User.id'));
     }
@@ -215,6 +215,7 @@ class QcDocumentsController extends AppController {
         if (!$this->QcDocument->exists($id)) {
             throw new NotFoundException(__('Invalid qc document'));
         }
+        $this->_check_access();
         if ($this->request->is('post') || $this->request->is('put')) {
             $this->Session->setFlash(__('Approval Saved'));
             if ($this->request->data['Approval']['user_id']) $this->_save_approvals();
@@ -310,8 +311,13 @@ class QcDocumentsController extends AppController {
             $this->redirect(array('action' => 'index'));
         }
 
+        if($this->Session->read('User.is_creator') == 0){
+            $this->Session->setFlash(__('You are not authorized to creator new documents'));
+            $this->redirect(array('action' => 'index'));
+        }
+
         if(file_exists(Configure::read('path'))){
-            
+
         }else{
             $newFolder = New Folder();
             $newFolder->create(Configure::read('path'));
@@ -320,7 +326,7 @@ class QcDocumentsController extends AppController {
         chmod(Configure::read('path'),0777);
 
         if ($this->request->is('post') || $this->request->is('put')) {
-            
+
             $accessptedExtentions = array(
                 'application/msword',
                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -330,10 +336,11 @@ class QcDocumentsController extends AppController {
                 'text/plain',
                 'application/vnd.ms-excel',
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'application/pdf'
+                'application/pdf',
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation'
 
             );
-
+            
             if($this->request->data['QcDocument']['file']['type']){
                 if(!in_array($this->request->data['QcDocument']['file']['type'], $accessptedExtentions)){
                     $this->Session->setFlash(__('Incorrect File Type'));
@@ -347,6 +354,7 @@ class QcDocumentsController extends AppController {
 
             $this->request->data['QcDocument']['system_table_id'] = $this->_get_system_table_id();
             $this->QcDocument->create();
+            
             $this->request->data['QcDocument']['title'] = $this->_clean_table_names(ltrim(rtrim($this->request->data['QcDocument']['title'])));
             $this->request->data['QcDocument']['document_number'] = ltrim(rtrim($this->request->data['QcDocument']['document_number']));
             $this->request->data['QcDocument']['revision_number'] = ltrim(rtrim($this->request->data['QcDocument']['revision_number']));
@@ -378,6 +386,17 @@ class QcDocumentsController extends AppController {
                 $this->request->data['QcDocument']['approved_by'] = $this->request->data['Approval']['QcDocument']['approved_by'];
             }            
 
+            $document_number = $this->request->data['QcDocument']['document_number'];
+            $rec = $this->QcDocument->find('count', array('conditions' => array('QcDocument.document_number' => $document_number)));            
+            if ($rec > 0) {
+                $document_number = $this->_get_last_number();
+                $new_document_number = $document_number;
+            } else {
+                $new_document_number = $document_number;
+            }
+
+            $this->request->data['QcDocument']['document_number'] = $new_document_number;
+
             if ($this->QcDocument->save($this->request->data)) {
                 if (!empty($this->request->data['QcDocument']['file']['name'])) $this->_step1($this->request->data, $this->QcDocument->id);
                 else{                    
@@ -399,7 +418,7 @@ class QcDocumentsController extends AppController {
                             $this->redirect(array('action' => 'add'));
                         }
 
-                     
+
                         $file_name = $this->request->data['QcDocument']['title'];
                         $document_number = $this->request->data['QcDocument']['document_number'];
                         $document_version = $this->request->data['QcDocument']['revision_number'];
@@ -733,7 +752,7 @@ class QcDocumentsController extends AppController {
         
         if (($this->request->is('post') || $this->request->is('put')) && !empty($this->request->data['QcDocument'])) {
             if($this->request->data['QcDocument']['document_type'] == 2)$this->_update_process($this->request->data,$this->request->data['QcDocument']['id']);
-         
+
             $this->request->data['QcDocument']['system_table_id'] = $this->_get_system_table_id();
             $this->request->data['QcDocument']['branches'] = json_encode($this->request->data['QcDocument']['share_with_branches']);
             $this->request->data['QcDocument']['departments'] = json_encode($this->request->data['QcDocument']['share_with_departments']);
@@ -924,13 +943,13 @@ class QcDocumentsController extends AppController {
                         // 'fields'=>array('QcDocument.id','QcDocument.created_by'), 
                         'conditions'=>array('QcDocument.id'=>$this->request->data['QcDocument']['id']
                     )));
-                        
+
                     $editors = json_decode($doc['QcDocument']['editors'],true);
                     if($editors != null){
                         if(!in_array($this->Session->read('User.id'), $editors)){
-                                
-                                $this->Session->setFlash(__('You do not have permission to edit this document'));
-                                $this->redirect(array('action' => 'index')); 
+
+                            $this->Session->setFlash(__('You do not have permission to edit this document'));
+                            $this->redirect(array('action' => 'index')); 
                         }        
                     }else{
                         $this->Session->setFlash(__('You do not have permission to edit this document'));
@@ -974,7 +993,7 @@ class QcDocumentsController extends AppController {
             $this->set('customTables',$customTables);
         }
         
-                
+
     } 
 
     public function delete_document() {
@@ -1059,6 +1078,10 @@ class QcDocumentsController extends AppController {
             }
         }
         if ($field == 'n') {
+            if(strlen($val) > 7){
+                return 2;
+            }
+
             $rec = $this->QcDocument->find('count', array('conditions' => array('QcDocument.document_number' => $val)));
             // echo $rec;
             if ($rec > 0) {
@@ -1164,14 +1187,25 @@ class QcDocumentsController extends AppController {
         }
     }
 
+    public function _double_check($docs = null){
+        $number = "QMS-".str_pad($docs, 3, 0, STR_PAD_LEFT);
+        $rec = $this->QcDocument->find('count', array('conditions' => array('QcDocument.document_number' => $number)));
+        if($rec == 0){
+            return $number;
+        }else{
+            $docs = $docs + 1;
+            return $this->_double_check($docs);
+        }
+    }
+
     public function _get_last_number(){
         $docs = $this->QcDocument->find('count',array());
         $docs = $docs + 1;
-        $number = "QMS-".str_pad($docs, 3, 0, STR_PAD_LEFT);
-        return $number;        
+        $new_document_number = $this->_double_check($docs);
+        return $new_document_number;        
     }
-    // change history functionality
 
+    // change history functionality
     public function define_change_history_table(){
         $this->loadModel('Company');
         $customTables = $this->QcDocument->CustomTable->find('list');
@@ -1209,7 +1243,7 @@ class QcDocumentsController extends AppController {
                 $this->set('company',$company);
             }
         }
-                
+
     }
 
     public function change_history($id = null){  
@@ -1254,7 +1288,7 @@ class QcDocumentsController extends AppController {
 
     public function update_revision($id = null){
         if ($this->request->is('post') || $this->request->is('put')) {
-            
+
             $qcDocument = $this->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$this->request->data['QcDocument']['id']),'recursive'=>-1));
             
             $archiveQcDocument = $qcDocument;
@@ -1415,7 +1449,7 @@ class QcDocumentsController extends AppController {
                         $this->Session->setFlash(__('Document is already archived.'));
                         $this->redirect(array('action' => 'view', $qcDocument['QcDocument']['parent_id'], 'timestamp'=>date('ymdhis')));
                     }
-        
+
                     
                     // find changed document
                     $additionalFiles = json_decode($records[0][$model]['additional_files'],true);
@@ -1562,7 +1596,7 @@ class QcDocumentsController extends AppController {
                         file_put_contents($history_file_for_save . DS . "createdInfo.json", json_encode($json, JSON_PRETTY_PRINT));
 
                     }else{
-                        
+
                     }  
                 }
             }

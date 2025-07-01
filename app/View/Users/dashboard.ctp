@@ -136,7 +136,7 @@ $pptarray = array('ppt','pptx');
             </tr>
             <?php foreach($customTables as $customTable){ 
 
-              $last_updated = $this->requestAction(array('controller'=>'custom_tables', 'action'=>'last_updated_record',$customTable['CustomTable']['table_name']));
+              $last_updated = $this->requestAction(array('controller'=>'custom_tables', 'action'=>'last_updated_record',$customTable['CustomTable']['table_name'],$this->Session->read('User.id'),1));
 
               switch ($schedules[$customTable['QcDocument']['schedule_id']]){
                 case 'Daily':
@@ -159,6 +159,15 @@ $pptarray = array('ppt','pptx');
                 break;
                 case 'Monthly':
                 if(date('Y-m-d',strtotime($last_updated['created'])) < date('Y-m-d',strtotime('-1 month'))){
+                  $label = 'Pending';
+                  $class = "label-warning";
+                }else{
+                  $label = 'Updated';
+                  $class = "label-success";
+                }
+                break;
+                case 'Half-Yearly':
+                if(date('Y-m-d',strtotime($last_updated['created'])) < date('Y-m-d',strtotime('-6 months'))){
                   $label = 'Pending';
                   $class = "label-warning";
                 }else{
@@ -259,10 +268,7 @@ $pptarray = array('ppt','pptx');
                     </tr>
 
                     <?php foreach ($approvals as $approval): 
-                      if(!$approval['ApprovalComment'] && $approval['ApprovalComment'][0]['user_id'] != $this->Session->read('User.id')){
-
-
-                        ?>
+                      if(!$approval['ApprovalComment'] && $approval['ApprovalComment'][0]['user_id'] != $this->Session->read('User.id')){?>
                         <tr>
                           <td><?php echo h($approval['Approval']['model_name']); ?>&nbsp;</td>
                           <td><?php echo h($approval['Approval']['created']); ?>&nbsp;</td>
@@ -293,7 +299,7 @@ $pptarray = array('ppt','pptx');
                 </div>
                 <div class="box-footer"><small>List of approvals sent/received by you.</small></div>
               </div>
-            <?php }else{ ?>              
+            <?php }else{ ?>
             <?php } ?>
             <?php if($approvalComments){ ?>
               <div class="row">

@@ -60,7 +60,8 @@ if($approval){ ?>
 	</div>
 <?php } ?>
 <?php
-if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1){
+// if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1){
+if($this->Session->read('User.is_publisher') == 0){	
 	echo "<div class='row'><div class='col-md-12 approval_checkbox_div'>" . $this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox'))."</div></div>"; ?>
 <?php }
 ?>
@@ -115,7 +116,8 @@ if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_appr
 	<div class="box-footer">
 		<?php if($this->action == 'view'){
 			echo "<div class='row'>";
-			if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1){
+			// if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1){
+			if($this->Session->read('User.is_publisher') == 1){
 				echo "<div class='col-md-12 approval_checkbox_div'>" . $this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox'))."</div>";
 				$pubshow = true;
 			}else{
@@ -135,7 +137,8 @@ if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_appr
 			} 
 			
 			echo "<div class='row'>";
-			if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1){
+			// if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1){
+			if($this->Session->read('User.is_publisher') == 1){
 				// if($this->Session->read('User.is_approver') == 1){
 				echo "<div class='col-md-2 approval_checkbox_div'><br />".$this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox','onClick'=>'addapp();'))."</div>";
 				$pubshow = true;
@@ -155,7 +158,8 @@ if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_appr
 <?php if($preparer && ($preparer == $this->Session->read('User.id') || $preparer == $this->Session->read('User.employee_id'))){ ?>
 	
 <?php }else{
-	if(($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1) && $pubshow != 1){
+	// if(($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1) && $pubshow != 1){
+	if($this->Session->read('User.is_publisher') == 1  && $pubshow != 1){		
 		echo $this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox'));
 	}
 } ?>	

@@ -211,13 +211,15 @@ class UsersController extends AppController {
         if ($this->request->is('ajax')) { 
             $str = base64_decode($this->request->data['str']);
             $values = explode(',',$str);            
-
+            
             $user= $this->User->find('first',array('recursive'=>-1,'conditions'=>array('User.id'=>$values[0])));
             if($user){
                 if($values[1] == 'is_mr'){                
                     $user['User']['is_mr'] = $values[2];
                     $user['User']['is_view_all'] = $values[2];
                     $user['User']['is_approver'] = $values[2];
+                    $user['User']['is_publisher'] = $values[2];
+                    $user['User']['is_creator'] = $values[2];
                 }
                 if($values[1] == 'is_view_all'){                
                     $user['User']['is_view_all'] = $values[2];
@@ -227,6 +229,12 @@ class UsersController extends AppController {
                 }
                 if($values[1] == 'status'){                
                     $user['User']['status'] = $values[2];
+                }
+                if($values[1] == 'is_publisher'){
+                    $user['User']['is_publisher'] = $values[2];
+                }
+                if($values[1] == 'is_creator'){
+                    $user['User']['is_creator'] = $values[2];
                 }
             }
             $this->User->create();
@@ -242,6 +250,12 @@ class UsersController extends AppController {
                 }
                 if($values[1] == 'status'){                
                     return $user['User']['status'];
+                }
+                if($values[1] == 'is_publisher'){                
+                    return $user['User']['is_publisher'];
+                }
+                if($values[1] == 'is_creator'){                
+                    return $user['User']['is_creator'];
                 }
             }else{
                 return 10;
@@ -546,6 +560,8 @@ class UsersController extends AppController {
                     $this->Session->write('User.username', $user['User']['username']);
                     $this->Session->write('User.lastLogin', $user['User']['last_login']);
                     $this->Session->write('User.is_mr', $user['User']['is_mr']);
+                    $this->Session->write('User.is_creator', $user['User']['is_creator']);
+                    $this->Session->write('User.is_publisher', $user['User']['is_publisher']);
                     $this->Session->write('User.is_mt', $user['User']['is_mt']);
                     $this->Session->write('User.hod', $user['Employee']['is_hod']);
                     $this->Session->write('User.company_id', $user['User']['company_id']);
@@ -683,6 +699,12 @@ class UsersController extends AppController {
         $this->CustomTable->virtualFields = array(
             'qc_parent' => 'select `qc_documents`.`parent_document_id` from `   qc_documents` where `qc_documents`.`id` LIKE CustomTable.qc_document_id'
         );
+
+        // options
+        // shared with all the users
+        // shared with branches
+        // shared with departments
+
         $customTables = $this->CustomTable->find('all', array(
             'fields'=>array(
                 'CustomTable.id',
@@ -700,7 +722,20 @@ class UsersController extends AppController {
                 'CustomTable.qc_parent',
             ),
             'order'=>array('CustomTable.name'=>'ASC'),
-            'conditions' => array('CustomTable.qc_parent' => -1,  'CustomTable.publish' => 1, 'QcDocument.add_records' => 1, 'CustomTable.table_locked' => 0, 'CustomTable.table_name NOT LIKE' => '%_child_%', 'OR' => array('QcDocument.departments LIKE ' => '%' . $this->Session->read('User.department_id') . '%', 'QcDocument.branches LIKE ' => '%' . $this->Session->read('User.branch_id') . '%', 'QcDocument.user_id LIKE ' => '%' . $this->Session->read('User.id') . '%',))));
+            'conditions' => array(
+                'CustomTable.qc_parent' => -1,  
+                'CustomTable.publish' => 1, 
+                'QcDocument.add_records' => 1, 
+                'CustomTable.table_locked' => 0, 
+                'CustomTable.table_name NOT LIKE' => '%_child_%', 
+                'OR' => array(
+                    'QcDocument.departments LIKE ' => '%' . $this->Session->read('User.department_id') . '%', 
+                    'QcDocument.branches LIKE ' => '%' . $this->Session->read('User.branch_id') . '%', 
+                    'QcDocument.user_id LIKE ' => '%' . $this->Session->read('User.id') . '%',
+                    )
+                )
+            )
+        );
         
         $this->set('customTables', $customTables);
         $schedules = $this->CustomTable->QcDocument->Schedule->find('list');
@@ -867,7 +902,9 @@ class UsersController extends AppController {
             $err = curl_error($curl);
             curl_close($curl);
             
+
             $this->request->data['User'] = $user;
+
             if($err){
 
             }
