@@ -16,7 +16,7 @@
 <style>
 
 	.chosen-container, .chosen-container-single, .chosen-select
-	{min-width: 200px; width:100% !important;}
+	{min-width: 120px; width:100% !important;}
 	#ui-datepicker-div,.ui-datepicker,.datepicker{z-index:9999 !important}{z-index: 999999 !important}
 /*.modal-footer{text-align: left}*/
 </style>
