@@ -122,17 +122,16 @@ if($this->action == 'edit' || $this->action == 'recreate' || $this->action == 'r
 }
 
 
-if($this->action == 'index' && $this->request->controller != 'usage_details' && $this->request->controller != 'custom_tables'  && $this->request->controller != 'invoices' && ($this->Session->read('User.is_mt') == true || $this->Session->read('User.is_hod') == true)) {
+if(($this->action == 'index' || $this->action == 'advance_search' || $this->action == 'quick_search') && $this->request->controller != 'usage_details' && $this->request->controller != 'custom_tables'  && $this->request->controller != 'invoices' && ($this->Session->read('User.is_mt') == true || $this->Session->read('User.is_hod') == true)) {
 
     echo $this->Html->link('<i class="fa fa-check-square"></i>',"#",
         array('class'=>'tooltip1 btn btn-app btn-sm btn-default fa-dark ','escape'=>false,
             'onClick'=>'selectaddtrs()',
             'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Select All'
         ));
-
-    echo $this->Form->create(Inflector::classify($this->request->controller),array('action'=>'bulk_delete','style'=>'display:inline'),array('class'=>'in-line pull-left','style'=>'display:inline'));
-    
     if(!in_array($this->request->controller, array('qc_documents','custom_tables','processes','standards'))){
+
+    echo $this->Form->create(Inflector::classify($this->request->controller),array('action'=>'bulk_delete','style'=>'display:inline'),array('class'=>'in-line pull-left','style'=>'display:inline'));    
         echo '<label for="bulkDeleteSubmit" class="btn btn-app btn-default"><i class="fa fa-trash-o text-danger"></i></label>';
         echo $this->Form->submit('&nbsp;',
             array(
@@ -165,13 +164,14 @@ if($this->action == 'index' && $this->request->controller != 'usage_details' && 
 ?>        
 </div>
 <div class="col-md-4 col-sm-12">
+    <?php if(!in_array($this->request->controller, array('standards'))){ ?>
     <?php if(($this->action == 'index' || $this->action == 'quick_search' ) && $this->request->controller != 'usage_details'  && $this->request->controller != 'invoices') { ?>
         <div class=" btn-group" style="width:100%;">
             <?php 
             echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_src_button', 'label'=>false,'placeholder'=>'Add Search query and press Tab.','style'=>'margin-top: -12px'));                        
             ?>
         </div>
-    <?php } ?>
+    <?php } } ?>
 </div>
 </div>
 
@@ -185,7 +185,7 @@ $str .= 'timestamp:'.date('ymdhis');
 ?>
 
 <script type="text/javascript">  
-    <?php if($this->action == 'index' && ($this->Session->read('User.is_mt') == true || $this->Session->read('User.is_hod') == true)) { ?>
+    <?php if(($this->action == 'index' || $this->action == 'advance_search'  || $this->action == 'quick_search') && ($this->Session->read('User.is_mt') == true || $this->Session->read('User.is_hod') == true)) { ?>
         function selectaddtrs(){
             $('form tr').each(function() {   
                 $(this).toggleClass('warning');

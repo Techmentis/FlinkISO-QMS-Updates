@@ -15,7 +15,7 @@ $date = date('Y-m-d',strtotime('+16 days'));
             <div class="logo">Flink<strong>ISO</strong></div>
         </div>
         <div class="content">
-            <h3>Welsome to FlinkISO</h3><br />
+            <h3>Welcome to FlinkISO</h3><br />
             <p>Dear User,<br /><br /></p>            
             <p>Thank you for registering with FlinkISO&trade; On-Cloud edition.</p>
             <p>Your free trial will be active till <?php echo date('d M Y',strtotime('+15 days')) ;?></p>

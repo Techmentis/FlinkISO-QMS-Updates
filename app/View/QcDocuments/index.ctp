@@ -53,7 +53,7 @@ $pptarray = array('ppt','pptx');
 								<?php }elseif(in_array($qcDocument['QcDocument']['file_type'],$pdfarray)){ ?>
 									<i class="fa fa-file-pdf-o" aria-hidden="true"></i>
 								<?php }elseif(in_array($qcDocument['QcDocument']['file_type'],$pptarray)){ ?>
-									<i class="fa fa-file-ppt-o" aria-hidden="true"></i>
+									<i class="fa fa-file-powerpoint-o" aria-hidden="true"></i>
 								<?php }else{ ?>
 									<i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i>
 								<?php }?>

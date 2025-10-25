@@ -496,8 +496,7 @@ echo $this->fetch('script');
 												'label'=>false,
 												'multiple'=>true, 
 												'options'=>$users,
-												'default'=>$creators,
-												'required'=>true
+												'default'=>$creators,												
 											));?>												
 										</td>
 											<td><?php echo $this->Form->input('viewers',array(
@@ -505,23 +504,20 @@ echo $this->fetch('script');
 												'multiple'=>true, 
 												'options'=>$users,
 												'default'=>$viewers,
-												'required'=>true
-											));?>												
+											));?>							
 										</td>
 										<td><?php echo $this->Form->input('editors',array(
 												'label'=>false,
 												'multiple'=>true, 
 												'options'=>$users,
 												'default'=>$editors,
-												'required'=>true
 											));?>												
 										</td>
 										<td><?php echo $this->Form->input('approvers',array(
 												'label'=>false,
 												'multiple'=>true, 
 												'options'=>$users,
-												'default'=>$approvers,
-												'required'=>true
+												'default'=>$approvers,												
 											));?>												
 										</td>
 									</tr>
@@ -539,6 +535,6 @@ echo $this->fetch('script');
 			</div>
 		</div>
 	</div>
-	<?php echo $this->Form->submit('Update Access',array('class'=>'btn btn-sm btn-success'));
+	<?php echo $this->Form->submit('Update Access',array('class'=>'btn btn-sm btn-success','id'=>'updateaccessbutton'));
 	echo $this->Form->end();?>
 </div>

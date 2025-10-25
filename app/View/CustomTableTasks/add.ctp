@@ -177,7 +177,6 @@
 							<?php echo $this->Form->submit(__('Submit'), array('div' => false, 'style'=>'margin-bottom:10px', 'class' => 'btn btn-primary btn-success','async' => 'false', 'update'=>'create_tasks', 'id'=>'task_submit_id')); ?>
 							<?php echo $this->Html->image('indicator.gif', array('id' => 'task_submit_indicator')); ?>
 							<?php echo $this->Form->end(); ?>
-
 							<?php echo $this->Js->writeBuffer();?>
 							<script type="text/javascript">
 								$("#CustomTableTaskConditionField").on('change',function(){

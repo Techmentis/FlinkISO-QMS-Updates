@@ -312,9 +312,11 @@ class QcDocumentsController extends AppController {
         }
 
         if($this->Session->read('User.is_creator') == 0){
-            $this->Session->setFlash(__('You are not authorized to creator new documents'));
+            $this->Session->setFlash(__('You are not authorized to create new documents'));
             $this->redirect(array('action' => 'index'));
         }
+
+
 
         if(file_exists(Configure::read('path'))){
 
@@ -499,7 +501,7 @@ class QcDocumentsController extends AppController {
         $full_name = explode('.', $data['QcDocument']['file']['name']);
         $file_type = $data['QcDocument']['file_type'];
         $file_name = $data['QcDocument']['title'];
-        $document_number = $data['QcDocument']['document_number'];
+        $document_number = $data['QcDocument']['document_number'];        
         $document_version = (int)$data['QcDocument']['revision_number'];
         
         $title = $file_name;
@@ -589,7 +591,7 @@ class QcDocumentsController extends AppController {
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 'application/pdf'
             );
-
+            
             if($this->request->data['QcDocument']['file']['type']){
                 if(!in_array($this->request->data['QcDocument']['file']['type'], $accessptedExtentions)){
                     $this->Session->setFlash(__('Incorrect File Type'));
@@ -632,7 +634,7 @@ class QcDocumentsController extends AppController {
                     $this->redirect(array('action' => 'view',$this->request->data['QcDocument']['id']));                
                 }
             }else{
-                
+
                 $path = Configure::read('path') . DS . $id ;
                 $dir = new Folder();
                 $dir->create($path);
@@ -797,6 +799,7 @@ class QcDocumentsController extends AppController {
             $access = $this->request->data['Access'];
             $options = array('conditions' => array('QcDocument.' . $this->QcDocument->primaryKey => $id));
             $this->request->data = $this->QcDocument->find('first', $options);
+            if($this->Session->read('User.id') != $this->request->data['QcDocument']['created_by'])$this->_doc_access($this->request->data,$access);
 
             if($this->request->data['QcDocument']['document_status'] == 3){
                 $this->Session->setFlash(__('Can not edit this document. This document is under revision.'));
@@ -1422,7 +1425,7 @@ class QcDocumentsController extends AppController {
                     ),
                     'recursive'=>-1
                 ));
-
+                
                 if($customTable){
                     // load model
                     $model = Inflector::Classify($customTable['CustomTable']['table_name']);
@@ -1621,5 +1624,142 @@ class QcDocumentsController extends AppController {
             $this->QcDocument->save($qcDocument,false);            
         }
         exit;
+    }    
+
+    public function rename($id = null, $value = null){
+        $value = base64_decode($value);
+        if ($this->request->is('post') || $this->request->is('put')) {            
+            $qcDocument = $this->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$id),'recursive'=>-1));
+            if($qcDocument){                
+                if($qcDocument['QcDocument']['document_number'] != $this->request->data['QcDocument']['document_number']){
+                    // check if document number exists if changed.
+                    $docNumCheck = $this->QcDocument->find('count',array(
+                        'conditions'=>array(
+                            'QcDocument.document_number'=>$this->request->data['QcDocument']['document_number'],
+                            'QcDocument.id != '=>$this->request->data['QcDocument']['id'],
+                            'QcDocument.standard_id'=>$qcDocument['QcDocument']['standard_id'],
+                        )));
+
+
+                    if($docNumCheck > 0){
+                        $this->Session->setFlash(__('Document Number already exists.'));
+                        $this->redirect(array('action' => 'rename',$this->request->data['QcDocument']['id']));  
+                    }
+                }
+                
+                //find if the document exists;
+                // back up existing document
+                // if yes, rename the document
+                // check if history exists
+                // if yes rename the history foler
+                
+                $id = $qcDocument['QcDocument']['id'];
+
+                $file_type = $qcDocument['QcDocument']['file_type'];
+                $old_file_name = $qcDocument['QcDocument']['title'];
+                $document_number = $qcDocument['QcDocument']['document_number'];
+                $document_version = $qcDocument['QcDocument']['revision_number'];
+                $old_file_name = $document_number . '-' . $old_file_name . '-' . $document_version;
+                $old_file_name = $this->_clean_table_names($old_file_name);
+                $old_file_name = $old_file_name. '.' . $file_type;
+                
+                $file = Configure::read('path') . DS . $id . DS . $old_file_name;
+                
+                
+                // new name
+                $qcDocument['QcDocument']['title'] = $this->request->data['QcDocument']['name'];
+                $file_type = $qcDocument['QcDocument']['file_type'];
+                $file_name = $qcDocument['QcDocument']['title'];
+                $document_number = $this->request->data['QcDocument']['document_number'];
+                $document_version = $this->request->data['QcDocument']['revision_number'];
+                $file_name = $document_number . '-' . $file_name . '-' . $document_version;
+                $file_name = $this->_clean_table_names($file_name);
+                $file_name = $file_name. '.' . $file_type;
+                
+                $newfile = Configure::read('path') . DS . $id . DS . $file_name;
+
+                if(file_exists($file)){                    
+                    if(file_exists(Configure::read('path'). DS . 'backups')){
+
+                    }else{
+                        $backupFolder = New Folder();
+                        if($backupFolder->create(Configure::read('path'). DS . 'backups')){
+
+                        }else{
+                            // echo 'Unable to create Backup Folder';
+                            $this->Session->setFlash(__('Unable to back the document.'));
+                            $this->redirect(array('action' => 'rename',$this->request->data['QcDocument']['id']));                              
+                        }    
+                    }
+                    
+                    if(file_exists(Configure::read('path'). DS . 'backups' . DS . $id)){
+
+                    }else{
+                        $backupFileFolder = New Folder();
+                        if($backupFileFolder->create(Configure::read('path'). DS . 'backups' . DS . $id)){
+
+                        }
+                    }
+
+                    // back up existing folder                                    
+                    $folderToCopy = new Folder(Configure::read('path') . DS . $id);
+                    $folderToCopy->copy(array(
+                        'to' => Configure::read('path'). DS . 'backups' . DS . $id,
+                        'from' => Configure::read('path') . DS . $id,
+                        'recursive' => true
+                    ));
+                    
+                    if(file_exists($file)){
+                        rename($file, $newfile);
+                    }
+
+                    $oldfolder = $file.'-hist';
+                    $newfolder = $newfile.'-hist';
+
+                    if(file_exists($oldfolder)){
+                        rename($oldfolder, $newfolder);
+                    }
+                 
+                    // update record
+                    $qcDocument['QcDocument']['name'] = $this->request->data['QcDocument']['name'];
+                    $qcDocument['QcDocument']['title'] = $this->_clean_table_names($this->request->data['QcDocument']['name']);
+                    $qcDocument['QcDocument']['document_number'] = $this->request->data['QcDocument']['document_number'];
+                    $qcDocument['QcDocument']['revision_number'] = $this->request->data['QcDocument']['revision_number'];
+                    
+                    $this->QcDocument->create();
+                    $this->QcDocument->save($qcDocument,false);
+
+                    $this->Session->setFlash(__('Document renamed.'));
+                    $this->redirect(array('action' => 'view',$this->request->data['QcDocument']['id']));  
+
+                }else{
+                    $this->Session->setFlash(__('Document does not exists.'));
+                    $this->redirect(array('action' => 'view',$this->request->data['QcDocument']['id']));  
+                }                
+            }else{
+                $this->Session->setFlash(__('Document does not exists.'));
+                $this->redirect(array('action' => 'view',$this->request->data['QcDocument']['id']));  
+            }
+        }else{
+            $access = $this->request->data['Access'];
+            $options = array('conditions' => array('QcDocument.' . $this->QcDocument->primaryKey => $id));
+            $this->request->data = $this->QcDocument->find('first', $options);
+            if($this->Session->read('User.id') != $this->request->data['QcDocument']['created_by'])$this->_doc_access($this->request->data,$access);
+
+            if($this->request->data['QcDocument']['document_status'] == 3){
+                $this->Session->setFlash(__('Can not edit this document. This document is under revision.'));
+                $this->redirect(array('action' => 'view', $id,'timestamp'=>date('ymdhis')));
+            }
+            
+            if($this->request->data['QcDocument']['document_status'] == 6){
+                $this->Session->setFlash(__('You must update this document.'));
+                $this->redirect(array('action' => 'update_revision', $id,'timestamp'=>date('ymdhis')));
+            }
+
+            if($this->request->data['QcDocument']['archived'] == 1){
+                $this->Session->setFlash(__('You can not edit this document, its archived.'));
+                $this->redirect(array('action' => 'view', $id,'timestamp'=>date('ymdhis')));
+            }
+        }
     }
 }

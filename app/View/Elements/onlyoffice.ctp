@@ -78,6 +78,15 @@ if($filetype != null){
         $docType = 'word';
         $heading = 'PDF';
     }
+
+    if($file_type == 'pptx' || $file_type == 'ppt'){
+        $documentType = 'presentation';
+        $icon = ' fa-file-powerpoint-o';
+        $border_color = '#ab5252;';
+        $docType = 'presentation';
+        $heading = 'PPTX';
+    }
+
     if($this->Session->read('User')){ ?>
         <style type="text/css">
             #ofdcontainer<?php echo $placeholderid;?>{
@@ -221,82 +230,51 @@ if($filetype != null){
                         $fileuriUser = $url;
                         $onAppReady = 'onAppReady';
 
-                        $config = [
-                            "type" => $filetype,        
-                            "documentType" => $documentType,
-                            "document" => [
-                                "title" => $file,
+                        $config  = array();
+                            $config = [
+                                "document" => [
+                                    "key" => $filekey,
+                                    "permissions" => [
+                                        "comment"=> true,
+                                        "commentGroups"=>["edit"=>[$this->Session->read('User.company_name')],"remove"=>[$this->Session->read('User.company_name')],"view"=>[$this->Session->read('User.company_name')]],
+                                        "copy"=>true,
+                                        "deleteCommentAuthorOnly"=>false,
+                                        "download"=>true,
+                                        "edit"=>true,
+                                        "editCommentAuthorOnly"=>false,
+                                        "fillForms"=>true,
+                                        "modifyContentControl"=>true,
+                                        "modifyFilter"=>true,
+                                        "print"=>true,
+                                        "review"=>true,
+                                        "reviewGroups"=>[$this->Session->read('User.company_name')]                                    
+                                ],
                                 "url" => $url,
                                 "fileType" => $filetype,
-                                "key" => $filekey,
-                                "info" => [
-                                    "owner" => $this->Session->read('User.company_name'),
-                                    "uploaded" => date('Y-m-d H:i:s'),
-                                    "favorite" => null
-                                ],
-                                "permissions" => [
-                                    "comment" => true,
-                                    "download" => false,
-                                    "edit" => true,
-                                    "fillForms" => true,
-                                    "modifyFilter" => true,
-                                    "modifyContentControl" => true,
-                                    "review" => true,
-                                    "reviewGroups" => true,
-                                    "print"=>false
-                                ],
-                            ],
-                            "editorConfig" => [
-                                "callbackUrl"=> $callbackUrl,            
-                                "mode" => $mode,
-                                "autosave" => true, 
-                                "forcesave" => true,           
-                                "chat" => true,
-                                "comments" => true,
-                                "coEditing" => [
-                                    "mode" => "strict", 
-                                    "change" => true
-                                ],
-                                "templates" => [
-                                    [
-                                        "image" => "",
-                                        "title" =>  "",
-                                        "url" =>  ""
+                                "documentType" => $documentType,
+                                "title" => $file,
+                                ],                            
+                                "editorConfig"=>[
+                                    "callbackUrl"=>$callbackUrl,
+                                    "mode"=>$mode,
+                                    "user" => [
+                                        "id" => $this->Session->read('User.id'),
+                                        "name" => $this->Session->read('User.name'),
+                                        "group" => $this->Session->read('User.company_name')
                                     ]
                                 ],
-                                "user" => [
-                                    "id" => $this->Session->read('User.id'),
-                                    "name" => $this->Session->read('User.name'),
-                                    "group" => $this->Session->read('User.company_name')
-                                ],
-                                "auth" => [
-                                    "company_id" => $this->Session->read('User.company_id'),
-                                    "company_name" => $this->Session->read('User.company_name'),
-                                    "user_session_id" => $this->Session->read('User.user_session_id'),
-                                ],
-                                "embedded" => [
-                                    "saveUrl" => $fileuriUser,
-                                    "embedUrl" => $fileuriUser,
-                                    "shareUrl" => $fileuriUser,
-                                    "toolbarDocked" => "top",
-                                ],
-                                "customization" => [
-                                    "about" => true,
-                                    "feedback" => true,                
-                                    "submitForm" => false,                
-                                ]
-                            ]
-                            
-                        ];    
-
+                                "token"=>false                                
+                            ];
+                        
                         $aurl = array(
-                            'controller' => $this->request->controller,
+                            'controller' => 'qc_documents',
                             'action' => 'jwtencode',
-                            'payload'=>$config
+                            'payload'=>base64_encode(json_encode($config))
                         );
+
+
                         $token =$this->requestAction($aurl);
-                        $config['token'] = $token;
-                        $config['lang'] = "en";
+                        $config['token'] = $token;                        
                         ?>
                         <?php 
                         $version_keys = array();
@@ -327,11 +305,12 @@ if($filetype != null){
                                 }
                                 
                                 var connectEditor = function () {                                    
-                                    var config = <?php echo json_encode($config) ?>;    
-                                    config.width = "100%";
-                                    config.height = "100%";
-                                    config.events = {
-                                    };                
+                                    var config = <?php echo json_encode($config) ?>;
+                                    console.log(config);
+                                    // config.width = "100%";
+                                    // config.height = "100%";
+                                    // config.events = {
+                                    // };                
                                     docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);                                    
                                 };
 
@@ -475,63 +454,56 @@ if($filetype != null){
                                         </div>                                    
                                     </div>
                                 </div>   
-                            <?php } else {  ?>
+                            <?php } else {  ?>                                
                                 <?php                            
                                 $fileuriUser = $url;
-                                $config = [
-                                    "type" => $filetype,        
-                                    "documentType" => $documentType,
-                                    "document" => [
-                                        "title" => $file,
-                                        "url" => $url,
-                                        "fileType" => $filetype,
-                                        "key" => $filekey,
-                                        "info" => [
-                                            "owner" => $this->Session->read('User.company_name'),
-                                            "uploaded" => date('Y-m-d H:i:s'),
-                                            "favorite" => null
-                                        ],
-                                        "permissions" => [
-                                            "comment" => false,
-                                            "download" => false,
-                                            "edit" => false,
-                                            "fillForms" => false,
-                                            "modifyFilter" => false,
-                                            "modifyContentControl" => false,
-                                            "review" => false,
-                                            "reviewGroups" => false,
-                                            "print"=>false
-                                        ]
-                                    ],
-                                    "editorConfig" => [
-                                        "callbackUrl"=> $callbackUrl,            
-                                        "mode" => $mode,
-                                        "autosave" => false, 
-                                        "forcesave" => false,           
-                                        "chat" => false,
-                                        "comments" => false,
-                                        "user" => [
-                                            "id" => $this->Session->read('User.id'),
-                                            "name" => $this->Session->read('User.name'),
-                                            "group" => $this->Session->read('User.company_name')
-                                        ],
-                                        "auth" => [
-                                            "company_id" => $this->Session->read('User.company_id'),
-                                            "company_name" => $this->Session->read('User.company_name'),
-                                            "user_session_id" => $this->Session->read('User.user_session_id'),
-                                        ]
+                                $fileuriUser = $url;
+                            $onAppReady = 'onAppReady';                            
+                            $config  = array();
+                            $config = [
+                                "document" => [
+                                    "key" => $filekey,
+                                    "permissions" => [
+                                        "comment"=> true,
+                                        "commentGroups"=>["edit"=>[$this->Session->read('User.company_name')],"remove"=>[$this->Session->read('User.company_name')],"view"=>[$this->Session->read('User.company_name')]],
+                                        "copy"=>true,
+                                        "deleteCommentAuthorOnly"=>false,
+                                        "download"=>true,
+                                        "edit"=>true,
+                                        "editCommentAuthorOnly"=>false,
+                                        "fillForms"=>true,
+                                        "modifyContentControl"=>true,
+                                        "modifyFilter"=>true,
+                                        "print"=>true,
+                                        "review"=>true,
+                                        "reviewGroups"=>[$this->Session->read('User.company_name')]                                    
+                                ],
+                                "url" => $url,
+                                "fileType" => $filetype,
+                                "documentType" => $documentType,
+                                "title" => $file,
+                                ],                            
+                                "editorConfig"=>[
+                                    "callbackUrl"=>$callbackUrl,
+                                    "mode"=>$mode,
+                                    "user" => [
+                                        "id" => $this->Session->read('User.id'),
+                                        "name" => $this->Session->read('User.name'),
+                                        "group" => $this->Session->read('User.company_name')
                                     ]
+                                ],
+                                "token"=>false                                
+                            ];
+                            
+                            $aurl = array(
+                                'controller' => 'qc_documents',
+                                'action' => 'jwtencode',
+                                'payload'=>base64_encode(json_encode($config))
+                            );
 
-                                ];  
 
-                                $aurl = array(
-                                    'controller' => 'qc_documents',
-                                    'action' => 'jwtencode',
-                                    'payload'=>$config
-                                );
-                                $token =$this->requestAction($aurl);
-                                $config['lang'] = "en";
-                                $config['token'] = $token;                         
+                            $token =$this->requestAction($aurl);
+                            $config['token'] = $token; 
                                 ?>
                                 <?php 
                                 $version_keys = array();
@@ -548,9 +520,10 @@ if($filetype != null){
                                 <script type="text/javascript">                
 
                                     $().ready(function(){                
-                                        var docEditor;                
+                                        var docEditor;
                                         var сonnectEditor = function () {
                                             var config = <?php echo json_encode($config) ?>;
+                                            console.log(config);
                                             config.width = "100%";
                                             config.height = "100%";
                                             docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);                                        

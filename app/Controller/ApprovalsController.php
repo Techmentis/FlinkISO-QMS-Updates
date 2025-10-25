@@ -15,6 +15,12 @@ class ApprovalsController extends AppController {
     public $components = array('Paginator');
 
     public function index($startDate = null, $endDate = null) {
+
+        if($this->Session->read('User.is_mr') == false){
+            $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
+            $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));
+        }
+        
         if ($this->request->is('post')) {
 
             $dates = explode(' - ',$this->request->data['Approval']['dates']);

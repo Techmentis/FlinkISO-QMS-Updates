@@ -183,33 +183,36 @@ class EmployeesController extends AppController {
 
 
     public function _add_user($data = null, $employee_id = null){
-        $this->loadModel('User');
-        $user['User']['employee_id'] = $employee_id;
-        $user['User']['name'] = $data['Employee']['name'];
-        $user['User']['username'] = $data['Employee']['office_email'];
-        $user['User']['password'] = Security::hash($data['Employee']['office_email'], 'md5', true);
-        $user['User']['branch_id'] = $data['Employee']['branch_id'];
-        $user['User']['department_id'] = $data['Employee']['department_id'];
-        $user['User']['assigned_branches'] = json_encode(array($data['Employee']['branch_id']));
-        $user['User']['is_mr'] = 0;
-        $user['User']['is_approver'] = 1;
-        $user['User']['is_view_all'] = 1;
-        $user['User']['is_mt'] = 0;
-        $user['User']['status'] = 1;
-        $user['User']['publish'] = $data['Employee']['publish'];
-        $user['User']['language_id'] = 1;
-        $user['User']['allow_multiple_login'] = 0;
-        $user['User']['limit_login_attempt'] = 1;
-        $user['User']['benchmark'] = 0;
-        $user['User']['agree'] = 0;
-        $user['User']['prepared_by'] = $this->Session->read('User.employee_id');
-        $user['User']['system_table_id'] = '5297b2e7-0a9c-46e3-96a6-2d8f0a000005';
 
-        try {
-            $this->User->create();
-            $this->User->save($user['User'],false);
-        } catch (Exception $e) {
-            
+        if($this->Session->read('User.is_mr') == true){
+            $this->loadModel('User');
+            $user['User']['employee_id'] = $employee_id;
+            $user['User']['name'] = $data['Employee']['name'];
+            $user['User']['username'] = $data['Employee']['office_email'];
+            $user['User']['password'] = Security::hash($data['Employee']['office_email'], 'md5', true);
+            $user['User']['branch_id'] = $data['Employee']['branch_id'];
+            $user['User']['department_id'] = $data['Employee']['department_id'];
+            $user['User']['assigned_branches'] = json_encode(array($data['Employee']['branch_id']));
+            $user['User']['is_mr'] = 0;
+            $user['User']['is_approver'] = 1;
+            $user['User']['is_view_all'] = 1;
+            $user['User']['is_mt'] = 0;
+            $user['User']['status'] = 1;
+            $user['User']['publish'] = $data['Employee']['publish'];
+            $user['User']['language_id'] = 1;
+            $user['User']['allow_multiple_login'] = 0;
+            $user['User']['limit_login_attempt'] = 1;
+            $user['User']['benchmark'] = 0;
+            $user['User']['agree'] = 0;
+            $user['User']['prepared_by'] = $this->Session->read('User.employee_id');
+            $user['User']['system_table_id'] = '5297b2e7-0a9c-46e3-96a6-2d8f0a000005';
+
+            try {
+                $this->User->create();
+                $this->User->save($user['User'],false);
+            } catch (Exception $e) {
+                
+            }
         }
     }
 
@@ -381,10 +384,14 @@ class EmployeesController extends AppController {
 
     public function update_parent($id = null, $value = null){
         $this->autoRender = false;
-        $this->Employee->read(null,$id);
-        $this->Employee->set('parent_id',$value);
-        $this->Employee->save();
-        return true;
+        if($this->Session->read('User.is_mr') == true){
+            $this->Employee->read(null,$id);
+            $this->Employee->set('parent_id',$value);
+            $this->Employee->save();
+            return true;
+        }else{
+            return false;
+        }
     }
 
     public function save_signature(){

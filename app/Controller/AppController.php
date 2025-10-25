@@ -100,7 +100,7 @@ class AppController extends Controller {
 
 					$base = explode('/' , $this->request->base);
 					if($this->Session->read('User.dir_name') != $base[count($base)-1]){ 
-						$ignore = array('login', 'logout','onlyofficechk');
+						$ignore = array('login', 'logout','onlyofficechk','clean_table_names');
 						if(!in_array($this->action,$ignore)){
 							$this->Session->write('User.id', NULL);
 							$this->Session->destroy('User');
@@ -256,7 +256,12 @@ class AppController extends Controller {
 				)); 
 			}else{
 				$skip = array('approval_comments','approvals','standards','processes'); 
-				if(!in_array($this->request->controller,$skip))$this->_check_access();
+				$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','index','view');
+
+				if(!in_array($this->action,$ignore)){
+					// $this->Session->setFlash(__('Blocked Action: '. $this->request->action), 'default', array('class' => 'alert alert-danger'));
+					$this->_check_access();
+				}
 			} 
 			$skip_track_history = array('check_invoice_dateTue','dir_size','advance_search','assigned_tasks','index','jwtencode','field_fetch','check_document','code_input_main');
 
@@ -282,7 +287,7 @@ class AppController extends Controller {
 		$this->redirect($this->referer());
 	}
 	public function _access_redirect($n = null){ 
-		$ignore = array('install_updates', 'register','activate','send_otp', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk','change_password','check_password_validation','save_template','clean_table_names','jwtencode','save_doc','save_rec_doc','save_custom_docs','save_file','clean_table_names');
+		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess');
 		if(!in_array($this->action,$ignore) 
 			&& $this->request->controller != 'qc_documents' 
 			// && $this->request->controller != 'standards' 
@@ -302,7 +307,7 @@ class AppController extends Controller {
 	}
 	public function _check_access() {
 		// if user is not admin
-		if($this->Session->read('User.is_mr') == false){
+		if($this->Session->read('User.is_mr') == false){			
 			//check if its add/edit/view/ & custom table
 			if(strpos($this->request->controller,"child") === false){ 
 				if(isset($this->request->params['named']['qc_document_id'])){
@@ -887,23 +892,42 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		$filekey = $record_id;
 		$stat = date('ymdhis');
 		$filekey = $filekey . $stat;		
-		// return GenerateRevisionId($key);
 		if (strlen($filekey) > 20) $filekey = crc32($filekey);
 		$filekey = preg_replace("[^0-9-.a-zA-Z_=]", "_", $filekey);
 		$filekey = substr($filekey, 0, min(array(strlen($filekey), 20)));
 		return $filekey;
 	}
 	public function jwtencode($payload = null) {
-		if(!$payload)$payload = $this->request->params['named']['payload'];		
-		$header = ["alg" => "HS256", "typ" => "JWT"];
-		$encHeader = $this->_base64UrlEncode(json_encode($header));
-		$encPayload = $this->_base64UrlEncode(json_encode($payload));
-		$hash = $this->_base64UrlEncode($this->_calculateHash($encHeader, $encPayload));
-		$token = "$encHeader.$encPayload.$hash";
-		return $token;
+		$payload = json_decode(base64_decode($this->request->params['named']['payload']),true);		
+		$payload['iat'] = time();
+        $payload['exp'] = time() + (60 * 60);        
+        $token = $this->generateJWT($payload);
+        return $token;
 	}
-	public function _calculateHash($encHeader, $encPayload) {
-		return hash_hmac("sha256", ". $encHeader.$encPayload .", Configure::read('onlyofficesecret'), true);
+
+	public function generateJWT($payload = null){
+		$signing_key = Configure::read('onlyofficesecret');
+	    $header = [ 
+	        "alg" => "SHA256", 
+	        "typ" => "JWT" 
+	    ];
+	    $header = ["alg" => "HS256", "typ" => "JWT"];	    
+	    $header = $this->base64_url_encode(json_encode($header));
+	    $payload = $this->base64_url_encode(json_encode($payload));
+	    $signature = $this->base64_url_encode(hash_hmac('SHA256', "$header.$payload", $signing_key, true));
+	    $jwt = "$header.$payload.$signature";
+	    return $jwt;
+	}
+
+
+	public function base64_url_encode($text):String{
+    	return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($text));
+	}
+
+	public function _calculateHash($encPayload = null) {
+		$key = $this->_base64UrlEncode(Configure::read('onlyofficesecret'));
+		$has = hash_hmac("sha256", $encPayload, $key,false);
+		return $has;
 	}
 	public function _base64UrlEncode($str) {
 		return str_replace("/", "_", str_replace("+", "-", trim(base64_encode($str), "=")));
@@ -920,6 +944,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 		return base64_decode($b64);
 	}
+	
 	public function _isValidUuid($uuid = null) {
 		if (!is_string($uuid) || (preg_match('/^[a-f\d]{8}(-[a-f\d]{4}){4}[a-f\d]{8}$/i', $uuid) !== 1)) {
 			return false;
@@ -1343,48 +1368,43 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 	public function _pre_search(){
 		$modelName = $this->modelClass;
-		
-		if(!empty($customTable['CustomTable']['qc_document_id']) && !isset($this->request->params['named']['qc_document_id'])){
+		$skiparray = array('clauses');
+		if(!in_array($this->request->controller,$skiparray)){
+			if(!empty($customTable['CustomTable']['qc_document_id']) && !isset($this->request->params['named']['qc_document_id'])){
 			
-		}else{ 
-			$document = $this->_qc_document_header($this->request->params['named']['qc_document_id']);
-		}
+			}else{ 
+				$document = $this->_qc_document_header($this->request->params['named']['qc_document_id']);
+			}
 
-		if(!empty($customTable['CustomTable']['process_id']) && !isset($this->request->params['named']['process_id'])){ 
-			
-		}else{ 
-			$process = $this->_process_header($this->request->params['named']['process_id']);
-		}
+			if(!empty($customTable['CustomTable']['process_id']) && !isset($this->request->params['named']['process_id'])){ 
+				
+			}else{ 
+				$process = $this->_process_header($this->request->params['named']['process_id']);
+			}
+		}		
 	}
 
 	public function quick_search(){
 		$model = $this->modelClass;
 		$this->_pre_search();
-		$fields = array_keys($this->$model->schema());
-		
+		$fields = array_keys($this->$model->schema());	
 		$x = 0;
-
-		$search_keys = array('id', 'name','title','document_number');
-
+		$search_keys = array('name','title','document_number','clause','sub-clause');
 		$src = $this->$model->displayField;
-
-
 		$srcs = explode(' ',$this->request->params['named']['search']);
 		$conditions = array();
-		
-		foreach($srcs as $s){			
-			$conditions[] = array('LOWER('.$model.'.'.$src .') LIKE ' => '%'.strtolower($s).'%');
+		foreach($srcs as $s){						
 			foreach ($search_keys as $keys) {
 				if(in_array($keys, $fields)){
-					$field_condition[] = array('LOWER('.$model.'.'.$keys.') LIKE' => '%'.strtolower($s).'%');
+					$field_condition[] = array('LOWER('.$model.'.'.$keys.') LIKE' => '%'.strtolower($s) . '%');
 				}
 			} 
 		}
+		
 		if($field_condition)$conditions = array('OR'=>array_merge($conditions,$field_condition));					
 		$this->paginate = array('limit'=>25, 'order' => array($model.'.id' => 'DESC'), 'conditions' => array($conditions));
 		$this->$model->recursive = 0;			
 		$this->set(Inflector::variable(Inflector::tableize($model)), $this->paginate()); 
-
 		$this->_commons(); 
 		$this->render('index');
 	}
@@ -2189,20 +2209,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			}
 		}
 		echo "{\"error\":0}";
-	}
-
-	public function _upload_custom_files($files = null, $id = null){
-		
-		$path = WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . $this->request->controller . DS . $id . DS . 'record_files';
-		$recordfilesfolder = new Folder($path_for_save);
-		$recordfilesfolder->create($path);
-		chmod($path, 0777);
-		foreach($files as $file){
-			move_uploaded_file($file['tmp_name'], $path . DS . $file['name']); 
-		}
-		return true;
-
-	}
+	}	
 
 	public function curl($type = null, $api_controller = null, $path = null,$data = null,$linkedTosWithDisplay = null){
 
@@ -2697,7 +2704,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				$this->request->data[$modelName]['publish'] = 1;
 			}
 
-
 			if ($this->$modelName->save($this->request->data,false)) {
 				$new_record_id = $this->$modelName->id;
 				
@@ -2744,7 +2750,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						}
 					}	
 				}
-				if($this->request->data['Files'])$this->_upload_custom_files($this->request->data['Files'],$this->$modelName->id);
+				if($this->request->data['Files'])$this->_upload_custom_files($this->request->data['Files'],$this->$modelName->id,null);
 
 				// get hasMany
 
@@ -2753,7 +2759,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 					if($this->request->data[$model]){
 						$this->loadModel($model);
-
 						unset($this->request->data[$model]['count']);
 						unset($this->request->data[$model]['file_id']);
 						unset($this->request->data[$model]['file_key']);
@@ -2775,16 +2780,36 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 							$cdata['branchid'] = $this->Session->read('User.branch_id');
 							$cdata['departmentid'] = $this->Session->read('User.department_id');
 							$cdata['qc_document_id'] = $this->request->data[$modelName]['qc_document_id'];
-
+							
 							try{
 								$this->$model->save($cdata,false);
+								// $recs =$cdata = $key = $value = null;
+								foreach($this->request->data[$model] as $recs){									
+									foreach($recs as  $key => $value){										
+										if(is_array($value)){
+											// $this->request->data[$model]['ChildFiles'][] = array();
+											if($value['name']){	
+												$path = WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . $this->$model->useTable . DS . $recs['id'] . DS . 'record_files';
+												$recordfilesfolder = new Folder($path_for_save);
+												$recordfilesfolder->create($path);
+												chmod($path, 0777);
+												move_uploaded_file($value['tmp_name'], $path . DS . $value['name']); 												
+
+											}else{
+												$this->request->data[$model][$key] = json_encode($value);
+											}
+
+										}										
+									}
+
+								}								
+								
 							}catch(Exception $e) {
 						 		// do nothing; 
 							}
 						}
 					}
 				}
-				
 				
 				if ($this->_show_approvals()) $this->_save_approvals($this->$modelName->id);
 				$this->Session->setFlash(__('Record has been saved'));
@@ -2842,6 +2867,20 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			} else {
 				$this->Session->setFlash(__('Record could not be saved. Please, try again.'));
 			}
+		}		
+
+		public function _upload_custom_files($files = null, $id = null,$controller = null){
+			
+			if($controller == null)$controller = $this->request->controller;
+			
+			$path = WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . $controller . DS . $id . DS . 'record_files';
+			$recordfilesfolder = new Folder($path_for_save);
+			$recordfilesfolder->create($path);
+			chmod($path, 0777);
+			foreach($files as $file){
+				move_uploaded_file($file['tmp_name'], $path . DS . $file['name']); 
+			}
+			return true;
 		}
 
 		public function reloaddocument_copy(){
@@ -3370,7 +3409,10 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 									$this->File->create();
 									if($this->File->save($file,false)){
 									}									
-								}else{									
+								}else{	
+
+									if(empty($this->request->params['named']['record_id']))$this->request->params['named']['record_id'] = 'tmp';
+
 									$file_type = $qcfile['QcDocument']['file_type'];
 									$file_name = $file_name_without_ext = $this->_clean_table_names($qcfile['QcDocument']['title']);
 									$document_number = $qcfile['QcDocument']['document_number'];

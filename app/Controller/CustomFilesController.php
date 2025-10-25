@@ -46,8 +46,8 @@ class CustomFilesController extends AppController {
                     
                     $this->_update_view($this->request->data['CustomFile']['id'], $file_name, 1, 0);
                     $this->autoRender = false;
-                    $this->response->file($file_path, array('download' => true, 'name' => $file_data['FileUpload']['file_details'] . '.' . $file_data['FileUpload']['file_type']));
-                    $this->response->send();
+                    $this->response->file($file_path, array('download' => true, 'name' => $file_name));
+                    $this->response->send();                    
                 }
             }
         } else {            

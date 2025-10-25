@@ -1,1 +1,0 @@
-<?php echo $message = $proposal['Proposal']['email_body'];?>

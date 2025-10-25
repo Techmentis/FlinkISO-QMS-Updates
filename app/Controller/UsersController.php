@@ -85,6 +85,7 @@ class UsersController extends AppController {
 
         if ($this->request->is('ajax')) { 
             $this->autoRender = false;
+            if($this->Session->read('User.is_mr') == true){
             $employee  = $this->User->Employee->find('first',array('conditions'=>array('Employee.id'=>$this->data['id']),'recursive'=>-1));
             if($employee){
 
@@ -151,7 +152,11 @@ class UsersController extends AppController {
 
                 return true;
             }
-            return true;
+        }else{
+
+        }
+        return true;
+        
         }else{
             $this->Session->setFlash(__('Select employee first.'));
             $this->redirect(array('controller'=>'employees', 'action' => 'index'));
@@ -208,63 +213,65 @@ class UsersController extends AppController {
 
     public function reset_access($id = null) {
         $this->autoRender = false;
-        if ($this->request->is('ajax')) { 
-            $str = base64_decode($this->request->data['str']);
-            $values = explode(',',$str);            
-            
-            $user= $this->User->find('first',array('recursive'=>-1,'conditions'=>array('User.id'=>$values[0])));
-            if($user){
-                if($values[1] == 'is_mr'){                
-                    $user['User']['is_mr'] = $values[2];
-                    $user['User']['is_view_all'] = $values[2];
-                    $user['User']['is_approver'] = $values[2];
-                    $user['User']['is_publisher'] = $values[2];
-                    $user['User']['is_creator'] = $values[2];
+        if($this->Session->read('User.is_mr') == true){
+            if ($this->request->is('ajax')) {
+                $str = base64_decode($this->request->data['str']);
+                $values = explode(',',$str);            
+                
+                $user= $this->User->find('first',array('recursive'=>-1,'conditions'=>array('User.id'=>$values[0])));
+                if($user){
+                    if($values[1] == 'is_mr'){                
+                        $user['User']['is_mr'] = $values[2];
+                        $user['User']['is_view_all'] = $values[2];
+                        $user['User']['is_approver'] = $values[2];
+                        $user['User']['is_publisher'] = $values[2];
+                        $user['User']['is_creator'] = $values[2];
+                    }
+                    if($values[1] == 'is_view_all'){                
+                        $user['User']['is_view_all'] = $values[2];
+                    }
+                    if($values[1] == 'is_approver'){                
+                        $user['User']['is_approver'] = $values[2];
+                    }
+                    if($values[1] == 'status'){                
+                        $user['User']['status'] = $values[2];
+                    }
+                    if($values[1] == 'is_publisher'){
+                        $user['User']['is_publisher'] = $values[2];
+                    }
+                    if($values[1] == 'is_creator'){
+                        $user['User']['is_creator'] = $values[2];
+                    }
                 }
-                if($values[1] == 'is_view_all'){                
-                    $user['User']['is_view_all'] = $values[2];
+                $this->User->create();
+                if($this->User->save($user,false)){
+                    if($values[1] == 'is_mr'){                
+                        return $user['User']['is_mr'];
+                    }
+                    if($values[1] == 'is_view_all'){                
+                        return $user['User']['is_view_all'];
+                    }
+                    if($values[1] == 'is_approver'){                
+                        return $user['User']['is_approver'];
+                    }
+                    if($values[1] == 'status'){                
+                        return $user['User']['status'];
+                    }
+                    if($values[1] == 'is_publisher'){                
+                        return $user['User']['is_publisher'];
+                    }
+                    if($values[1] == 'is_creator'){                
+                        return $user['User']['is_creator'];
+                    }
+                }else{
+                    return 10;
                 }
-                if($values[1] == 'is_approver'){                
-                    $user['User']['is_approver'] = $values[2];
-                }
-                if($values[1] == 'status'){                
-                    $user['User']['status'] = $values[2];
-                }
-                if($values[1] == 'is_publisher'){
-                    $user['User']['is_publisher'] = $values[2];
-                }
-                if($values[1] == 'is_creator'){
-                    $user['User']['is_creator'] = $values[2];
-                }
-            }
-            $this->User->create();
-            if($this->User->save($user,false)){
-                if($values[1] == 'is_mr'){                
-                    return $user['User']['is_mr'];
-                }
-                if($values[1] == 'is_view_all'){                
-                    return $user['User']['is_view_all'];
-                }
-                if($values[1] == 'is_approver'){                
-                    return $user['User']['is_approver'];
-                }
-                if($values[1] == 'status'){                
-                    return $user['User']['status'];
-                }
-                if($values[1] == 'is_publisher'){                
-                    return $user['User']['is_publisher'];
-                }
-                if($values[1] == 'is_creator'){                
-                    return $user['User']['is_creator'];
-                }
+                
+                
             }else{
-                return 10;
-            }
-            
-            
-        }else{
-            
-        }        
+                
+            } 
+        }       
     }
     public function change_password() {
         if ($this->request->is('post')) {
@@ -1162,8 +1169,7 @@ class UsersController extends AppController {
                             $this->Session->setFlash(__('Account created'));
                             file_put_contents(APP . 'Config/installed.txt', date('Y-m-d, H:i:s'));
                             unlink(APP . 'Config/installed_db.txt');
-                            // $this->set('url',$this->request->data['User']['dir_name']);
-                            echo "here";
+                            // $this->set('url',$this->request->data['User']['dir_name']);                            
                             $this->redirect(array('action' => 'login'));
                             
                         } else {

@@ -1,5 +1,5 @@
 
-<div class="row hide"><div class="col-md-12"><?php echo $this->Session->flash(); ?></div></div>
+<div class="row"><div class="col-md-12"><?php echo $this->Session->flash(); ?></div></div>
 <div class="access " style="text-align:center;">
     
     <div  id="users_ajax">

@@ -64,7 +64,7 @@ echo $this->fetch('script');
       <!-- /.content-wrapper -->
       <footer class="main-footer">  
         <div class="pull-right hidden-xs">
-          <b>Version</b> 2.2.40
+          <b>Version</b> 2.2.42
       </div>
       <strong>Copyright &copy; 2013 <a href="http://www.techmentis.biz">Techmentis Global Services Pvt Ltd</a>.</strong> All rights
       reserved.

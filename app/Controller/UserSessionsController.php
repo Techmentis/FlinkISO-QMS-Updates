@@ -22,6 +22,11 @@ public function _get_system_table_id() {
     return $systemTableId['SystemTable']['id'];
 }
 public function index() {
+    if($this->Session->read('User.is_mr') == false){
+        $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
+        $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));
+    }
+
     $userId = $this->request->query['user_id'];
     if ($userId) {
         $conditions = array('UserSession.user_id' => $userId);
@@ -34,6 +39,11 @@ public function index() {
     $this->set(compact('users'));
 }
 public function view($id = null) {
+    if($this->Session->read('User.is_mr') == false){
+        $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
+        $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));
+    }
+    
     $userId = $id;
     $this->UserSession->History->recursive = 0;
     $userSession = $this->UserSession->History->find('all', array('conditions' => array('History.user_session_id' => $id), 'order' => array('History.created' => 'DESC')));

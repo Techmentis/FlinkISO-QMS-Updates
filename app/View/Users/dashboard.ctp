@@ -41,10 +41,10 @@ $pptarray = array('ppt','pptx');
               'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'System User Audit Trail'
             ));
 
-          echo $this->Html->link('<i class="fa fa-check-square-o"></i>',array('controller'=>'approvals', 'action'=>'index','timestamp'=>date('ymdhis')),
-            array('class'=>'tooltip1 btn btn btn-app btn-sm btn-info','escape'=>false,
-              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'View all approvals'
-            ));
+          // echo $this->Html->link('<i class="fa fa-check-square-o"></i>',array('controller'=>'approvals', 'action'=>'index','timestamp'=>date('ymdhis')),
+          //   array('class'=>'tooltip1 btn btn btn-app btn-sm btn-info','escape'=>false,
+          //     'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'View all approvals'
+          //   ));
 
           
             ?>

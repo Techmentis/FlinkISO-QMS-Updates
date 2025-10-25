@@ -28,36 +28,39 @@
 	// 	echo $this->Html->link('<i class="fa fa-database"></i>',array('controller'=>'custom_tables', 'action'=>'add', 'process_id'=> $postVal,'qc_document_id'=>$qc_document_id,'custom_table_id'=>$custom_table_id),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Add Table'));		
 	// }
 
-	if($this->request->controller == 'employees'){		
-		if($user == null){
-			echo $this->Html->link('<i class="fa fa-user"></i>','javascript:void(0);',array('id'=>$postVal.'-user', 'class'=>'tooltip1 btn btn-sm btn-danger empaction','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Add User'));			
-		}else{
-			echo $this->Html->link('<i class="fa fa-gears"></i>',array('controller'=>'users','action'=>'edit',$user,'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-success empaction','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Edit User'));			
-		} ?>
-		<script type="text/javascript">
-			$("#<?php echo $postVal;?>-user").on('click',function(){
-				$.ajax({
-					url: "<?php echo Router::url('/', true); ?>users/add",
-					type: "POST",
-					dataType: "json",
-					contentType: "application/json; charset=utf-8",
-					data: JSON.stringify({ id: '<?php echo $postVal;?>'}),
-					beforeSend: function( xhr ) {
-						$("#<?php echo $postVal;?>-user i").removeClass('fa-user').addClass('fa-refresh fa-spin');
-						$("#<?php echo $postVal;?>-user").next().find('.tooltip-inner').html('Adding');
-						$("#<?php echo $postVal;?>-user").tooltip().attr({'data-toggle':'tooltip', 'data-original-title':'Adding','data-placement':'left','data-trigger':'hover'}).tooltip('show');
-					},					
-					success: function (result) {
-						$("#<?php echo $postVal;?>-user").removeClass('btn-danger').addClass('btn-success');
-						$("#<?php echo $postVal;?>-user i").removeClass('fa-refresh fa-spin').addClass('fa-check');
-						$("#<?php echo $postVal;?>-user").next().find('.tooltip-inner').html('User added');
-						$("#<?php echo $postVal;?>-user").tooltip().attr({'data-toggle':'tooltip', 'data-original-title':'User added','data-placement':'left','data-trigger':'hover'}).tooltip('show');
-					},
-					error: function (err) {
-						
-					}
-				}); 
-			});
+	if($this->request->controller == 'employees'){
+		if($this->Session->read('User.is_mr') == true){
+
+			if($user == null){
+				echo $this->Html->link('<i class="fa fa-user"></i>','javascript:void(0);',array('id'=>$postVal.'-user', 'class'=>'tooltip1 btn btn-sm btn-danger empaction','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Add User'));			
+			}else{
+				echo $this->Html->link('<i class="fa fa-gears"></i>',array('controller'=>'users','action'=>'edit',$user,'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-success empaction','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Edit User'));			
+			} ?>
+			<script type="text/javascript">
+				$("#<?php echo $postVal;?>-user").on('click',function(){
+					$.ajax({
+						url: "<?php echo Router::url('/', true); ?>users/add",
+						type: "POST",
+						dataType: "json",
+						contentType: "application/json; charset=utf-8",
+						data: JSON.stringify({ id: '<?php echo $postVal;?>'}),
+						beforeSend: function( xhr ) {
+							$("#<?php echo $postVal;?>-user i").removeClass('fa-user').addClass('fa-refresh fa-spin');
+							$("#<?php echo $postVal;?>-user").next().find('.tooltip-inner').html('Adding');
+							$("#<?php echo $postVal;?>-user").tooltip().attr({'data-toggle':'tooltip', 'data-original-title':'Adding','data-placement':'left','data-trigger':'hover'}).tooltip('show');
+						},					
+						success: function (result) {
+							$("#<?php echo $postVal;?>-user").removeClass('btn-danger').addClass('btn-success');
+							$("#<?php echo $postVal;?>-user i").removeClass('fa-refresh fa-spin').addClass('fa-check');
+							$("#<?php echo $postVal;?>-user").next().find('.tooltip-inner').html('User added');
+							$("#<?php echo $postVal;?>-user").tooltip().attr({'data-toggle':'tooltip', 'data-original-title':'User added','data-placement':'left','data-trigger':'hover'}).tooltip('show');
+						},
+						error: function (err) {
+							
+						}
+					}); 
+				});
+			<?php } ?>
 		</script>
 
 		

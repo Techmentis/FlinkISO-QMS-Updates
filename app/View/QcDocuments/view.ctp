@@ -15,7 +15,10 @@
 		<div class="row">
 			<div class="col-md-8">
 				<h3><?php echo h($qcDocument['QcDocument']['name']); ?> <small>.<?php echo h($qcDocument['QcDocument']['file_type']); ?></small><br />
-					<small><?php echo $qcDocument['Standard']['name']; ?> / <?php echo h($qcDocument['Clause']['title']); ?> / <?php echo h($qcDocument['QcDocument']['document_number']); ?>  / Rev.No.<?php echo h($qcDocument['QcDocument']['revision_number']); ?></small></h3>
+					<small><?php echo $qcDocument['Standard']['name']; ?> / <?php echo h($qcDocument['Clause']['title']); ?> / <?php echo h($qcDocument['QcDocument']['document_number']); ?>  / Rev.No.<?php echo h($qcDocument['QcDocument']['revision_number']); ?> | 
+						<?php echo $this->Html->link('Rename',array('action'=>'rename',$qcDocument['QcDocument']['id'])) ;?>
+					</small>
+				</h3>
 				</div>
 				<div class="col-md-4 text-right hide"><br /><br />
 					<div id="downloadpdf">
@@ -167,9 +170,16 @@
 								if($file_type == 'xls' || $file_type == 'xlsx'){
 									$documentType = 'cell';
 								}
+								if($file_type == 'pdf'){
+									$documentType = 'pdf';
+								}
+
+								if($file_type == 'pptx' || $file_type == 'ppt'){
+									$documentType = 'presentation';
+								}
 
 								$file = $document_number.'-'.$file_name.'-'.$document_version;
-								$file = $this->requestAction(array('action'=>'clean_table_names',$file));
+								// $file = $this->requestAction(array('action'=>'clean_table_names',$file));
 								$file = $file.'.'.$file_type;
 
 								$mode = 'view';

@@ -32,6 +32,14 @@
 					if($file_type == 'xls' || $file_type == 'xlsx'){
 						$documentType = 'cell';
 					}
+					if($file_type == 'pdf'){
+						$documentType = 'pdf';
+					}
+
+					if($file_type == 'pptx' || $file_type == 'ppt'){
+						$documentType = 'presentation';
+					}
+
 
 					$editors = json_decode($this->request->data['QcDocument']['editors'],true);
 					if($editors){
