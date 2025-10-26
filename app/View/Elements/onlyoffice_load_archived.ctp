@@ -94,145 +94,130 @@ if($filetype != null){
 
     $callbackUrl .= '/user:'.$this->Session->read('User.id');
     $file = $file;
-                    $mode = $mode; // : sent from form
+    $mode = $mode; // : sent from form
 
-                    if($file_type == 'doc' || $file_type == 'docx'){
-                        $documentType = 'word';
-                    }
+    if($file_type == 'doc' || $file_type == 'docx'){
+        $documentType = 'word';
+    }
 
-                    if($file_type == 'xls' || $file_type == 'xlsx'){
-                        $documentType = 'cell';
-                    }?>
+    if($file_type == 'xls' || $file_type == 'xlsx'){
+        $documentType = 'cell';
+    }?>
 
-                    
-                    <?php                            
-                    $fileuriUser = $url;
-                    $config = [
-                        "type" => $filetype,        
-                        "documentType" => $documentType,
-                        "document" => [
-                            "title" => 'archived.'.$filetype,
-                            "url" => $url,
-                            "fileType" => $filetype,
-                            "key" => $key,
-                            "info" => [
-                                "owner" => $this->Session->read('User.company_name'),
-                                "uploaded" => date('Y-m-d H:i:s'),
-                                "favorite" => null
-                            ],
-                            "permissions" => [
-                                "comment" => false,
-                                "download" => true,
-                                "edit" => false,
-                                "fillForms" => false,
-                                "modifyFilter" => false,
-                                "modifyContentControl" => false,
-                                "review" => false,
-                                "reviewGroups" => false,
-                                "print"=>false
-                            ]
-                        ],
-                        "editorConfig" => [
-                            "mode" => 'view',
-                            "autosave" => false, 
-                            "forcesave" => false,           
-                            "chat" => false,
-                            "comments" => false,
-                            "user" => [
-                                "id" => $this->Session->read('User.id'),
-                                "name" => $this->Session->read('User.name'),
-                                "group" => $this->Session->read('User.company_name')
-                            ],
-                            "auth" => [
-                                "company_id" => $this->Session->read('User.company_id'),
-                                "company_name" => $this->Session->read('User.company_name'),
-                                "user_session_id" => $this->Session->read('User.user_session_id'),
-                            ]
-                        ]
+    
+    <?php                            
+    $fileuriUser = $url;
 
-                    ];  
-
-                    $aurl = array(
-                        'controller' => 'qc_documents',
-                        'action' => 'jwtencode',
-                        'payload'=>$config
-                    );
-                    $token =$this->requestAction($aurl);
-                    $config['lang'] = "en";
-                    $config['token'] = $token;                         
-                    ?>
-
-
-                    <script type="text/javascript">                
-
-                        $().ready(function(){
-
-                            var docEditor;                
-                            var сonnectEditor = function () {
-                                var config = <?php echo json_encode($config) ?>;
-                                config.width = "100%";
-                                config.height = "100%";
-                                docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);                                        
-                            };
-                            var fixSize = function () {
-                                var wrapEl = document.getElementsByClassName("form");
-                                if (wrapEl.length) {
-                                    wrapEl[0].style.height = screen.availHeight + "px";
-                                    window.scrollTo(0, -1);
-                                    wrapEl[0].style.height = window.innerHeight + "px";
-                                }
-                            };
-                            $("#ofdcontainer<?php echo $placeholderid;?>").on('click',function(){
-                                if($('#ofdcontainer<?php echo $placeholderid;?>').hasClass('collapsed-box') == true){
-                                    $("#ofccontainerbtn<?php echo $placeholderid;?>").removeClass('fa-plus');
-                                    $("#ofccontainerbtn<?php echo $placeholderid;?>").addClass('fa-minus');
-                                    if (window.addEventListener) {
-                                        сonnectEditor();
-                                    } else if (window.attachEvent) {
-                                        сonnectEditor();
-                                    }
-                                }else{
-                                    $("#ofccontainerbtn<?php echo $placeholderid;?>").removeClass('fa-minus');
-                                    $("#ofccontainerbtn<?php echo $placeholderid;?>").addClass('fa-plus');
-                                }
-                            });
-                        });            
-
-                    </script>
-                    <div class="onlyofficediv">
-                        <div id="placeholder_<?php echo $placeholderid;?>" style="display: block; float: left; width: 100%; height: auto;"></div>
-                    </div>
-                    <div class="panel-footer">
-
-                    </div>
+    $config  = array();
+    $config = [
+        "document" => [
+            "key" => $filekey,
+            "permissions" => [
+                "comment"=> true,
+                "commentGroups"=>["edit"=>[$this->Session->read('User.company_name')],"remove"=>[$this->Session->read('User.company_name')],"view"=>[$this->Session->read('User.company_name')]],
+                "copy"=>true,
+                "deleteCommentAuthorOnly"=>false,
+                "download"=>true,
+                "edit"=>true,
+                "editCommentAuthorOnly"=>false,
+                "fillForms"=>true,
+                "modifyContentControl"=>true,
+                "modifyFilter"=>true,
+                "print"=>true,
+                "review"=>true,
+                "reviewGroups"=>[$this->Session->read('User.company_name')]                                    
+        ],
+        "url" => $url,
+        "fileType" => $filetype,
+        "documentType" => $documentType,
+        "title" => 'Archived',
+        ],                            
+        "editorConfig"=>[
+            "callbackUrl"=>$callbackUrl,
+            "mode"=>'view',
+            "user" => [
+                "id" => $this->Session->read('User.id'),
+                "name" => $this->Session->read('User.name'),
+                "group" => $this->Session->read('User.company_name')
+            ]
+        ],
+        "token"=>false                                
+    ];
 
                     
+
+    $aurl = array(
+        'controller' => 'qc_documents',
+        'action' => 'jwtencode',
+        'payload'=>base64_encode(json_encode($config))
+    );
+    $token =$this->requestAction($aurl);                    
+    $config['token'] = $token;
+?>
+
+<script type="text/javascript">
+
+$().ready(function(){
+
+    var docEditor;                
+    var сonnectEditor = function () {
+        var config = <?php echo json_encode($config) ?>;
+        docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);                                        
+    };
+    var fixSize = function () {
+        var wrapEl = document.getElementsByClassName("form");
+        if (wrapEl.length) {
+            wrapEl[0].style.height = screen.availHeight + "px";
+            window.scrollTo(0, -1);
+            wrapEl[0].style.height = window.innerHeight + "px";
+        }
+    };
+    $("#ofdcontainer<?php echo $placeholderid;?>").on('click',function(){
+        if($('#ofdcontainer<?php echo $placeholderid;?>').hasClass('collapsed-box') == true){
+            $("#ofccontainerbtn<?php echo $placeholderid;?>").removeClass('fa-plus');
+            $("#ofccontainerbtn<?php echo $placeholderid;?>").addClass('fa-minus');
+            if (window.addEventListener) {
+                сonnectEditor();
+            } else if (window.attachEvent) {
+                сonnectEditor();
+            }
+        }else{
+            $("#ofccontainerbtn<?php echo $placeholderid;?>").removeClass('fa-minus');
+            $("#ofccontainerbtn<?php echo $placeholderid;?>").addClass('fa-plus');
+        }
+    });
+});            
+
+</script>
+            <div class="onlyofficediv">
+                <div id="placeholder_<?php echo $placeholderid;?>" style="display: block; float: left; width: 100%; height: auto;"></div>
                 </div>
-            </div>
-        <?php }else{ ?>
+            <div class="panel-footer">
+        </div>
+    </div>
+</div>
+<?php }else{ ?>
+<style type="text/css">
+    .info-box-number{font-size: 14px !important; font-weight: 400;}
+    .info-box-text{font-weight: 600;}
+    .nomargin-checkbox .checkbox{margin-top: 0px !important;}
+    .nomargin-checkbox label{margin: 0 0 0 0 !important;}
+</style>
 
-            <style type="text/css">
-                .info-box-number{font-size: 14px !important; font-weight: 400;}
-                .info-box-text{font-weight: 600;}
-                .nomargin-checkbox .checkbox{margin-top: 0px !important;}
-                .nomargin-checkbox label{margin: 0 0 0 0 !important;}
-            </style>
-            
-            <div class="box collapsed-box">          
-              <div class="box-header with-border">
-                <h3 class="box-title text-danger">Archived Document</h3>
+<div class="box collapsed-box">          
+  <div class="box-header with-border">
+    <h3 class="box-title text-danger">Archived Document</h3>
 
-                <div class="box-tools pull-right">
-                  <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
-                  </button>
-              </div>            
-          </div>          
-          <div class="box-body">
-
-          </div>          
-      </div>
-  <?php } 
-}else{ ?>
+    <div class="box-tools pull-right">
+      <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
+      </button>
+  </div>            
+</div>          
+    <div class="box-body">
+    </div>
+</div>
+      <?php } 
+    }else{ ?>
 
 <?php } ?>
 </div>
