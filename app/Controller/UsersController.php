@@ -49,6 +49,7 @@ class UsersController extends AppController {
         $this->User->recursive = 0;
         $this->set('users', $this->paginate());
         $this->_get_count();
+        $this->_get_user_list();        
     }
     /**
      * view method
@@ -70,11 +71,21 @@ class UsersController extends AppController {
         if($this->Session->read('User.is_mr') == 1){
             // get all the documents
             $this->loadModel('QcDocument');
-            $qcDocuments = $this->QcDocument->find('all',array('conditions'=>array('QcDocument.parent_document_id'=>array(NULL,-1,'')),
-                'fields'=>array('QcDocument.id','QcDocument.title','QcDocument.standard_id','QcDocument.user_id','QcDocument.branches','QcDocument.departments','QcDocument.designations','QcDocument.editors')
+            $qcDocuments = $this->QcDocument->find('all',array(
+                'recursive'=>-1,
+                'conditions'=>array('QcDocument.parent_document_id'=>array(NULL,-1,'')),
+                'fields'=>array('QcDocument.id','QcDocument.title','QcDocument.name','QcDocument.standard_id','QcDocument.user_id','QcDocument.branches','QcDocument.departments','QcDocument.designations','QcDocument.editors')
             ));            
             $this->set('qcDocuments',$qcDocuments);
-        }        
+
+            $this->loadModel('CustomTable');
+            $customTables = $this->CustomTable->find('all',array(
+                'recursive'=>-1,
+                'conditions'=>array('CustomTable.custom_table_id'=> ''),
+                'fields'=>array('CustomTable.id','CustomTable.name','CustomTable.creators','CustomTable.editors','CustomTable.viewers','CustomTable.approvers')
+            ));            
+            $this->set('customTables',$customTables);
+        }
     }
     /**
      * add method
@@ -207,6 +218,26 @@ class UsersController extends AppController {
         } else {
             $options = array('conditions' => array('User.' . $this->User->primaryKey => $id));
             $this->request->data = $this->User->find('first', $options);
+
+            if($this->Session->read('User.is_mr') == 1){
+                // get all the documents
+                $this->loadModel('QcDocument');
+                $qcDocuments = $this->QcDocument->find('all',array(
+                    'recursive'=>-1,
+                    'conditions'=>array('QcDocument.parent_document_id'=>array(NULL,-1,'')),
+                    'fields'=>array('QcDocument.id','QcDocument.title','QcDocument.name','QcDocument.standard_id','QcDocument.user_id','QcDocument.branches','QcDocument.departments','QcDocument.designations','QcDocument.editors')
+                ));            
+                $this->set('qcDocuments',$qcDocuments);
+
+                $this->loadModel('CustomTable');
+                $customTables = $this->CustomTable->find('all',array(
+                    'recursive'=>-1,
+                    'conditions'=>array('CustomTable.custom_table_id'=> ''),
+                    'fields'=>array('CustomTable.id','CustomTable.name','CustomTable.creators','CustomTable.editors','CustomTable.viewers','CustomTable.approvers')
+                ));            
+                $this->set('customTables',$customTables);
+            }
+            
         }        
         $this->_commons();
     }
@@ -242,29 +273,30 @@ class UsersController extends AppController {
                     if($values[1] == 'is_creator'){
                         $user['User']['is_creator'] = $values[2];
                     }
-                }
+                    // $user['User']['copy_acl_from'] = NULL;
                 $this->User->create();
-                if($this->User->save($user,false)){
-                    if($values[1] == 'is_mr'){                
-                        return $user['User']['is_mr'];
+                    if($this->User->save($user,false)){
+                        if($values[1] == 'is_mr'){                
+                            return $user['User']['is_mr'];
+                        }
+                        if($values[1] == 'is_view_all'){                
+                            return $user['User']['is_view_all'];
+                        }
+                        if($values[1] == 'is_approver'){                
+                            return $user['User']['is_approver'];
+                        }
+                        if($values[1] == 'status'){                
+                            return $user['User']['status'];
+                        }
+                        if($values[1] == 'is_publisher'){                
+                            return $user['User']['is_publisher'];
+                        }
+                        if($values[1] == 'is_creator'){                
+                            return $user['User']['is_creator'];
+                        }
+                    }else{
+                        return 10;
                     }
-                    if($values[1] == 'is_view_all'){                
-                        return $user['User']['is_view_all'];
-                    }
-                    if($values[1] == 'is_approver'){                
-                        return $user['User']['is_approver'];
-                    }
-                    if($values[1] == 'status'){                
-                        return $user['User']['status'];
-                    }
-                    if($values[1] == 'is_publisher'){                
-                        return $user['User']['is_publisher'];
-                    }
-                    if($values[1] == 'is_creator'){                
-                        return $user['User']['is_creator'];
-                    }
-                }else{
-                    return 10;
                 }
                 
                 
@@ -698,8 +730,7 @@ class UsersController extends AppController {
             )
         ));
 
-        $this->set('masters',$masters);
-        
+        $this->set('masters',$masters);        
         
         $this->loadModel('Approval');
         $this->loadModel('CustomTable');
@@ -719,6 +750,7 @@ class UsersController extends AppController {
                 'CustomTable.table_name',
                 'CustomTable.table_version',
                 'CustomTable.qc_document_id',
+                'CustomTable.creators',
                 'QcDocument.id',
                 'QcDocument.title',
                 'QcDocument.name',
@@ -727,19 +759,25 @@ class UsersController extends AppController {
                 'QcDocument.file_type',
                 'QcDocument.schedule_id',
                 'CustomTable.qc_parent',
+                'QcDocument.data_type',
+                'QcDocument.data_update_type',
+                'QcDocument.data_file_type',
             ),
             'order'=>array('CustomTable.name'=>'ASC'),
+            'recursive'=>0,
             'conditions' => array(
                 'CustomTable.qc_parent' => -1,  
                 'CustomTable.publish' => 1, 
                 'QcDocument.add_records' => 1, 
                 'CustomTable.table_locked' => 0, 
                 'CustomTable.table_name NOT LIKE' => '%_child_%', 
-                'OR' => array(
-                    'QcDocument.departments LIKE ' => '%' . $this->Session->read('User.department_id') . '%', 
-                    'QcDocument.branches LIKE ' => '%' . $this->Session->read('User.branch_id') . '%', 
-                    'QcDocument.user_id LIKE ' => '%' . $this->Session->read('User.id') . '%',
-                    )
+                'QcDocument.schedule_id != '=>'56d1564b-0acc-48f6-9beb-03a7db1e6cf9',
+                'CustomTable.creators LIKE ' => '%'.$this->Session->read('User.id').'%'
+                // 'OR' => array(
+                //     'QcDocument.departments LIKE ' => '%' . $this->Session->read('User.department_id') . '%', 
+                //     'QcDocument.branches LIKE ' => '%' . $this->Session->read('User.branch_id') . '%', 
+                //     'QcDocument.user_id LIKE ' => '%' . $this->Session->read('User.id') . '%',
+                //     )
                 )
             )
         );
@@ -1253,5 +1291,166 @@ class UsersController extends AppController {
         // Once the SQL is run, update version in companies table with new version number.
         // redirect to login.
 
+    }
+
+    public function copy_access_from($from = null, $to = null){
+        if($this->Session->read('User.is_mr') == false){
+            if($this->request->is('ajax') == false){
+                $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
+                $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
+            }else{                
+                exit;
+            }
+        }
+
+        // copy from qcDocuments
+        $this->loadModel('QcDocument');
+        $this->loadModel('CustomTable');
+
+        $fromCheck = $this->User->find('count',array('conditions'=>array('User.id'=>$from)));
+        $toCheck = $this->User->find('count',array('conditions'=>array('User.id'=>$to)));
+        
+        if($fromCheck == 1 && $toCheck == 1){
+
+            //first add
+            $qcDocuments = $this->QcDocument->find('all',array(
+                'recursive'=>-1,
+                'fields'=>array(
+                    'QcDocument.id',
+                    'QcDocument.user_id',
+                    'QcDocument.editors',
+                ),
+                'conditions'=>array(                    
+                )
+            ));
+
+            if($qcDocuments){
+                foreach($qcDocuments as $qcDocument){
+                    // view
+                    $users = json_decode($qcDocument['QcDocument']['user_id'],true);
+                    if($users){
+                        if(in_array($from, $users)){
+                            $users[] = $to;
+                        }else if(in_array($to,$users)){
+                            $users = $this->_remove_from_array($users,$to);
+                        }
+                    }
+                    
+
+                    //edit
+                    $editors = json_decode($qcDocument['QcDocument']['editors'],true);
+                    if($editors){
+                        if(in_array($from, $editors)){
+                            $editors[] = $to;
+                        }else if(in_array($to,$editors)){
+                            $editors = $this->_remove_from_array($editors,$to);
+                        }
+                    }
+
+                    $qcDocument['QcDocument']['user_id'] = json_encode($users);
+                    $qcDocument['QcDocument']['editors'] = json_encode($editors);
+                    $this->QcDocument->create();
+                    $this->QcDocument->save($qcDocument,false);
+
+                }
+            }            
+
+            $customTables = $this->CustomTable->find('all',array(
+                'recursive'=>-1,
+                'conditions'=>array('custom_table_id'=> ''),
+                'fields'=>array(
+                    'CustomTable.id',
+                    'CustomTable.custom_table_id',
+                    'CustomTable.creators',
+                    'CustomTable.editors',
+                    'CustomTable.viewers',
+                    'CustomTable.approvers',
+                )
+            ));
+
+            
+            if($customTables){
+                foreach($customTables as $customTable){
+                    //creators
+                    $users = json_decode($customTable['CustomTable']['creators'],true);
+                    if(is_array($users)){
+                        if(in_array($from, $users)){
+                            $users[] = $to;
+                        }else if(in_array($to,$users)){
+                            $users = $this->_remove_from_array($users,$to);
+                        }
+                        $customTable['CustomTable']['creators'] = json_encode($users);
+                        // $users = array();
+                    }else{
+                        $customTable['CustomTable']['creators'] = NULL;
+                    }
+                    
+                    $users = json_decode($customTable['CustomTable']['editors'],true);
+                    if(is_array($users)){
+                        if(in_array($from, $users)){
+                            $users[] = $to;
+                        }else if(in_array($to,$users)){
+                            $users = $this->_remove_from_array($users,$to);
+                        }
+                        $customTable['CustomTable']['editors'] = json_encode($users);
+                        // $users = array();
+                    }else{
+                        $customTable['CustomTable']['editors'] = NULL;
+                    }
+
+                    $users = json_decode($customTable['CustomTable']['viewers'],true);
+                    if(is_array($users)){
+                        if(in_array($from, $users)){
+                            $users[] = $to;
+                        }else if(in_array($to,$users)){
+                            $users = $this->_remove_from_array($users,$to);
+                        }
+                        $customTable['CustomTable']['viewers'] = json_encode($users);
+                        // $users = array();
+                    }else{
+                        $customTable['CustomTable']['viewers'] = NULL;
+                    }
+
+                    $users = json_decode($customTable['CustomTable']['approvers'],true);
+                    if(is_array($users)){
+                        if(in_array($from, $users)){
+                            $users[] = $to;
+                        }else if(in_array($to,$users)){
+                            $users = $this->_remove_from_array($users,$to);
+                        }
+                        $customTable['CustomTable']['approvers'] = json_encode($users);
+                        // $users = array();
+                    }else{
+                        $customTable['CustomTable']['approvers'] = NULL;
+                    }
+
+                    $this->CustomTable->create();
+                    $this->CustomTable->save($customTable,false);
+                }
+            }
+            
+            // update user's copy_acl_from
+            $user = $this->User->find('first',array('conditions'=>array('User.id'=>$to),'recursive'=>-1));
+            $user['User']['copy_acl_from'] = $from;
+            $this->User->create();
+            $this->User->save($user,false);
+
+            return true;
+        }
+    }
+
+    public function _remove_from_array($arraytobecleaned = null,$valuetoberemoved = null){
+        // debug($arraytobecleaned);
+        if(is_array($arraytobecleaned)){
+            foreach($arraytobecleaned as $arr){
+                if($arr == $valuetoberemoved){
+
+                }else{
+                    $newarray[] = $arr;
+                }
+            }
+
+            return $newarray;
+        }
     }
 }

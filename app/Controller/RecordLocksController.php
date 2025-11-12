@@ -29,7 +29,7 @@ public function add($table_id = null) {
 			$this->set('lockRecordActions', $this->RecordLock->customArray['actions']);                
 
 			return $this->redirect(array('action' => 'add',$table_id));
-		} else {				
+		} else {
 			$this->Session->setFlash(__('The record lock could not be saved. Please, try again.'));
 		}
 	}

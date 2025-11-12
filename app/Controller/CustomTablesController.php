@@ -24,15 +24,14 @@ class CustomTablesController extends AppController {
         $systemTableId = $this->SystemTable->find('first', array('conditions' => array('SystemTable.system_name' => $this->request->params['controller'])));
         return $systemTableId['SystemTable']['id'];
     }
-    public function _commons($creator = null) {        
+    public function _commons($creator = null) {
         if ($this->action == 'view' || $this->action == 'recreate') $this->set('approvals', $this->get_approvals());
 
         $this->set('branches', $this->_get_branch_list());
         $this->set('departments', $this->_get_department_list());
         $this->set('designations', $this->_get_designation_list());
         $this->set('usernames', $this->_get_usernames());
-        
-        // $companies = $this->CustomTable->Company->find('list',array('conditions'=>array('Company.publish'=>1,'Company.soft_delete'=>0)));
+
         $preparedBies = $approvedBies = $this->CustomTable->PreparedBy->find('list', array('conditions' => array('PreparedBy.publish' => 1, 'PreparedBy.soft_delete' => 0)));
         $createdBies = $modifiedBies = $this->CustomTable->CreatedBy->find('list', array('conditions' => array('CreatedBy.publish' => 1, 'CreatedBy.soft_delete' => 0)));
         $qcDocuments = $this->CustomTable->QcDocument->find('list', array('conditions' => array('QcDocument.publish' => 1, 'QcDocument.soft_delete' => 0)));
@@ -42,9 +41,7 @@ class CustomTablesController extends AppController {
         $count = $this->CustomTable->find('count');
         $publish = $this->CustomTable->find('count', array('conditions' => array('CustomTable.publish' => 1)));
         $unpublish = $this->CustomTable->find('count', array('conditions' => array('CustomTable.publish' => 0)));
-        // $fieldTypes = array(0 => 'varchar', 1 => 'text', 2 => 'int', 3 => 'tinyint', 4 => 'float', 5 => 'date', 6 => 'datetime',);
         $fieldTypes = $this->CustomTable->customArray['fieldTypes'];
-        // $displayTypes = array(0 => 'text', 1 => 'radio', 2 => 'checkbox', 3 => 'dropdown', 4 => 'multiple', 5 => 'break');
         $displayTypes = $this->CustomTable->customArray['displayTypes'];
         //get all tables
         $controllers = array();
@@ -64,10 +61,7 @@ class CustomTablesController extends AppController {
         }
 
         $customArray = $this->CustomTable->customArray;
-
         $dataTypes = array('text','phone','email','textarea','checkbox','radio','dropdown-s','dropdown-m','date','datetime','number','file');
-
-
         $bootstrapSizes = array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
         $this->set(compact('count', 'publish', 'unpublish', 'fieldTypes', 'bootstrapSizes', 'linkedTos', 'displayTypes', 'qcDocuments','dataTypes','customArray'));
         // add creator
@@ -76,8 +70,6 @@ class CustomTablesController extends AppController {
             $this->_get_approval_comnments($this->request->params['named']['approval_id'], $creator);
         }
         $this->_get_approver_list($creator);
-
-
         $processes = $this->CustomTable->Process->find('list', array('recursive' => -1, 'conditions' => array()));
         $standards = $this->CustomTable->QcDocument->Standard->find('list', array('recursive' => -1, 'conditions' => array()));
         $clauses = $this->CustomTable->QcDocument->Standard->Clause->find('list', array('recursive' => -1, 'conditions' => array()));
@@ -85,10 +77,7 @@ class CustomTablesController extends AppController {
         $branches = $this->CustomTable->QcDocument->CreatedBy->Branch->find('list');
         $schedules = $this->CustomTable->QcDocument->Schedule->find('list');
         $this->set(compact('processes','standards','clauses','departments','branches','schedules'));
-
-        $reserved_fields = array("id", "name", "prepared_by", "approved_by", "created", "modified", "sr_no", "qd_document_id", "file_id", "file_key" ,"created_by" ,"modified_by" ,"status_user_id" ,"record_status" ,"branchid" ,"departmentid" ,"company_id" ,"soft_delete" ,"process_id");     
-
-        
+        $reserved_fields = array("id", "name", "prepared_by", "approved_by", "created", "modified", "sr_no", "qd_document_id", "file_id", "file_key" ,"created_by" ,"modified_by" ,"status_user_id" ,"record_status" ,"branchid" ,"departmentid" ,"company_id" ,"soft_delete" ,"process_id");
     }
     /**
      * index method
@@ -96,21 +85,19 @@ class CustomTablesController extends AppController {
      * @return void
      */
     public function index() {
-
         if($this->Session->read('User.is_mr') == false){
             $accessConditions = array(
                 'OR'=>array(
                     'OR'=>array(
                         'QcDocument.branches LIKE' => '%'.$this->Session->read('User.branch_id').'%',
-                        'QcDocument.departments LIKE' => '%'.$this->Session->read('User.department_id').'%',
-                        // 'QcDocument.designations LIKE' => '%'.$this->Session->read('User.designation_id').'%',
+                        'QcDocument.departments LIKE' => '%'.$this->Session->read('User.department_id').'%',                        
                         'QcDocument.user_id LIKE' => '%'.$this->Session->read('User.id').'%',
                     ),'OR'=>array(
                         'CustomTable.creators LIKE ' => '%'.$this->Session->read('User.id').'%',
                         'CustomTable.editors LIKE ' => '%'.$this->Session->read('User.id').'%',
                         'CustomTable.viewers LIKE ' => '%'.$this->Session->read('User.id').'%',
                         'CustomTable.approvers LIKE ' => '%'.$this->Session->read('User.id').'%',
-                    )                    
+                    )
                 )
             );
         }else{
@@ -130,7 +117,7 @@ class CustomTablesController extends AppController {
         $this->paginate = array(
             'order' => array('CustomTable.childDoc'=>'ASC','CustomTable.sr_no' => 'DESC'), 
             'conditions' => array(
-                $accessConditions, 
+                $accessConditions,
                 'OR' => array('ltrim(rtrim(CustomTable.custom_table_id))' => "", 'CustomTable.custom_table_id' => null, 'CustomTable.linked >' => 0)));
         $this->CustomTable->recursive = 0;
         $customTables = $this->paginate();
@@ -138,6 +125,7 @@ class CustomTablesController extends AppController {
         $this->set('customTables', $customTables);
         $this->_get_count();
     }
+    
     public function child($custom_table_id = null) {
         $conditions = $this->_check_request();
         $this->paginate = array('order' => array('CustomTable.sr_no' => 'DESC'), 'conditions' => array($conditions, 'CustomTable.custom_table_id' => $this->request->params['named']['custom_table_id']));
@@ -156,7 +144,7 @@ class CustomTablesController extends AppController {
     public function view($id = null) {
         if (!$this->CustomTable->exists($id)) {
             throw new NotFoundException(__('Invalid Table'));
-        }        
+        }
 
         if($this->Session->read('User.is_mr') == false){
             if($this->request->is('ajax') == false){
@@ -169,7 +157,7 @@ class CustomTablesController extends AppController {
         }
 
         $this->CustomTable->virtualFields = array('linked' => 'select count(*) from `custom_tables` where `custom_tables`.`custom_table_id` LIKE CustomTable.id ',);
-        $options = array('conditions' => array('CustomTable.' . $this->CustomTable->primaryKey => $id));
+        $options = array('recursive'=>0, 'conditions' => array('CustomTable.' . $this->CustomTable->primaryKey => $id));
         $customTable = $this->CustomTable->find('first', $options);
         $this->set('customTable', $this->CustomTable->find('first', $options));
         if ($this->_show_approvals()) {
@@ -189,24 +177,17 @@ class CustomTablesController extends AppController {
             $this->redirect(array('action' => 'recreate', $id, 'approval_id' => $this->request->params['named']['approval_id']));
         }
         
-
         // check if file exists, if not, add from latest qc file
-
-        $qcDocument = $this->_qc_document_header($customTable['CustomTable']['qc_document_id']);
-        
+        $qcDocument = $this->_qc_document_header($customTable['CustomTable']['qc_document_id']);        
         $file_type = $qcDocument['QcDocument']['file_type'];
         $file_name = $qcDocument['QcDocument']['title'];
         $document_number = $qcDocument['QcDocument']['document_number'];
-        $document_version = $qcDocument['QcDocument']['revision_number'];
-        // $file_name = $document_number . '-' . $file_name . '-' . $document_version . '.' . $file_type;
-
+        $document_version = $qcDocument['QcDocument']['revision_number'];        
         $file_name = $document_number . '-' . $file_name . '-' . $document_version;
         $file_name = $this->_clean_table_names($file_name);
         $file_name = $file_name . '.' . $file_type;
-
         $tableFile = WWW_ROOT .  'files' . DS . $this->Session->read('User.company_id') . DS . 'custom_tables' . DS . $id . DS . $file_name;
-
-        if(!file_exists($tableFile)){            
+        if(!file_exists($tableFile)){
             $qcfile = WWW_ROOT .  'files' . DS . $this->Session->read('User.company_id') . DS . 'qc_documents' . DS . $qcDocument['QcDocument']['id'] . DS . $file_name;;
             if(file_exists($qcfile)){
                 // copy file
@@ -221,52 +202,52 @@ class CustomTablesController extends AppController {
         $this->loadModel('Employee');
         $this->Employee->Behaviors->load('Containable');
         $branchUsers = $this->User->find('list',array('conditions'=>array('User.branch_id'=> json_decode($qcDocument['QcDocument']['branches'],true))));
-        // debug($branchUsers);
-
         $departmentUsers = $this->User->find('list',array('conditions'=>array('User.department_id'=> json_decode($qcDocument['QcDocument']['departments'],true))));
-        // debug($departmentUsers);
-
+        
         $this->Employee->contain('User.id','User.name');
         $dUsers = $this->Employee->find('all',array(
             'fields'=>array('Employee.id','Employee.designation_id'),
             'recursive'=>0,            
             'conditions'=>array('Employee.designation_id'=> json_decode($qcDocument['QcDocument']['designations'],true))));
-        // debug($dUsers);
         if($dUsers){
             foreach($dUsers as $dusers){
                 foreach($dusers['User'] as $duser){
                     $designationUsers[$duser['id']] = $duser['name'];
                 }
-
             }
         }
 
-        $this->set('branchUsers','departmentUsers','designationUsers');        
+        $this->set('branchUsers','departmentUsers','designationUsers');
         $this->set('qcDocument', $qcDocument);
         $this->set('process', $this->_process_header($customTable['CustomTable']['process_id']));
         $this->_commons($this->Session->read('User.id'));
-
         // get child 
         $childs = $this->CustomTable->find('all',array('conditions'=>array('CustomTable.custom_table_id'=>$id)));
-        
         $this->set('childs',$childs);
-
         $customTriggers = $this->CustomTable->CustomTrigger->find('all',array('conditions'=>array('CustomTrigger.custom_table_id'=>$customTable['CustomTable']['id'])));
         $this->set('customTriggers',$customTriggers);
-
         $key = $this->_generate_onlyoffice_key($customTable['CustomTable']['id'] . date('Ymdhis'));
         $this->set('filekey', $key);
-
+        $updateTable = false;
+        if($customTable['CustomTable']['creators'] == null)$customTable['CustomTable']['creators'] = $qcDocument['QcDocument']['editors'];$updateTable = true;
+        if($customTable['CustomTable']['viewers'] == null)$customTable['CustomTable']['viewers'] = $qcDocument['QcDocument']['user_id'];$updateTable = true;
+        if($customTable['CustomTable']['editors'] == null)$customTable['CustomTable']['editors'] = $qcDocument['QcDocument']['editors'];$updateTable = true;
+        if($customTable['CustomTable']['approvers'] == null)$customTable['CustomTable']['approvers'] = $qcDocument['QcDocument']['editors'];$updateTable = true;
+        if($updateTable == true){
+            $this->CustomTable->create();
+            $this->CustomTable->save($customTable['CustomTable'],false);
+        }
     }
+    
     public function edit($id = null) {
         if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
-
         $this->redirect(array('action' => 'view', $id));
     }
-    public function _make_table_name($qc_doc_id = null,$type = null) {        
+
+    public function _make_table_name($qc_doc_id = null,$type = null) {
         if($type == 'qc_documents'){
             $qcDocument = $this->CustomTable->QcDocument->find('first', array('recursive' => 0, 'conditions' => array('QcDocument.id' => $qc_doc_id),));
             $tableName = $qcDocument['QcDocument']['title'] . '_' . $qcDocument['QcDocument']['revision_number'];
@@ -290,29 +271,26 @@ class CustomTablesController extends AppController {
             // check if any other tables is already created.
             $version = $this->CustomTable->find('count', array('conditions' => array('CustomTable.table_name LIKE' => '%' . $tableName . '%')));
             if($version)$version = $version + 1;
-            else $version = 0;            
+            else $version = 0;
             $tableName = $tableName = $process['Process']['name'].'_'. $version;
             $tableName = 'tbl_'.$this->_clean_table_names($tableName);
             $tableName = Inflector::pluralize($tableName . '_v' . $version);
             return array($tableName, $version);
-        }else if($type == 'masters'){
-            // $process = $this->CustomTable->Process->find('first', array('recursive' => 0, 'conditions' => array('Process.id' => $qc_doc_id),));
-            // $tableName = $process['Process']['name'];
+        }else if($type == 'masters'){            
             $tableName = $this->request->data['CustomTable']['name'];
             $tableName = ltrim(rtrim($tableName));
             $tableName = $this->_clean_table_names($tableName);
             $tableName = $tableName . '_v';
             // check if any other tables is already created.
             $version = $this->CustomTable->find('count', array('conditions' => array('CustomTable.table_name LIKE' => '%' . $tableName . '%')));
-            $version = 0;            
-            // $tableName = $tableName = $process['Process']['name'].'_'. $version;
+            $version = 0;
             $tableName = 'tbl_'.$this->_clean_table_names($tableName);
             $tableName = Inflector::pluralize($tableName .$version);
             return array($tableName, $version);
-        }
-        
+        }        
     }
-    public function _make_child_table_name($qc_doc_id = null, $type = null, $linked = null) {        
+    
+    public function _make_child_table_name($qc_doc_id = null, $type = null, $linked = null) {
         if($type == 'qc_documents'){
             $qcDocument = $this->CustomTable->QcDocument->find('first', array('recursive' => 0, 'conditions' => array('QcDocument.id' => $qc_doc_id),));
             $linked = $linked + 1;
@@ -325,46 +303,41 @@ class CustomTablesController extends AppController {
             $tableName = $qcDocument['QcDocument']['title'] . '' . $qcDocument['QcDocument']['revision_number'];
             $tableName = 'chd_'.$this->_clean_table_names($tableName);
             $tableName = Inflector::pluralize($tableName . '_child_' . $linked . '_v' . $version);
-        }else if($type == 'processes'){    
+        }else if($type == 'processes'){
             $process = $this->CustomTable->Process->find('first', array('recursive' => 0, 'conditions' => array('Process.id' => $qc_doc_id),));
             $tableName = 'chd_'.$this->_clean_table_names(trim($process['Process']['name']));
-            $tableName = $tableName;
-            
+            $tableName = $tableName;            
             $version = $this->CustomTable->find('count', array('conditions' => array('CustomTable.custom_table_id !='=>'', 'CustomTable.table_name LIKE' => '%' . $tableName .'%' )));
-
             $version = $version + 1;
             $tableName = 'chd_'.$this->_clean_table_names($process['Process']['name'].'_'. $version);
             $tableName = Inflector::pluralize($tableName . '_child_' . $linked . '_v' . $version);
-            // return array($tableName, $version);
         }
-
         return array($tableName, $version);
     }
+    
     public function add_fields($type = null, $id = null, $f = null) {
         
     }
 
-    public function existing_fields($type = null, $id = null, $f = null,$field = null,$custom_table_id = null) {    
+    public function existing_fields($type = null, $id = null, $f = null,$field = null,$custom_table_id = null) {
         $this->set('f', $f);
         $this->set('id', $id);
         $this->set('type', $type);
-        $field_name = base64_decode($field);
-        
+        $field_name = base64_decode($field);        
         $table = $this->CustomTable->find('first',array('conditions'=>array('CustomTable.id'=>$custom_table_id),'recursive'=>-1,'fields'=>array('CustomTable.id','CustomTable.fields')));
         $fields = json_decode($table['CustomTable']['fields'],true);
-        foreach($fields as $field){            
+        foreach($fields as $field){
             if($field['field_name'] == $field_name){
                 $fieldDetails = $field;
             }
-        }        
+        }
         $this->set('fieldDetails', $fieldDetails);
         $this->_commons($this->Session->read('User.id'));
     }
 
-
     // 1st step add new table
-    public function _add_new_table($table_name = null,$defaultfield = null,$sqld = null,$fields = null){        
-        foreach($fields as $field){            
+    public function _add_new_table($table_name = null,$defaultfield = null,$sqld = null,$fields = null){
+        foreach($fields as $field){
             $newFields[] = $field;
         }
         $fields = $newFields;
@@ -373,7 +346,7 @@ class CustomTablesController extends AppController {
         $sql .= "`sr_no` int(11) NOT NULL AUTO_INCREMENT,";
         $sql .= "`".$defaultfield."` varchar(255) NOT NULL,";
         $sql .= $sqld;
-        $sql .= "            
+        $sql .= "
         `file_id` varchar(36) NULL,
         `file_key` varchar(50) NULL,
         `parent_id` varchar(36) NULL,
@@ -400,15 +373,12 @@ class CustomTablesController extends AppController {
 
         }else{
             $this->Session->setFlash(__('Something went wrong'), 'default', array('class' => 'alert alert-danger'));
-            $this->redirect($this->referer());          
+            $this->redirect($this->referer());
         }
 
         // run above sql first and then add alter table commands one by one
-        foreach ($fields as $chkd) {
-
-            
+        foreach ($fields as $chkd) {            
             if($chkd['new'] == 0 && $chkd['field_name'] != $chkd['old_field_name']){
-
                 switch ($chkd['field_type']) {
                     case 0: // varchar
                     $type = 'varchar('.$chkd['length'].')';
@@ -440,7 +410,6 @@ class CustomTablesController extends AppController {
             else $m = '';
 
             if(!in_array($chkd['field_name'],$this->reserved_fields))$updatesql .= 'ALTER TABLE `'.$this->request->data['CustomTable']['table_name'].'` CHANGE `'.$chkd['old_field_name'].'` `'.$chkd['field_name'].'` '.$type. ' '. $m.' NULL;';
-
         }
 
         if($chkd['drop'] == 1){
@@ -448,7 +417,6 @@ class CustomTablesController extends AppController {
         }
 
         if($chkd['new'] == 1){
-
             switch ($chkd['field_type']) {
             case 0: // varchar
             $type = 'varchar('.$chkd['length'].')';
@@ -486,42 +454,39 @@ class CustomTablesController extends AppController {
     }
 }
 
-if($updatesql){
-    try{
-        $this->CustomTable->query($updatesql);
-    }catch(Exception $e){
-        
-    }
-}
-
-if($dropsql){
-    try{
-        $this->CustomTable->query($dropsql);
-    }catch(Exception $e){
-        
-    }
-}
-
-if($addsqls){
-    foreach($addsqls as $addsql){
+    if($updatesql){
         try{
-        $this->CustomTable->query($addsql);
+            $this->CustomTable->query($updatesql);
         }catch(Exception $e){
-           
-        }    
+            
+        }
     }
-    
-}
 
-return true;
+    if($dropsql){
+        try{
+            $this->CustomTable->query($dropsql);
+        }catch(Exception $e){
+            
+        }
+    }
 
+    if($addsqls){
+        foreach($addsqls as $addsql){
+            try{
+            $this->CustomTable->query($addsql);
+            }catch(Exception $e){
+               
+            }
+        }
+    }
+    return true;
 }
     /**
      * add method
      *
      * @return void
      */
-    public function add() {        
+    public function add() {
         if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
@@ -529,7 +494,7 @@ return true;
 
         if(empty($this->request->params['named']['qc_document_id']) && empty($this->request->params['named']['process_id'])){
             $this->Session->setFlash(__('Select Document/Process first'), 'default', array('class' => 'alert alert-danger'));
-            $this->redirect(array('controller' => 'custom_tables', 'action' => 'index',$n));   
+            $this->redirect(array('controller' => 'custom_tables', 'action' => 'index',$n));
         }
 
         if ($this->_show_approvals()) {
@@ -539,9 +504,7 @@ return true;
             $this->set(array('userids' => $userids));
             $this->set(array('showApprovals' => $this->_show_approvals()));
         }
-
         // block adding table if document is not available
-
         if($this->request->params['named']['qc_document_id']){
             $options = array('recursive' => - 1, 'conditions' => array('QcDocument.id' => $this->request->params['named']['qc_document_id']));
             $qcDoc = $this->CustomTable->QcDocument->find('first', $options);
@@ -624,8 +587,7 @@ return true;
 
                 $qcpfile = WWW_ROOT .  'files' . DS . $this->Session->read('User.company_id') . DS . 'custom_tables' . DS . $this->request->data['CustomTable']['qc_document_id'] . DS . $file_name;
                 if (!file_exists($qcpfile)) {
-                    // $this->Session->setFlash(__('This document does not exists.'));
-                    // $this->redirect(array('action' => 'index', 'qc_document_id' => $this->request->params['named']['qc_document_id']));
+                    
                 }    
             }else if($this->request->data['CustomTable']['process_id']){
                 $options = array('recursive' => - 1, 'conditions' => array('Process.id' => $this->request->data['CustomTable']['process_id']));
@@ -637,8 +599,7 @@ return true;
                 $file_name = $file_name;
                 $qcpfile = WWW_ROOT .  'files' . DS . $this->Session->read('User.company_id') . DS . 'custom_tables' . DS . $this->request->data['CustomTable']['process_id'] . DS . $file_name;
                 if (!file_exists($qcpfile)) {                    
-                    // $this->Session->setFlash(__('This document does not exists.'));
-                    // $this->redirect(array('action' => 'index', 'qc_document_id' => $this->request->params['named']['qc_document_id']));
+                    
                 }
             }
             
@@ -661,6 +622,15 @@ return true;
             }
 
             if ($this->CustomTable->save($this->request->data)) {
+                $qcDocument = $this->CustomTable->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$this->request->data['CustomTable']['qc_document_id']),'recursive'=>-1,));
+                if($qcDocument){
+                    $qcDocument['QcDocument']['schedule_id'] = $this->request->data['QcDocument']['schedule_id'];
+                    $qcDocument['QcDocument']['data_type'] = $this->request->data['QcDocument']['data_type'];
+                    $qcDocument['QcDocument']['data_update_type'] = $this->request->data['QcDocument']['data_update_type'];
+                    $this->CustomTable->QcDocument->save($qcDocument,false);
+                }
+
+                // update qc document schedule & types
                 
                 $file = Configure::read('path') . DS . $this->CustomTable->id . DS . $file_name;
                 
@@ -1323,13 +1293,10 @@ return true;
         }
 
         
-        if ($this->request->is('post') || $this->request->is('put')) {
-
-            
+        if ($this->request->is('post') || $this->request->is('put')) {            
             $updatesql = '';
             $dropsql = '';
-            $addsql = '';
-            
+            $addsql = '';            
             foreach($this->request->data['CustomTableFields'] as $fields){
                 if($fields['default_field'] == 1){
                     $defaultfield = $this->_clean_table_names($fields['field_name']);                  
@@ -1343,7 +1310,6 @@ return true;
 
             $fieldTypes = $this->CustomTable->customArray['fieldTypes'];
             $table_name = $this->request->data['CustomTable']['table_name'];
-
             
             $newFields = array();
             foreach($this->request->data['CustomTableFields'] as $fields){
@@ -1371,16 +1337,12 @@ return true;
                 $this->request->data['CustomTableFields'] = $newFields;
             }
             
-
             $this->request->data['CustomTable']['system_table_id'] = $this->_get_system_table_id();
             $this->request->data['CustomTable']['password'] = Security::hash($this->request->data['CustomTable']['password'], 'md5', true);
             $this->CustomTable->create();
 
             $this->request->data['CustomTable']['belongs_to'] = json_encode($belongsTo);
-            $belongsTo = null;            
-            
-
-            
+            $belongsTo = null;
 
             if ($this->CustomTable->save($this->request->data)) {
 
@@ -1423,14 +1385,13 @@ return true;
                         'CustomTable.custom_table_id',
                         'CustomTable.table_version',
                     ))
-            );
+                );
 
                 if($findChilds){
                     $hasMany = array();
                     foreach($findChilds as $findChild){                        
                         $hasMany[] = array('table_name'=>$findChild['CustomTable']['table_name'],'friendly_name'=>$findChild['CustomTable']['name'],'table_version'=>$findChild['CustomTable']['table_version']);
-                    }
-                    
+                    }                    
                 }
                 
                 $data = array($this->request->data,$table_name,$friendlyName,$defaultfield,json_encode($hasMany));
@@ -1557,10 +1518,9 @@ return true;
                 }
             }
 
-        }         
-        
-
+        }
     }
+    
     public function _get_hasManies($data = null) {
         $parent = $this->CustomTable->find('first', array('conditions' => array('CustomTable.id' => $data['CustomTable']['custom_table_id'])));
         if ($parent) {
@@ -1577,6 +1537,7 @@ return true;
         $this->CustomTable->save();        
         return $existingHasManies;
     }
+    
     public function recreate_child($id = null) {
         if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
@@ -1603,7 +1564,6 @@ return true;
 
             $fieldTypes = $this->CustomTable->customArray['fieldTypes'];
             $table_name = $this->request->data['CustomTable']['table_name'];
-
 
             $newFields = array();
             foreach($this->request->data['CustomTableFields'] as $fields){
@@ -1644,8 +1604,6 @@ return true;
             $hasMany[] = array('table_name' => $this->request->data['CustomTable']['table_name'], 'friendly_name' => $this->request->data['CustomTable']['name'], 'table_version' => $this->request->data['CustomTable']['table_version']);
 
     
-
-            
             $this->CustomTable->create();
             if ($this->CustomTable->save($this->request->data)) {
 
@@ -1732,9 +1690,7 @@ return true;
                 $this->CustomTable->create();
                 $this->CustomTable->save($customTable);
 
-
                 $sqlresult = $this->_add_new_table($customTable['CustomTable']['table_name'],$defaultfield,$sqld,$this->request->data['CustomTableFields']);
-
                 
                 if ($this->_show_approvals()) $this->_save_approvals($this->CustomTable->id);
                 $this->redirect(array('action' => 'recreate_child',$this->request->params['pass'][0]));
@@ -1746,8 +1702,7 @@ return true;
         $this->set('customTable', $customTable);
         $this->request->data = $customTable;
         
-        if ($this->request->params['named']['qc_document_id'] || $this->request->params['named']['process_id']) {
-            
+        if ($this->request->params['named']['qc_document_id'] || $this->request->params['named']['process_id']) {            
             // generate table name
             // for documets
             if($this->request->params['named']['qc_document_id'] != ''){
@@ -1759,8 +1714,7 @@ return true;
                 $this->set('process', $process);                
             }else{
                 
-            }
-            
+            }            
         } else {
             // $this->Session->setFlash(__('Chose document first to create table. Tables are linked with documents and document must be present before adding table.'));
             // $this->redirect(array('controller' => 'qc_documents', 'action' => 'index'));
@@ -1778,7 +1732,6 @@ return true;
 
         $key = $this->_generate_onlyoffice_key($customTable['CustomTable']['id'] . date('Ymdhis'));
         $this->set('filekey', $key);
-
         $this->_commons($this->Session->read('User.id'));
     }
     
@@ -1790,14 +1743,11 @@ return true;
             echo "Bad Request";
         }
         $data = json_decode($body_stream, TRUE);
-        
         if ($data["status"] == 2) {
             
             $data = json_decode($body_stream, TRUE);
             $record_id = $this->request->params['named']['record_id'];
             $path_for_save = WWW_ROOT . 'files' . DS . $local['company_id'] . DS . 'files' . DS . $local['record_id'];
-            
-            // $qcdoc = $this->CustomTable->QcDocument->find('first', array('recursive' => - 1, 'conditions' => array('QcDocument.id' => $this->request->params['named']['record_id'])));
             $this->loadModel('File');
             $file = $this->File->find('first',array('conditions'=>array('File.id'=>$local['record_id'])));
             if($file){            
@@ -1810,6 +1760,7 @@ return true;
                 $file_for_save = $path_for_save . DS . $file_name;
                 $testfolder = new Folder($path_for_save,true, 0777);
                 $testfolder->create($path_for_save);                
+                
                 try{
                     chmod($path_for_save, 0777);    
                 }catch (Exception $e){
@@ -1839,8 +1790,29 @@ return true;
                             $updates[] = array('version_key'=>$key,'modified'=>$last_modified,'by'=>$local['user']);
                         }
 
-                        $file['File']['version_keys'] = json_encode($updates);
 
+                        $preFileName = 'prev' . '.'.$file_type;
+                        $url = $preFile_for_save = $history_path_for_save . DS . $preFileName;
+                        $url = str_replace('\/','/',$url);
+
+                        $newHistory = array(                            
+                            'key'=>$data['key'],
+                            'version'=>count($updates),
+                            'changes'=> $data['history']['changes'],
+                            'serverVersion'=>$data['history']['serverVersion'],
+                            'created'=>$data['history']['changes'][0]['created'],
+                            'user'=>array(
+                                'id'=>$data['history']['changes'][0]['user']['id'],
+                                'name'=>$data['history']['changes'][0]['user']['name'],
+                                'url'=>$history_path_for_save = $file_for_save.'-hist' . DS . count($updates) . DS . $preFileName
+                            ),
+                        );
+
+                        $versions = json_decode($file['File']['versions'],true);
+                        $versions[] = $newHistory;
+
+                        $file['File']['version_keys'] = json_encode($updates);
+                        $file['File']['versions'] = json_encode($versions);
                         $file['File']['data_received'] = 'from save_doc custom_tables';
                         $file['File']['file_key'] = $key;
                         $file['File']['file_status'] = 1;  
@@ -1848,12 +1820,31 @@ return true;
                         $this->File->create();
                         $this->File->save($file,false);
 
+                        // add -hist folder
+                        $history_path_for_save = $file_for_save.'-hist' . DS . count($updates);
+                        $historyFolder = new Folder($history_path_for_save);
+                        $historyFolder->create($history_path_for_save);                        
+
+                        // save pervious version
+                        $downloadUri = $data["url"];
+
+                        // adding diff.zip file
+                        $changesData = file_get_contents($data["changesurl"]);
+                        file_put_contents($history_path_for_save. DS . "diff.zip", $changesData, LOCK_EX);
+
+                        $fromFile = new File($file_for_save);
+
+                        $new_data = file_get_contents($downloadUri);
+                        if (file_put_contents($preFile_for_save, $new_data,LOCK_EX)) {
+                            
+                        }else{
+                            
+                        }
+
                     } else {
                         
-                    }
-                    
-                }
-                
+                    }                    
+                }                
             }
             
         }
@@ -1896,7 +1887,6 @@ return true;
                 chmod($file_for_save, 0777);
                 $downloadUri = $data["url"];
 
-
                 if (file_get_contents($downloadUri) === FALSE) {
                     
                 } else {
@@ -1924,15 +1914,14 @@ return true;
 
                     } else {
                         
-                    }
-                    
+                    }                    
                 }
                 
-            }
-            
+            }            
         }
         echo "{\"error\":0}";
     }
+
     public function unlock($id = null) {
         if ($this->request->is('post') || $this->request->is('put')) {
             if (empty($this->request->data['CustomTable']['password'])) {
@@ -1957,6 +1946,7 @@ return true;
             }
         }
     }
+
     public function lock($id = null) {
         if ($this->request->is('post') || $this->request->is('put')) {
             if (empty($this->request->data['CustomTable']['password'])) {
@@ -1981,6 +1971,7 @@ return true;
             }
         }
     }
+
     public function publish($id = null) {
         if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
@@ -2010,6 +2001,7 @@ return true;
             }
         }
     }
+
     public function hold($id = null) {
         if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
@@ -2039,6 +2031,7 @@ return true;
             }
         }
     }
+
     public function delete_child($id = null) {
         if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
@@ -2116,6 +2109,7 @@ return true;
             }
         }        
     }
+
     public function update_field() {
         if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
@@ -2207,6 +2201,7 @@ return true;
             $this->_commons($this->Session->read('User.id'));
         }
     }
+
     public function update_child_field() {
         if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
@@ -2303,62 +2298,224 @@ return true;
             $this->_commons($this->Session->read('User.id'));
         }
     }
+
     public function reports() {
         $this->render('/Elements/reports');
         $this->_commons($this->Session->read('User.id'));
     }
-    public function last_updated_record($table_name = null, $user_id = null,$option = null) {
-        $model = Inflector::classify($table_name);  
+
+    public function last_updated_record($table_name = null, $user_id = null,$option = null,$schedule_id = null) {
+        $schedules = $this->CustomTable->QcDocument->Schedule->find('list');
+        $model = Inflector::classify($table_name);
+        $scheduleCondition = array();
+        
+        if(!$this->Session->read('User.is_mr')){
+            if($this->Session->read('User.is_view_all') == false){
+                $branchCondition = array('OR'=>array('History.branchid'=>json_decode($this->Session->read('User.assigned_branches'),true)));
+                $branchConditionModel = array($model.'.branchid'=>json_decode($this->Session->read('User.assigned_branches'),true));
+            }
+        }else{
+            $branchCondition = array();
+            $branchConditionModel = array();
+        }
+
+        // for schedule
+        // add schedule conditions using switch case as $schedulecondition
+
+        // for data entry type 
+        // add 1-2-3 type conditions
+        // 0=>'Any user should update a single document for a defined schedule',
+        // just use schedule condition
+
+        // 1=>'Every user should update a saperate document for a defined schedule',
+        // use schedule condition along with user condition
+
+        // 2=>'Multiple users should update a single document for a defined schedule',
+        // Check if current user has added any record
+        // if not, check if any other user has added any record
+
+
+        // 0=>'Any user should update a single document for a defined schedule',
+        // 1=>'Every user should update a saperate document for a defined schedule',
+        // 2=>'Multiple users should update a single document for a defined schedule',
+
         try{
             $this->loadModel($model);
 
+            switch ($schedules[$schedule_id]){
+            case 'Daily':            
+                $scheduleCondition = array('DATE(History.created)' =>  date('Y-m-d'));
+                $scheduleConditionModel = array('DATE('.$model.'.created)' =>  date('Y-m-d'));
+            break;
+
+            case 'Weekly':
+                $scheduleCondition = array('WEEK(History.created)' =>  date('W'),'YEAR(History.created)' =>  date('Y'));
+                $scheduleConditionModel = array('WEEK('.$model.'.created)' =>  date('W'),'YEAR('.$model.'.created)' =>  date('Y'));
+            break;
+            
+            case 'Monthly':
+                $scheduleCondition = array('MONTH(History.created)' =>  date('W'),'YEAR(History.created)' =>  date('Y'));
+                $scheduleConditionModel = array('MONTH('.$model.'.created)' =>  date('W'),'YEAR('.$model.'.created)' =>  date('Y'));
+            break;
+
+            case 'Quarterly':
+                $scheduleCondition = array('QUARTER(History.created)' =>  ceil(date('m',time())/3),'YEAR(History.created)' =>  date('Y'));
+                $scheduleConditionModel = array('QUARTER('.$model.'.created)' =>  ceil(date('m',time())/3),'YEAR('.$model.'.created)' =>  date('Y'));
+            break;
+
+            case 'Yearly':
+                $scheduleCondition = array('YEAR(History.created)' =>  date('Y'));
+                $scheduleConditionModel = array('YEAR('.$model.'.created)' =>  date('Y'));
+            break;
+
+            case 'Half-Yearly':
+                $scheduleCondition = array('QUARTER(History.created)' =>  ceil(date('m',time())/2),'YEAR(History.created)' =>  date('Y'));
+                $scheduleConditionModel = array('QUARTER('.$model.'.created)' =>  ceil(date('m',time())/2),'YEAR('.$model.'.created)' =>  date('Y'));
+            break;
+
+            case 'none':
+
+            break;
+        }
+
+
+        switch ($option) {
+            case 0: // Any user should update a single document for a defined schedule'
+            // $condition = array_merge($scheduleCondition, array($model . '.created_by' => $this->Session->read('User.id')));
+            $condition = array_merge($scheduleCondition,$branchCondition);
+            $conditionModel = array_merge($scheduleConditionModel,$branchConditionModel);
+            break;
+            case 1: // Every user should update a saperate document for a defined schedule            
+            $condition = array_merge($scheduleCondition, $branchCondition, array('History.created_by' => $this->Session->read('User.id')));
+            $conditionModel = array_merge($scheduleConditionModel,$branchConditionModel, array($model . '.created_by' => $this->Session->read('User.id')));
+            break;
+            case 2: // Multiple users should update a single document for a defined schedule                    
+            // $condition = array( 'OR'=>array( $scheduleCondition, array($model . '.created_by' => $this->Session->read('User.id'))));
+            $condition = array_merge($scheduleCondition,$branchCondition);
+            $conditionModel = array_merge($scheduleConditionModel,$branchConditionModel);
+            break;
+        }
+
+            if($option == 2){
+                $this->loadModel('History');
+                $history = $this->History->find('first',array(
+                    'fields'=>array(
+                        'History.id',
+                        'History.sr_no',
+                        'History.model_name',
+                        'History.created_by',
+                        'History.record_id',
+                        'History.action',
+                        'History.created',
+                        'History.post_values'
+                    ),
+                    'recursive'=>-1,
+                    'conditions'=>array(
+                        $condition,
+                        'History.model_name'=>$model,
+                        'History.created_by'=>$this->Session->read('User.id'),
+                        'OR'=>array('History.action'=>array('add','edit')),
+                        'History.post_values != '=>'[[]]'
+                    ),
+                    'order'=>array('History.created'=>'DESC')
+                ));
+
+                if(!$history){
+                    $this->loadModel('History');
+                    $history = $this->History->find('first',array(
+                        'fields'=>array(
+                            'History.id',
+                            'History.sr_no',
+                            'History.model_name',
+                            'History.created_by',
+                            'History.record_id',
+                            'History.action',
+                            'History.created',
+                            'History.post_values'
+                        ),
+                        'recursive'=>-1,
+                        'conditions'=>array(
+                            $condition,
+                            'History.model_name'=>$model,
+                            // 'History.created_by'=>$this->Session->read('User.id'),
+                            'OR'=>array('History.action'=>array('add','edit')),
+                            'History.post_values != '=>'[[]]'
+                        ),
+                        'order'=>array('History.created'=>'DESC')
+                    ));
+                }
+
+            }else{
+                $this->loadModel('History');
+                $history = $this->History->find('first',array(
+                    'fields'=>array(
+                        'History.id',
+                        'History.sr_no',
+                        'History.model_name',
+                        'History.created_by',
+                        'History.record_id',
+                        'History.action',
+                        'History.created',
+                        'History.post_values'
+                    ),
+                    'recursive'=>-1,
+                    'conditions'=>array(
+                        $condition,
+                        'History.model_name'=>$model,
+                        // 'History.created_by'=>$this->Session->read('User.id'),
+                        'OR'=>array('History.action'=>array('add','edit')),
+                        'History.post_values != '=>'[[]]'
+                    ),
+                    'order'=>array('History.created'=>'DESC')
+                ));
+            }
+            
             // options
             // shared with all the users
             // shared with branches
             // shared with departments
+            
+            if($history){
 
-            switch ($option) {
-                    case 0: // varchar
-                    $condition = array($model . '.created_by' => $this->Session->read('User.id'));
-                    break;
-                    case 1: // text
-                    $condition = array($model . '.branchid' => $this->Session->read('User.branch_id'));
-                    break;
-                    case 2: // int
-                    $condition = array($model . '.departmentid' => $this->Session->read('User.department_id'));
-                    break;                    
-                    default: // text
-                    $condition = array();
-                    break;
+                if($history['History']['record_id']){
+                    $last_updated = $this->$model->find('first', array('fields' => array(
+                        $model . '.created',
+                        $model . '.id',
+                        $model . '.created_by',
+                    ), 
+                        'conditions' => array($model.'.id'=>$history['History']['record_id']), 
+                        'order' => array($model . '.created' => 'DESC')
+                        )
+                    );
+                    $last_updated[$model]['updated_by'] = $history['History']['created_by'];
+                }else{                    
+                    $last_updated = $this->$model->find('first', array('fields' => array(
+                        $model . '.created', 
+                        $model . '.id',
+                        $model . '.created_by',
+                    ), 
+                        'conditions' => array($conditionModel), 
+                        'order' => array($model . '.created' => 'DESC')
+                        )
+                    );
+                    $last_updated[$model]['updated_by'] = $last_updated[$model]['created_by'];
+                }                
             }            
-            $last_updated = $this->$model->find('first', array('fields' => array(
-                $model . '.created', 
-                $model . '.id',
-                $model . '.branchid',
-                $model . '.departmentid',
-            ), 
-                'conditions' => $condition, 
-                'order' => array($model . '.created' => 'DESC')
-                )
-            );
-            if ($last_updated) {
+            
+            
+            if ($last_updated) {                
                 return $last_updated[$model];
-            } else {
+            } else { 
                 return false;
             }    
         } catch (Exception $e){
 
-        }
-
-        
+        }        
     }
 
     public function create_master(){
-
-        if ($this->request->is('post') || $this->request->is('put')) {
-            
+        if ($this->request->is('post') || $this->request->is('put')) {            
             $this->autoRender = false;
-
             $this->request->data['CustomTable']['password'] = Security::hash($this->request->data['CustomTable']['password'], 'md5', true);
             $tableName = $this->_make_table_name(null,'masters');
             // check if table already exists
@@ -2397,7 +2554,6 @@ return true;
                     Configure::write('debug',2);
 
                     $result = json_decode($result['response']['finalResult'],true);
-
                     $viewCode = json_decode($result['controller_model'],true);
 
 
@@ -2476,8 +2632,7 @@ return true;
                 PRIMARY KEY (`id`),
                 KEY `sr_no` (`sr_no`)
                 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-                ";
-                // everything run properly -- now create table
+                ";                
 
                 $this->_clear_cake_cache();
                 Configure::write('debug',2);
@@ -2502,10 +2657,9 @@ return true;
                     $controller_file_name = str_replace('.php','', $controller_file_name);
                     $linkedTos[$controller_file_name] = $customTable['CustomTable']['name'] . " ver " . $customTable['CustomTable']['table_version'];
 
-                    asort($linkedTos);
-                    echo json_encode($linkedTos);
+                    asort($linkedTos);                    
                     $this->_clear_cake_cache();
-                    Configure::write('debug',0);  
+                    Configure::write('debug',0);
                 }else{
                     echo 'SQL failed!';
                 }
@@ -2643,8 +2797,6 @@ return true;
                 $this->redirect(array('action' => 'unlock', $customTable['CustomTable']['id']));
             }
         }
-        
-
     }
 
     public function loadbelongstos($id = null){
@@ -2705,7 +2857,7 @@ return true;
         $this->set('id',$id);
         $linkedProcesses = $this->CustomTableProcess->find('all',array('order'=>array('CustomTableProcess.sequence'=>'ASC'), 'conditions'=>array('CustomTableProcess.custom_table_id'=>$id)));
         $this->set('linkedProcesses',$linkedProcesses);
-        return "asdasd";        
+        return true;
     }
 
     public function delete_link_processes($id = null, $process_id = null){
@@ -2771,6 +2923,148 @@ return true;
                 $this->redirect(array('action' => 'view', $id, date('Ymdhis')));
             }
         }
+    }
+
+    public function updatedataentry($qc_document_id = null, $custom_table_id = null){
+        if ($this->request->is('post')) {
+            $qcDocument = $this->CustomTable->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$qc_document_id),'recursive'=>-1,));
+            if($qcDocument){
+                $this->request->data['QcDocument']['add_records'] = 1;
+                $qcDocument['QcDocument']['schedule_id'] = $this->request->data['QcDocument']['schedule_id'];
+                $qcDocument['QcDocument']['add_records'] = $this->request->data['QcDocument']['add_records'];
+                $qcDocument['QcDocument']['data_type'] = $this->request->data['QcDocument']['data_type'];
+                $qcDocument['QcDocument']['data_update_type'] = $this->request->data['QcDocument']['data_update_type'];                
+                $this->CustomTable->QcDocument->create();
+                if($this->CustomTable->QcDocument->save($qcDocument,false)){
+                    $this->Session->setFlash(__('Dataentry Details Updated.'));
+                }else{
+                    $this->Session->setFlash(__('Dataentry Details Updated failed'));
+                }                
+                $this->redirect(array('action' => 'view', $custom_table_id, date('Ymdhis')));
+            }
+        }
+        $this->Session->setFlash(__('Incorrect access.'));
+        $this->redirect(array('action' => 'view', $custom_table_id, date('Ymdhis')));
+    }
+
+    public function update_access($custom_table_id = null, $user_id = null){
+        $this->autoRender = false;
+        if($this->Session->read('User.is_mr') == true){
+            if ($this->request->is('post')) {
+                $customTable = $this->CustomTable->find('first',array(
+                    'fields'=>array('CustomTable.id','CustomTable.creators','CustomTable.viewers','CustomTable.editors','CustomTable.approvers','CustomTable.qc_document_id'),
+                    'recursive'=>-1,
+                    'conditions'=>array('CustomTable.id'=>$this->request->data['custom_table_id'])));
+                
+                if($this->request->data['typ'] == 0){
+                    $action = 'remove'.$this->request->data['action'];
+                }else{
+                    $action = 'add'.$this->request->data['action'];
+                }
+                if($customTable){
+                    switch ($action) {
+                        case 'addcreate' :
+                            $users = json_decode($customTable['CustomTable']['creators'],true);
+                            $users[] = $this->request->data['user_id'];
+                            $customTable['CustomTable']['creators'] = json_encode($users);
+                        break;
+
+                        case 'removecreate' :
+                            $users = json_decode($customTable['CustomTable']['creators'],true);
+                            $users = $this->_removefromarray($users,$this->request->data['user_id']);
+                            $customTable['CustomTable']['creators'] = json_encode($users);
+
+                        break;
+
+                        case 'addedit' :
+                            $users = json_decode($customTable['CustomTable']['editors'],true);
+                            $users[] = $this->request->data['user_id']; 
+                            $customTable['CustomTable']['editors'] = json_encode($users);
+                        break;
+
+                        case 'removeedit' :
+                            $users = json_decode($customTable['CustomTable']['editors'],true);
+                            $users = $this->_removefromarray($users,$this->request->data['user_id']);
+                            $customTable['CustomTable']['editors'] = json_encode($users);
+                        break;
+
+                        case 'addview' :
+                            $users = json_decode($customTable['CustomTable']['viewers'],true);
+                            $users[] = $this->request->data['user_id'];  
+                            $customTable['CustomTable']['viewers'] = json_encode($users);
+                        break;
+
+                        case 'removeview' :
+                            $users = json_decode($customTable['CustomTable']['viewers'],true);
+                            $users = $this->_removefromarray($users,$this->request->data['user_id']);
+                            $customTable['CustomTable']['viewers'] = json_encode($users);
+                        break;
+
+                        case 'addapprove' :
+                            $users = json_decode($customTable['CustomTable']['approvers'],true);
+                            $users[] = $this->request->data['user_id']; 
+                            $customTable['CustomTable']['approvers'] = json_encode($users); 
+                        break;
+
+                        case 'removeapprove' :
+                            $users = json_decode($customTable['CustomTable']['approvers'],true);
+                            $users = $this->_removefromarray($users,$this->request->data['user_id']);
+                            $customTable['CustomTable']['approvers'] = json_encode($users);
+                        break;
+                    }
+
+                    $this->CustomTable->create();
+                    $this->CustomTable->save($customTable,false);
+
+                    // remove copy_acl_from
+                    $this->loadModel('User');
+                    $user = $this->User->find('first',array('recursive'=>-1,'conditions'=>array('User.id'=>$this->request->data['user_id'])));
+                    if($user){
+                        $user['User']['copy_acl_from'] = NULL;
+                        $this->User->create();
+                        $this->User->save($user,false);
+                    }
+                    // update qc document permission
+                    // if add/ edit/ approver is added then also add VIEW permission to QC Document
+                    if($this->request->data['typ'] == 1){
+                        $this->_update_qc_document_view_permission($customTable['CustomTable']['qc_document_id'],$this->request->data['user_id']);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        }
+    }
+
+    public function _update_qc_document_view_permission($qc_document_id = null, $user_id = null){
+        if($qc_document_id){
+            $this->loadModel('QcDocument');
+            $qcDocument = $this->QcDocument->find('first',array('recursive'=>-1,'conditions'=>array('QcDocument.id'=>$qc_document_id)));            
+            if($qcDocument){
+                $users = json_decode($qcDocument['QcDocument']['user_id'],true);
+                if(in_array($user_id, $users)){
+
+                }else{
+                    $users[] = $user_id;
+                    $qcDocument['QcDocument']['user_id'] = json_encode($users);
+                    $this->QcDocument->create();
+                    $this->QcDocument->save($qcDocument,false);
+                }
+            }
+        }
+        return true;
+    }
+
+    public function _removefromarray($arr = null, $val = null){
+        if(is_array($arr)){
+            foreach($arr as $key => $v){
+                if($v == $val){
+                    unset($arr[$key]);
+                }
+            }
+            return $arr;
+        }
+
     }
     
 }

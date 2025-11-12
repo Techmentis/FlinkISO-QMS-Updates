@@ -44,8 +44,8 @@
 				<?php
 				$filesTypes = array('docx'=>'Document','xlsx'=>'Spreadsheet');
 				echo $this->Form->input('id');
-				echo "<div class='col-md-8'>".$this->Form->input('name',array('readonly'=>'readonly', 'label'=>'Template Name', 'class'=>'form-control',)) . '</div>';
-				echo "<div class='col-md-4'>".$this->Form->input('file_type',array('readonly'=>'readonly','options'=>$filesTypes, 'type'=>'radio','default'=>'docx', 'required'=>'required','class'=>'',)) . '</div>';
+				echo "<div class='col-md-12'>".$this->Form->input('name',array('readonly'=>'readonly', 'label'=>'Template Name', 'class'=>'form-control',)) . '</div>';
+				echo "<div class='col-md-4 hide'>".$this->Form->input('file_type',array('readonly'=>'readonly','options'=>$filesTypes, 'type'=>'radio','default'=>'docx', 'required'=>'required','class'=>'',)) . '</div>';
 				echo "<div class='col-md-4'>".$this->Form->hidden('model',array('default'=>'Template',)) . '</div>';
 				echo "<div class='col-md-4'>".$this->Form->hidden('controller',array('default'=>'templates',)) . '</div>';
 				echo "<div class='col-md-4'>".$this->Form->hidden('record_id',array('default'=>'template',)) . '</div>';

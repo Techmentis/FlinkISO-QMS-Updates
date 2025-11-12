@@ -110,7 +110,7 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 			$("#"+fa_id).removeClass('fa-list').addClass('fa-refresh fa-spin');
 			
 			if($('#'+approval_id+'_div').html().length == 0){			
-				$('#'+approval_id+'_div').load('<?php echo Router::url('/', true); ?>approval_comments/approval_comments/approval_id:'+approval_id, function(responseTxt, statusTxt, xhr){			
+				$('#'+approval_id+'_div').load('<?php echo Router::url('/', true); ?>approval_comments/approval_comments/approval_id:'+approval_id +'/custom_table_id:<?php echo $customTable["CustomTable"]["id"];?>', function(responseTxt, statusTxt, xhr){			
 					if(statusTxt == 'success'){
 						$("#"+fa_id).removeClass('fa-refresh fa-spin').addClass('fa-check');	
 					}

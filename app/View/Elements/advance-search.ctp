@@ -17,7 +17,7 @@
 
 	.chosen-container, .chosen-container-single, .chosen-select
 	{min-width: 120px; width:100% !important;}
-	#ui-datepicker-div,.ui-datepicker,.datepicker{z-index:9999 !important}{z-index: 999999 !important}
+	/*#ui-datepicker-div,.ui-datepicker,.datepicker{z-index:9999 !important}{z-index: 999999 !important}*/
 /*.modal-footer{text-align: left}*/
 </style>
 
@@ -52,8 +52,8 @@
 							<?php foreach ($src as $fieldName => $oprators) { ?>
 								<tr>
 									<td><?php echo Inflector::Humanize($fieldName);?></td>
-									<td><?php echo $this->Form->input($fieldName,array('id'=>false, 'name'=>'data[basic]['.$modal.']['.$fieldName.'][oprator]', 'options'=>$oprators,'default'=>'==', 'label'=>false,'onChange'=>'checkdate(this)','class'=>'form-control'));?></td>
-									<td><?php echo $this->Form->input($fieldName.'_value',array('id'=>false,'name'=>'data[basic]['.$modal.']['.$fieldName.'][value]','label'=>false,'class'=>'form-control'));?></td>
+									<td><?php echo $this->Form->input($fieldName,array('id'=>Inflector::Classify($modal.$fieldName), 'name'=>'data[basic]['.$modal.']['.$fieldName.'][oprator]', 'options'=>$oprators,'default'=>'==', 'label'=>false,'onChange'=>'checkdate(this)','class'=>'form-control'));?></td>
+									<td><?php echo $this->Form->input($fieldName.'_value',array('id'=>Inflector::Classify($modal.$fieldName).'_Value','name'=>'data[basic]['.$modal.']['.$fieldName.'][value]','label'=>false,'class'=>'form-control'));?></td>
 								</tr>
 							<?php } ?>
 						</table>
@@ -117,8 +117,10 @@
 	function checkdate(n){
 		if(n.value == 'between'){
 
-			i = n.id + "Value";
-			$("#"+i).data('datepicker').remove();
+			i = n.id + "_Value";
+			// $("#"+i).data('datepicker').remove();			
+			$("#"+i).datepicker("destroy");
+			
 			$("#"+i).daterangepicker({
 				format: 'MM/DD/YYYY',
 				locale: {

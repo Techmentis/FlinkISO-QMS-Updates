@@ -1,4 +1,7 @@
 <div  id="main">
+    <style>
+        .fa{font-size: 14px}
+    </style>
     <?php echo $this->Session->flash(); ?>
     <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Users','modelClass'=>'User','options'=>array(),'pluralVar'=>'users'))); ?>
     <div class="users ">
@@ -8,28 +11,39 @@
                 <tr>
                     <th><?php echo $this->Paginator->sort('employee_id', __('Employee')); ?></th>
                     <th><?php echo $this->Paginator->sort('username', __('Username')); ?></th>
-                    <th><?php echo $this->Paginator->sort('is_mr', __('Admin')); ?></th>
-                    <th><?php echo $this->Paginator->sort('is_view_all', __('View')); ?></th>
-                    <th><?php echo $this->Paginator->sort('is_creator', __('Creator')); ?></th>                    
-                    <th><?php echo $this->Paginator->sort('is_approver', __('Approver')); ?></th>
-                    <th><?php echo $this->Paginator->sort('is_publisher', __('Publisher')); ?></th>
                     <th><?php echo $this->Paginator->sort('department_id', __('Department')); ?></th>
-                    <th><?php echo $this->Paginator->sort('branch_id', __('Branch')); ?></th>                                        
+                    <th><?php echo $this->Paginator->sort('branch_id', __('Branch')); ?></th>
                     <th><?php echo $this->Paginator->sort('last_login', __('Last Login')); ?></th>
-                    <th>Block/Release</th>
+                    <?php if($this->Session->read('User.is_mr') == true){ ?>
+                        <th><?php echo $this->Paginator->sort('is_mr', __('Admin')); ?></th>
+                        <th><?php echo $this->Paginator->sort('is_view_all', __('View')); ?></th>
+                        <th><?php echo $this->Paginator->sort('is_creator', __('Creator')); ?></th>                    
+                        <th><?php echo $this->Paginator->sort('is_approver', __('Approver')); ?></th>
+                        <th><?php echo $this->Paginator->sort('is_publisher', __('Publisher')); ?></th>                        
+                        <th>Block/Release</th>
+                        <th><?php echo __('Copy Access From');?></th>
+                    <?php } ?>                                        
                     <th><?php echo $this->Paginator->sort('publish', __('Publish')); ?></th>
-                    <th>Actions</th>
+                    <?php if($this->Session->read('User.is_mr') == true){ ?>
+                        <th>Actions</th>
+                    <?php } ?>
                 </tr>
                 <?php if ($users) {
                     $x = 0;
-                    foreach ($users as $user):
-                        ?>                
+                    foreach ($users as $user):?>                
                         <tr class="on_page_src" onclick="addrec('<?php echo $user['User']['id'];?>')" id="<?php echo $user['User']['id'];?>_tr">
                             <td><?php echo $user['User']['name']; ?>&nbsp;</td>
                             <td><?php echo $user['User']['username']; ?>&nbsp;</td>
                             <td>
+                                <?php echo $this->Html->link($user['Department']['name'], array('controller' => 'departments', 'action' => 'view', $user['Department']['id'])); ?>
+                            </td>
+                            <td>
+                                <?php echo $this->Html->link($user['Branch']['name'], array('controller' => 'branches', 'action' => 'view', $user['Branch']['id'])); ?>
+                            </td>
+                            <td><?php echo $user['User']['last_login']; ?>&nbsp;</td>
+                            <?php if($this->Session->read('User.is_mr') == true){ ?>
+                            <td>
                                 <?php 
-
                                 if($user['User']['is_mr']){
                                     $str = base64_encode($user['User']['id'].',is_mr,0');
                                     echo $this->Html->link('<i class="fa fa-check"></i>','javascript:void(0)', array(
@@ -48,11 +62,9 @@
                                     ));
                                 }
                             ?>&nbsp;
-                        </td>
-                        
+                        </td>                        
                         <td>
-                            <?php 
-
+                            <?php
                             if($user['User']['is_view_all']){
                                 $str = base64_encode($user['User']['id'].',is_view_all,0');
                                 echo $this->Html->link('<i class="fa fa-check"></i>','javascript:void(0)', array(
@@ -70,12 +82,10 @@
                                     'escape'=>false
                                 ));
                             }
-                        ?>&nbsp;
-                    </td>
-
-                    <td>
-                            <?php 
-
+                            ?>&nbsp;
+                        </td>
+                        <td>
+                            <?php
                             if($user['User']['is_creator']){
                                 $str = base64_encode($user['User']['id'].',is_creator,0');
                                 echo $this->Html->link('<i class="fa fa-check"></i>','javascript:void(0)', array(
@@ -93,35 +103,31 @@
                                     'escape'=>false
                                 ));
                             }
-                        ?>&nbsp;
-                    </td>
-
-                    <td>
-                        <?php 
-
-                        if($user['User']['is_approver']){
-                            $str = base64_encode($user['User']['id'].',is_approver,0');
-                            echo $this->Html->link('<i class="fa fa-check"></i>','javascript:void(0)', array(
-                                'class'=>'btn btn-sm text-success',
-                                'onClick'=>'reset_access(\''.$user['User']['id'].'\', \''.$str.'\',this.id,\'is_approver\', 0)',
-                                'id'=>$user['User']['id'].'_is_approver',
-                                'escape'=>false
-                            ));
-                        }else{
-                            $str = base64_encode($user['User']['id'].',is_approver,1');
-                            echo $this->Html->link('<i class="fa fa-remove"></i>','#', array(
-                                'class'=>'btn btn-sm text-danger',
-                                'onClick'=>'reset_access(\''.$user['User']['id'].'\', \''.$str.'\',this.id,\'is_approver\', 1)',
-                                'id'=>$user['User']['id'].'_is_approver',
-                                'escape'=>false
-                            ));
-                        }
-                    ?>&nbsp;
-                </td>
-
-                <td>
+                            ?>&nbsp;
+                        </td>
+                        <td>
                             <?php 
-
+                                if($user['User']['is_approver']){
+                                    $str = base64_encode($user['User']['id'].',is_approver,0');
+                                    echo $this->Html->link('<i class="fa fa-check"></i>','javascript:void(0)', array(
+                                        'class'=>'btn btn-sm text-success',
+                                        'onClick'=>'reset_access(\''.$user['User']['id'].'\', \''.$str.'\',this.id,\'is_approver\', 0)',
+                                        'id'=>$user['User']['id'].'_is_approver',
+                                        'escape'=>false
+                                    ));
+                                }else{
+                                    $str = base64_encode($user['User']['id'].',is_approver,1');
+                                    echo $this->Html->link('<i class="fa fa-remove"></i>','#', array(
+                                        'class'=>'btn btn-sm text-danger',
+                                        'onClick'=>'reset_access(\''.$user['User']['id'].'\', \''.$str.'\',this.id,\'is_approver\', 1)',
+                                        'id'=>$user['User']['id'].'_is_approver',
+                                        'escape'=>false
+                                    ));
+                                }
+                            ?>&nbsp;
+                        </td>
+                        <td>
+                            <?php 
                             if($user['User']['is_publisher']){
                                 $str = base64_encode($user['User']['id'].',is_publisher,0');
                                 echo $this->Html->link('<i class="fa fa-check"></i>','javascript:void(0)', array(
@@ -139,54 +145,52 @@
                                     'escape'=>false
                                 ));
                             }
+                            ?>&nbsp;
+                        </td>
+                        <td>
+                            <?php
+                            if($user['User']['status'] == 1){
+                                $str = base64_encode($user['User']['id'].',status,0');
+                                echo $this->Html->link('<i class="fa fa-check"></i>','javascript:void(0)', array(
+                                    'class'=>'text-success',
+                                    'onClick'=>'reset_access(\''.$user['User']['id'].'\', \''.$str.'\',this.id,\'status\', 0)',
+                                    'id'=>$user['User']['id'].'_status',
+                                    'escape'=>false
+                                ));
+                            }else{
+                                $str = base64_encode($user['User']['id'].',status,1');
+                                echo $this->Html->link('<i class="fa fa-ban"></i>','#', array(
+                                    'class'=>'text-danger',
+                                    'onClick'=>'reset_access(\''.$user['User']['id'].'\', \''.$str.'\',this.id,\'status\', 1)',
+                                    'id'=>$user['User']['id'].'_status',
+                                    'escape'=>false
+                                ));
+                            }
                         ?>&nbsp;
+                        </td> 
+                        <td>                            
+                            <?php echo $this->Form->input('copy_acl_from',array('options'=>$PublishedUserList, 'default'=>$user['User']['copy_acl_from'], 'id'=>false,'label'=>false,'onChange'=>'copyaccess(this.value,\''.$user['User']['id'].'\')'));?>
+                        </td>                        
+                    <?php } ?>                    
+                    <td width="60">
+                        <?php if ($user['User']['publish'] == 1) { ?>
+                            <span class="fa fa-check"></span>
+                        <?php } else { ?>
+                            <span class="fa fa-close"></span>
+                        <?php } ?>&nbsp;
                     </td>
-
-                <td>
-                    <?php echo $this->Html->link($user['Department']['name'], array('controller' => 'departments', 'action' => 'view', $user['Department']['id'])); ?>
-                </td>
-                <td>
-                    <?php echo $this->Html->link($user['Branch']['name'], array('controller' => 'branches', 'action' => 'view', $user['Branch']['id'])); ?>
-                </td>                    
-                <td><?php echo $user['User']['last_login']; ?>&nbsp;</td>
-                <td>
-                    <?php 
-
-                    if($user['User']['status'] == 1){
-                        $str = base64_encode($user['User']['id'].',status,0');
-                        echo $this->Html->link('<i class="fa fa-check"></i>','javascript:void(0)', array(
-                            'class'=>'btn btn-sm text-success',
-                            'onClick'=>'reset_access(\''.$user['User']['id'].'\', \''.$str.'\',this.id,\'status\', 0)',
-                            'id'=>$user['User']['id'].'_status',
-                            'escape'=>false
-                        ));
-                    }else{
-                        $str = base64_encode($user['User']['id'].',status,1');
-                        echo $this->Html->link('<i class="fa fa-ban"></i>','#', array(
-                            'class'=>'btn btn-sm text-danger',
-                            'onClick'=>'reset_access(\''.$user['User']['id'].'\', \''.$str.'\',this.id,\'status\', 1)',
-                            'id'=>$user['User']['id'].'_status',
-                            'escape'=>false
-                        ));
-                    }
-                ?>&nbsp;
-            </td>
-            <td width="60">
-                <?php if ($user['User']['publish'] == 1) { ?>
-                    <span class="fa fa-check"></span>
-                <?php } else { ?>
-                    <span class="fa fa-close"></span>
-                    <?php } ?>&nbsp;</td>
-                    <td class=" actions" style="width:120px">
-                        <?php echo $this->element('actions', array('created' => $user['User']['created_by'], 'postVal' => $user['User']['id'], 'softDelete' => $user['User']['soft_delete'],'is_mr'=>$user['User']['is_mr'])); ?></td>
-                    </tr>
-                    <?php
-                    $x++;
+                    <?php if($this->Session->read('User.is_mr') == true){ ?>         
+                        <td class=" actions" style="width:120px">
+                            <?php echo $this->element('actions', array('created' => $user['User']['created_by'], 'postVal' => $user['User']['id'], 'softDelete' => $user['User']['soft_delete'],'is_mr'=>$user['User']['is_mr'])); ?>                        
+                        </td>
+                    <?php } ?>
+                </tr>
+            <?php
+                $x++;
                 endforeach;
-            } else {
-                ?>
+            } else {?>
                 <tr><td colspan="10"><?php echo __('No results found'); ?></td></tr>
-            <?php } ?>
+            <?php } ?>            
         </table>
         <?php echo $this->Form->end(); ?>
     </div>
@@ -211,10 +215,28 @@
         ?>
     </ul>
 </div>
+<?php if($this->Session->read('User.is_mr') == true) { ?>
+    <div class="row">
+        <div class="col-md-12">
+            <h5>Admin</h5>
+            <p>Has access to entire sytem. Can create users/ assign access controls to users & can create Custom HTML Tables.</p>
+            <h5>View</h5>
+            <p>Non-admin users with View option can view records added by themselves. If "Is View All" selected from Edit page, they can also see records added by other users from their Branch. You can add additional branches for record viewing from Edit page.</p>
+            <h5>Creators</h5>
+            <p>These users can create documents.</p>
+            <h5>Approvers</h5>
+            <p>These users can approver documents & records.</p>
+            <h5>Publishers</h5>
+            <p>These users can publish documents & records.</p>
+            <h5>Block/ Release</h5>
+            <p>Admins can block users. Admins can also unlock users who are locked if they entire  wrong password multiple times.</p>
+            <h5>Copy Access From</h5>
+            <p>You can copy Document & Custom HTML Form acces from one user to another by selecting the user from <strong>Copy Access From </strong> dropdown. When you select the user form the dropdown, system will automatically add user access from that user to a current user. This will not change any settings like Admin/ View/ Creator/ Approver/ Publisher but the user will get the Document & Custom HTML Form access form the selected user.</p>
+        </div>
+    </div>
+<?php } ?>
 </div>
-
 <script>
-
     function reset_access(userid,str, id, field, t){        
         $.ajax({
          url: "<?php echo Router::url('/', true); ?>users/reset_access",
@@ -277,13 +299,19 @@
 
     }
 
-
-    $.ajaxSetup({
-        beforeSend: function () {
-            $("#busy-indicator").show();
-        },
-        complete: function () {
-            $("#busy-indicator").hide();
+    function copyaccess(from,to){
+        if(from == to){
+            alert('Same user.')
+            return false;
+        }else{
+            $.ajax({
+                url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/copy_access_from/"+from+"/"+to,
+                success: function(data, result) {
+                    console.log('done');
+                },
+            }); 
         }
-    });
+    }
+    
+    $.ajaxSetup({beforeSend: function () {$("#busy-indicator").show();},complete: function () {$("#busy-indicator").hide();}});
 </script>

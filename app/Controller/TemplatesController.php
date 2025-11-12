@@ -25,14 +25,65 @@ class TemplatesController extends AppController {
             $this->request->data['Template']['user_id'] = $this->Session->read('User.id');
             $this->request->data['Template']['custom_table_id'] = 'templates';
             $this->Template->create();
+
+            //check duplicate
+            $templ = $this->Template->find('count',array('conditions'=>array('Template.name'=>$this->request->data['Template']['name'])));
+            if($templ > 0){
+                $this->Session->setFlash(__('Duplicate Name.'));
+                $this->redirect(array('action' => 'add'));
+            }
+
+            $accessptedExtentions = array(
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.oasis.opendocument.spreadsheet',
+                'application/vnd.oasis.opendocument.text',
+                'application/rtf',
+                'text/plain',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/pdf',
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+
+            );
+            
+            if($this->request->data['Template']['file']['type']){
+                if(!in_array($this->request->data['Template']['file']['type'], $accessptedExtentions)){
+                    $this->Session->setFlash(__('Incorrect File Type'));
+                    $this->redirect(array('action' => 'add'));
+                }
+            }
+            
             if($this->Template->save($this->request->data)){
-                $this->_load_blank_file($this->request->data['Template']['file_type'],$this->request->data['Template']['name'],$this->Template->id);
+                $id = $this->Template->id;
+                $file_name = $this->_clean_table_names($this->request->data['Template']['name']);
+                $file_name = $file_name . '.' . $this->request->data['Template']['file_type'];
+
+                if (!file_exists(Configure::read('path') . DS . $id)) {
+                    $pathfolder = new Folder();
+                    if ($pathfolder->create(Configure::read('path') . DS . $id)) {
+                        chmod(Configure::read('path') . DS . $id,0777);
+                    } else {
+                        echo "failed folder" . Configure::read('path');
+                        exit;
+                    }
+                }
+
+
+                $file = Configure::read('path') . DS . $id . DS . $file_name;
+                if (move_uploaded_file($this->request->data['Template']['file']['tmp_name'], $file)) {
+
+                }else{
+                    $this->Session->setFlash(__('Unable to save file'));
+                    $this->redirect(array('action' => 'add'));
+                }
+
                 $this->Session->setFlash(__('Add template content'));
                 $this->redirect(array('action' => 'edit',$this->Template->id));
             }else{
                 $this->Session->setFlash(__('Something went wrong.'));
                 $this->redirect(array('action' => 'add'));
-            }            
+            }
         }
     }
 

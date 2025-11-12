@@ -318,14 +318,13 @@ array(
 		0=>'Add Content',
 		1=>'Upload File',
 	),'dataTypes'=>array(
-		0=>'Document',
-		1=>'Data',
-		2=>'Both'
+		1=>'Data : Opens document in view mode as reference.',
+		0=>'Document : Opens document\'s copy in edit mode. Users can update document copy along with the data in table.',
+		// 2=>'Both'
 	),'dataUpdateTypes'=>array(
-		0=>'Any User',
-		1=>'Every User',
-		2=>'Branch',
-		3=>'Department'
+		0=>'Any user should update a single document for a defined schedule',
+		1=>'Every user should update a saperate document for a defined schedule',
+		2=>'Multiple users should update a single document for a defined schedule',
 	),
 	'documentStatuses' => array(
 		'0' => 'Draft',
@@ -343,8 +342,7 @@ array(
 		'1' => 'Internal',
 		'2' => 'Restricted',
 		'3' => 'Public/ Uncontrolled'
-	),'documentTypes' => 
-	array(
+	),'documentTypes' => array(
 		'0'=>'Manual',
 		'1'=>'Procedure',
 		'2'=>'Process',

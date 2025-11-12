@@ -13,9 +13,46 @@
 </style>
 <script type="text/javascript">
 	function addfiletype(filetype){
-		$("#QcDocumentFileType").val(filetype);	
-		$("#filetypediv").hide();
+		$("#TemplateFileType").val(filetype);	
+		// $("#filetypediv").hide();
 	}
+
+	$().ready(function(){
+		$("#TemplateFile").on('change',function(){			
+			let pathext = this.value;
+			const pathfile = pathext.split(".");
+			const arr = pathfile.length;
+			const ext = pathfile[arr-1];
+			
+			var earr = ["doc","docx","xls","xlsx","pdf","ppt","odt","txt","pptx","pptm"];
+			
+			if($.inArray(ext,earr) > -1){
+				
+			}else{
+				alert('This file type is not allowed : ' + ext);
+				location.reload(true);
+			}
+			let name = pathext.split('.' + ext);
+			console.log(name);
+			let path = name[0];
+			const file = path.split("\\");			
+			const filename  = file[file.length - 1];
+
+			var str = filename;
+			
+			// if (!isNaN(str[0]) && !isNaN(str[str.length - 1])) {
+			// 	this.value = "";
+			// 	alert('File starting or ending with numbers is not allowed.');
+			// 	location.reload(true);
+			// } else {
+				
+			// }
+			$("#TemplateName").val(filename);
+			// $("#QcDocumentTitle").val(filename);
+			// add_title(filename);
+			addfiletype(ext);
+		});
+	})
 
 	$().ready(function(){
 		$("#TemplateName").on('change',function(){			
@@ -43,9 +80,9 @@
 			<div class="row">		
 				<?php
 				$filesTypes = array('docx'=>'Document','xlsx'=>'Spreadsheet');
-
-				echo "<div class='col-md-8'>".$this->Form->input('name',array('required'=>'required', 'label'=>'Template Name', 'class'=>'form-control',)) . '</div>';
-				echo "<div class='col-md-4'>".$this->Form->input('file_type',array('options'=>$filesTypes, 'type'=>'radio','default'=>'docx', 'required'=>'required','class'=>'',)) . '</div>';
+				echo "<div class='col-md-6'><span class='control-fileupload' style='margin-top:28px'><i class='fa fa-file'></i>". $this->Form->input('file',array('class'=>$block_class ,  'type'=>'file', 'label'=>'Upload Document', 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));')) . "</div>";
+				echo "<div class='col-md-6'>".$this->Form->input('name',array('required'=>'required', 'label'=>'Template Name', 'class'=>'form-control',)) . '</div>';
+				echo "<div class='col-md-4 hide'>".$this->Form->hidden('file_type',array('required'=>'required','class'=>'',)) . '</div>';
 				echo "<div class='col-md-4'>".$this->Form->hidden('model',array('default'=>'Template',)) . '</div>';
 				echo "<div class='col-md-4'>".$this->Form->hidden('controller',array('default'=>'templates',)) . '</div>';
 				echo "<div class='col-md-4'>".$this->Form->hidden('record_id',array('default'=>'template',)) . '</div>';

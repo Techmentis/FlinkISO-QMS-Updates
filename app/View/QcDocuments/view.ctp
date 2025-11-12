@@ -302,7 +302,7 @@
 										const arr = pathfile.length;
 										const ext = pathfile[arr-1];
 
-										var earr = ["doc","docx","xls","xlsx","pdf","ppt","odt","txt"];
+										var earr = ["doc","docx","xls","xlsx","pdf","ppt","odt","txt","pptx","pptm"];
 										if($.inArray(ext,earr) > -1){
 
 										}else{
@@ -336,6 +336,18 @@
 									<table class="table table-responsive table-bordered">
 										<thead><h4>Document Sharing</h4></thead>
 										<tbody>
+											<tr>
+												<th>Schedule</th>
+												<td><strong><?php echo $qcDocument['Schedule']['name'];?></strong></td>
+											</tr>
+											<tr>
+												<th>Data Type</th>
+												<td><strong><?php echo $customArray['dataTypes'][$qcDocument['QcDocument']['data_type']];?></strong></td>
+											</tr>
+											<tr>
+												<th>Data Updated Type</th>
+												<td><strong><?php echo $customArray['dataUpdateTypes'][$qcDocument['QcDocument']['data_update_type']];?></strong></td>
+											</tr>
 											<?php if($qcDocument['QcDocument']['branches'] != 'null'){ ?>
 												<tr>
 													<th>Shared with Branches</th>

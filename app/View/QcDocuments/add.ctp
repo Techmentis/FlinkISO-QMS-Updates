@@ -40,7 +40,6 @@
 				location.reload(true);
 			}
 			let name = pathext.split('.' + ext);
-			console.log(name);
 			let path = name[0];
 			const file = path.split("\\");			
 			const filename  = file[file.length - 1];
@@ -229,7 +228,7 @@
 								0=>'Yes, Update Custom HTML Form Document when any changes are made to this document',
 								1=>'No, Custom HTML Form Document will be updated manually',
 							);
-							echo "<div class='col-md-12'>".$this->Form->input('update_custom_table_document',array('legend'=>'Update Custom HTML From Document','type'=>'radio', 'class'=>'','options'=>$updateCustomTableDocuments,'default'=>0)) . '</div>'; 
+							echo "<div class='col-md-12 hide'>".$this->Form->input('update_custom_table_document',array('legend'=>'Update Custom HTML From Document','type'=>'radio', 'class'=>'','options'=>$updateCustomTableDocuments,'default'=>0)) . '</div>'; 
 
 							echo "</div><div class='row'>";
 							
@@ -291,7 +290,7 @@
 
 													echo "<div class='row'>";
 													echo "<div class='col-md-12'><hr /></div>";
-													echo "<div class='col-md-12'>".$this->Form->input('editors',array('name'=>'data[QcDocument][editors][]','label'=>'Who can edit this document?','multiple', 'options'=>$usernames, 'class'=>'form-control', 'required'=>'required',  'style'=>'')) . '</div>'; 
+													echo "<div class='col-md-12'>".$this->Form->input('editors',array('name'=>'data[QcDocument][editors][]','label'=>'Who can edit this document?','multiple', 'options'=>$usernames,'default'=>$this->Session->read('User.id'),  'class'=>'form-control', 'required'=>'required',  'style'=>'')) . '</div>'; 
 													echo "<div class='hide'><br />".$this->Form->input('select_all_editors',array('type'=>'checkbox','class'=>'checkbox','onClick'=>'selectall("QcDocumentEditors",this)'))."</div>";
 													echo "</div>";
 												}
@@ -305,30 +304,26 @@
 									</div>
 								</div>
 							</div>
-							
-							<div class='row'>
-								<div class='col-md-12'>
-									<div class="box box-default">
-										<div class="box-header with-border">
-											<i class="fa fa-database"></i>
-											<h3 class="box-title">Document Data Entry</h3>
-										</div>
-										<div class="box-body">
-											<div class="row">
-												<?php 
-												
-												echo "<div class='col-md-6'><br /><div class='nomargin-checkbox'><label>Do you want this document to be shared with users for scheduled data enrty? If yes, click YES below. You must define schedule & data type.</label>".$this->Form->input('add_records',array('type'=>'checkbox','label'=>'Yes')) . '</div></div>'; 
-												echo "<div class='col-md-2'>".$this->Form->input('schedule_id',array()) . '</div>'; 
-												echo "<div class='col-md-2'>".$this->Form->input('data_type',array('required', 'options'=>$customArray['dataTypes'])) . '</div>'; 
-												echo "<div class='col-md-2'>".$this->Form->input('data_update_type',array('required','options'=>$customArray['dataUpdateTypes'],'default'=>-1)) . '</div>';
-											?>
-											</div>
-										</div>
-									</div>
+														
+							<?php 		
+							unset($customArray['documentStatuses'][3]);
+							unset($customArray['documentStatuses'][6]);
+							echo "<div class='row'>";
+							echo "<div class='col-md-8'>".$this->Form->input('document_status',array('default'=>0,'type'=>'radio', 'class'=>'','options'=>$customArray['documentStatuses'])) . '</div>';
+							echo "<div class='col-md-3'><br />" . $this->Form->input('allow_download',array('type'=>'checkbox','class'=>'checkbox')) ."</div>";
+							echo "<div class='col-md-3'><br />" . $this->Form->input('allow_print',array('type'=>'checkbox','class'=>'checkbox')) ."</div>";
+							?>
+							<div class="col-md-12">
+								<div class="panel panel-body panel-default">
+									<strong>Note:</strong>
+									<ul class="list">										
+										<li>Draft: When document is in Draft mode, editors will see this document on their dashbord for co-authring.</li>
+										<li>Archived: Use this option if you are adding an already archived document.</li>
+										<li>Allow Download will allow users to download uncontrolled copy of the document from the ONLYOFFICE Editors dorectly.</li>
+									</ul>
 								</div>
 							</div>
-							<?php 		echo "<div class='row'>";
-							echo "<div class='col-md-12'>".$this->Form->input('document_status',array('default'=>0,'type'=>'radio', 'class'=>'','options'=>$customArray['documentStatuses'])) . '</div>';
+							<?php
 							echo "<div class='hide'>".$this->Form->hidden('template_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
 
 							echo "<div class='hide'>".$this->Form->hidden('user_session_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
@@ -340,7 +335,7 @@
 							echo "<div class='hide'>".$this->Form->hidden('old_cr_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
 							echo "<div class='hide'>".$this->Form->hidden('parent_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
 							// echo "<div class='col-md-4'>".$this->Form->hidden('parent_document_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
-							echo "<div class='col-md-12'>".$this->Form->input('linked_document_ids',array('label'=>'Linked Documents', 'name'=>'data[QcDocument][linked_document_id][]','class'=>'form-control','multiple','options'=>$parentQcDocuments)) . '</div>'; 
+							// echo "<div class='col-md-12'>".$this->Form->input('linked_document_ids',array('label'=>'Linked Documents', 'name'=>'data[QcDocument][linked_document_id][]','class'=>'form-control','multiple','options'=>$parentQcDocuments)) . '</div>'; 
 							
 							
 							?>

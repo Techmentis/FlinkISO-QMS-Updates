@@ -19,7 +19,7 @@
 				}
 			},
 			submitHandler: function(form) {
-				$(form).ajaxSubmit({
+				$("#CustomTriggerAddForm").ajaxSubmit({
 					url: "<?php echo Router::url('/', true); ?>custom_triggers/add/<?php echo $this->request->params['pass'][0];?>",
 					type: 'POST',
 					target: '#customTriggers_ajax',
@@ -38,8 +38,6 @@
 				});
 			}
 		});
-		
-		
 		$().ready(function() {
 
 			$(".admin").on('change',function(){
@@ -229,7 +227,9 @@
 								<div class="" id="triggertask">
 									<ul>
 										<li><a href="#op1">Option 1</a></li>
-										<li><a href="#op2">Option 2</a></li>
+										<?php if($fieldNames != null){ ?>
+											<li><a href="#op2">Option 2</a></li>
+										<?php } ?>
 										<li></li>
 									</ul>
 									<div id="op1">
@@ -239,16 +239,17 @@
 											echo "<div class='col-md-12'>".$this->Form->input('action',array('class'=>'','type'=>'radio', 'default'=>0, 'options'=>$actions)) . '</div>';?>										
 										</div>
 									</div>
+									<?php if($fieldNames != null){ ?>
 									<div id="op2">
 										<div class="row">
-											<?php 
+											<?php
 											echo "<div class='col-md-6'>".$this->Form->input('field_name',array('class'=>'form-control',)) . '</div>'; 
 											echo "<div class='col-md-6' id='get_data'>".$this->Form->input('changed_field_value',array('class'=>'form-control','options'=>array())) . '</div>';
 											?>
 											<div class="col-md-12"><p><br />Select field name and field value for which you would like to send email.</p></div>
 										</div>
-
 									</div>
+									<?php } ?>
 								</div>	
 							</div>
 							<div class="col-md-12"><h4>Send Email To</h4></div>

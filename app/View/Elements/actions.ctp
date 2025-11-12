@@ -8,13 +8,13 @@
 .pdf-btn{padding: 3px 20px}
 .pdf-btn a{color: #777777 !important;}*/
 </style>
-<div class="btn-group btn-no-border" >
+<div class="btn-group btn-no-border" style="padding-top:0px" >
 
 	<?php $controller = $this->request->controller;?>
 	<?php if($this->request->params['named']['parent_record_id']){
-		echo $this->Html->link('<i class="fa fa-file-o"></i>',array('controller'=>$controller, 'action'=>'view',$postVal,'qc_document_id'=>$qc_document_id,'process_id'=>$process_id,'custom_table_id'=>$custom_table_id,'timestamp'=>date('ymdhis')),array('target'=>'_blank','escape'=>false,'class'=>'tooltip1 btn btn-sm btn-default','data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View File'));
+		echo $this->Html->link('<i class="fa fa-file-o"></i>',array('controller'=>$controller, 'action'=>'view',$postVal,'qc_document_id'=>$qc_document_id,'process_id'=>$process_id,'custom_table_id'=>$custom_table_id, 'compare' => 'yes','timestamp'=>date('ymdhis')),array('target'=>'_blank','escape'=>false,'class'=>'tooltip1 btn btn-sm btn-default','data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View File'));
 	}else{
-		echo $this->Html->link('<i class="fa fa-television"></i>',array('controller'=>$controller, 'action'=>'view',$postVal,'qc_document_id'=>$qc_document_id,'process_id'=>$process_id,'custom_table_id'=>$custom_table_id,'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View','timestamp'=>date('ymdhis')));
+		echo $this->Html->link('<i class="fa fa-television"></i>',array('controller'=>$controller, 'action'=>'view',$postVal,'qc_document_id'=>$qc_document_id,'process_id'=>$process_id,'custom_table_id'=>$custom_table_id,'compare' => 'yes','timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View','timestamp'=>date('ymdhis')));
 	}
 	
 	?>

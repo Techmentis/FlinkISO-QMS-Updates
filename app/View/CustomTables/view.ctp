@@ -1,3 +1,5 @@
+<?php echo $this->Html->script(array('jquery.validate.min', 'jquery-form.min')); ?>
+<?php echo $this->fetch('script'); ?>
 <?php
 if( isset($doc_not_found) && $doc_not_found == true){
 	echo "<div class='alert alert-danger'><i class='fa fa-warning'></i> Document not found for this table</div>";
@@ -37,6 +39,9 @@ echo $this->fetch('script');
 	.no-margin-bottom{
 		padding: 15px 15px 0 15px;
 	}
+	.error, .error .chosen-container{
+			border: 1px dotted red;
+		}
 </style>
 <?php echo $this->Session->flash();?>
 <div class="row">
@@ -178,32 +183,8 @@ echo $this->fetch('script');
 							<tr><th>Version</th><td><?php echo $customTable['CustomTable']['table_version']?></td></tr>
 							<tr><th>Description</th><td><?php echo $customTable['CustomTable']['description']?></td></tr>
 							<tr><th>Status</th><td><?php echo $customTable['CustomTable']['table_locked']? 'Unlocked':'Locked';?></td></tr>
-							<tr><th>Schedule</th><td><?php echo $schedules[$customTable['QcDocument']['schedule_id']];?></td></tr>
-							<tr><td colspan="2"><strong>Shared With</strong></td></tr>
-							<tr><th>Departments</th><td>
-								<?php
-								if($process){
-									$users = json_decode($customTable['Process']['process_owners']);
-								}
-								foreach($users as $user){
-									echo $departments[$user].', ';
-								}
-								?>
-							</td></tr>
-							<tr><th>Branches</th><td>
-								<?php 
-								if($process){
-									$branchess = json_decode($customTable['Process']['applicable_to_branches']);
-								}
-								foreach($branchess as $branch){						
-									echo $branches[$branch].', ';
-								}
-								?>
-							</td></tr>
-							<tr><th>Users</th><td></td></tr>
-							<tr>
-								<th>Class</th><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']);?> (_tbl/ _div)</td>
-							</tr>								
+							<tr><th>Schedule</th><td><?php echo $schedules[$customTable['QcDocument']['schedule_id']];?></td></tr>							
+							<tr><th>Class</th><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']);?> (_tbl/ _div)</td></tr>								
 						</table>
 
 						<div class="table-body-div">
@@ -247,12 +228,6 @@ echo $this->fetch('script');
 								<tr><td>created</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('created');?></td><td></td></tr>
 								<tr><td>modified</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('modified');?></td><td></td></tr>
 								<tr><td>publish</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('publish');?></td><td></td></tr>
-								<tr><th colspan="2">Custom Fields</th></tr>
-								<tr>
-									<th>Field Name</th>
-									<th>Field Id</th>
-									<th>Linked To</th>
-								</tr>
 							</table>
 							<br /><br />
 						</div>
@@ -473,68 +448,147 @@ echo $this->fetch('script');
 		if($customTable['CustomTable']['approvers'])$approvers = json_decode($customTable['CustomTable']['approvers'],true);
 		else $approvers = json_decode($qcDocument['QcDocument']['editors'],true);
 		?>
-		<?php echo $this->Form->create('CustomTable',array('action'=>'updateaccess/'.$customTable['CustomTable']['id']),array('id'=>'updateaccess'));?>
-		<div class="row">
-			<div class="col-md-12">
+		
+		<?php if($this->Session->read('User.is_mr') == true){ ?>
+		<?php echo $this->Form->create('CustomTable',array('url'=>'updatedataentry/'.$customTable['CustomTable']['qc_document_id'].'/'.$customTable['CustomTable']['id'],'id'=>'updatedataentry','class'=>'form','role' => 'form', ),array('class' => 'form'));?>
+		<div class='row'>
+			<div class='col-md-12'>
+				
 				<div class="box box-default">
-					<div class="box-header">
-						<h4 class="box-title">Table Permissions</h4>
+					<div class="box-header with-border">
+						<i class="fa fa-database"></i>
+						<h3 class="box-title">Data Entry</h3>
 					</div>
 					<div class="box-body">
 						<div class="row">
-							<div class="col-md-12">
-								<table class="table table-bordered">
-									<tr>
-										<th>Creators</th>
-										<th>Viewers</th>
-										<th>Editors</th>
-										<th>Approvers</th>
-									</tr>
-									<tr>
-										<tr>
-											<td><?php echo $this->Form->input('creators',array(
-												'label'=>false,
-												'multiple'=>true, 
-												'options'=>$users,
-												'default'=>$creators,												
-											));?>												
-										</td>
-											<td><?php echo $this->Form->input('viewers',array(
-												'label'=>false,
-												'multiple'=>true, 
-												'options'=>$users,
-												'default'=>$viewers,
-											));?>							
-										</td>
-										<td><?php echo $this->Form->input('editors',array(
-												'label'=>false,
-												'multiple'=>true, 
-												'options'=>$users,
-												'default'=>$editors,
-											));?>												
-										</td>
-										<td><?php echo $this->Form->input('approvers',array(
-												'label'=>false,
-												'multiple'=>true, 
-												'options'=>$users,
-												'default'=>$approvers,												
-											));?>												
-										</td>
-									</tr>
-								</tr>
-								<tr>
-									<td>Create, View, Edit, Delete</td>
-									<td>View Only</td>
-									<td>View, Edit</td>
-									<td>View, Edit, Approve</td>
-								</tr>
-							</table>
-						</div>							
+							<?php 
+							
+							// echo "<div class='col-md-6'><br /><div class='nomargin-checkbox'><label>Do you want this document to be shared with users for scheduled data enrty? If yes, click YES below. You must define schedule & data type.</label>".$this->Form->input('add_records',array('type'=>'checkbox','label'=>'Yes')) . '</div></div>'; 
+							echo "<div class='col-md-2'>".$this->Form->input('QcDocument.schedule_id',array(
+								'required'=>'required',
+								'default'=>$customTable['QcDocument']['schedule_id'])) . '</div>'; 
+							
+							echo "<div class='col-md-5'>".$this->Form->input('QcDocument.data_type',array('required'=>'required', 'options'=>$customArray['dataTypes'],
+								'default'=>$customTable['QcDocument']['data_type'])) . '</div>'; 
+							
+							echo "<div class='col-md-5'>".$this->Form->input('QcDocument.data_update_type',array('required'=>'required','options'=>$customArray['dataUpdateTypes'],'default'=>$customTable['QcDocument']['data_update_type'])) . '</div>';
+						?>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-	<?php echo $this->Form->submit('Update Access',array('class'=>'btn btn-sm btn-success','id'=>'updateaccessbutton'));
-	echo $this->Form->end();?>
+		<?php echo $this->Form->submit('Update Dataentry',array('class'=>'btn btn-sm btn-success','id'=>'updatedataentrybutton'));
+		echo $this->Form->end();?>
+
+<script>
+	$.validator.setDefaults({
+    	ignore: null,
+    	errorPlacement: function(error, element) {    		
+			if(element['context']['className'] == 'form-control select error'){
+				$(element).next('.chosen-container').addClass('error');
+			}else if(element['context']['className'] == 'radio error'){
+				$(element).next('legend').addClass('error');
+			}else{
+				$(element).after(error); 
+			}
+		}
+    });
+
+    $("#updatedataentry").validate({
+    	"data[QcDocument][schedule_id]": {
+			greaterThanZero: true,
+		},
+		"data[QcDocument][data_type]": {
+			greaterThanZero: true,
+		},
+		"data[QcDocument][data_update_type]": {
+			greaterThanZero: true,
+		}
+    });
+
+	$().ready(function(){	
+		$('select').chosen();
+		$("#updatedataentrybutton").click(function(){			
+            if($('#updatedataentry').valid()){
+               // $("#submit_id").prop("disabled",true);
+               // $("#submit-indicator").show();
+               $('#updatedataentry').submit();
+           }else{
+           	console.log('sas');
+           }
+
+       });
+	});
+</script>		
+
+
+		<?php } ?>
+
+		<?php if($this->Session->read('User.is_mr') == true){ ?>
+		<?php echo $this->Form->create('CustomTable',array('url'=>'updateaccess/'.$customTable['CustomTable']['id'],'id'=>'updateaccess'),array());?>
+			<div class="row">
+				<div class="col-md-12">
+					<div class="box box-default">
+						<div class="box-header">
+							<h4 class="box-title">Table Permissions</h4>
+						</div>
+						<div class="box-body">
+							<div class="row">
+								<div class="col-md-12">
+									<table class="table table-bordered">
+										<tr>
+											<th>Creators</th>
+											<th>Viewers</th>
+											<th>Editors</th>
+											<th>Approvers</th>
+										</tr>
+										<tr>
+											<tr>
+												<td><?php echo $this->Form->input('creators',array(
+													'label'=>false,
+													'multiple'=>true, 
+													'options'=>$users,
+													'default'=>$creators,
+												));?>												
+											</td>
+												<td><?php echo $this->Form->input('viewers',array(
+													'label'=>false,
+													'multiple'=>true, 
+													'options'=>$users,
+													'default'=>$viewers,
+												));?>							
+											</td>
+											<td><?php echo $this->Form->input('editors',array(
+													'label'=>false,
+													'multiple'=>true, 
+													'options'=>$users,
+													'default'=>$editors,
+												));?>												
+											</td>
+											<td><?php echo $this->Form->input('approvers',array(
+													'label'=>false,
+													'multiple'=>true, 
+													'options'=>$users,
+													'default'=>$approvers,												
+												));?>												
+											</td>
+										</tr>
+									</tr>
+									<tr>
+										<td>Create, View, Edit, Delete</td>
+										<td>View Only</td>
+										<td>View, Edit</td>
+										<td>View, Edit, Approve</td>
+									</tr>
+								</table>
+							</div>							
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<?php echo $this->Form->submit('Update Access',array('class'=>'btn btn-sm btn-success','id'=>'updateaccessbutton'));
+		echo $this->Form->end();?>
+		<?php } ?>
 </div>

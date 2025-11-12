@@ -1,6 +1,6 @@
 <?php 
 if($action == 'view' || $action == 'mini_view'){
-    $mode = 'view';    
+    $mode = 'view';
 }
 ?>
 <div id="ofcon<?php echo $filekey;?>">
@@ -13,16 +13,13 @@ if($action == 'view' || $action == 'mini_view'){
         <?php } ?>
     </style>
     <?php
-    if(!$filekey)$filekey = $fileData['File']['new_file_key'];                
+    if(!$filekey)$filekey = $fileData['File']['new_file_key'];
     $placeholderid = $filekey;
     $checkdatetime = date('Y-m-d H:i:s',strtotime("-10 seconds"));
     $currentdatetime = date('Y-m-d H:i:s');
     if($last_modified)$last_modified = date('Y-m-d H:i:s',strtotime($last_modified));
 
-    if(
-        ($last_saved == null || date('Y-m-d H:i:s',strtotime($last_modified)) < $checkdatetime) 
-        // && ($last_modified != $currentdatetime )
-    ){
+    if(($last_saved == null || date('Y-m-d H:i:s',strtotime($last_modified)) < $checkdatetime)){
 
     // DRAFT MODE : if user is admin preparer , approvers , Hod or anyone else with whom the document is shared can edit the document in draft mode
     // if document is Published, then only admin & prepare can adit the document
@@ -99,46 +96,41 @@ if($filetype != null){
             <h3 class="box-title"><i class="fa <?php echo $icon;?>"></i>&nbsp;&nbsp;<?php echo $heading;?>&nbsp;&nbsp;<small>Your document is ready, click here to load the document.</small></h3>
             <div class="box-tools pull-right">
               <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus" id="ofccontainerbtn<?php echo $placeholderid;?>"></i></button>
-          </div>            
-      </div>          
+          </div>
+      </div>      
       <div class="box-body no-padding">
         <script type="text/javascript" src="<?php echo Configure::read('OnlyofficePath');?>"></script>
         <style type="text/css">
             .onlyofficediv{width: 100%;height: 924px;display: block;float: left;}
         </style>
-        <?php                 
+        <?php
         if($version_keys)$versionHistory = json_decode($version_keys,true);
         $currentVersion = $versionHistory['serverVersion'];
         if(!$versions)$versions = '{}';
         else{
             $previous = json_decode($versions,true);
-            $previous = $previous[count($previous)-1];                    
-        }        
-        ?>
+            $previous = $previous[count($previous)-1];
+        }    ?>
         <?php
-
         // add reload document script as a function for each IF.
         $comarray = array('qc_documents','custom_tables','processes','pdf_templates');
-        if($this->request->controller == 'custom_tables' && $this->action == 'view'){            
+        if($this->request->controller == 'custom_tables' && $this->action == 'view'){
             echo "<div class='data_type_notification'>Loading file in view mode.</div>";
             $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/custom_tables'. '/' . $record_id . '/' . $file;
             $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/custom_tables'. '/' . $record_id . '/' . 'diff.zip';
-            $callbackUrl = Router::url('/',true) ."custom_tables/save_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller ;
-            
-        }else if($this->request->controller == 'custom_tables' && $this->action == 'recreate'){ 
+            $callbackUrl = Router::url('/',true) ."custom_tables/save_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller ;            
+        }else if($this->request->controller == 'custom_tables' && $this->action == 'recreate'){
             echo "<div class='data_type_notification'>Loading Custom Table File.</div>";
             $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/custom_tables'. '/' . $record_id . '/' . $file;
             $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/custom_tables'. '/' . $record_id . '/' . 'diff.zip';
-            $callbackUrl = Router::url('/',true) ."custom_tables/save_custom_table_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller ;
-            
+            $callbackUrl = Router::url('/',true) ."custom_tables/save_custom_table_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller ;            
         }else if($this->request->controller == 'templates' && $this->action == 'edit'){
             echo "<div class='data_type_notification'>Loading Template file.</div>";
             $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/templates'. '/' . $record_id . '/' . $file;
             $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/templates'. '/' . $record_id . '/' . 'diff.zip';
-            $callbackUrl = Router::url('/',true) ."templates/save_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller ;
-            
+            $callbackUrl = Router::url('/',true) ."templates/save_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller ;            
         }else if(!in_array($this->request->controller, $comarray) && ($this->action == 'add' || $this->action == 'edit' || $this->action == 'view') && $document['QcDocument']['data_type'] != 1)
-        {      
+        {
             if($this->action == 'edit' || $this->action == 'add'){
                 if(!$mode)$mode = 'edit';
                 echo "<div class='data_type_notification'>Document setting is Document/Both. Loding document in Edit mode.</div>";
@@ -153,36 +145,24 @@ if($filetype != null){
 
             $callbackUrl = Router::url('/',true) ."custom_tables/save_rec_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller;
         }else if(!in_array($this->request->controller, $comarray) && ($this->action == 'add' || $this->action == 'edit' || $this->action == 'view') && $document['QcDocument']['data_type'] == 1)
-        {   
-
-            echo "<div class='data_type_notification'>Document setting is Data. Loding document in View mode.</div>";
-            
+        {
+            echo "<div class='data_type_notification'>Document setting is Data. Loding document in View mode.</div>";            
             $mode = 'view';
-            // section for custom forms                    
+            // section for custom forms
             $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'custom_tables'. '/' . $fileEdit['File']['id'] . '/' . $fileEdit['File']['name'].'.'.$fileEdit['File']['file_type'];
             $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'custom_tables'. '/' . $fileEdit['File']['id'] . '/' . 'diff.zip';
-
             $callbackUrl = Router::url('/',true) ."custom_tables/save_rec_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller;
-            
-
         }else if(isset($fileData)){  
-
             $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') .'/'. $fileData['File']['controller'].'/'.$fileData['File']['user_id'] . '/'.$fileData['File']['record_id'].'/'.$fileData['File']['qc_document_id'] .'/'.$fileData['File']['name'].'.'.$fileData['File']['file_type'];
-
             $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') .'/'. $fileData['File']['controller'].'/'.$fileData['File']['user_id'] . '/'.$fileData['File']['record_id'].'/'.$fileData['File']['qc_document_id'] .'/'.'diff.zip';
-            
             $callbackUrl = Router::url('/',true) .$this->request->controller. '/' ."save_custom_docs/file_id:". $fileData['File']['id'];
             $filekey = $fileData['File']['new_file_key'];
-            $filetype = $fileData['File']['file_type'];                
-
-        }else if($controller == 'files'){  
-
+            $filetype = $fileData['File']['file_type'];
+        }else if($controller == 'files'){
             $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'files'. '/' . $fileEdit['File']['id'] . '/' . $fileEdit['File']['name'].'.'.$fileEdit['File']['file_type'];
             $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'files'. '/' . $fileEdit['File']['id'] . '/' . 'diff.zip';
-
             $callbackUrl = Router::url('/',true) ."custom_tables/save_rec_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller;
-
-        }else if($this->request->controller == 'pdf_templates'){  
+        }else if($this->request->controller == 'pdf_templates'){
             if($cover == true){
                 $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'pdf_template'. '/cover/template.docx';
                 $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'pdf_template/cover/diff.zip';
@@ -190,18 +170,15 @@ if($filetype != null){
             }else{
                 $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'pdf_template'. '/' . $record_id . '/template.docx';
                 $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'pdf_template'. '/' . $record_id . '/' . 'diff.zip';
-
                 $callbackUrl = Router::url('/',true) ."pdf_templates/save_template/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller;
-            }            
+            }
         }else{    
             $url = Configure::read('url') . '/' . $path . '/' .$file;
-            $historyurl = Configure::read('url') . '/' . $path . '/' .'diff.zip';                        
+            $historyurl = Configure::read('url') . '/' . $path . '/' .'diff.zip';
             if($this->request->controller == 'qc_documents')
                 $callbackUrl = Router::url('/',true) ."qc_documents/save_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller ;
-
             else if($this->request->controller == 'custom_tables')
                 $callbackUrl = Router::url('/',true) ."custom_tables/save_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller ;
-
             else if ($this->request->controller == 'processes')
                 $callbackUrl = Router::url('/',true) ."processes/save_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller ;
             
@@ -213,6 +190,18 @@ if($filetype != null){
         }
 
         $callbackUrl .= '/user:'.$this->Session->read('User.id');
+
+        if($this->request->data['QcDocument']['allow_download'] == true){
+            $allow_download = true;
+        }else{
+            $allow_download = false;
+        }
+
+        if($document['QcDocument']['allow_print'] == true){
+            $allow_print = true;
+        }else{
+            $allow_print = false;
+        }
 
         $file = $file;
                     $mode = $mode; // : sent from form
@@ -226,7 +215,7 @@ if($filetype != null){
                     }
 
                     if($mode == 'edit'){
-
+                        
                         $fileuriUser = $url;
                         $onAppReady = 'onAppReady';
 
@@ -239,13 +228,13 @@ if($filetype != null){
                                         "commentGroups"=>["edit"=>[$this->Session->read('User.company_name')],"remove"=>[$this->Session->read('User.company_name')],"view"=>[$this->Session->read('User.company_name')]],
                                         "copy"=>true,
                                         "deleteCommentAuthorOnly"=>false,
-                                        "download"=>true,
+                                        "download"=>$allow_download,
                                         "edit"=>true,
                                         "editCommentAuthorOnly"=>false,
                                         "fillForms"=>true,
                                         "modifyContentControl"=>true,
                                         "modifyFilter"=>true,
-                                        "print"=>true,
+                                        "print"=>$allow_print,
                                         "review"=>true,
                                         "reviewGroups"=>[$this->Session->read('User.company_name')]                                    
                                 ],
@@ -276,14 +265,13 @@ if($filetype != null){
                         $token =$this->requestAction($aurl);
                         $config['token'] = $token;                        
                         ?>
-                        <?php 
+                        <?php
                         $version_keys = array();
                         $versionHistories = json_decode($versions,true);
                         foreach($versionHistories as $versionHistory){
                             unset($versionHistory['changes']);
                             $finalHistory[] = $versionHistory;
                             // $version_keys[] = $versionHistory;
-
                         }
                         $versionHistories = json_encode($versionHistories['changes']);
                         ?>
@@ -295,22 +283,17 @@ if($filetype != null){
                                     var url = event.data.url;
                                 };
                                 var docEditor;
-                                var onDocumentStateChange = function (event) {        
+                                var onDocumentStateChange = function (event) {
                                     var title = document.title.replace(/\*$/g, "");
                                     document.title = title + (event.data ? "*" : "");
                                 };
 
-                                var onDownloadAs = function () {            
+                                var onDownloadAs = function () {
                                     return false;
                                 }
                                 
-                                var connectEditor = function () {                                    
+                                var connectEditor = function () {
                                     var config = <?php echo json_encode($config) ?>;
-                                    console.log(config);
-                                    // config.width = "100%";
-                                    // config.height = "100%";
-                                    // config.events = {
-                                    // };                
                                     docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);                                    
                                 };
 
@@ -321,7 +304,7 @@ if($filetype != null){
                                         window.scrollTo(0, -1);
                                         wrapEl[0].style.height = window.innerHeight + "px";
                                     }
-                                };                                 
+                                };
 
                                 $("#ofdcontainer<?php echo $placeholderid;?>").on('click',function(){
                                     if($('#ofdcontainer<?php echo $placeholderid;?>').hasClass('collapsed-box') == true){
@@ -341,12 +324,12 @@ if($filetype != null){
                         </script>
                         <div class="">
                             <div class="split col-md-12 no-margin no-padding">
-                                <div class="onlyofficediv">    
+                                <div class="onlyofficediv">
                                     <div id="placeholder_<?php echo $filekey;?>"></div>
                                 </div>
                             </div>
                             <div class="load_version_document col-md-6 hide no-margin  no-padding">
-                                <div class="onlyofficediv" id="load_version_document_<?php echo $filekey;?>">    
+                                <div class="onlyofficediv" id="load_version_document_<?php echo $filekey;?>">
                                     <div id="placeholder_<?php echo $filekey;?>"></div>
                                 </div>
                             </div>
@@ -356,15 +339,14 @@ if($filetype != null){
                                 <?php if(!empty($finalHistory)){ ?>
                                     <div class="col-md-12" style="padding-top:10px">
                                         <p style="padding-left:10px; padding-top:10px; margin-top:10px; border-top:1px solid #ccc;">
-                                            <strong>Note:</strong> Previous document versions are available. You can either view previous document version side-by-side or at the bottom on the current document. To toggle the view, click toggle button below.                                            
+                                            <strong>Note:</strong> Previous document versions are available. You can either view previous document version side-by-side or at the bottom on the current document. To toggle the view, click toggle button below.
                                         </p>
                                     </div>
                                 <?php } ?>
                                 <div class="col-md-11"  style="padding-top:20px">
                                     <?php if(!empty($finalHistory)){ ?>
-
-                                        <div class="btn-group" role="group">     
-                                            <?php  
+                                        <div class="btn-group" role="group">
+                                            <?php
                                             if(isset($this->request->params['named']['compare']) && $this->request->params['named']['compare'] == 'yes'){
                                                 echo $this->Html->link(
                                                     '<i class="fa fa-toggle-on fa-lg"></i>',
@@ -379,7 +361,6 @@ if($filetype != null){
                                                         'escape'=>false,
                                                         'onClick'=>'document.location.reload();'
                                                     ));
-
                                             }else{
                                                 echo $this->Html->link(
                                                     '<i class="fa fa-toggle-off fa-lg"></i>',
@@ -394,9 +375,9 @@ if($filetype != null){
                                                         'escape'=>false,
                                                         'onClick'=>'document.location.reload();'
                                                     ));
-                                            }                                            
-                                            ?>                                          
-                                            <?php                                             
+                                            }
+                                            ?>
+                                            <?php
                                             $i = 0;
                                             foreach($finalHistory as $version_key){
                                                 if($version_key['key'] != $filekey){
@@ -416,11 +397,11 @@ if($filetype != null){
                                                             \'prev.'.$filetype.'\',
                                                             \''.$version_key['version'].'\',
                                                             \''.$version_key['user']['name'].'\',
-                                                            \''.$version_key['created'].'\'                                                            
+                                                            \''.$version_key['created'].'\'
                                                         )'
                                                     ));
                                                     $i++;
-                                                }                            
+                                                }
                                             }
                                             echo $this->Html->link(
                                                 '<div class="">'.($i).'</div>',
@@ -429,33 +410,48 @@ if($filetype != null){
                                                     'class'=>'btn btn-info btn-sm',
                                                     'escape'=>false,
                                                     'onClick'=>'document.location.reload();'
-                                                ));                                           
-                                                ?>                                                
+                                                ));
+                                                ?>
                                             </div>
-
-                                            
-
-                                        <?php } ?>  
+                                        <?php } ?>
                                     </div>
-                                    <div class="col-md-1 text-right" style="padding-top:20px">                                        
-                                        <?php echo $this->Html->link('<i class="fa fa-trash-o fa-lg"></i>',
+                                    <div class="col-md-1 text-right" style="padding-top:20px">
+                                        <?php
+                                        if(!isset($this->request->params['named']['custom_table_id'])){
+                                            echo $this->Html->link('<i class="fa fa-trash-o fa-lg"></i>',
                                             array(
                                                 'action'=> 'delete_document',
                                                 'url'=>base64_encode($url)
                                             ),
                                             array(
                                                 'data-original-title'=>'Delete this document?',
-                                                'class'=>'btn text-danger tooltip1', 
+                                                'class'=>'btn text-danger tooltip1',
                                                 'escape'=>false,
                                                 'data-toggle'=>'tooltip',
                                                 'data-trigger'=>'hover',
                                                 'data-placement'=>'bottom',
-                                            ));?>                                            
-                                        </div>                                    
+                                            ));
+                                        }
+                                        ?>
+                                        </div>
                                     </div>
-                                </div>   
-                            <?php } else {  ?>                                
-                                <?php                            
+                                </div>
+<!-- View section -->
+                            <?php } else {  ?>
+                                <?php
+
+                                if($qcDocument['QcDocument']['allow_download'] == true){
+                                    $allow_download = true;
+                                }else{
+                                    $allow_download = false;
+                                }
+
+                                if($qcDocument['QcDocument']['allow_print'] == true){
+                                    $allow_print = true;
+                                }else{
+                                    $allow_print = false;
+                                }                                
+
                                 $fileuriUser = $url;
                                 $fileuriUser = $url;
                             $onAppReady = 'onAppReady';                            
@@ -468,13 +464,13 @@ if($filetype != null){
                                         "commentGroups"=>["edit"=>[$this->Session->read('User.company_name')],"remove"=>[$this->Session->read('User.company_name')],"view"=>[$this->Session->read('User.company_name')]],
                                         "copy"=>true,
                                         "deleteCommentAuthorOnly"=>false,
-                                        "download"=>true,
+                                        "download"=>$allow_download,
                                         "edit"=>true,
                                         "editCommentAuthorOnly"=>false,
                                         "fillForms"=>true,
                                         "modifyContentControl"=>true,
                                         "modifyFilter"=>true,
-                                        "print"=>true,
+                                        "print"=>$allow_print,
                                         "review"=>true,
                                         "reviewGroups"=>[$this->Session->read('User.company_name')]                                    
                                 ],
@@ -505,28 +501,24 @@ if($filetype != null){
                             $token =$this->requestAction($aurl);
                             $config['token'] = $token; 
                                 ?>
-                                <?php 
+                                <?php
                                 $version_keys = array();
                                 $versionHistories = json_decode($versions,true);
                                 foreach($versionHistories as $versionHistory){
                                     unset($versionHistory['changes']);
                                     $finalHistory[] = $versionHistory;
-                                // $version_keys[] = $versionHistory;
-
+                                    // $version_keys[] = $versionHistory;
                                 }
                                 $versionHistories = json_encode($versionHistories['changes']);
                                 ?>
-
-                                <script type="text/javascript">                
-
-                                    $().ready(function(){                
-                                        var docEditor;
+                                <script type="text/javascript">
+                                    $().ready(function(){
+                                        var docEditor;             
                                         var сonnectEditor = function () {
                                             var config = <?php echo json_encode($config) ?>;
-                                            console.log(config);
                                             config.width = "100%";
                                             config.height = "100%";
-                                            docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);                                        
+                                            docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);
                                         };
                                         var fixSize = function () {
                                             var wrapEl = document.getElementsByClassName("form");
@@ -535,25 +527,8 @@ if($filetype != null){
                                                 window.scrollTo(0, -1);
                                                 wrapEl[0].style.height = window.innerHeight + "px";
                                             }
-                                        };                                        
-                                        <?php if($this->action == 'view' && $this->request->controller != 'custom_tables'){ ?>
-                                            $("#ofdcontainer<?php echo $placeholderid;?>").removeClass("collapsed-box");
-                                            if (window.addEventListener) {
-                                                сonnectEditor();
-                                            } else if (window.attachEvent) {
-                                                сonnectEditor();
-                                            }
-                                            $("#ofdcontainer<?php echo $placeholderid;?>").on('click',function(){
-                                            if($('#ofdcontainer<?php echo $placeholderid;?>').hasClass('collapsed-box') == true){
-                                                $("#ofccontainerbtn<?php echo $placeholderid;?>").removeClass('fa-plus');
-                                                $("#ofccontainerbtn<?php echo $placeholderid;?>").addClass('fa-minus');                                                
-                                            }else{
-                                                $("#ofccontainerbtn<?php echo $placeholderid;?>").removeClass('fa-minus');
-                                                $("#ofccontainerbtn<?php echo $placeholderid;?>").addClass('fa-plus');
-                                            }
-                                        });
-                                        <?php }else{ ?>
-                                            $("#ofdcontainer<?php echo $placeholderid;?>").on('click',function(){
+                                        };
+                                        $("#ofdcontainer<?php echo $placeholderid;?>").on('click',function(){
                                             if($('#ofdcontainer<?php echo $placeholderid;?>').hasClass('collapsed-box') == true){
                                                 $("#ofccontainerbtn<?php echo $placeholderid;?>").removeClass('fa-plus');
                                                 $("#ofccontainerbtn<?php echo $placeholderid;?>").addClass('fa-minus');
@@ -567,10 +542,7 @@ if($filetype != null){
                                                 $("#ofccontainerbtn<?php echo $placeholderid;?>").addClass('fa-plus');
                                             }
                                         });
-                                        <?php } ?>
-                                        
-                                    });            
-
+                                    });
                                 </script>
                                 <div class="">
                                     <div class="split col-md-12 no-margin  no-padding">
@@ -579,7 +551,7 @@ if($filetype != null){
                                         </div>
                                     </div>
                                     <div class="load_version_document col-md-6 hide no-margin  no-padding">
-                                        <div class="onlyofficediv" id="load_version_document_<?php echo $filekey;?>">    
+                                        <div class="onlyofficediv" id="load_version_document_<?php echo $filekey;?>">
                                             <div id="placeholder_<?php echo $filekey;?>"></div>
                                         </div>
                                     </div>
@@ -588,8 +560,8 @@ if($filetype != null){
                                     <div class="row">
                                         <div class="col-md-11"  style="padding-top:20px">
                                             <?php if(!empty($finalHistory)){ ?>
-                                                <div class="btn-group" role="group">     
-                                                    <?php  
+                                                <div class="btn-group" role="group">
+                                                    <?php
                                                     if(isset($this->request->params['named']['compare']) && $this->request->params['named']['compare'] == 'yes'){
                                                         echo $this->Html->link(
                                                             '<i class="fa fa-toggle-on fa-lg"></i>',
@@ -604,7 +576,6 @@ if($filetype != null){
                                                                 'escape'=>false,
                                                                 'onClick'=>'document.location.reload();'
                                                             ));
-
                                                     }else{
                                                         echo $this->Html->link(
                                                             '<i class="fa fa-toggle-off fa-lg"></i>',
@@ -619,9 +590,9 @@ if($filetype != null){
                                                                 'escape'=>false,
                                                                 'onClick'=>'document.location.reload();'
                                                             ));
-                                                    }                                            
-                                                    ?>                                          
-                                                    <?php                                             
+                                                    }
+                                                    ?>
+                                                    <?php
                                                     $i = 0;
                                                     foreach($finalHistory as $version_key){
                                                         if($version_key['key'] != $filekey){
@@ -631,7 +602,10 @@ if($filetype != null){
                                                                 array(
                                                                     'id'=>'icon_'.$version_key['key'],
                                                                     'escape'=>false,
-                                                                    'class'=>'vlables btn btn-default btn-sm',
+                                                                    'class'=>'vlables btn btn-default btn-sm tooltip1',
+                                                                    'data-toggle'=>'tooltip',
+                                                                    'data-trigger'=>'hover',
+                                                                    'data-original-title'=>'Updated by: '. $version_key['user']['name'].' on: '. $version_key['created'],
                                                                     'onClick'=>'loaddocumentversions(
                                                                     \''.base64_encode($version_key['user']['url']).'\',
                                                                     '.$version_key['key'].',
@@ -641,11 +615,11 @@ if($filetype != null){
                                                                     \'prev.'.$filetype.'\',
                                                                     \''.$version_key['version'].'\',
                                                                     \''.$version_key['user']['name'].'\',
-                                                                    \''.$version_key['created'].'\'                                                            
+                                                                    \''.$version_key['created'].'\'
                                                                 )'
                                                             ));
                                                             $i++;
-                                                        }                            
+                                                        }
                                                     }
                                                     echo $this->Html->link(
                                                         '<div class="">'.($i).'</div>',
@@ -654,13 +628,14 @@ if($filetype != null){
                                                             'class'=>'btn btn-info btn-sm',
                                                             'escape'=>false,
                                                             'onClick'=>'document.location.reload();'
-                                                        ));                                           
-                                                        ?>                                                
+                                                        ));?>
                                                     </div>
-                                                <?php } ?>  
+                                                <?php } ?>
                                             </div>
-                                            <div class="col-md-1 text-right" style="padding-top:20px">                                            
-                                                <?php echo $this->Html->link('<i class="fa fa-trash-o fa-lg"></i>',
+                                            <div class="col-md-1 text-right" style="padding-top:20px">
+                                                <?php
+                                                if(!isset($this->request->params['named']['custom_table_id'])){
+                                                echo $this->Html->link('<i class="fa fa-trash-o fa-lg"></i>',
                                                     array(
                                                         'action'=> 'delete_document',
                                                         'url'=>base64_encode($url)
@@ -672,7 +647,8 @@ if($filetype != null){
                                                         'data-toggle'=>'tooltip',
                                                         'data-trigger'=>'hover',
                                                         'data-placement'=>'bottom',
-                                                    ));?>  
+                                                    ));
+                                                }?>  
                                                 </div>
                                             </div>
                                         </div>
@@ -681,7 +657,6 @@ if($filetype != null){
                             </div>
                         </div>
                     <?php }else{ ?>
-
                         <style type="text/css">
                             .info-box-number{font-size: 14px !important; font-weight: 400;}
                             .info-box-text{font-weight: 600;}
@@ -690,12 +665,12 @@ if($filetype != null){
                         </style>
                         <script type="text/javascript">
                             function addfiletype(filetype){
-                                $("#QcDocumentFileType").val(filetype); 
+                                $("#QcDocumentFileType").val(filetype);
                                 $("#filetypediv").hide();
                             }
 
                             $().ready(function(){
-                                $("#QcDocumentFile").on('change',function(){            
+                                $("#QcDocumentFile").on('change',function(){
                                     let pathext = this.value;
                                     const pathfile = pathext.split(".");
                                     const arr = pathfile.length;
@@ -728,39 +703,38 @@ if($filetype != null){
                               });
                             })
                         </script>
-                        <div class="box collapsed-box">          
+                        <div class="box collapsed-box">
                           <div class="box-header with-border">
                             <h3 class="box-title text-danger">Document</h3>
-
                             <div class="box-tools pull-right">
                               <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
                               </button>
-                          </div>            
-                      </div>          
+                          </div>
+                      </div>
                       <div class="box-body">
-                        <?php 
+                        <?php
                         if(($this->request->controller == 'qc_documents' || $this->request->controller == 'processes') && $this->action == 'edit'){ ?>
                             <div class="row">
-                                <div class="col-md-12"><p class="text-danger">System could not load the document. Uplaod Document from View page.</p></div>                
+                                <div class="col-md-12"><p class="text-danger">System could not load the document. Uplaod Document from View page.</p></div>
                             </div>
                         <?php }else{ ?>
                             <p class="text-danger">System could not load the document.</p>
                         <?php } ?>
-                    </div>          
+                    </div>
                 </div>
-            <?php } 
+            <?php }
         }else{ ?>
             <div class="row">
                 <div class="col-md-12">
                     <div class="box box-warning collapsed-box" id="ofdcontainer<?php echo $placeholderid;?>">
                       <div class="box-header with-border data-header" data-widget="collapse">
                         <h3 class="box-title"><i class="fa fa-clock-o"></i>&nbsp;&nbsp;Document&nbsp;&nbsp;<small> Last Updated : <?php echo date('Y-m-d H:i:s',strtotime($last_modified))?>. We are updating your document. Please wait...</small></h3>
-                        <div class="box-tools pull-right">                    
+                        <div class="box-tools pull-right">
                             <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus" id="ofccontainerbtn<?php echo $placeholderid;?>"></i></button>
                             <i class="fa fa-refresh" id="ofcrefresh<?php echo $placeholderid;?>"></i>
-                        </div>            
-                    </div>          
-                    <div class="box-body">                
+                        </div>
+                    </div>
+                    <div class="box-body">
                         <p>This document is recently updated. Please allow 1-3 mins for changes to reflect.</p>
                     </div>
                 </div>
@@ -783,7 +757,6 @@ if($filetype != null){
                 })
             });
         <?php } ?>
-
 
         function loaddocumentversions(url,key,version_key,fileType,documentType,file,version,user,created,id){
 
@@ -817,7 +790,7 @@ if($filetype != null){
 
                 $(".vlables").removeClass('btn-warning').addClass('btn-default');
                 $("#icon_"+version_key).removeClass('btn-default').addClass('btn-warning');
-            // $(".split").removeClass('col-md-12').addClass('col-md-6');
+                // $(".split").removeClass('col-md-12').addClass('col-md-6');
                 $.ajax({
                     type: "POST",
                     data : {
@@ -841,8 +814,7 @@ if($filetype != null){
                     $("#load_version_document_<?php echo $filekey;?>").html(data); 
                 },
             });
-
-            <?php } ?>        
-        }      
+            <?php } ?>
+        }
     </script>
 </div>

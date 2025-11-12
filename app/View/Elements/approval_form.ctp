@@ -1,3 +1,11 @@
+<?php 
+	$disabledPublish = false;
+	if($customTable){
+		if(is_array(json_decode($customTable['CustomTable']['approvers'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['approvers'],true))){
+			$disabledPublish = true;
+		}			
+	}
+?>
 <script type="text/javascript">
 	$(document).ready(function() {
 		$('select').chosen( { width: '100%' } );
@@ -113,11 +121,11 @@ if($this->Session->read('User.is_publisher') == 0){
 		</div>	
 		
 	</div>
-	<div class="box-footer">
+	<div class="box-footer">		
 		<?php if($this->action == 'view'){
 			echo "<div class='row'>";
 			// if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1){
-			if($this->Session->read('User.is_publisher') == 1){
+			if($this->Session->read('User.is_publisher') == 1 && $disabledPublish == false){
 				echo "<div class='col-md-12 approval_checkbox_div'>" . $this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox'))."</div>";
 				$pubshow = true;
 			}else{
@@ -127,7 +135,7 @@ if($this->Session->read('User.is_publisher') == 0){
 			echo "<div class='col-md-12'><br />" . $this->Form->submit('Submit',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Submit','class'=>'btn btn-md btn-success')) . "</div>";
 			echo "</div>";
 			echo $this->Form->end();
-		}else{
+		}else{			
 			if($this->request->data[Inflector::classify($this->request->controller)]['prepared_by']){
 				$prepared_by = $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'];
 				$dis = '\'readonly\' => \'readonly\'';
@@ -137,8 +145,8 @@ if($this->Session->read('User.is_publisher') == 0){
 			} 
 			
 			echo "<div class='row'>";
-			// if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1){
-			if($this->Session->read('User.is_publisher') == 1){
+			
+			if($disabledPublish == false){
 				// if($this->Session->read('User.is_approver') == 1){
 				echo "<div class='col-md-2 approval_checkbox_div'><br />".$this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox','onClick'=>'addapp();'))."</div>";
 				$pubshow = true;
@@ -146,9 +154,7 @@ if($this->Session->read('User.is_publisher') == 0){
 				echo "<div class='col-md-5'>".$this->Form->input('Approval.'.$approvalModel.'.approved_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovedBy','options'=>$approvedByList, 'class'=>'form-control select'))."</div>";
 			}else{
 				echo "<div class='col-md-12 hide'>".$this->Form->input('Approval.'.$approvalModel.'.prepared_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'PreparedBy','selected'=>$prepared_by, 'readonly'=>'readonly' , 'class'=>'form-control select'))."</div>";			
-				echo "<div class='col-md-12 text-warning'><strong>Note:</strong> You are not an Approver, you must send this record for approval and approvers will publish the record after varification. Record will not reflect in any reports or dropsowns unless its approved and published.</div>";
-				
-					// echo "<div class='col-md-6'>".$this->Form->input('approved_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovedBy','options'=>$approversList,'class'=>'form-control select'))."</div>";
+				echo "<div class='col-md-12 text-warning'><strong>Note:</strong> You are not an Approver, you must send this record for approval and approvers will publish the record after varification. Record will not reflect in any reports or dropsowns unless its approved and published.</div>";				
 			}			
 			
 			echo "</div>";
@@ -159,7 +165,7 @@ if($this->Session->read('User.is_publisher') == 0){
 	
 <?php }else{
 	// if(($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1) && $pubshow != 1){
-	if($this->Session->read('User.is_publisher') == 1  && $pubshow != 1){		
+	if($this->Session->read('User.is_publisher') == 1  && $pubshow != 1){
 		echo $this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox'));
 	}
 } ?>	

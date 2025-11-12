@@ -151,11 +151,12 @@
 						<?php } ?>
 					</table>
 				</div>
+				<?php if($result['radio']){ ?>
 				<div class="row">
 					<div class="CustomTableTasks form col-md-12">
 						<?php echo $this->Form->create('CustomTableTask', array('controller'=>'custom_table_tasks','action'=>'add'), array('role'=>'form','class'=>'form')); ?>
 						<div class="row">
-							<?php					
+							<?php
 							echo "<div class='col-md-6 hide'>" . $this->Form->hidden('custom_table_id',array('default'=>$this->request->params['pass'][0], 'class'=>'form-control')) . "</div>";
 							echo "<div class='col-md-6'>" . $this->Form->input('employee_field',array('required'=>'required', 'options'=>$result['emp'], 'class'=>'form-control')) . "</div>";
 							echo "<div class='col-md-6'>" . $this->Form->input('condition_field',array('required'=>'required', 'options'=>$result['radio'], 'class'=>'form-control')) . "</div>";						
@@ -190,7 +191,7 @@
 							</script>									
 						</div>
 					</div>			
-					
+				<?php } ?>
 				</div>
 				<div class="box-footer"><strong>Note: </strong>When you add task for employee, basis on the condition set by you, emplyee will automatically receive an email when those conditions are met. Task will also be displayed on employees dashboard for action. There is no need to add additional email triggers for such conditions.</div>
 			</div>

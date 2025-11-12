@@ -13,6 +13,7 @@ class ApprovalCommentsController extends AppController {
      * @var array
      */
     public $components = array('Paginator');
+    
     public function approval_comments($approval_id = null) {
 
         $this->layout = 'ajax';
@@ -28,19 +29,7 @@ class ApprovalCommentsController extends AppController {
             $approval = $this->ApprovalComment->Approval->find('first', array('conditions' => array('Approval.id' => $this->request->params['named']['approval_id'])));
             $this->set('approval', $approval);
         }
-        $approversLists = $this->ApprovalComment->User->find('list', array(
-            'conditions' => array(
-                'OR'=>array(
-                    'User.is_approver' => 1, 
-                    'User.is_mr'=>1, 
-                    'User.is_view_all'=>1,  
-                    'User.id !=' => $creator, 
-                    'User.id !=' => $this->Session->read('User.id')
-                )
-            )
-        )
-    );
-
+        $approversLists = $this->_get_approver_list();        
         $approversLists[$approval['Approval']['from']] = $approval['From']['name'];
         $this->set('approversLists', $approversLists);
     }
@@ -51,11 +40,14 @@ class ApprovalCommentsController extends AppController {
         $approval_id = $this->request->data['approval_id'];
         $approval_status = $this->request->data['approval_status'];
         
+        if($to == -1 || $id == -1 || $approval_id == -1){
+            echo "Data missing.";
+            exit;
+        }
+
         if($approval_status == 1){
             // close approval
-
             $approval = $this->ApprovalComment->Approval->find('first',array('recursive'=>-1,'conditions'=>array('Approval.id'=>$approval_id)));
-
             if($approval){
                 $approval['Approval']['status'] = $approval['Approval']['approval_status'] = 1;
                 $approval['Approval']['approver_comments'] = $response;
@@ -114,10 +106,10 @@ class ApprovalCommentsController extends AppController {
                     $approvalComment['ApprovalComment']['comments'] = $response;
                     $approvalComment['ApprovalComment']['response_status'] = 0;                    
                     $this->ApprovalComment->create();
-                    if ($this->ApprovalComment->save($approvalComment['ApprovalComment'])) {
+                    if ($this->ApprovalComment->save($approvalComment['ApprovalComment'],false)) {
                         $this->_sent_approval_email($to,0,$response,$model);
                     } else {
-                        echo "Add failed";
+                        echo "Add failed.";
                     }
                 }
             } else {
@@ -131,16 +123,15 @@ class ApprovalCommentsController extends AppController {
                         $approvalComment['ApprovalComment']['response_status'] = 0;
                         $approvalComment['ApprovalComment']['comments'] = $response;
                         $this->ApprovalComment->create();
-                        if ($this->ApprovalComment->save($approvalComment['ApprovalComment'])) {
+                        if ($this->ApprovalComment->save($approvalComment['ApprovalComment'],false)) {
                             $this->_sent_approval_email($to,0,$response,$model);
                         } else {
-                            echo "Add failed";
+                            echo "Add failed..";
                         }
                     }
                 }
             }
         }
-        
     }
 
 

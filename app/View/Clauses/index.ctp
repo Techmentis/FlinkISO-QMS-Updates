@@ -17,7 +17,7 @@
 			<table cellpadding="0" cellspacing="0" class="table table-hover">
 				<tr>					
 					<th><?php echo $this->Paginator->sort('title'); ?></th>
-					<th><?php echo $this->Paginator->sort('standard'); ?></th>
+					<!-- <th><?php echo $this->Paginator->sort('standard'); ?></th> -->
 					<th><?php echo $this->Paginator->sort('standard_id'); ?></th>
 					<th><?php echo $this->Paginator->sort('clause'); ?></th>
 					<th><?php echo $this->Paginator->sort('sub-clause'); ?></th>
@@ -30,7 +30,7 @@
 					<?php foreach ($clauses as $clause): ?>
 						<tr class="on_page_src" onclick="addrec('<?php echo $clause['Clause']['id'];?>')" id="<?php echo $clause['Clause']['id'];?>_tr">
 							<td><?php echo h($clause['Clause']['title']); ?>&nbsp;</td>
-							<td><?php echo h($clause['Standard']['name']); ?>&nbsp;</td>
+							<!-- <td><?php echo h($clause['Standard']['name']); ?>&nbsp;</td> -->
 							<td><?php echo $this->Html->link($clause['Standard']['name'], array('controller' => 'standards', 'action' => 'view', $clause['Standard']['id'])); ?></td>
 							<td><?php echo h($clause['Clause']['clause']); ?>&nbsp;</td>
 							<td><?php echo h($clause['Clause']['sub-clause']); ?>&nbsp;</td>		

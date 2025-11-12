@@ -114,7 +114,7 @@ public $belongsTo = array(
 		'className' => 'QcDocument',
 		'foreignKey' => 'qc_document_id',
 		'conditions' => '',
-		'fields' => array('id', 'name', 'title','document_number','revision_number','file_type','departments','branches','user_id','schedule_id','publish','parent_document_id'),
+		'fields' => array('id', 'name', 'title','document_number','revision_number','file_type','departments','branches','user_id','schedule_id', 'data_type','data_update_type', 'publish','parent_document_id'),
 		'order' => ''
 	),'Process' => array(
 		'className' => 'Process',
@@ -258,9 +258,11 @@ public $customArray = array(
 		6=>'datetime',
 		7=>'file'
 
-	),
-
-	'displayTypes' => array(
+	),'dataUpdateTypes'=>array(
+		0=>'Any user should update a single document for a defined schedule',
+		1=>'Every user should update a saperate document for a defined schedule',
+		2=>'Multiple users should update a single document for a defined schedule',
+	),'displayTypes' => array(
 		0=>'text',
 		1=>'radio',
 		2=>'checkbox',
@@ -276,9 +278,9 @@ public $customArray = array(
 		1=>'Process',
 	),
 	'dataTypes'=>array(
-		0=>'Data',
-		1=>'Document',
-		2=>'Both',	
+		1=>'Data : Opens document in view mode as reference.',
+		0=>'Document : Opens document\'s copy in edit mode. Users can update document copy along with the data in table.',
+		// 2=>'Both',	
 	)
 );
 

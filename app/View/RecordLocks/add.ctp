@@ -1,3 +1,4 @@
+<?php if($lockRecordField){?>
 <div id="loadlocks">
 	<?php echo $this->Html->script(array('jquery.validate.min', 'jquery-form.min')); ?>
 	<?php echo $this->fetch('script'); ?>
@@ -118,17 +119,17 @@
 													contentType: "application/json; charset=utf-8",
 													data: JSON.stringify({ id: '<?php echo $recordLock['RecordLock']['id'];?>'}),
 													beforeSend: function( xhr ) {
-									    // $("#<?php echo $postVal;?>-user i").removeClass('fa-user').addClass('fa-refresh fa-spin');
-									    // $("#<?php echo $postVal;?>-user").next().find('.tooltip-inner').html('Adding');
-									    // $("#<?php echo $postVal;?>-user").tooltip().attr({'data-toggle':'tooltip', 'data-original-title':'Adding','data-placement':'left','data-trigger':'hover'}).tooltip('show');
-									    // $("#<?php echo $recordLock['RecordLock']['id'];?>-tr").remove();
+													    // $("#<?php echo $postVal;?>-user i").removeClass('fa-user').addClass('fa-refresh fa-spin');
+													    // $("#<?php echo $postVal;?>-user").next().find('.tooltip-inner').html('Adding');
+													    // $("#<?php echo $postVal;?>-user").tooltip().attr({'data-toggle':'tooltip', 'data-original-title':'Adding','data-placement':'left','data-trigger':'hover'}).tooltip('show');
+													    // $("#<?php echo $recordLock['RecordLock']['id'];?>-tr").remove();
 													},					
 													success: function (result) {
 														$("#<?php echo $recordLock['RecordLock']['id'];?>-tr").remove();
-										// $("#<?php echo $postVal;?>-user").removeClass('btn-danger').addClass('btn-success');
-										// $("#<?php echo $postVal;?>-user i").removeClass('fa-refresh fa-spin').addClass('fa-check');
-										// $("#<?php echo $postVal;?>-user").next().find('.tooltip-inner').html('User added');
-										// $("#<?php echo $postVal;?>-user").tooltip().attr({'data-toggle':'tooltip', 'data-original-title':'User added','data-placement':'left','data-trigger':'hover'}).tooltip('show');
+															// $("#<?php echo $postVal;?>-user").removeClass('btn-danger').addClass('btn-success');
+															// $("#<?php echo $postVal;?>-user i").removeClass('fa-refresh fa-spin').addClass('fa-check');
+															// $("#<?php echo $postVal;?>-user").next().find('.tooltip-inner').html('User added');
+															// $("#<?php echo $postVal;?>-user").tooltip().attr({'data-toggle':'tooltip', 'data-original-title':'User added','data-placement':'left','data-trigger':'hover'}).tooltip('show');
 													},
 													error: function (err) {
 														
@@ -150,8 +151,7 @@
 						<?php echo $this->Form->create('RecordLock', array('controller'=>'record_locks','action'=>'add'), array('role'=>'form','class'=>'form')); ?>
 						<div class="row">
 							<?php
-							$linkedToTables[Inflector::classify($customTable['Table']['table_name'])] = Inflector::classify($customTable['Table']['table_name']);
-							
+							$linkedToTables[Inflector::classify($customTable['Table']['table_name'])] = Inflector::classify($customTable['Table']['table_name']);							
 							echo "<div class='col-md-6 hide'>" . $this->Form->hidden('table_id',array('default'=>$this->request->params['pass'][0], 'class'=>'form-control')) . "</div>";
 							echo "<div class='col-md-12'>" . $this->Form->input('lock_table_id',array('required'=>'required', 'options'=>$linkedToTables, 'class'=>'form-control')) . "</div>";
 							echo "<div class='col-md-4'>" . $this->Form->input('table_field',array('required'=>'required', 'class'=>'form-control','options'=>$lockRecordField)) . "</div>";
@@ -191,4 +191,4 @@
 				<div class="panel-footer">At certiain point you may want to disable a record which is dependent on current record you are adding. E.g, if you are adding Document Change Request, you may restrict the Document for which you are adding the chage request for. In such scenario, you can use this option. Select which table you want to lock and the add the condition. Once you add and save these details, a linked record for that table will be locked for editing.</div>
 			</div>
 		</div>
-		
+<?php } ?>		

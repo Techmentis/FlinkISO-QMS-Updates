@@ -85,6 +85,7 @@ if($this->action == 'view' || $this->action == 'user_access') {
             'qc_document_id'=>$this->request->params['named']['qc_document_id'],
             'custom_table_id'=>$this->request->params['named']['custom_table_id'],
             'process_id' => $this->request->params['named']['process_id'],
+            'compare' => 'yes',
             'timestamp'=>date('ymdhis')
         ),
         array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
@@ -114,6 +115,7 @@ if($this->action == 'edit' || $this->action == 'recreate' || $this->action == 'r
         'qc_document_id'=>$this->request->params['named']['qc_document_id'],
         'custom_table_id'=>$this->request->params['named']['custom_table_id'],
         'process_id' => $this->request->params['named']['process_id'],
+        'compare' => 'yes',
         'timestamp'=>date('ymdhis')
     ),
     array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,

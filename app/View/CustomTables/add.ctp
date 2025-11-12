@@ -168,6 +168,34 @@
 					</div>
 				</div>
 			</div>
+			<div class='row'>
+			<div class='col-md-12'>
+				
+				<div class="box box-default">
+					<div class="box-header with-border">
+						<i class="fa fa-database"></i>
+						<h3 class="box-title">Data Entry</h3>
+					</div>
+					<div class="box-body">
+						<div class="row">
+							<?php 
+							
+							// echo "<div class='col-md-6'><br /><div class='nomargin-checkbox'><label>Do you want this document to be shared with users for scheduled data enrty? If yes, click YES below. You must define schedule & data type.</label>".$this->Form->input('add_records',array('type'=>'checkbox','label'=>'Yes')) . '</div></div>'; 
+							echo "<div class='col-md-2'>".$this->Form->input('QcDocument.schedule_id',array(
+								'required'=>'required',
+								)) . '</div>'; 
+							
+							echo "<div class='col-md-5'>".$this->Form->input('QcDocument.data_type',array('required'=>'required', 
+								'options'=>$customArray['dataTypes'],)) . '</div>'; 
+							
+							echo "<div class='col-md-5'>".$this->Form->input('QcDocument.data_update_type',array('required'=>'required',
+								'options'=>$customArray['dataUpdateTypes'],)) . '</div>';
+						?>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
 			<div class='row'>
 				<div class='col-md-12'>
@@ -338,11 +366,17 @@
 
 	
 	$.validator.setDefaults({
-		ignore: null,
-		errorPlacement: function(error, element) {
-			$(element).after(error);
-		},
-	});
+    	ignore: null,
+    	errorPlacement: function(error, element) {    		
+			if(element['context']['className'] == 'form-control select error'){
+				$(element).next('.chosen-container').addClass('error');
+			}else if(element['context']['className'] == 'radio error'){
+				$(element).next('legend').addClass('error');
+			}else{
+				$(element).after(error); 
+			}
+		}
+    });
 	
 	function open_master(){
 		$("#open_master_model").load("<?php echo Router::url('/', true); ?>custom_tables/create_master");
@@ -403,7 +437,10 @@
 						rules: {
 							"data[CustomTable][changed_field_value]": {
 								greaterThanZero: true,
-							}
+							},
+							"data[CustomTable][schedule_id]": {
+								greaterThanZero: true,
+							},							
 						}
 					});
 				},

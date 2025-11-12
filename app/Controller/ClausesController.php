@@ -202,9 +202,9 @@ class ClausesController extends AppController {
         10,10.2, Corrective Action,58511238-fba8-4db9-aad0-833fc20b8995;
         10,10.3,Continual Improvement,58511238-fba8-4db9-aad0-833fc20b8995;
         ";        
-        $data = split(';', ltrim(rtrim($str)));
+        $data = explode(';', ltrim(rtrim($str)));
         foreach ($data as $info) {
-            if ($info != ',') $cc = split(',', $info);
+            if ($info != ',') $cc = explode(',', $info);
             if ($cc[2]) {
                 $clause['Clause']['title'] = ltrim(rtrim($cc[2]));
                 $clause['Clause']['standard_id'] = ltrim(rtrim($cc[3]));
