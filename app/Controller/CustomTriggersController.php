@@ -53,6 +53,19 @@ class CustomTriggersController extends AppController
                 if ($f["linked_to"] == "Users") {
                     $notifyUsers[$f["field_name"]] = $f["field_name"];
                 }
+
+                if ($f["linked_to"] == "Branches") {
+                    $notifyBranches = true;
+                }
+
+                if ($f["linked_to"] == "Departments") {
+                    $notifyDepartments = true;
+                }
+
+                if ($f["linked_to"] == "Designations") {
+                    $notifyDesignations = true;
+                }
+
                 $notifyUsers["prepared_by"] = "prepared_by";
                 $notifyUsers["approved_by"] = "approved_by";
 
@@ -62,6 +75,9 @@ class CustomTriggersController extends AppController
                 $this->set("fieldNames", $fieldNames);
                 $this->set("fields", $fields);
                 $this->set("notifyUsers", $notifyUsers);
+                $this->set("notifyBranches", $notifyBranches);
+                $this->set("notifyDepartments", $notifyDepartments);
+                $this->set("notifyDesignations", $notifyDesignations);
             }
         }
         $this->set('departments',$this->_get_department_list());

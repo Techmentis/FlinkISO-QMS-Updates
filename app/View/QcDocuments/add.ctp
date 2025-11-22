@@ -310,8 +310,8 @@
 							unset($customArray['documentStatuses'][6]);
 							echo "<div class='row'>";
 							echo "<div class='col-md-8'>".$this->Form->input('document_status',array('default'=>0,'type'=>'radio', 'class'=>'','options'=>$customArray['documentStatuses'])) . '</div>';
-							echo "<div class='col-md-3'><br />" . $this->Form->input('allow_download',array('type'=>'checkbox','class'=>'checkbox')) ."</div>";
-							echo "<div class='col-md-3'><br />" . $this->Form->input('allow_print',array('type'=>'checkbox','class'=>'checkbox')) ."</div>";
+							echo "<div class='col-md-2'><br />" . $this->Form->input('allow_download',array('type'=>'checkbox','class'=>'checkbox')) ."</div>";
+							echo "<div class='col-md-2'><br />" . $this->Form->input('allow_print',array('type'=>'checkbox','class'=>'checkbox')) ."</div>";
 							?>
 							<div class="col-md-12">
 								<div class="panel panel-body panel-default">

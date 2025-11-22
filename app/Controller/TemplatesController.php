@@ -25,14 +25,13 @@ class TemplatesController extends AppController {
             $this->request->data['Template']['user_id'] = $this->Session->read('User.id');
             $this->request->data['Template']['custom_table_id'] = 'templates';
             $this->Template->create();
-
             //check duplicate
             $templ = $this->Template->find('count',array('conditions'=>array('Template.name'=>$this->request->data['Template']['name'])));
             if($templ > 0){
                 $this->Session->setFlash(__('Duplicate Name.'));
                 $this->redirect(array('action' => 'add'));
             }
-
+            
             $accessptedExtentions = array(
                 'application/msword',
                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -46,12 +45,23 @@ class TemplatesController extends AppController {
                 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
 
             );
-            
-            if($this->request->data['Template']['file']['type']){
+
+            if(is_uploaded_file($this->request->data['Template']['file']['tmp_name'])){
                 if(!in_array($this->request->data['Template']['file']['type'], $accessptedExtentions)){
                     $this->Session->setFlash(__('Incorrect File Type'));
                     $this->redirect(array('action' => 'add'));
                 }
+                $file_name = explode('.',$this->request->data['Template']['file']['name']);
+                $ext = $file_name[count($file_name)-1];
+                if($ext == 'doc' || $ext == 'docx' || $ext == 'txt' || $ext == 'odt')$this->request->data['Template']['file_type'] = 0;
+                if($ext == 'xlx' || $ext == 'xlsx')$this->request->data['Template']['file_type'] = 1;
+                if($ext == 'ppt' || $ext == 'pptx')$this->request->data['Template']['file_type'] = 2;
+
+                $this->request->data['Template']['file_type'] = $ext;
+            }else{
+                if($this->request->data['Template']['file_type'] == 0)$this->request->data['Template']['file_type'] = 'docx';
+                else if($this->request->data['Template']['file_type'] == 1)$this->request->data['Template']['file_type'] = 'xlsx';
+                else if($this->request->data['Template']['file_type'] == 2)$this->request->data['Template']['file_type'] = 'pptx';
             }
             
             if($this->Template->save($this->request->data)){
@@ -69,14 +79,20 @@ class TemplatesController extends AppController {
                     }
                 }
 
+                if(is_uploaded_file($this->request->data['Template']['file']['tmp_name'])){
+                    $file = Configure::read('path') . DS . $id . DS . $file_name;
+                    if (move_uploaded_file($this->request->data['Template']['file']['tmp_name'], $file)) {
 
-                $file = Configure::read('path') . DS . $id . DS . $file_name;
-                if (move_uploaded_file($this->request->data['Template']['file']['tmp_name'], $file)) {
-
+                    }else{
+                        $this->Session->setFlash(__('Unable to save file'));
+                        $this->redirect(array('action' => 'add'));
+                    }
                 }else{
-                    $this->Session->setFlash(__('Unable to save file'));
-                    $this->redirect(array('action' => 'add'));
+                    $this->_load_blank_file($this->request->data['Template']['file_type'],$this->request->data['Template']['name'],$this->Template->id);
+                    $this->Session->setFlash(__('Add template content'));
+                    $this->redirect(array('action' => 'edit',$this->Template->id));
                 }
+                
 
                 $this->Session->setFlash(__('Add template content'));
                 $this->redirect(array('action' => 'edit',$this->Template->id));

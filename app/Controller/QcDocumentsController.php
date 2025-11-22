@@ -28,7 +28,7 @@ class QcDocumentsController extends AppController {
                 'OR'=>array(
                     'QcDocument.branches LIKE' => '%'.$this->Session->read('User.branch_id').'%',
                     'QcDocument.departments LIKE' => '%'.$this->Session->read('User.department_id').'%',
-                    // 'QcDocument.designations LIKE' => '%'.$this->Session->read('User.designation_id').'%',
+                    'QcDocument.designations LIKE' => '%'.$this->Session->read('User.designation_id').'%',
                     'QcDocument.user_id LIKE' => '%'.$this->Session->read('User.id').'%',
                 )
             )
@@ -104,26 +104,45 @@ class QcDocumentsController extends AppController {
             'parent_id'=>'QcDocument.parent_document_id',
             'tables' => 'select count(*) from `custom_tables` where `custom_tables`.`qc_document_id` LIKE QcDocument.id', 
             'active_tables' => 'select count(*) from `custom_tables` where `custom_tables`.`publish` = 1 AND `custom_tables`.`table_locked` = 0 AND `custom_tables`.`qc_document_id` LIKE QcDocument.id',
-            'childDoc'=>'select count(*) from qc_documents where qc_documents.parent_document_id LIKE QcDocument.id');
+            'childDoc'=>'select count(*) from qc_documents where qc_documents.parent_document_id LIKE QcDocument.id',
+            'srct' => '
+                    CASE
+                        WHEN QcDocument.and_or_condition = true THEN                             
+                            (select count(*) from qc_documents WHERE 
+                                qc_documents.id = QcDocument.id AND
+                                    IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
+                                    IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
+                                    IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+                            )
+                        WHEN QcDocument.and_or_condition = false THEN 
+                            (select count(*) from qc_documents WHERE 
+                                qc_documents.id = QcDocument.id AND
+                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
+                                IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
+                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+                            )
+                        ELSE "Un"
+                    END
+            '
+        );
         
         $conditions = $this->_check_request();
         if($this->Session->read('User.is_mr') == false){
             $accessConditions = array(
-                'OR'=>array(
-                    'QcDocument.prepared_by'=>$this->Session->read('User.employee_id'),
-                    'QcDocument.branches LIKE' => '%'.$this->Session->read('User.branch_id').'%',
-                    'QcDocument.departments LIKE' => '%'.$this->Session->read('User.department_id').'%',
-                    // 'QcDocument.designations LIKE' => '%'.$this->Session->read('User.designation_id').'%',
-                    'QcDocument.user_id LIKE' => '%'.$this->Session->read('User.id').'%',
-                )
+                'QcDocument.archived !='=>1,
+                'QcDocument.parent_document_id '=>-1,
+                'QcDocument.srct >' => 0
             );
         }else{
-            $accessConditions = array();
+            $accessConditions = array(
+                'QcDocument.archived !='=>1,
+                'QcDocument.parent_document_id '=>-1,              
+            );
         }
 
         $this->paginate = array('all',
             'fields'=>array(
-                'QcDocument.name','QcDocument.title','QcDocument.document_number','QcDocument.revision_number', 'QcDocument.document_status','QcDocument.publish','QcDocument.parent_document_id','QcDocument.parent_id','QcDocument.prepared_by','QcDocument.approved_by','QcDocument.tables','QcDocument.active_tables','QcDocument.standard_id','QcDocument.file_type','QcDocument.parent_document_id','QcDocument.childDoc',
+                'QcDocument.id', 'QcDocument.name','QcDocument.title','QcDocument.document_number','QcDocument.revision_number', 'QcDocument.document_status','QcDocument.publish','QcDocument.parent_document_id','QcDocument.parent_id','QcDocument.prepared_by','QcDocument.approved_by','QcDocument.tables','QcDocument.active_tables','QcDocument.standard_id','QcDocument.file_type','QcDocument.parent_document_id','QcDocument.childDoc','QcDocument.srct','QcDocument.and_or_condition','QcDocument.branches','QcDocument.departments','QcDocument.designations',
                 'PreparedBy.id',
                 'PreparedBy.name',
                 'ApprovedBy.id',
@@ -131,16 +150,13 @@ class QcDocumentsController extends AppController {
                 'IssuedBy.id',
                 'IssuedBy.name',
                 'Standard.id',
-                'Standard.name'
+                'Standard.name',                
             ),
             'order' => array('QcDocument.intdocunumber' => 'ASC','QcDocument.title'=>'ASC'),
             'conditions' => array(
-                'QcDocument.archived !='=>1,
-                'QcDocument.parent_document_id '=>-1,
                 $accessConditions
             ));
         $this->QcDocument->recursive = 0;
-
         $this->set('qcDocuments', $this->paginate());
         $this->_get_count();
         $this->_commons($this->Session->read('User.id'));
@@ -1046,65 +1062,76 @@ class QcDocumentsController extends AppController {
 
     public function update_access(){
         $this->autoRender = false;
-        $qcDocument = $this->QcDocument->find('first',array(
-            'recursive'=>-1,
-            'conditions'=>array('QcDocument.id'=>$this->request->data['qc_document_id'])));
+        if ($this->request->is('post') || $this->request->is('put')) {
+            $qcDocuments = $this->QcDocument->find('all',array(
+                'recursive'=>-1,
+                'conditions'=>array(
+                    'OR'=>array(
+                        'QcDocument.id'=>$this->request->data['qc_document_id'],
+                        'QcDocument.parent_document_id'=>$this->request->data['qc_document_id']
+                        )                    
+                    )
+            ));
 
-        if($this->request->data['typ'] == 0){
-            $action = 'remove'.$this->request->data['action'];
-        }else{
-            $action = 'add'.$this->request->data['action'];
-        }
-        
-        if($qcDocument){
-            switch ($action) {
-                case 'addview' :
-                    $users = json_decode($qcDocument['QcDocument']['user_id'],true);
-                    $users[] = $this->request->data['user_id'];
-                    $qcDocument['QcDocument']['user_id'] = json_encode($users);
-                break;
-
-                case 'removeview' :
-                    $qcDocument['QcDocument']['user_id'] = str_replace($this->request->data['user_id'], '', $qcDocument['QcDocument']['user_id']);
-                    $users = json_decode($qcDocument['QcDocument']['user_id'],true);
-                    foreach($users as $user){
-                        if($user)$newView[] = $user;
-                    }
-                    $qcDocument['QcDocument']['user_id'] = json_encode($newView);
-                break;
-
-                case 'addedit' :
-                    $users = json_decode($qcDocument['QcDocument']['editors'],true);
-                    $users[] = $this->request->data['user_id'];
-                    $qcDocument['QcDocument']['editors'] = json_encode($users);
-                break;
-
-                case 'removeedit' :
-                    $qcDocument['QcDocument']['editors'] = str_replace($this->request->data['user_id'], '', $qcDocument['QcDocument']['editors']);
-                    $users = json_decode($qcDocument['QcDocument']['editors'],true);
-                    foreach($users as $user){
-                        if($user)$newEdit[] = $user;
-                    }
-                    $qcDocument['QcDocument']['editors'] = json_encode($newEdit);
-                break;
+            if($this->request->data['typ'] == 0){
+                $action = 'remove'.$this->request->data['action'];
+            }else{
+                $action = 'add'.$this->request->data['action'];
             }
-            $this->QcDocument->create();
-            if($this->QcDocument->save($qcDocument,false)){
+            
+            if($qcDocuments){
+                foreach($qcDocuments as $qcDocument){
+                    switch ($action) {
+                        case 'addview' :
+                            $users = json_decode($qcDocument['QcDocument']['user_id'],true);
+                            $users[] = $this->request->data['user_id'];
+                            $qcDocument['QcDocument']['user_id'] = json_encode($users);
+                        break;
 
-                // remove copy_acl_from
-                $this->loadModel('User');
-                $user = $this->User->find('first',array('recursive'=>-1,'conditions'=>array('User.id'=>$this->request->data['user_id'])));
-                if($user){
-                    $user['User']['copy_acl_from'] = NULL;
-                    $this->User->create();
-                    $this->User->save($user,false);
+                        case 'removeview' :
+                            $qcDocument['QcDocument']['user_id'] = str_replace($this->request->data['user_id'], '', $qcDocument['QcDocument']['user_id']);
+                            $users = json_decode($qcDocument['QcDocument']['user_id'],true);
+                            foreach($users as $user){
+                                if($user)$newView[] = $user;
+                            }
+                            $qcDocument['QcDocument']['user_id'] = json_encode($newView);
+                        break;
+
+                        case 'addedit' :
+                            $users = json_decode($qcDocument['QcDocument']['editors'],true);
+                            $users[] = $this->request->data['user_id'];
+                            $qcDocument['QcDocument']['editors'] = json_encode($users);
+                        break;
+
+                        case 'removeedit' :
+                            $qcDocument['QcDocument']['editors'] = str_replace($this->request->data['user_id'], '', $qcDocument['QcDocument']['editors']);
+                            $users = json_decode($qcDocument['QcDocument']['editors'],true);
+                            foreach($users as $user){
+                                if($user)$newEdit[] = $user;
+                            }
+                            $qcDocument['QcDocument']['editors'] = json_encode($newEdit);
+                        break;
+                    }
+                    
+                    $this->QcDocument->create();
+                    if($this->QcDocument->save($qcDocument,false)){
+                        // remove copy_acl_from
+                        $this->loadModel('User');
+                        $user = $this->User->find('first',array('recursive'=>-1,'conditions'=>array('User.id'=>$this->request->data['user_id'])));
+                        if($user){
+                            $user['User']['copy_acl_from'] = NULL;
+                            $this->User->create();
+                            $this->User->save($user,false);
+                        }
+                        // return true;
+                    }else{
+                        // return false;
+                    }
                 }
                 return true;
             }else{
                 return false;
             }
-        }else{
-            return false;
         }
 
         // if($qcDocument){

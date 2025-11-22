@@ -8,7 +8,7 @@
 				<div class="panel-body" id="update_div">
 				<?php
 				    try {
-				        $updates = Xml::build('http://www.flinkiso.com/flinkiso-updates/application-updates.xml', array(
+				        $updates = Xml::build('https://www.flinkiso.com/flinkiso-updates/application-updates.xml', array(
 				            'return' => 'simplexml'
 				        ));
 				        if ($updates) {

@@ -2308,7 +2308,10 @@ class CustomTablesController extends AppController {
         $schedules = $this->CustomTable->QcDocument->Schedule->find('list');
         $model = Inflector::classify($table_name);
         $scheduleCondition = array();
-        
+        $branchConditionModel = array();
+        $branchCondition = array();
+        $branchConditionModel = array();
+
         if(!$this->Session->read('User.is_mr')){
             if($this->Session->read('User.is_view_all') == false){
                 $branchCondition = array('OR'=>array('History.branchid'=>json_decode($this->Session->read('User.assigned_branches'),true)));
@@ -2357,7 +2360,6 @@ class CustomTablesController extends AppController {
                 $scheduleCondition = array('MONTH(History.created)' =>  date('W'),'YEAR(History.created)' =>  date('Y'));
                 $scheduleConditionModel = array('MONTH('.$model.'.created)' =>  date('W'),'YEAR('.$model.'.created)' =>  date('Y'));
             break;
-
             case 'Quarterly':
                 $scheduleCondition = array('QUARTER(History.created)' =>  ceil(date('m',time())/3),'YEAR(History.created)' =>  date('Y'));
                 $scheduleConditionModel = array('QUARTER('.$model.'.created)' =>  ceil(date('m',time())/3),'YEAR('.$model.'.created)' =>  date('Y'));

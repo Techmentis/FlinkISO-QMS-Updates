@@ -215,26 +215,6 @@
         ?>
     </ul>
 </div>
-<?php if($this->Session->read('User.is_mr') == true) { ?>
-    <div class="row">
-        <div class="col-md-12">
-            <h5>Admin</h5>
-            <p>Has access to entire sytem. Can create users/ assign access controls to users & can create Custom HTML Tables.</p>
-            <h5>View</h5>
-            <p>Non-admin users with View option can view records added by themselves. If "Is View All" selected from Edit page, they can also see records added by other users from their Branch. You can add additional branches for record viewing from Edit page.</p>
-            <h5>Creators</h5>
-            <p>These users can create documents.</p>
-            <h5>Approvers</h5>
-            <p>These users can approver documents & records.</p>
-            <h5>Publishers</h5>
-            <p>These users can publish documents & records.</p>
-            <h5>Block/ Release</h5>
-            <p>Admins can block users. Admins can also unlock users who are locked if they entire  wrong password multiple times.</p>
-            <h5>Copy Access From</h5>
-            <p>You can copy Document & Custom HTML Form acces from one user to another by selecting the user from <strong>Copy Access From </strong> dropdown. When you select the user form the dropdown, system will automatically add user access from that user to a current user. This will not change any settings like Admin/ View/ Creator/ Approver/ Publisher but the user will get the Document & Custom HTML Form access form the selected user.</p>
-        </div>
-    </div>
-<?php } ?>
 </div>
 <script>
     function reset_access(userid,str, id, field, t){        

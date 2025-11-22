@@ -2147,6 +2147,8 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			CURLOPT_MAXREDIRS => 10,
 			CURLOPT_TIMEOUT => 30,
 			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_SSL_VERIFYHOST => 0,
+          	CURLOPT_SSL_VERIFYPEER => 0,
 			CURLOPT_CUSTOMREQUEST => "POST",
 			CURLOPT_POSTFIELDS => "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"data\"\r\n\r\n".json_encode($postdata)."\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--",
 			CURLOPT_HTTPHEADER => array(
@@ -2178,6 +2180,8 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			CURLOPT_MAXREDIRS => 10,
 			CURLOPT_TIMEOUT => 30,
 			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_SSL_VERIFYHOST => 0,
+          	CURLOPT_SSL_VERIFYPEER => 0,
 			CURLOPT_CUSTOMREQUEST => "GET",
 			CURLOPT_HTTPHEADER => array( 
 			),
@@ -2760,12 +2764,15 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		// this idealy only should execute for edit
 		if($this->action == 'edit'){
 			$triggers = $this->CustomTrigger->find('all',array('recursive'=>-1, 'conditions'=>array(
-				'CustomTrigger.custom_table_id'=>$this->request->params['named']['custom_table_id'],
-				'CustomTrigger.field_name !='=> -1,
+				'CustomTrigger.custom_table_id'=>$this->request->params['named']['custom_table_id'],				
 			)));
+			
 			if($triggers){
 				// check for each field change and if there is a change, trigger email as per conditions
 				foreach($triggers as $trigger){
+					
+					
+			
 					if(
 						$this->request->data[$modelName][$trigger['CustomTrigger']['field_name']] != $existingRecord[$modelName][$trigger['CustomTrigger']['field_name']] && 
 						$trigger['CustomTrigger']['changed_field_value'] == $this->request->data[$modelName][$trigger['CustomTrigger']['field_name']]
@@ -2775,27 +2782,99 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 							$subject = $trigger['CustomTrigger']['name'];
 							$message = $trigger['CustomTrigger']['message'];
 							$this->_send_trigger_email($tos,$subject,$message);
+
+							$subject = $message = '';
+							$trigger = array();
+							// action based trigger 
+							$trigger = $this->CustomTrigger->find('first',array('recursive'=>-1, 'conditions'=>array(
+								'CustomTrigger.custom_table_id'=>$this->request->params['named']['custom_table_id'],
+								'CustomTrigger.action'=>$action,
+							)));
+							if($trigger){
+								$tos = $this->_get_tos($trigger);
+								if($tos){
+									$subject = $trigger['CustomTrigger']['name'];
+									$message = $trigger['CustomTrigger']['message'];
+									$this->_send_trigger_email($tos,$subject,$message);
+								}
+							}
+
+						}
+					}else{
+						if($trigger['CustomTrigger']['notify_departments'] == true){
+							debug($existingRecord[$modelName]);
+							debug($customTable);
+							if($existingRecord[$modelName]['custom_table_id']){
+								$customTable = $this->$modelName->CustomTable->find('first',array(
+									'conditions'=>array('CustomTable.id'=>$existingRecord[$modelName]['custom_table_id']),
+									'recursive'=>-1,
+									'fields'=>array('CustomTable.id','CustomTable.fields')));
+
+								if($customTable){
+									$fields = json_decode($customTable['CustomTable']['fields'],true);
+									foreach($fields as $field){
+										if($field['linked_to'] == 'Departments' && $field['display_type'] == 4){
+											$departments = json_decode($existingRecord[$modelName][$field['field_name']],true);											
+										}elseif($field['linked_to'] == 'Departments' && $field['display_type'] == 3){
+											$departments[] = $existingRecord[$modelName][$field['field_name']];
+										}
+										$this->_get_emails_by_bdd(0,$departments);
+										
+
+										if($field['linked_to'] == 'Branches' && $field['display_type'] == 4){
+											$branches = json_decode($existingRecord[$modelName][$field['field_name']],true);											
+										}elseif($field['linked_to'] == 'Departments' && $field['display_type'] == 3){
+											$branches[] = $existingRecord[$modelName][$field['field_name']];
+										}
+										$this->_get_emails_by_bdd(1,$branches);
+
+										if($field['linked_to'] == 'Designations' && $field['display_type'] == 4){
+											$desiganations = json_decode($existingRecord[$modelName][$field['field_name']],true);											
+										}elseif($field['linked_to'] == 'Departments' && $field['display_type'] == 3){
+											$desiganations[] = $existingRecord[$modelName][$field['field_name']];
+										}
+
+										$this->_get_emails_by_bdd(2,$desiganations);
+									}
+
+									$tos = $this->_get_tos($trigger);
+									if($tos){
+										$subject = $trigger['CustomTrigger']['name'];
+										$message = $trigger['CustomTrigger']['message'];
+										$this->_send_trigger_email(array_keys($tos),$subject,$message);
+									}
+								}
+							}							
 						}
 					}
 				}
 			}
-		}
-		$subject = $message = '';
-		$trigger = array();
-		// action based trigger 
-		$trigger = $this->CustomTrigger->find('first',array('recursive'=>-1, 'conditions'=>array(
-			'CustomTrigger.custom_table_id'=>$this->request->params['named']['custom_table_id'],
-			'CustomTrigger.action'=>$action,
-		)));
-		if($trigger){
-			$tos = $this->_get_tos($trigger);
-			if($tos){
-				$subject = $trigger['CustomTrigger']['name'];
-				$message = $trigger['CustomTrigger']['message'];
-				$this->_send_trigger_email($tos,$subject,$message);
-			}
-		}
+		}		
 	} 
+
+	public function _get_emails_by_bdd($type = null, $values = null){	
+		$this->loadModel('Employee');
+		if($type == 0){
+			$employees = $this->Employee->find('all',array('recursive'=>-1,'fields'=>array('Employee.id','Employee.name','Employee.office_email'),
+				'conditions'=>array('Employee.department_id'=>$values)));			
+		}
+
+		if($type == 1){
+			$employees = $this->Employee->find('all',array('recursive'=>-1,'fields'=>array('Employee.id','Employee.name','Employee.office_email'),
+				'conditions'=>array('Employee.branch_id'=>$values)));			
+		}
+
+		if($type == 2){
+			$employees = $this->Employee->find('all',array('recursive'=>-1,'fields'=>array('Employee.id','Employee.name','Employee.office_email'),
+				'conditions'=>array('Employee.desiganation_id'=>$values)));			
+		}
+		
+		foreach($employees as $employee){
+				if($employee)$tos[$employee['Employee']['office_email']] = $employee['Employee']['office_email'];	
+		}
+
+		return $tos;
+	}
 
 	public function _get_tos($trigger = null){
 		$this->loadModel('Employee');
@@ -2857,7 +2936,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		return $tos;
 	}
 
-	public function _send_trigger_email($tos = null,$subject = null, $message = null){
+	public function _send_trigger_email($tos = null,$subject = null, $message = null){		
 		try{
 			App::uses('CakeEmail', 'Network/Email');
 			$EmailConfig = new CakeEmail("fast");
@@ -2873,6 +2952,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$EmailConfig->emailFormat('html');
 			$EmailConfig->send();
 		} catch(Exception $e) {
+			CakeLog::write('debug',json_encode($e));
 		}
 	}
 

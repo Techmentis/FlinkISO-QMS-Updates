@@ -166,7 +166,11 @@
 						<div class="box box-default">
 							<div class="box-header with-border">
 								<i class="fa fa-share-alt"></i>
-								<h3 class="box-title">Document Sharing</h3>
+								<h3 class="box-title">Document Sharing  
+								</h3>
+									<br />
+									<p><?php echo $this->Form->input('and_or_condition',array('label'=>'Check for strict sharing','class'=>'checkbox'));?> </p>									
+									<small>If strict shareing is checked, only users beloging to selected Branches/ Departments/ Designations will be able to view the document. It not checked, then users belonging to either of any will be able to view the documents.</small>
 							</div>
 							<div class="box-body">
 								<div class="">
@@ -185,7 +189,7 @@
 									echo "<div class='col-md-10'>".$this->Form->input('share_with_designations',array('name'=>'data[QcDocument][share_with_designations][]','multiple', 'options'=>$designations, 'class'=>'form-control chosen','selected'=>json_decode($this->request->data['QcDocument']['designations']))) . '</div>'; 
 									echo "<div class='col-md-2'><br />".$this->Form->input('select_all_designations',array('type'=>'checkbox','class'=>'checkbox','onClick'=>'selectall("QcDocumentShareWithDesignations",this)'))."</div>";
 									echo "</div>";
-
+									
 									echo "<div class='row'>";
 									echo "<div class='col-md-10'>".$this->Form->input('user_id',array('name'=>'data[QcDocument][user_id][]','label'=>'Share with Users','multiple', 'options'=>$usernames, 'class'=>'form-control', 'style'=>'','selected'=>json_decode($this->request->data['QcDocument']['user_id'],true))) . '</div>'; 
 									echo "<div class='col-md-2'><br />".$this->Form->input('select_all_users',array('type'=>'checkbox','class'=>'checkbox','onClick'=>'selectall("QcDocumentUserId",this)'))."</div>";

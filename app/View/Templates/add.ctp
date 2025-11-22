@@ -13,8 +13,14 @@
 </style>
 <script type="text/javascript">
 	function addfiletype(filetype){
-		$("#TemplateFileType").val(filetype);	
-		// $("#filetypediv").hide();
+		if(filetype == 'doc' || filetype == 'docx' || filetype == 'odt' || filetype == 'txt'){
+			$("#TemplateFileType0").prop('checked',true);	
+		}else if(filetype == 'xls' || filetype == 'xlsx'){
+			$("#TemplateFileType1").prop('checked',true);
+		}else if (filetype == 'ppt' || filetype == 'pptx'){
+			alert('Only doc, docx, xls & xlsx formats are allowed');
+			$("#TemplateFileType2").prop('checked',true);
+		}		
 	}
 
 	$().ready(function(){
@@ -29,27 +35,17 @@
 			if($.inArray(ext,earr) > -1){
 				
 			}else{
-				alert('This file type is not allowed : ' + ext);
+				alert('This file type is not allowed : ' + ext + '\nAllowed file types are "doc","docx","xls","xlsx","pdf","ppt","odt","txt","pptx","pptm"');
 				location.reload(true);
 			}
 			let name = pathext.split('.' + ext);
-			console.log(name);
+			
 			let path = name[0];
 			const file = path.split("\\");			
 			const filename  = file[file.length - 1];
 
 			var str = filename;
-			
-			// if (!isNaN(str[0]) && !isNaN(str[str.length - 1])) {
-			// 	this.value = "";
-			// 	alert('File starting or ending with numbers is not allowed.');
-			// 	location.reload(true);
-			// } else {
-				
-			// }
 			$("#TemplateName").val(filename);
-			// $("#QcDocumentTitle").val(filename);
-			// add_title(filename);
 			addfiletype(ext);
 		});
 	})
@@ -80,15 +76,19 @@
 			<div class="row">		
 				<?php
 				$filesTypes = array('docx'=>'Document','xlsx'=>'Spreadsheet');
-				echo "<div class='col-md-6'><span class='control-fileupload' style='margin-top:28px'><i class='fa fa-file'></i>". $this->Form->input('file',array('class'=>$block_class ,  'type'=>'file', 'label'=>'Upload Document', 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));')) . "</div>";
-				echo "<div class='col-md-6'>".$this->Form->input('name',array('required'=>'required', 'label'=>'Template Name', 'class'=>'form-control',)) . '</div>';
-				echo "<div class='col-md-4 hide'>".$this->Form->hidden('file_type',array('required'=>'required','class'=>'',)) . '</div>';
+				echo "<div class='col-md-4'><span class='control-fileupload' style='margin-top:28px'><i class='fa fa-file'></i>". $this->Form->input('file',array('class'=>$block_class ,  'type'=>'file', 'label'=>'Upload Document', 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));')) . "</div>";
+				echo "<div class='col-md-4'>".$this->Form->input('name',array('required'=>'required', 'label'=>'Template Name', 'class'=>'form-control',)) . '</div>';
+				echo "<div class='col-md-4'>".$this->Form->input('file_type',array('required'=>'required','class'=>'', 'type'=>'radio', 'options'=>array(0=>'Document',1=>'Spreadsheet',2=>'Presentation'))) . '</div>';
 				echo "<div class='col-md-4'>".$this->Form->hidden('model',array('default'=>'Template',)) . '</div>';
 				echo "<div class='col-md-4'>".$this->Form->hidden('controller',array('default'=>'templates',)) . '</div>';
 				echo "<div class='col-md-4'>".$this->Form->hidden('record_id',array('default'=>'template',)) . '</div>';
 				?>
 				<div class="col-md-12" id="duplicate_name"></div>
-				<div class="col-md-12"><div class="show_comments"><i class="fa  fa-exclamation-triangle"></i>Add template name & file type and save the record, it will redirect you to the template creation page.</div></div>
+				<div class="col-md-12"><div class="show_comments">
+					<i class="fa hide fa-exclamation-triangle"></i>
+					<strong>Option-1: </strong>Add template name & file type and save the record, it will redirect you to the template creation page. You can then create a template from scratch and save it for future use. If you select Document, system will load blank document, if you select Spreadsheet, system will load blank spreadsheet. You can then add/ edit containt to the newly created document.<br />
+					<strong>Option-2: </strong>Upload exising template from your local machine (allowed file types: "doc","docx","xls","xlsx","pdf","ppt","odt","txt","pptx","pptm" and click submit. (Do not change File Type).<br />
+				</div></div>
 			</div>
 			<br />
 		</div>			

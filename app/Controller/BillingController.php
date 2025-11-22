@@ -119,8 +119,18 @@ class BillingController extends AppController {
             $errors = error_get_last();
             echo "<span class='text-danger'><strong>Failed error: ". json_encode($errors['message'].'</strong></span></br>');
 
-        } else {                                                
-            exec('unzip ' . WWW_ROOT . 'updates' . DS . 'update.zip -d ' . WWW_ROOT. 'updates');
+        } else {
+            try{
+                exec('unzip ' . WWW_ROOT . 'updates' . DS . 'update.zip -d ' . WWW_ROOT. 'updates');    
+            }catch(Exception $e){
+                
+            }
+            try{
+                exec('powershell -Command "Expand-Archive -Path '.$from.' -DestinationPath '.$to.'"');
+            }catch(Exception $e){
+                
+            }
+            
             exec('rm -rf ' . WWW_ROOT . 'updates' . DS . '__MACOSX');
             exec('rm -rf ' . WWW_ROOT . 'updates' . DS . 'update.zip');
 
@@ -131,13 +141,13 @@ class BillingController extends AppController {
     public function updating_sql(){
 
         echo "<span class='text-info'><h4>Downloading sql updates....</span></h4><hr /></br>";
-
-        if(!@copy('https://www.flinkiso.com/flinkiso-updates/updates.sql', WWW_ROOT. 'updates' . DS . 'update.sql'))
+        $copyfrom = WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'app' . DS . 'webroot' . DS. 'updates' . DS . 'updates.sql';
+        if(!file_exists($copyfrom))
         {
             $errors= error_get_last();
             $updatestr .= "<span class='text-danger'><strong>Sql failed error ". json_encode($errors['message'].'</strong></span></br>');
         } else {
-            $sql = fopen( WWW_ROOT. 'updates' . DS . 'update.sql', "r");
+            $sql = fopen($copyfrom, "r");
             $contents = stream_get_contents($sql);
             $contents = explode(PHP_EOL,$contents);
             foreach($contents as $sql){
@@ -153,28 +163,20 @@ class BillingController extends AppController {
        }    
    }
 
-   public function copy_files(){
-    
-        $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'app');
-        if($foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'app')){
-            echo "Update Successful";
+ public function copy_files(){
+        $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'QMS_NSM-main' . DS . 'app');
+        if($foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'app')){            
         }else{
-            echo "Copy failed. Please roll-back chanages from the backup folder.";
-            exit;
+            CakeLog::write('debug','App folder copy failed');
         }
         
-
-        $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'lib');
+        $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'QMS_NSM-main' . DS . 'lib');
         if($foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'lib')){
-            echo "Update Successful";
-            exit;
+            
         }else{
-            echo "Copy failed. Please roll-back chanages from the backup folder.";
-            exit;
+            CakeLog::write('debug','Lib folder copy failed');
         }
-        
         echo "<span class='text-success'><h4>Update Complete!</span></h4></br>";
     }
-
 
 }

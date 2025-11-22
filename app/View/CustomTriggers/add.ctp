@@ -254,9 +254,23 @@
 							</div>
 							<div class="col-md-12"><h4>Send Email To</h4></div>
 							<?php 
+							if(isset($notifyDepartments)){
+								echo "<div class='col-md-12'>".$this->Form->input('notify_departments',array('class'=>'nd','default'=>1,'label'=>'Everyone in selected Department')) . '</div>';
+							}
+
+							if(isset($notifyBranches)){
+								echo "<div class='col-md-12'>".$this->Form->input('notify_branches',array('class'=>'nb','default'=>1,'label'=>'Everyone in selected Branches')) . '</div>';
+							}
+
+							if(isset($notifyBranchesDesignations)){
+								echo "<div class='col-md-12'>".$this->Form->input('notify_designations',array('class'=>'nb','default'=>1,'label'=>'Everyone with selected designation')) . '</div>';
+							}
+
+							echo "<div class='col-md-12'><hr /></div>";
+
 							echo "<div class='col-md-12'>".$this->Form->input('notify_admins',array('class'=>'admin','default'=>1, 'label'=>'Admins')) . '</div>';
 							echo "<div class='col-md-12'>".$this->Form->input('notify_hods',array('class'=>'hod','default'=>1,'label'=>'Department HoDs')) . '</div>';
-							echo "<div class='col-md-12'>".$this->Form->input('hod_departments',array('label'=>'Select Departments','multiple', 'options'=>array($departments))) . '</div>';
+							echo "<div class='col-md-12'>".$this->Form->input('hod_departments',array('label'=>'Select Departments','multiple', 'options'=>array($departments))) . '</div>';							
 							?>
 							<div class="col-md-12"><p><br /><strong>Note: </strong>If table has a department field, and if you chose Notify HoDs, HoD of that department will automaticaly receive the email. To send email to additional HoDs from different departments, chose thode departments from "Select Departments" field.</p></div>											
 							<?php	

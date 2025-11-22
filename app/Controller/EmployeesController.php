@@ -241,7 +241,9 @@ class EmployeesController extends AppController {
                 //update user- emaployee name if user exists
                 $user = $this->Employee->User->find('first',array('recursive'=>-1, 'conditions'=>array('User.employee_id'=>$id)));
                 if($user){
-                    $user['User']['name'] = $this->request->data['Employee']['name']; 
+                    $user['User']['name'] = $this->request->data['Employee']['name'];
+                    $user['User']['branch_id'] =  $this->request->data['Employee']['branch_id'];
+                    $user['User']['department_id'] =  $this->request->data['Employee']['department_id'];
                     $this->Employee->User->create();
                     $this->Employee->User->save($user,false);
                 }
