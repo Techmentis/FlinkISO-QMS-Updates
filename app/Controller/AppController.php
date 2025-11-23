@@ -3683,12 +3683,10 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			'title'=>$title,
 			'key'=>$key,			     
 		];
-
 		// add header token
 		$headerToken = "";
 		$jwtHeader = Configure::read('onlyofficesecret');
-		$headerToken = $this->jwtEncode([ "payload" => $arr ]);
-		$arr["token"] = $this->jwtEncode($arr);	    
+		$arr["token"] = $this->generateJWT($arr);	    
 		$data = json_encode($arr);	
 		// request parameters
 		$opts = array('http' => array(
@@ -3696,14 +3694,17 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			'timeout' => 30,
 			'header'=> "Content-type: application/json\r\n" . 
 			"Accept: application/json\r\n" .
-			(empty($headerToken) ? "" : $jwtHeader.": Bearer $headerToken\r\n"),
+			(empty($headerToken) ? "" : $jwtHeader.": Bearer ".$arr['token']."\r\n"),
 			'content' => $data
 		));
 		$context = stream_context_create($opts);
 		$response_data = file_get_contents($path, FALSE, $context);
 		$downloadUri = json_decode($response_data,true);
 		$downloadUri = $downloadUri['fileUrl'];
-		if (file_get_contents($downloadUri) === FALSE) {			
+		
+		if (file_get_contents($downloadUri) === FALSE) {
+			Echo "Error in file conversion";
+			exit;		
 		} else {	
 			$savepath = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id;
 			if(!file_exists($savepath)){
