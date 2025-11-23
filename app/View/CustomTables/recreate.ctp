@@ -212,39 +212,7 @@
 				echo $this->Form->input('branchid', array('type' => 'hidden', 'value' => $this->Session->read('User.branch_id')));
 				echo $this->Form->input('departmentid', array('type' => 'hidden', 'value' => $this->Session->read('User.department_id')));		
 				?>
-			</div>
-			<div class=''>
-				<div class='col-md-12'>
-					<div class="box box-default">
-						<div class="box-header with-border">
-							<i class="fa fa-share-alt"></i>
-							<h3 class="box-title">Table Sharing</h3>
-						</div>
-						<div class="box-body">
-							<div class="row">
-								<?php	
-								if($this->request->data['CustomTable']['qc_document_id']){
-									echo "<div class='col-md-12'>".$this->Form->input('share_with_branches',array('name'=>'data[QcDocument][share_with_branches][]', 'multiple','options'=>$branches, 'selected'=>json_decode($qcDocument["QcDocument"]["branches"],false), 'class'=>'form-control',)) . '</div>'; 
-									echo "<div class='col-md-12'>".$this->Form->input('share_with_departments',array('name'=>'data[QcDocument][share_with_departments][]','multiple', 'options'=>$departments, 'selected'=>json_decode($qcDocument["QcDocument"]["departments"],false), 'class'=>'form-control',)) . '</div>'; 
-									echo "<div class='col-md-12'>".$this->Form->input('share_with_designations',array('name'=>'data[QcDocument][share_with_designations][]','multiple', 'options'=>$designations, 'selected'=>json_decode($qcDocument["QcDocument"]["designations"],false), 'class'=>'form-control chosen',)) . '</div>'; 
-									echo "<div class='col-md-12'>".$this->Form->input('user_id',array('name'=>'data[QcDocument][user_id][]','label'=>'Share with Users','multiple', 'options'=>$usernames, 'selected'=>json_decode($qcDocument["QcDocument"]["user_id"],false), 'class'=>'form-control', 'style'=>'')) . '</div>'; 
-								}
-
-								if($this->request->data['CustomTable']['process_id']){
-
-									echo "<div class='col-md-12'>".$this->Form->input('share_with_branches',array('name'=>'data[Process][share_with_branches][]', 'multiple','options'=>$branches, 'selected'=>json_decode($process["Process"]["applicable_to_branches"],false), 'class'=>'form-control',)) . '</div>'; 
-									echo "<div class='col-md-12'>".$this->Form->input('share_with_departments',array('name'=>'data[QcDocument][share_with_departments][]','multiple', 'options'=>$departments, 'selected'=>json_decode($process["Process"]["process_owners"],false), 'class'=>'form-control',)) . '</div>'; 
-									echo "<div class='col-md-12'>".$this->Form->input('share_with_designations',array('name'=>'data[QcDocument][share_with_designations][]','multiple', 'options'=>$designations,'class'=>'form-control chosen',)) . '</div>'; 
-									echo "<div class='col-md-12'>".$this->Form->input('user_id',array('name'=>'data[QcDocument][user_id][]','label'=>'Share with Users','multiple', 'options'=>$usernames, 'class'=>'form-control', 'style'=>'')) . '</div>'; 
-								}
-								?>
-
-							</div>
-						</div>
-					</div>
-				</div>
-
-			</div>
+			</div>			
 			<?php if($this->request->data['CustomTable']['process_id']){ ?>
 				<div class='row'>
 					<div class='col-md-12'>
