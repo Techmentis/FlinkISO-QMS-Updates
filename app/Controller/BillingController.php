@@ -164,13 +164,13 @@ class BillingController extends AppController {
    }
 
  public function copy_files(){
-        $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'QMS_NSM-main' . DS . 'app');
+        $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'app');
         if($foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'app')){            
         }else{
             CakeLog::write('debug','App folder copy failed');
         }
         
-        $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'QMS_NSM-main' . DS . 'lib');
+        $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'lib');
         if($foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'lib')){
             
         }else{
