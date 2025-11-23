@@ -85,24 +85,24 @@ class CustomTablesController extends AppController {
      * @return void
      */
     public function index() {
-        if($this->Session->read('User.is_mr') == false){
-            $accessConditions = array(
-                'OR'=>array(
-                    'OR'=>array(
-                        'QcDocument.branches LIKE' => '%'.$this->Session->read('User.branch_id').'%',
-                        'QcDocument.departments LIKE' => '%'.$this->Session->read('User.department_id').'%',                        
-                        'QcDocument.user_id LIKE' => '%'.$this->Session->read('User.id').'%',
-                    ),'OR'=>array(
-                        'CustomTable.creators LIKE ' => '%'.$this->Session->read('User.id').'%',
-                        'CustomTable.editors LIKE ' => '%'.$this->Session->read('User.id').'%',
-                        'CustomTable.viewers LIKE ' => '%'.$this->Session->read('User.id').'%',
-                        'CustomTable.approvers LIKE ' => '%'.$this->Session->read('User.id').'%',
-                    )
-                )
-            );
-        }else{
-            $accessConditions = array();
-        }
+        // if($this->Session->read('User.is_mr') == false){
+        //     $accessConditions = array(
+        //         'OR'=>array(
+        //             'OR'=>array(
+        //                 'QcDocument.branches LIKE' => '%'.$this->Session->read('User.branch_id').'%',
+        //                 'QcDocument.departments LIKE' => '%'.$this->Session->read('User.department_id').'%',                        
+        //                 'QcDocument.user_id LIKE' => '%'.$this->Session->read('User.id').'%',
+        //             ),'OR'=>array(
+        //                 'CustomTable.creators LIKE ' => '%'.$this->Session->read('User.id').'%',
+        //                 'CustomTable.editors LIKE ' => '%'.$this->Session->read('User.id').'%',
+        //                 'CustomTable.viewers LIKE ' => '%'.$this->Session->read('User.id').'%',
+        //                 'CustomTable.approvers LIKE ' => '%'.$this->Session->read('User.id').'%',
+        //             )
+        //         )
+        //     );
+        // }else{
+        //     $accessConditions = array();
+        // }
         
         $conditions = $this->_check_request();
         if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 1)$accessConditions[] = array('CustomTable.table_type'=>0);
@@ -113,7 +113,32 @@ class CustomTablesController extends AppController {
         $this->CustomTable->virtualFields = array(
             'linked' => 'select count(*) from `custom_tables` where `custom_tables`.`custom_table_id` LIKE CustomTable.id ',
             'childDoc' => 'select count(*) from `qc_documents` where QcDocument.parent_document_id LIKE `qc_documents`.id ',
+            'srct' => '
+                CASE
+                    WHEN QcDocument.and_or_condition = true THEN                             
+                        (select count(*) from qc_documents WHERE 
+                            qc_documents.id = QcDocument.id AND
+                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
+                                IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
+                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+                        )
+                    WHEN QcDocument.and_or_condition = false THEN 
+                        (select count(*) from qc_documents WHERE 
+                            qc_documents.id = QcDocument.id AND
+                            IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
+                            IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
+                            IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+                        )
+                    ELSE "Un"
+                END'
         );
+
+        if($this->Session->read('User.is_mr') == false){
+            $accessConditions = array('CustomTable.srct >' => 0);
+        }else{
+            $accessConditions = array();
+        }
+
         $this->paginate = array(
             'order' => array('CustomTable.childDoc'=>'ASC','CustomTable.sr_no' => 'DESC'), 
             'conditions' => array(

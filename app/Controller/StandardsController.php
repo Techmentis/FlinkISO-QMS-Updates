@@ -289,16 +289,17 @@ class StandardsController extends AppController {
                     $standard['Standard']['soft_delete'] = 1;
                     $this->Standard->create();
                     if($this->Standard->save($standard,false)){
-                        $clauses = $this->Standard->Clause->find('all',array('recursive'=>1,'conditions'=>array('Clause.standard_id'=>$standard['Standard']['id'])));
+                        $this->loadModel('Clause');
+                        $clauses = $this->Clause->find('all',array('recursive'=>-1, 'fields'=>array('Clause.id', 'Clause.standard_id','Clause.publish','Clause.soft_delete'), 'conditions'=>array('Clause.standard_id'=>$standard['Standard']['id'])));
                         if($clauses){
                             foreach($clauses as $clause){
-                                $this->Standard->Clause->create();
-                                $clause['publish'] = 0;
-                                $clause['soft_delete'] = 1;
-                                $this->Standard->Clause->save($clause,false);
+                                $this->Clause->create();
+                                $clause['Clause']['publish'] = 0;
+                                $clause['Clause']['soft_delete'] = 1;
+                                $this->Clause->save($clause,false);
                             }
                         }
-
+                        
                         $qcDocumentCategories = $this->Standard->QcDocumentCategory->find('all',array('recursive'=>1,'conditions'=>array('QcDocumentCategory.standard_id'=>$standard['Standard']['id'])));
                         if($qcDocumentCategories){
                             foreach($qcDocumentCategories as $qcDocumentCategory){

@@ -235,7 +235,7 @@ class AppController extends Controller {
 				));
 			}else{
 				$skip = array('approval_comments','approvals','standards','processes');
-				$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','index','view');
+				$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess');
 				if(!in_array($this->action,$ignore)){
 					// $this->Session->setFlash(__('Blocked Action: '. $this->request->action), 'default', array('class' => 'alert alert-danger'));
 					$this->_check_access();
@@ -288,17 +288,31 @@ class AppController extends Controller {
 			if(strpos($this->request->controller,"child") === false){ 
 				if(isset($this->request->params['named']['qc_document_id'])){
 					$this->loadModel('QcDocument');
+					$this->QcDocument->virtualFields = array(
+						'srct' => '
+		                    CASE
+		                        WHEN QcDocument.and_or_condition = true THEN                             
+		                            (select count(*) from qc_documents WHERE 
+		                                qc_documents.id = QcDocument.id AND
+		                                    IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
+		                                    IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
+		                                    IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+		                            )
+		                        WHEN QcDocument.and_or_condition = false THEN 
+		                            (select count(*) from qc_documents WHERE 
+		                                qc_documents.id = QcDocument.id AND
+		                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
+		                                IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
+		                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+		                            )
+		                        ELSE "Un"
+		                    END
+		            '
+					);
 					$sharing = $this->QcDocument->find('count',array(					
 						'conditions'=>array(
 							'QcDocument.id'=>$this->request->params['named']['qc_document_id'],
-							'OR'=>array(
-								'QcDocument.prepared_by'=> $this->Session->read('User.employee_id'),
-								'QcDocument.approved_by'=> $this->Session->read('User.employee_id'),
-								'QcDocument.issued_by'=> $this->Session->read('User.employee_id'),
-								'QcDocument.branches LIKE' => '%'.$this->Session->read('User.branch_id').'%',
-								'QcDocument.departments LIKE' => '%'.$this->Session->read('User.department_id').'%',							
-								'QcDocument.user_id LIKE' => '%'.$this->Session->read('User.id').'%',
-							)
+							'QcDocument.srct >' => 0
 						)
 					));
 					if($sharing == 0){
@@ -309,17 +323,31 @@ class AppController extends Controller {
 					//check if its qcDocument controller and if yes, check access with param 0
 					if($this->request->controller == 'qc_documents' && isset($this->request->params['pass'][0])){
 						$this->loadModel('QcDocument');
+						$this->QcDocument->virtualFields = array(
+						'srct' => '
+		                    CASE
+		                        WHEN QcDocument.and_or_condition = true THEN                             
+		                            (select count(*) from qc_documents WHERE 
+		                                qc_documents.id = QcDocument.id AND
+		                                    IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
+		                                    IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
+		                                    IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+		                            )
+		                        WHEN QcDocument.and_or_condition = false THEN 
+		                            (select count(*) from qc_documents WHERE 
+		                                qc_documents.id = QcDocument.id AND
+		                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
+		                                IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
+		                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+		                            )
+		                        ELSE "Un"
+		                    END
+		            	');
+						
 						$sharing = $this->QcDocument->find('count',array(
 							'conditions'=>array(
 								'QcDocument.id'=>$this->request->params['pass'][0],
-								'OR'=>array(
-									'QcDocument.prepared_by'=> $this->Session->read('User.employee_id'),
-									'QcDocument.approved_by'=> $this->Session->read('User.employee_id'),
-									'QcDocument.issued_by'=> $this->Session->read('User.employee_id'),
-									'QcDocument.branches LIKE' => '%'.$this->Session->read('User.branch_id').'%',
-									'QcDocument.departments LIKE' => '%'.$this->Session->read('User.department_id').'%',
-									'QcDocument.user_id LIKE' => '%'.$this->Session->read('User.id').'%',
-								)
+								'QcDocument.srct >' => 0
 							)
 						));
 						if($sharing == 0){
@@ -1807,9 +1835,36 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		$documentTypes = $this->CustomTable->QcDocument->customArray['documentTypes'];
 		foreach($standards as $key => $value){
 			foreach($documentTypes as $dkey => $documentType){
+				$this->CustomTable->virtualFields = array(
+					'srct' => '
+	                    CASE
+	                        WHEN QcDocument.and_or_condition = true THEN                             
+	                            (select count(*) from qc_documents WHERE 
+	                                qc_documents.id = QcDocument.id AND
+	                                    IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
+	                                    IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
+	                                    IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+	                            )
+	                        WHEN QcDocument.and_or_condition = false THEN 
+	                            (select count(*) from qc_documents WHERE 
+	                                qc_documents.id = QcDocument.id AND
+	                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
+	                                IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
+	                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+	                            )
+	                        ELSE "Un"
+	                    END
+	            '
+				);
+				if($this->Session->read('User.is_mr') == false){
+		            $accessConditions = array('CustomTable.srct >' => 0);
+		        }else{
+		            $accessConditions = array();
+		        }
+
 				$result = $this->CustomTable->find('all',array(
 					'recursive'=>0,
-					'fields'=>array('CustomTable.id','CustomTable.name','CustomTable.table_name','CustomTable.table_version','CustomTable.qc_document_id','CustomTable.process_id'), 
+					'fields'=>array('CustomTable.id','CustomTable.name','CustomTable.table_name','CustomTable.table_version','CustomTable.qc_document_id','CustomTable.process_id','CustomTable.srct'), 
 					'conditions'=>array(
 						'QcDocument.standard_id'=>$key,
 						'CustomTable.publish' => 1,
@@ -1822,7 +1877,9 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 							'QcDocument.branches LIKE ' => '%' . $this->Session->read('User.branch_id') . '%',
 							'QcDocument.user_id LIKE ' => '%' . $this->Session->read('User.id') . '%',
 							'QcDocument.editors LIKE ' => '%' . $this->Session->read('User.id') . '%'
-				)))); 
+						),
+						$accessConditions
+					)));					
 				if($result)$menus["$value"][$documentType] = $result;
 			}
 		}
@@ -2464,6 +2521,25 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 
 	public function _view(){
+		if($this->Session->read('User.is_mr') == false && $this->Session->read('User.is_view_all') == false){
+			if(
+				$this->viewVars[Inflector::variable($this->modelClass)][$this->modelClass]['prepared_by'] != $this->Session->read('User.employee_id') || 
+				$this->viewVars[Inflector::variable($this->modelClass)][$this->modelClass]['modified_by'] != $this->Session->read('User.employee_id') || 
+				$this->viewVars[Inflector::variable($this->modelClass)][$this->modelClass]['approved_by'] != $this->Session->read('User.employee_id') || 
+				$this->viewVars[Inflector::variable($this->modelClass)][$this->modelClass]['created_by'] != $this->Session->read('User.id')
+			){
+				$this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
+				$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));
+			}
+		}else if($this->Session->read('User.is_mr') == false && $this->Session->read('User.is_view_all') == true){
+			if(
+				$this->viewVars[Inflector::variable($this->modelClass)][$this->modelClass]['branchid'] != $this->Session->read('User.branch_id') && 
+				!in_array($this->viewVars[Inflector::variable($this->modelClass)][$this->modelClass]['branchid'], json_decode($this->Session->read('User.assigned_branches'),true))
+			){
+				$this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
+				$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));				
+			}
+		}
 		// check if this document has linked documents with table
 		$this->loadModel('CustomTable');
 		$linkedTables = $this->CustomTable->find('all',array(
@@ -2802,8 +2878,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						}
 					}else{
 						if($trigger['CustomTrigger']['notify_departments'] == true){
-							debug($existingRecord[$modelName]);
-							debug($customTable);
 							if($existingRecord[$modelName]['custom_table_id']){
 								$customTable = $this->$modelName->CustomTable->find('first',array(
 									'conditions'=>array('CustomTable.id'=>$existingRecord[$modelName]['custom_table_id']),
