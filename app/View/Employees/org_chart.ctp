@@ -3,7 +3,7 @@
     <div class="employees ">
         <?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => 'Employees', 'modelClass' => 'Employee', 'options' => array("sr_no" => "Sr No", "name" => "Name", "employee_number" => "Employee Number", "qualification" => "Qualification", "joining_date" => "Joining Date", "date_of_birth" => "Date Of Birth", "pancard_number" => "Pancard Number", "personal_telephone" => "Personal Telephone", "office_telephone" => "Office Telephone", "mobile" => "Mobile", "personal_email" => "Personal Email", "office_email" => "Office Email", "residence_address" => "Residence Address", "permenant_address" => "Permanent Address", "maritial_status" => "Marital Status", "driving_license" => "Driving License"), 'pluralVar' => 'employees'))); ?>
 
-
+        
         <style type="text/css">
             #orgc{background-color: #fff;}
             .orgchart{background-image: none !important}
@@ -39,8 +39,7 @@
                   }else{
                       $hclass = ' btn-default';
                   }
-                  ?>
-                  <?php // echo $this->Html->link('Export PDF','#',array('class'=>'btn btn-success','onClick'=>'getpdf();','escape'=>false));?>
+                  ?>                  
                   <?php echo $this->Html->link('Verticle',array('action'=>'org_chart','render'=>'v'),array('class'=>'btn' . $vclass));?>
                   <?php echo $this->Html->link('Horizontal',array('action'=>'org_chart','render'=>'h'),array('class'=>'btn'. $hclass));?>
               </div>

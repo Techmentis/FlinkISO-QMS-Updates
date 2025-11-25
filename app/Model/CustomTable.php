@@ -259,9 +259,9 @@ public $customArray = array(
 		7=>'file'
 
 	),'dataUpdateTypes'=>array(
-		0=>'Any user should update a single document for a defined schedule',
-		1=>'Every user should update a saperate document for a defined schedule',
-		2=>'Multiple users should update a single document for a defined schedule',
+		0=>'Any user should update a single document for a defined schedule.',
+		1=>'Every user should update a saperate document for a defined schedule.',
+		2=>'Multiple users should update a single document for a defined schedule.',
 	),'displayTypes' => array(
 		0=>'text',
 		1=>'radio',

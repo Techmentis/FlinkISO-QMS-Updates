@@ -217,9 +217,22 @@ class DesignationsController extends AppController {
             $imagepath = Router::url('/', true) . "img/img/avatar.png";
             
             if ($designation['children']){
-                $result[] = array('id' => $designation['Designation']['id'], 'name' => $designation['Designation']['name'], 'title' => $designation['Designation']['name'], 'className' => 'top-level', 'children' => $this->renderPosts($designation['children'], $result));
+                $result[] = array(
+                    'id' => $designation['Designation']['id'], 
+                    'name' => $designation['Designation']['name'], 
+                    'title' => $designation['Designation']['name'], 
+                    'imagepath'=>$imagepath,
+                    'className' => 'top-level', 
+                    'children' => $this->renderPosts($designation['children'], 
+                $result));
             } else {
-                $result[] = array($designation['Designation']['name'], 'name' => $designation['Designation']['name'], 'title' => $designation['Designation']['name'], 'className' => 'top-level','imagepath'=>$imagepath);
+                $result[] = array(
+                    'id'=> $designation['Designation']['id'], 
+                    'name' => $designation['Designation']['name'], 
+                    'title' => $designation['Designation']['name'], 
+                    'className' => 'top-level',
+                    'imagepath'=>$imagepath
+                );
             }
         }        
         $this->set('employees_orgchart', $result);
@@ -237,6 +250,7 @@ class DesignationsController extends AppController {
                 $children['className'] = 'middle-level';
                 $children['name'] = $child_designation['Designation']['name'];
                 $children['title'] = $child_designation['Designation']['name'];
+                $children['imagepath'] = $imagepath;
                 $children['children'] = $this->renderPosts($child_designation['children'], $tmpModel);
                 $return[] = $children;
             } else {

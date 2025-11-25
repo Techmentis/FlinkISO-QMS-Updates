@@ -270,13 +270,27 @@ class EmployeesController extends AppController {
             } else {
                 $imagepath = Router::url('/', true) . "img/img/avatar.png";
             }
-            if (!empty($employee['children'])) {
-                $result[] = array('id' => $employee['Employee']['id'], 'name' => $employee['Employee']['name'], 'title' => $employee['Designation']['name'], 'className' => 'top-level', 'children' => $this->renderPosts($employee['children'], $result));
-            } else {
-                $result[] = array($employee['Employee']['name'], 'name' => $employee['Employee']['name'], 'title' => $employee['Designation']['name'], 'className' => 'top-level','imagepath'=>$imagepath);
-            }
-        }
 
+            if (!empty($employee['children'])) {
+                $result[] = array(
+                    'id' => $employee['Employee']['id'], 
+                    'name' => $employee['Employee']['name'], 
+                    'title' => $employee['Designation']['name'], 
+                    'imagepath'=>$imagepath,
+                    'className' => 'top-level', 
+                    'children' => $this->renderPosts($employee['children'], 
+                $result));
+            
+            } else {
+                $result[] = array(
+                    'id'=>$employee['Employee']['id'], 
+                    'name' => $employee['Employee']['name'], 
+                    'title' => $employee['Designation']['name'],
+                    'imagepath'=>$imagepath,
+                    'className' => 'top-level',                     
+                );
+            }            
+        }        
         $this->set('employees_orgchart', $result);
     }
     public function renderPosts($employeesArray, $tmpModel) {
@@ -294,6 +308,7 @@ class EmployeesController extends AppController {
                 $children['className'] = 'middle-level';
                 $children['name'] = $child_employee['Employee']['name'];
                 $children['title'] = $child_employee['Designation']['name'];
+                $children['imagepath'] = $imagepath;
                 $children['children'] = $this->renderPosts($child_employee['children'], $tmpModel);
                 $return[] = $children;
             } else {

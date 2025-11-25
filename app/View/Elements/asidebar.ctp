@@ -39,7 +39,8 @@
             <li><?php echo $this->Html->link(__('Departments'), array('controller' => 'departments', 'action' => 'index','timestamp'=>date('ymdhis'))); ?></li>
             <li><?php echo $this->Html->link(__('Designations'), array('controller' => 'designations', 'action' => 'index','timestamp'=>date('ymdhis'))); ?></li>            
             <li><?php echo $this->Html->link(__('Employees'), array('controller' => 'employees', 'action' => 'index','timestamp'=>date('ymdhis'))); ?></li>
-            <li><?php echo $this->Html->link(__('Org Chart'), array('controller' => 'employees', 'action' => 'org_chart','timestamp'=>date('ymdhis'))); ?></li>
+            <li><?php echo $this->Html->link(__('Employee Org Chart'), array('controller' => 'employees', 'action' => 'org_chart','timestamp'=>date('ymdhis'))); ?></li>
+            <li><?php echo $this->Html->link(__('Designation Org Chart'), array('controller' => 'designations', 'action' => 'org_chart','timestamp'=>date('ymdhis'))); ?></li>
             <li><?php echo $this->Html->link(__('Users'), array('controller' => 'users', 'action' => 'index','timestamp'=>date('ymdhis'))); ?></li>           
           </ul>
         </li>
