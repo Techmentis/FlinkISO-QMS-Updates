@@ -145,9 +145,11 @@ class CustomTablesController extends AppController {
                 $accessConditions,
                 'OR' => array('ltrim(rtrim(CustomTable.custom_table_id))' => "", 'CustomTable.custom_table_id' => null, 'CustomTable.linked >' => 0)));
         $this->CustomTable->recursive = 0;
-        $customTables = $this->paginate();
-
+        $customTables = $this->paginate();        
         $this->set('customTables', $customTables);
+        $schedules = $this->CustomTable->QcDocument->Schedule->find('list');
+        $customArray = $this->CustomTable->customArray;
+        $this->set(array('schedules'=>$schedules,'customArray'=>$customArray));
         $this->_get_count();
     }
     

@@ -288,71 +288,77 @@ class AppController extends Controller {
 			if(strpos($this->request->controller,"child") === false){ 
 				if(isset($this->request->params['named']['qc_document_id'])){
 					$this->loadModel('QcDocument');
-					$this->QcDocument->virtualFields = array(
-						'srct' => '
-		                    CASE
-		                        WHEN QcDocument.and_or_condition = true THEN                             
-		                            (select count(*) from qc_documents WHERE 
-		                                qc_documents.id = QcDocument.id AND
-		                                    IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
-		                                    IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
-		                                    IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
-		                            )
-		                        WHEN QcDocument.and_or_condition = false THEN 
-		                            (select count(*) from qc_documents WHERE 
-		                                qc_documents.id = QcDocument.id AND
-		                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
-		                                IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
-		                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
-		                            )
-		                        ELSE "Un"
-		                    END
-		            '
-					);
-					$sharing = $this->QcDocument->find('count',array(					
-						'conditions'=>array(
-							'QcDocument.id'=>$this->request->params['named']['qc_document_id'],
-							'QcDocument.srct >' => 0
-						)
-					));
-					if($sharing == 0){
-						$this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
-						$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));
-					}
-				}else{ 
-					//check if its qcDocument controller and if yes, check access with param 0
-					if($this->request->controller == 'qc_documents' && isset($this->request->params['pass'][0])){
-						$this->loadModel('QcDocument');
+					$existChek = $this->QcDocument->exists($this->request->params['pass'][0]);
+					if($existChek){
 						$this->QcDocument->virtualFields = array(
-						'srct' => '
-		                    CASE
-		                        WHEN QcDocument.and_or_condition = true THEN                             
-		                            (select count(*) from qc_documents WHERE 
-		                                qc_documents.id = QcDocument.id AND
-		                                    IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
-		                                    IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
-		                                    IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
-		                            )
-		                        WHEN QcDocument.and_or_condition = false THEN 
-		                            (select count(*) from qc_documents WHERE 
-		                                qc_documents.id = QcDocument.id AND
-		                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
-		                                IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
-		                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
-		                            )
-		                        ELSE "Un"
-		                    END
-		            	');
-						
-						$sharing = $this->QcDocument->find('count',array(
+							'srct' => '
+			                    CASE
+			                        WHEN QcDocument.and_or_condition = true THEN                             
+			                            (select count(*) from qc_documents WHERE 
+			                                qc_documents.id = QcDocument.id AND
+			                                    IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
+			                                    IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
+			                                    IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+			                            )
+			                        WHEN QcDocument.and_or_condition = false THEN 
+			                            (select count(*) from qc_documents WHERE 
+			                                qc_documents.id = QcDocument.id AND
+			                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
+			                                IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
+			                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+			                            )
+			                        ELSE "Un"
+			                    END
+			            '
+						);
+						$sharing = $this->QcDocument->find('count',array(					
 							'conditions'=>array(
-								'QcDocument.id'=>$this->request->params['pass'][0],
+								'QcDocument.id'=>$this->request->params['named']['qc_document_id'],
 								'QcDocument.srct >' => 0
 							)
 						));
 						if($sharing == 0){
 							$this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
 							$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));
+						}
+					}					
+				}else{ 
+					//check if its qcDocument controller and if yes, check access with param 0
+					if($this->request->controller == 'qc_documents' && isset($this->request->params['pass'][0])){
+						$this->loadModel('QcDocument');
+						$existChek = $this->QcDocument->exists($this->request->params['pass'][0]);
+						if($existChek){
+							$this->QcDocument->virtualFields = array(
+							'srct' => '
+			                    CASE
+			                        WHEN QcDocument.and_or_condition = true THEN                             
+			                            (select count(*) from qc_documents WHERE 
+			                                qc_documents.id = QcDocument.id AND
+			                                    IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
+			                                    IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
+			                                    IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+			                            )
+			                        WHEN QcDocument.and_or_condition = false THEN 
+			                            (select count(*) from qc_documents WHERE 
+			                                qc_documents.id = QcDocument.id AND
+			                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
+			                                IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
+			                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+			                            )
+			                        ELSE "Un"
+			                    END
+			            	');
+							
+							$sharing = $this->QcDocument->find('count',array(
+								'conditions'=>array(
+									'QcDocument.id'=>$this->request->params['pass'][0],
+									'QcDocument.srct >' => 0
+								)
+							));
+							if($sharing == 0){
+								$this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
+								$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));
+							}
 						}
 					}else{
 						$this->loadModel('User');						
