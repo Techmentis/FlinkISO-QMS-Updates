@@ -1,3 +1,10 @@
+<style>#customTablesTable tr:hover {background-color: transparent !important;}</style>
+<?php
+$docarray = array('doc','docx');
+$sheetarray = array('xls','xlsx');
+$pdfarray = array('pdf');
+$pptarray = array('ppt','pptx');
+?>
 <?php if($customTables){ ?>
 	<?php echo $this->element('checkbox-script'); ?>
 	<div  id="main">	
@@ -63,109 +70,138 @@
 
 
 	<?php echo $this->Form->create(array('class'=>'no-padding no-margin no-background'));?>
-	<?php if($customTables){ ?>
+	<?php if($customTables){ 
+		$tblcount = 0;
+	?>
 		<div class="row">
-			<?php foreach ($customTables as $customTable): 
-				if($customTable['CustomTable']['childDoc'] == 0 ){
-					$textColor = 'text-success';
-				}else{
-					$textColor = 'text-warning';
-				}
-			?>
-				<div class="col-md-6 col-lg-4">
-					<div class="box" style="<?php echo $topBorder;?>">
-						<div class="box-header with-border">
-							<h4 class="box-title">
-								<?php 						
-
-								if($customTable['CustomTable']['publish'] == 1 && $customTable['CustomTable']['table_locked'] == 0){
-										// echo "<span class='text-success'><i class='fa fa-check'></i></span>";
-									$titleClass = $textColor;
-									$btnClass = 'success';	
-								}else{
-										// echo "<span class='text-danger'><i class='fa fa-exclamation-triangle'></i></span>";	
-									$titleClass = 'text-danger';
-									$btnClass = 'danger';												
-
-								}
-								?>
-								<?php 
-								if($customTable['CustomTable']['table_type'] == 2)echo $customTable['CustomTable']['name']; 
-								else echo $customTable['CustomTable']['name'];?>
-								<?php
-								if($this->request->params['named']['table_type'] != 3){
-									echo "</h4><br /><small>";
-									if(!$customTable['Process']['name']){
-										if(strlen($customTable['QcDocument']['name'])>45){
-											$doc = "<strong class='".$titleClass."' >".substr($customTable['QcDocument']['name'], 0,45) ."...</strong>: ". $customTable['QcDocument']['document_number'] ."-". $customTable['QcDocument']['revision_number'] .".". $customTable['QcDocument']['file_type'];	
-										}else{
-											$doc = "<strong class='".$titleClass."' >".substr($customTable['QcDocument']['name'], 0,45) ."</strong>: ". $customTable['QcDocument']['document_number'] ."-". $customTable['QcDocument']['revision_number'] .".". $customTable['QcDocument']['file_type'];
-										}
-										
-
-										echo $this->Html->link($doc,array('controller'=>'qc_documents','action'=>'view',$customTable['QcDocument']['id'],'timestamp'=>date('ymdhis')),array('target'=>'_blank','escape'=>false));	
-									}else{
-										$doc = "<strong class='".$titleClass."' >".$customTable['Process']['name'] ."</strong> <br /> <small>". $customTable['Process']['file_name'] ."</small>";
-										echo $this->Html->link($doc,array('controller'=>'processes','action'=>'view',$customTable['Process']['id'],'timestamp'=>date('ymdhis')),array('target'=>'_blank','escape'=>false));									
-									}
-								}else{
-									echo "</h4>";
-								}
-								?>
-								</small>
-							<span class="pull-right badge btn-<?php echo $btnClass;?>"><?php echo $customTable['CustomTable']['linked'];?></span>
-						</div>
-						<div class="box-body">				
-							<?php
-							if($customTable['CustomTable']['table_type'] == 2){
-								echo "Master Table";
+			<div class="col-md-12">
+				<table class="table" id="customTablesTable">
+					<tr>					
+						<?php foreach ($customTables as $customTable): 
+							if($customTable['CustomTable']['childDoc'] == 0 ){
+								$textColor = 'text-success';
 							}else{
-								if($customTable['CustomTable']['description'])
-									echo h(substr($customTable['CustomTable']['description'], 0,120)) .' ...&nbsp;';	
-								else echo "Description not added.";
+								$textColor = 'text-warning';
 							}
-							?>
-						</div>
-						<div class="box-footer text-right">	
-							<div class="pull-left">
-								<p style="padding-top:10px">
-									<small>
-										<?php 
-									// if($customTable['CustomTable']['table_type'] == 0) echo '<i class="fa fa-folder-open  text-default"></i>&nbsp;';
-									// if($customTable['CustomTable']['table_type'] == 1) echo '<i class="fa fa-link text-default"></i>&nbsp;';
-										?>
-										<?php 							
-										if(strlen($customTable['CustomTable']['table_name']) > 35){
-											echo h(substr($customTable['CustomTable']['table_name'], 0, 35)).'...';
-										}else{
-											echo h($customTable['CustomTable']['table_name']);
-										} ?>
-									</small>
-								</p>
-							</div>
-							<div class="btn-group btn-no-border">
-								<?php 							
+						?><td width="33%" style="border-top:none;">
+							<div class="row">
+								<div class="col-md-12">
+									<div class="box" style="<?php echo $topBorder;?>">
+										<div class="box-header with-border">
+											<h4 class="box-title" style="width:100%">
+												<?php 						
 
-								if($customTable['CustomTable']['publish'] == 1 && $customTable['CustomTable']['table_locked'] == 0 && $customTable['QcDocument']['parent_document_id'] == -1){
-									echo $this->Html->link('<i class="fa fa-plus-square-o fa-lg text-info"></i>',array('controller'=>$customTable['CustomTable']['table_name'], 'action'=>'add', 'custom_table_id'=>$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Goto Add page'));
-								}
-								if($this->request->params['named']['table_type'] == 3){
-									echo $this->Html->link('<i class="fa fa-plus-square-o fa-lg text-info"></i>',array('controller'=>$customTable['CustomTable']['table_name'], 'action'=>'add', 'custom_table_id'=>$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Goto Add page'));
-								}?>
-								
+												if($customTable['CustomTable']['publish'] == 1 && $customTable['CustomTable']['table_locked'] == 0){
+														// echo "<span class='text-success'><i class='fa fa-check'></i></span>";
+													$titleClass = $textColor;
+													$btnClass = 'success';	
+												}else{
+														// echo "<span class='text-danger'><i class='fa fa-exclamation-triangle'></i></span>";	
+													$titleClass = 'text-danger';
+													$btnClass = 'danger';												
 
-								<?php echo $this->Html->link('<i class="fa fa-table fa-lg text-info"></i>',array('controller'=>$customTable['CustomTable']['table_name'],'action'=>'index','custom_table_id'=>$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Goto index page'));?>
-								<?php
-								echo $this->Html->link('<i class="fa fa-bar-chart fa-lg text-info"></i>',array('controller'=>$customTable['CustomTable']['table_name'], 'action'=>'reports','custom_table_id'=>$customTable['CustomTable']['id']),
-									array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false,'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Reports'));
-									?>
-									
-									<?php echo $this->Html->link('<i class="fa fa-gears fa-lg text-success"></i>',array('action'=>'view',$customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View/ Recreate'));?>
-								</div>
+												}
+												?>
+												<?php 
+												if($customTable['CustomTable']['table_type'] == 2)echo $customTable['CustomTable']['name']; 
+												else echo $customTable['CustomTable']['name'];?>
+												<div class="pull-right"> <small><?php echo $schedules[$customTable['QcDocument']['schedule_id']];;?></small></div>
+												<?php
+												if($this->request->params['named']['table_type'] != 3){
+													echo "</h4><br /><small>";
+													if(!$customTable['Process']['name']){
+														if(strlen($customTable['QcDocument']['name'])>45){
+															$doc = "<strong class='".$titleClass."' >".substr($customTable['QcDocument']['name'], 0,45) ."...</strong>: ". $customTable['QcDocument']['document_number'] ."-". $customTable['QcDocument']['revision_number'] .".". $customTable['QcDocument']['file_type'];	
+														}else{
+															$doc = "<strong class='".$titleClass."' >".substr($customTable['QcDocument']['name'], 0,45) ."</strong>: ". $customTable['QcDocument']['document_number'] ."-". $customTable['QcDocument']['revision_number'] .".". $customTable['QcDocument']['file_type'];
+														}
+														
+
+														echo $this->Html->link($doc,array('controller'=>'qc_documents','action'=>'view',$customTable['QcDocument']['id'],'timestamp'=>date('ymdhis')),array('target'=>'_blank','escape'=>false));	
+													}else{
+														$doc = "<strong class='".$titleClass."' >".$customTable['Process']['name'] ."</strong> <br /> <small>". $customTable['Process']['file_name'] ."</small>";
+														echo $this->Html->link($doc,array('controller'=>'processes','action'=>'view',$customTable['Process']['id'],'timestamp'=>date('ymdhis')),array('target'=>'_blank','escape'=>false));									
+													}
+												}else{
+													echo "</h4>";
+												}
+												?>
+												</small>
+											<span class="pull-right badge btn-<?php echo $btnClass;?>"><?php echo $customTable['CustomTable']['linked'];?></span>
+										</div>
+										<div class="box-body">				
+											<?php
+											if($customTable['CustomTable']['table_type'] == 2){
+												echo "Master Table";
+											}else{
+												if($customTable['CustomTable']['description'])
+													echo h(substr($customTable['CustomTable']['description'], 0,120)) .' ...&nbsp;';	
+												else {									
+													echo '<small>'.$customArray['dataTypes'][$customTable['QcDocument']['data_type']].'<br />';
+													echo $customArray['dataUpdateTypes'][$customTable['QcDocument']['data_update_type']].'</small>';		
+												}
+											}
+											?>							
+										</div>
+										<div class="box-footer text-right">										
+											<div class="pull-left">
+												<p style="padding-top:10px">
+													<?php
+														if(in_array($customTable['QcDocument']['file_type'],$docarray)){ ?>
+															<i class="fa fa-file-word-o" aria-hidden="true"></i>
+														<?php }elseif(in_array($customTable['QcDocument']['file_type'],$sheetarray)){ ?>
+															<i class="fa fa-file-excel-o" aria-hidden="true"></i>
+														<?php }elseif(in_array($customTable['QcDocument']['file_type'],$pdfarray)){ ?>
+															<i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+														<?php }elseif(in_array($customTable['QcDocument']['file_type'],$pptarray)){ ?>
+															<i class="fa fa-file-powerpoint-o" aria-hidden="true"></i>
+														<?php }else{ ?>
+															<i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i>
+														<?php }?>														
+													<small>
+														<?php 
+													// if($customTable['CustomTable']['table_type'] == 0) echo '<i class="fa fa-folder-open  text-default"></i>&nbsp;';
+													// if($customTable['CustomTable']['table_type'] == 1) echo '<i class="fa fa-link text-default"></i>&nbsp;';
+														?>
+														<?php 							
+														if(strlen($customTable['CustomTable']['table_name']) > 35){
+															echo h(substr($customTable['CustomTable']['table_name'], 0, 35)).'...';
+														}else{
+															echo h($customTable['CustomTable']['table_name']);
+														} ?>
+													</small>
+												</p>
+											</div>
+											<div class="btn-group btn-no-border">
+												<?php 							
+
+												if($customTable['CustomTable']['publish'] == 1 && $customTable['CustomTable']['table_locked'] == 0 && $customTable['QcDocument']['parent_document_id'] == -1){
+													echo $this->Html->link('<i class="fa fa-plus-square-o fa-lg text-info"></i>',array('controller'=>$customTable['CustomTable']['table_name'], 'action'=>'add', 'custom_table_id'=>$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Goto Add page'));
+												}
+												if($this->request->params['named']['table_type'] == 3){
+													echo $this->Html->link('<i class="fa fa-plus-square-o fa-lg text-info"></i>',array('controller'=>$customTable['CustomTable']['table_name'], 'action'=>'add', 'custom_table_id'=>$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Goto Add page'));
+												}?>
+												
+
+												<?php echo $this->Html->link('<i class="fa fa-table fa-lg text-info"></i>',array('controller'=>$customTable['CustomTable']['table_name'],'action'=>'index','custom_table_id'=>$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Goto index page'));?>
+												<?php
+												echo $this->Html->link('<i class="fa fa-bar-chart fa-lg text-info"></i>',array('controller'=>$customTable['CustomTable']['table_name'], 'action'=>'reports','custom_table_id'=>$customTable['CustomTable']['id']),
+													array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false,'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Reports'));
+													?>
+													
+													<?php echo $this->Html->link('<i class="fa fa-gears fa-lg text-success"></i>',array('action'=>'view',$customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View/ Recreate'));?>
+												</div>
+											</div>
+										</div>
+									</div>
 							</div>
-						</div>
-					</div>
-				<?php endforeach; ?>
+							</td>
+							<?php 
+								$tblcount++;
+								if($tblcount % 3 == 0)echo "</tr>";
+							endforeach; ?>
+					</table>
+				</div>
 			<?php }else{ ?>
 				
 			<?php } ?>

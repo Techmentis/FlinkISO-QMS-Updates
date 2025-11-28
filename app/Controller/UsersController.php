@@ -998,7 +998,6 @@ class UsersController extends AppController {
             $this->loadModel('Company');
             $this->Company->create();
 
-
             //check if company exist
             $companyFind = $this->Company->find('first', array(
                 'conditions' => array(
@@ -1014,9 +1013,8 @@ class UsersController extends AppController {
                     $companyId     = $this->Company->id;
                     $alreadyExists = false;
                 }
-            }            
+            }
             
-
             if ($companyId != null) {
                 $branch_name                      = $this->request->data['User']['Customer']['city'] ? $this->request->data['User']['Customer']['city'] : 'Default';
                 $branch['Branch']['name']         = $branch_name;
@@ -1042,6 +1040,9 @@ class UsersController extends AppController {
                     $this->Branch->create();
                     if ($this->Branch->save($branch, false)) {
                         $branchId = $this->Branch->id;
+                    }else{
+                        $this->Session->setFlash(__('Branch could not be saved.'));
+                        $this->redirect(array('controller'=>'users', 'action' => 'register'));
                     }
                 }
 
@@ -1060,6 +1061,9 @@ class UsersController extends AppController {
                     $this->Department->create();
                     if ($this->Department->save($department, false)) {
                         $departmentId = $this->Department->id;
+                    }else{
+                        $this->Session->setFlash(__('Department could not be saved.'));
+                        $this->redirect(array('controller'=>'users', 'action' => 'register'));
                     }
                     
                     
@@ -1079,11 +1083,10 @@ class UsersController extends AppController {
                     $this->Designation->create();
                     if ($this->Designation->save($designation, false)) {
                         $designationId = $this->Designation->id;
+                    }else{
+                        $this->Session->setFlash(__('Designation could not be saved.'));
+                        $this->redirect(array('controller'=>'users', 'action' => 'register'));
                     }
-                    
-                    
-                    
-                    
                     
                     $this->loadModel('Employee');
                     $employeeCount = $this->Employee->find('count', array(

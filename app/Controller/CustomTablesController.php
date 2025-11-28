@@ -85,25 +85,7 @@ class CustomTablesController extends AppController {
      * @return void
      */
     public function index() {
-        // if($this->Session->read('User.is_mr') == false){
-        //     $accessConditions = array(
-        //         'OR'=>array(
-        //             'OR'=>array(
-        //                 'QcDocument.branches LIKE' => '%'.$this->Session->read('User.branch_id').'%',
-        //                 'QcDocument.departments LIKE' => '%'.$this->Session->read('User.department_id').'%',                        
-        //                 'QcDocument.user_id LIKE' => '%'.$this->Session->read('User.id').'%',
-        //             ),'OR'=>array(
-        //                 'CustomTable.creators LIKE ' => '%'.$this->Session->read('User.id').'%',
-        //                 'CustomTable.editors LIKE ' => '%'.$this->Session->read('User.id').'%',
-        //                 'CustomTable.viewers LIKE ' => '%'.$this->Session->read('User.id').'%',
-        //                 'CustomTable.approvers LIKE ' => '%'.$this->Session->read('User.id').'%',
-        //             )
-        //         )
-        //     );
-        // }else{
-        //     $accessConditions = array();
-        // }
-        
+        $accessConditions = array();
         $conditions = $this->_check_request();
         if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 1)$accessConditions[] = array('CustomTable.table_type'=>0);
         else if($this->request->params['named']['table_type'] == 2)$accessConditions[] = array('CustomTable.table_type'=>1);
@@ -134,15 +116,15 @@ class CustomTablesController extends AppController {
         );
 
         if($this->Session->read('User.is_mr') == false){
-            $accessConditions = array('CustomTable.srct >' => 0);
+            $accessConditions[] = array('CustomTable.srct >' => 0);
         }else{
-            $accessConditions = array();
+            $accessConditions[] = array();
         }
 
         $this->paginate = array(
             'order' => array('CustomTable.childDoc'=>'ASC','CustomTable.sr_no' => 'DESC'), 
             'conditions' => array(
-                $accessConditions,
+                $accessConditions,                
                 'OR' => array('ltrim(rtrim(CustomTable.custom_table_id))' => "", 'CustomTable.custom_table_id' => null, 'CustomTable.linked >' => 0)));
         $this->CustomTable->recursive = 0;
         $customTables = $this->paginate();        

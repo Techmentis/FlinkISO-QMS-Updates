@@ -1706,6 +1706,264 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		$this->set('branchDataEntry', $bresult);
 		$this->render('/Elements/reports');
 	}
+
+	public function employee_compliance($startDate = null, $endDate = null){
+
+		if($this->request->params['named']['custom_table_id']){
+			$this->loadModel('CustomTable');			
+			$this->CustomTable->virtualFields = array(
+				'schedule' => 'select schedule_id from qc_documents where qc_documents.id LIKE CustomTable.qc_document_id LIMIT 1',
+				'data_type' => 'select data_type from qc_documents where qc_documents.id LIKE CustomTable.qc_document_id LIMIT 1',
+				'data_update_type' => 'select data_update_type from qc_documents where qc_documents.id LIKE CustomTable.qc_document_id LIMIT 1'
+			);
+
+			$customTable = $this->CustomTable->find('first', array(
+				'recursive' => -1, 
+				'conditions' => array('CustomTable.id' => $this->request->params['named']['custom_table_id'])
+			));
+
+			$qcDocument = $this->CustomTable->QcDocument->find('first', array(
+				'recursive' => -1, 
+				'conditions' => array('QcDocument.id' => $customTable['CustomTable']['qc_document_id'])
+			));
+			
+			$this->loadModel('Schedule');
+			$schedules = $this->Schedule->find('list',array('recursive'=>-1,'fields'=>array('Schedule.id','Schedule.name')));
+			$schedule = $this->Schedule->find('first',array('conditions'=>array('Schedule.id' => $customTable['CustomTable']['schedule']), 'recursive'=>-1,'fields'=>array('Schedule.id','Schedule.name')));
+			$totalCreators = count(json_decode($customTable['CustomTable']['creators'],true));
+			$modelName = Inflector::Classify($customTable['CustomTable']['table_name']);
+			$this->loadModel($modelName);
+			
+			if ($this->request->is('post') || $this->request->is('put')) {
+				if($this->request->data[$modelName]['date_range']){
+					$dates = explode(' - ',$this->request->data[$modelName]['date_range']);
+					$startDate = date('Y-m-d',strtotime($dates[0]));
+					$endDate = date('Y-m-d',strtotime($dates[1]));
+				}
+				if(!$startDate)$startDate = date('Y-m-1');
+				if(!$endDate)$endDate = date('Y-m-d',strtotime('+1 month',strtotime($startDate)));
+
+				if($customTable['CustomTable']['data_update_type'] == 0){
+					$expected = $this->$modelName->find('count',array(
+						'conditions'=>array($modelName.'.created BETWEEN ? AND ?'=>array($startDate,$endDate))
+					));				
+				}else{					
+					$actual = $this->$modelName->find('count',array(
+						'conditions'=>array($modelName.'.created BETWEEN ? AND ?'=>array($startDate,$endDate))
+					));
+					$days = date_diff(date_create($endDate),date_create($startDate));
+					$days =  $days->days;
+					$expected = $totalCreators * $days;
+						
+				}
+
+				$results = $this->_data_entry($schedule['Schedule']['name'], $modelName, $startDate, $endDate,json_decode($customTable['CustomTable']['creators']),$customTable['CustomTable']['data_update_type']);
+				$this->set('results',$results[0]);
+				$this->set('users',$results[1]);
+
+				$this->set(array(
+					'sDate'=>date('Y-m-d',strtotime($dates[0])),
+					'eDate'=>date('Y-m-d',strtotime($dates[1])),
+					),
+				);
+
+			}
+
+		}else{
+			
+		}
+		$this->_get_department_list();
+		$this->_get_branch_list();
+		$this->set('customTable',$customTable);
+		$this->set('qcDocument',$qcDocument);
+		$this->set('schedules',$schedules);
+		$this->render('/Elements/employee_compliance');
+	}
+
+	public function _data_entry($schedule = null, $model = null, $startdate = null, $enddate = null,$creators = null,$update_type = null){
+		// 0=>'Any user should update a single document for a defined schedule',
+		// 1=>'Every user should update a saperate document for a defined schedule',
+		// 2=>'Multiple users should update a single document for a defined schedule',		
+		
+		$branchCon = $departmentCon = array();
+		if($this->request->data[$model]['branch_id'] && $this->request->data[$model]['branch_id'] != -1){
+			$branchCon = array('User.branch_id'=>$this->request->data[$model]['branch_id']);
+		}
+
+		if($this->request->data[$model]['department_id'] && $this->request->data[$model]['department_id'] != -1){
+			$departmentCon = array('User.department_id'=>$this->request->data[$model]['department_id']);
+		}
+
+		$addcreators = $this->$model->find('list',array( 
+			'fields'=>array($model.'.created_by',$model.'.created_by'),
+			'group'=>array($model.'.created_by')));
+		
+		$allusers = array_merge($creators,array_keys($addcreators));
+		$this->loadModel('User');
+		$users = $this->User->find('list',array('conditions'=>array(
+			'or'=>array( $branchCon,$departmentCon),
+			'User.id'=>$allusers)));
+
+		
+		$this->loadModel($model);
+		// get all creators
+		$this->$model->virtualFields = array(
+			'username'=>'select users.username from users where users.id LIKE '.$model.'.created_by'
+		);
+		
+		foreach($users as $userid => $username){
+			if($schedule  == 'Daily' || $schedule == 'Weekly' || $schedule  == 'Monthly' || $schedule  == 'None'){
+				$newstartdate = $startdate;
+				while ($newstartdate <= $enddate) {
+					switch ($schedule) {
+						case 'Daily':
+							if($update_type != 0)$results[date('D d M Y',strtotime($newstartdate))][$username]['expected'] = 1;
+							else $results[date('D d M Y',strtotime($newstartdate))][$username]['expected'] = 0;							
+							
+							$results[date('D d M Y',strtotime($newstartdate))][$username]['actual'] = $this->$model->find('count',array(
+								'conditions'=>array( $model.'.created_by'=>$userid, 'DATE('.$model.'.created)'=>$newstartdate)
+							));
+							$newstartdate = date('Y-m-d',strtotime('+1 day',strtotime($newstartdate)));
+						break;
+						case 'Weekly':								
+
+								if($update_type != 0)$results[date('W',strtotime($newstartdate))][$username]['expected'] = 1;
+								else $results[date('W',strtotime($newstartdate))][$username]['expected'] = 0;							
+								
+								$results[date('W',strtotime($newstartdate))][$username]['actual'] = $this->$model->find('count',array(
+								'conditions'=>array( 
+										$model.'.created_by'=>$userid, 
+										'WEEK('.$model.'.created) '=> date('W',strtotime($newstartdate)),
+										'YEAR('.$model.'.created) '=> date('Y',strtotime($newstartdate)),
+									)
+							));
+							$newstartdate = date('Y-m-d',strtotime('+1 week',strtotime($newstartdate)));
+						break;
+						case 'Monthly':
+							if($update_type != 0)$results[date('m',strtotime($newstartdate))][$username]['expected'] = 1;
+							else $results[date('m',strtotime($newstartdate))][$username]['expected'] = 0;
+
+							$results[date('m',strtotime($newstartdate))][$username]['actual'] = $this->$model->find('count',array(
+								'conditions'=>array( 
+										$model.'.created_by'=>$userid, 
+										'MONTH('.$model.'.created) '=> date('m',strtotime($newstartdate)),
+										'YEAR('.$model.'.created) '=> date('Y',strtotime($newstartdate)),
+									)
+							));
+							$newstartdate = date('Y-m-d',strtotime('+1 month',strtotime($newstartdate)));
+						break;
+						
+						case 'None':						
+							if($update_type != 0)$results[date('D d M Y',strtotime($newstartdate))][$username]['expected'] = 1;
+							else $results[date('D d M Y',strtotime($newstartdate))][$username]['expected'] = 0;							
+							
+							$results[date('D d M Y',strtotime($newstartdate))][$username]['actual'] = $this->$model->find('count',array(
+								'conditions'=>array(
+									$model.'.created_by'=>$userid,									
+									'DATE('.$model.'.created)'=> $newstartdate
+								)
+							));
+							$newstartdate = date('Y-m-d',strtotime('+1 day',strtotime($newstartdate)));
+						break;
+
+						default:
+							$newstartdate = date('Y-m-d',strtotime('+1 month',strtotime($newstartdate)));
+						break;
+					}				
+				}
+			}else{
+				if($schedule  == 'Quarterly'){
+					$newstartdate = date('Y-01-01',strtotime($startdate));
+					// $newenddate = date('Y-12-01',strtotime($startdate));
+					
+					if($update_type != 0)$results[date('Y ',strtotime($newstartdate)).'QTR-1'][$username]['expected'] = 1;
+					else $results[date('Y ',strtotime($newstartdate)).'QTR-1'][$username]['expected'] = 0;
+					
+					$results[date('Y ',strtotime($newstartdate)).'QTR-1'][$username]['actual'] = $this->$model->find('count',array(
+						'conditions'=>array( 
+								$model.'.created_by'=>$userid, 
+								'MONTH('.$model.'.created) BETWEEN ? AND ?'=> array(1,3),
+								'YEAR('.$model.'.created) '=> date('Y',strtotime($newstartdate)),
+							)
+					));
+
+					if($update_type != 0)$results[date('Y ',strtotime($newstartdate)).'QTR-2'][$username]['expected'] = 1;
+					else $results[date('Y ',strtotime($newstartdate)). 'QTR-2'][$username]['expected'] = 0;
+
+					$results[date('Y ',strtotime($newstartdate)).'QTR-2'][$username]['actual'] = $this->$model->find('count',array(
+						'conditions'=>array( 
+								$model.'.created_by'=>$userid, 
+								'MONTH('.$model.'.created) BETWEEN ? AND ?'=> array(4,6),
+								'YEAR('.$model.'.created) '=> date('Y',strtotime($newstartdate)),
+							)
+					));
+
+					if($update_type != 0)$results[date('Y ',strtotime($newstartdate)).'QTR-3'][$username]['expected'] = 1;
+					else $results[date('Y ',strtotime($newstartdate)).'QTR-3'][$username]['expected'] = 0;
+
+					$results[date('Y ',strtotime($newstartdate)).'QTR-3'][$username]['actual'] = $this->$model->find('count',array(
+						'conditions'=>array( 
+								$model.'.created_by'=>$userid, 
+								'MONTH('.$model.'.created) BETWEEN ? AND ?'=> array(7,9),
+								'YEAR('.$model.'.created) '=> date('Y',strtotime($newstartdate)),
+							)
+					));
+
+					if($update_type != 0)$results[date('Y ',strtotime($newstartdate)).'QTR-4'][$username]['expected'] = 1;
+					else $results[date('Y ',strtotime($newstartdate)).'QTR-4'][$username]['expected'] = 0;
+
+					$results[date('Y ',strtotime($newstartdate)).'QTR-4'][$username]['actual'] = $this->$model->find('count',array(
+						'conditions'=>array( 
+								$model.'.created_by'=>$userid, 
+								'MONTH('.$model.'.created) BETWEEN ? AND ?'=> array(10,12),
+								'YEAR('.$model.'.created) '=> date('Y',strtotime($newstartdate)),
+							)
+					));					
+				}
+
+				if($schedule  == 'Half-Yearly'){
+					$newstartdate = date('Y-01-01',strtotime($startdate));
+
+					if($update_type != 0)$results[date('Y ',strtotime($newstartdate)).'Jan-June'][$username]['expected'] = 1;
+					else $results[date('Y ',strtotime($newstartdate)).'Jan-June'][$username]['expected'] = 0;
+					
+					$results[date('Y ',strtotime($newstartdate)).'Jan-June'][$username]['actual'] = $this->$model->find('count',array(
+						'conditions'=>array( 
+								$model.'.created_by'=>$userid, 
+								'MONTH('.$model.'.created) BETWEEN ? AND ?'=> array(1,6),
+								'YEAR('.$model.'.created) '=> date('Y',strtotime($newstartdate)),
+							)
+					));
+
+					if($update_type != 0)$results[date('Y ',strtotime($newstartdate)).'July-Dec'][$username]['expected'] = 1;
+					else $results[date('Y ',strtotime($newstartdate)).'July-Dec'][$username]['expected'] = 0;
+
+					$results[date('Y ',strtotime($newstartdate)).'July-Dec'][$username]['actual'] = $this->$model->find('count',array(
+						'conditions'=>array( 
+								$model.'.created_by'=>$userid, 
+								'MONTH('.$model.'.created) BETWEEN ? AND ?'=> array(7,12),
+								'YEAR('.$model.'.created) '=> date('Y',strtotime($newstartdate)),
+							)
+					));
+				}
+
+				if($schedule  == 'Yearly'){
+					$newstartdate = date('Y-01-01',strtotime($startdate));
+
+					if($update_type != 0)$results[date('Y',strtotime($newstartdate))][$username]['expected'] = 1;
+					else $results[date('Y',strtotime($newstartdate))][$username]['expected'] = 0;
+
+					$results[date('Y',strtotime($startdate))][$username]['actual'] = $this->$model->find('count',array(
+						'conditions'=>array( 
+								$model.'.created_by'=>$userid, 								
+								'YEAR('.$model.'.created) '=> date('Y',strtotime($newstartdate)),
+							)
+					));					
+				}
+			}			
+		}				
+		return array($results,$users);
+	}
 	
 	public function _get_fields($custom_table_id = null) {
 		$this->loadModel('CustomTable');
