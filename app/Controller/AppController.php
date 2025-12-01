@@ -80,6 +80,7 @@ class AppController extends Controller {
 		Configure::write("common_path", 'files' . DS . $this->Session->read('User.company_id') . DS . $this->request->controller);		
 		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind');		
 		if (empty($this->Session->read('User.id')) && !in_array($this->action, $ignore)) {
+			if($this->request->is('ajax'))echo "Session expired. Please login again.";
 			$this->Session->setFlash(__('Login to continue'));
 			$this->redirect(array('controller' => 'users', 'action' => 'login'));
 		}else{
@@ -1746,15 +1747,14 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				if($customTable['CustomTable']['data_update_type'] == 0){
 					$expected = $this->$modelName->find('count',array(
 						'conditions'=>array($modelName.'.created BETWEEN ? AND ?'=>array($startDate,$endDate))
-					));				
-				}else{					
+						));	
+				}else{			
 					$actual = $this->$modelName->find('count',array(
 						'conditions'=>array($modelName.'.created BETWEEN ? AND ?'=>array($startDate,$endDate))
 					));
 					$days = date_diff(date_create($endDate),date_create($startDate));
 					$days =  $days->days;
 					$expected = $totalCreators * $days;
-						
 				}
 
 				$results = $this->_data_entry($schedule['Schedule']['name'], $modelName, $startDate, $endDate,json_decode($customTable['CustomTable']['creators']),$customTable['CustomTable']['data_update_type']);

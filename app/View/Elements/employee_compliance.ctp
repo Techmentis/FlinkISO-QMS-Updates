@@ -91,7 +91,15 @@
 				<th>Total</th>
 				<?php foreach($vav as $user => $totals){ ?>
 					<th><?php echo $totals['expected'];?></th>
-					<th><?php echo $totals['actual'];?></th>
+					<th><?php echo $totals['actual'];
+						
+						if($totals['expected'] !=  0 && $totals['actual'] != 0){
+							echo '<small class="pull-right"> '. round(($totals['actual'] * 100 /$totals['expected']),2 ) . '%</small>';
+						}else{
+							echo '<small class="pull-right"> 0%</small>';
+						}
+					
+					?></th>
 					<?php
 						$totalexpected = $totalexpected + $totals['expected'];
 						$totalactual = $totalactual + $totals['actual'];
