@@ -24,3 +24,4 @@ ALTER TABLE `files` ADD `versions` TEXT NULL AFTER `version_keys`;
 ALTER TABLE `qc_documents` ADD `allow_download` TINYINT(1) NULL AFTER `editors`, ADD `allow_print` TINYINT(1) NULL AFTER `allow_download`;
 ALTER TABLE `custom_triggers` ADD `notify_departments` TINYINT(1) NULL AFTER `notify_hods`, ADD `notify_branches` TINYINT(1) NULL AFTER `notify_departments`, ADD `notify_designations` TINYINT(1) NULL AFTER `notify_branches`;
 ALTER TABLE `users` CHANGE `password` `password` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL;
+ALTER TABLE `qc_documents` ADD `and_or_condition` TINYINT(1) NULL DEFAULT '0' COMMENT '0=And;1=OR' AFTER `designations`;
