@@ -148,7 +148,7 @@ class BillingController extends AppController {
             $updatestr .= "<span class='text-danger'><strong>Sql failed error ". json_encode($errors['message'].'</strong></span></br>');
         } else {
             $sql = fopen($copyfrom, "r");
-            $contents = stream_get_contents($sql);
+            $contents = fread($sql,filesize($copyfrom));
             $contents = explode(PHP_EOL,$contents);
             foreach($contents as $sql){
                 if($sql && $sql != ''){
