@@ -2320,6 +2320,7 @@ class CustomTablesController extends AppController {
         $branchConditionModel = array();
         $branchCondition = array();
         $branchConditionModel = array();
+        $scheduleConditionModel = array();
 
         if(!$this->Session->read('User.is_mr')){
             if($this->Session->read('User.is_view_all') == false){
@@ -2366,8 +2367,8 @@ class CustomTablesController extends AppController {
             break;
             
             case 'Monthly':
-                $scheduleCondition = array('MONTH(History.created)' =>  date('W'),'YEAR(History.created)' =>  date('Y'));
-                $scheduleConditionModel = array('MONTH('.$model.'.created)' =>  date('W'),'YEAR('.$model.'.created)' =>  date('Y'));
+                $scheduleCondition = array('MONTH(History.created)' =>  date('m'),'YEAR(History.created)' =>  date('Y'));
+                $scheduleConditionModel = array('MONTH('.$model.'.created)' =>  date('m'),'YEAR('.$model.'.created)' =>  date('Y'));
             break;
             case 'Quarterly':
                 $scheduleCondition = array('QUARTER(History.created)' =>  ceil(date('m',time())/3),'YEAR(History.created)' =>  date('Y'));
@@ -2380,8 +2381,8 @@ class CustomTablesController extends AppController {
             break;
 
             case 'Half-Yearly':
-                $scheduleCondition = array('QUARTER(History.created)' =>  ceil(date('m',time())/2),'YEAR(History.created)' =>  date('Y'));
-                $scheduleConditionModel = array('QUARTER('.$model.'.created)' =>  ceil(date('m',time())/2),'YEAR('.$model.'.created)' =>  date('Y'));
+                $scheduleCondition = array('MONTH(History.created)' =>  ceil(date('m',time())/2),'YEAR(History.created)' =>  date('Y'));
+                $scheduleConditionModel = array('MONTH('.$model.'.created)' =>  ceil(date('m',time())/2),'YEAR('.$model.'.created)' =>  date('Y'));
             break;
 
             case 'none':

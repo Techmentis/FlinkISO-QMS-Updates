@@ -1,4 +1,5 @@
 <div class="main">
+    <?php echo $this->Session->flash(); ?>
     <div class="row">
         <div class="col-md-12">
             <!-- <i class="fa fa-check-circle-o" style="font-size: 120px; font-weight: 10;"></i> -->

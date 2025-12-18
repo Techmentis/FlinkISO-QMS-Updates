@@ -953,11 +953,11 @@ class UsersController extends AppController {
             $this->request->data['User'] = $user;
 
             if($err){
-
+                CakeLog::write('debug',json_encode($err));
             }
 
             if($response){
-                // return $response;
+                CakeLog::write('debug',json_encode($response));
             }
         }
 
