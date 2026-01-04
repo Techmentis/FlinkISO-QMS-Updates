@@ -89,6 +89,16 @@ public function add() {
 			$this->set('pdfTemplateHeaders',$pdfTemplateHeaders);
 		}
 	}
+
+	if($this->request->params['named']['custom_table_id']){
+		$this->loadModel('CustomTable');
+
+		$qcDocument = $this->CustomTable->find('first',array(
+			'recursive'=>0,
+			'fields'=>array('CustomTable.id','CustomTable.qc_document_id','QcDocument.id','QcDocument.it_categories'),
+			'conditions'=>array('CustomTable.id'=>$this->request->params['named']['custom_table_id'])));
+		$this->set('qcDocument',$qcDocument);		
+	}
 	
 	$this->set('controller_name',$this->request->params['named']['controller_name']);
 }
@@ -301,126 +311,128 @@ public function _add_cover($data = null,$id = null){
 	return true;
 }
 public function download(){
-	
-	$this->set('addwatermark',false);
-	if($this->request->params['named']['type'] == 'rec'){
-		
-		if($this->request->params['named']['id']){
-			$path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $this->request->params['named']['id'];
-			$folderToEmpty = New Folder($path);
-			$folderToEmpty->delete();
-		}
-		
-		if($this->request->data['DocumentDownload']['add_cover'] > 0){			
-			$this->_add_cover($this->request->data,$this->request->params['named']['id']);
-			$this->set('addcover',false);
-		}	
-		//run file script
-		if($this->request->params['named']['model']){
-			$model = $this->request->params['named']['model'];			
-			$this->loadModel($model);
-			$record = $this->$model->find('first',array('conditions'=>array($model.'.id'=>$this->request->params['named']['id'])));
-			if($record){
-				$customTable = $this->$model->CustomTable->find('first',array('conditions'=>array('CustomTable.id'=>$record[$model]['custom_table_id'])));				
-				//check if file is available for this record
-				$this->loadModel('DownloadFile');
-				$file = $this->DownloadFile->find('first',array('conditions'=>array('DownloadFile.model'=>$model,'DownloadFile.record_id'=>$record[$model]['id'])));	
-				$qcDocument = $this->$model->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$record[$model]['qc_document_id'])));
-				$this->set('qcDocument',$qcDocument);
-				if($record){
-					$this->set('record',$record);
-					$this->set('fields',json_decode($customTable['CustomTable']['fields'],true));
-					$fontsize = $this->request->data['DocumentDownload']['font_size'];
-					$fontface = $this->request->data['DocumentDownload']['font_face'];
-					if(!$fontsize)$fontsize = '12';
-					if(!$fontface)$fontface = 'arial';
-
-					if($this->request->data['DocumentDownload']['pdf_header_id'] != -1){
-						$header_file = $this->_generate_template_header($qcDocument,$fontsize,$fontface,$record,$this->request->data['DocumentDownload']['pdf_header_id'],$model);	
-						$this->set('header_file',$header_file);
-					}else{
-						$this->_generate_header($qcDocument,$fontsize,$fontface,$record[$model]['id']);
-					}
-					
-					$this->loadModel('PdfTemplate');
-					if($this->request->data['DocumentDownload']['pdf_template_id'] != -1){
-						$pdfTemplate = $this->PdfTemplate->find('first',array('conditions'=>array('PdfTemplate.id'=>$this->request->data['DocumentDownload']['pdf_template_id']),'recursive'=>-1));	
-						$this->set('pdfTemplate',$pdfTemplate);
-						// open template
-						$templateFile = Configure::read('files') . DS . 'pdf_template' . DS . $pdfTemplate['PdfTemplate']['id'] . DS . 'template.html';
-						if($templateFile){
-						
-							$filetoread = fopen($templateFile, "r") or die("Unable to open file!");
-							$contents = fread($filetoread,filesize($templateFile));
-							fclose($filetoread);
-						
-							$content = $this->_generate_template_content($customTable['CustomTable']['fields'],$record,$model,$fontsize,$fontface,$contents,$pdfTemplate['PdfTemplate']['child_table_fields']);							
-						}						
-					}else{
-						$content = $this->_generate_content($customTable['CustomTable']['fields'],$record,$model,$fontsize,$fontface);
-					}					
-				}	
-			}			
-			
-			$additionalFiles = json_decode($record[$model]['additional_files']);
-			if($additionalFiles && is_array($additionalFiles)){
-				foreach($additionalFiles as $additionalFile){
-					$aFile = $this->DownloadFile->find('first',array('conditions'=>array('DownloadFile.id'=>$additionalFile),'recursive'=>-1));
-					if($aFile && $aFile['DownloadFile']['model'] == 'QcDocument'){
-						$url = Router::url('/', true) .'/files/'.$this->Session->read('User.company_id') .'/files/'.$aFile['DownloadFile']['id'] .'/'. $aFile['DownloadFile']['name'].'.'.$aFile['DownloadFile']['file_type'];
-						$this->_generate_onlyoffice_pdf($url,$aFile['DownloadFile']['file_type'],'pdf', null, $aFile['DownloadFile']['name'], $aFile['DownloadFile']['qc_document_id'],false);
-					}	
-				}
+	if ($this->request->is('post')) {	
+		$this->set('addwatermark',false);
+		if($this->request->params['named']['type'] == 'rec'){			
+			if($this->request->params['named']['id']){
+				$path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $this->request->params['named']['id'];
+				$folderToEmpty = New Folder($path);
+				$folderToEmpty->delete();
 			}
+			
+			if($this->request->data['DocumentDownload']['add_cover'] > 0){			
+				$this->_add_cover($this->request->data,$this->request->params['named']['id']);
+				$this->set('addcover',false);
+			}	
+			//run file script
+			if($this->request->params['named']['model']){
+				$model = $this->request->params['named']['model'];			
+				$this->loadModel($model);
+				$record = $this->$model->find('first',array('conditions'=>array($model.'.id'=>$this->request->params['named']['id'])));
+				if($record){
+					$customTable = $this->$model->CustomTable->find('first',array('conditions'=>array('CustomTable.id'=>$record[$model]['custom_table_id'])));				
+					//check if file is available for this record
+					$this->loadModel('DownloadFile');
+					$file = $this->DownloadFile->find('first',array('conditions'=>array('DownloadFile.model'=>$model,'DownloadFile.record_id'=>$record[$model]['id'])));	
+					$qcDocument = $this->$model->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$record[$model]['qc_document_id'])));
+					$this->set('qcDocument',$qcDocument);
+					if($record){
+						$this->set('record',$record);
+						$this->set('fields',json_decode($customTable['CustomTable']['fields'],true));
+						$fontsize = $this->request->data['DocumentDownload']['font_size'];
+						$fontface = $this->request->data['DocumentDownload']['font_face'];
+						if(!$fontsize)$fontsize = '12';
+						if(!$fontface)$fontface = 'arial';
+
+						if($this->request->data['DocumentDownload']['pdf_header_id'] != -1){
+							$header_file = $this->_generate_template_header($qcDocument,$fontsize,$fontface,$record,$this->request->data['DocumentDownload']['pdf_header_id'],$model);	
+							$this->set('header_file',$header_file);
+						}else{
+							if($this->request->data['DocumentDownload']['add_header']){
+								$this->_generate_header($qcDocument,$fontsize,$fontface,$record[$model]['id']);	
+							}
+							
+						}
+						
+						$this->loadModel('PdfTemplate');
+						if($this->request->data['DocumentDownload']['pdf_template_id'] != -1){
+							$pdfTemplate = $this->PdfTemplate->find('first',array('conditions'=>array('PdfTemplate.id'=>$this->request->data['DocumentDownload']['pdf_template_id']),'recursive'=>-1));	
+							$this->set('pdfTemplate',$pdfTemplate);
+							// open template
+							$templateFile = Configure::read('files') . DS . 'pdf_template' . DS . $pdfTemplate['PdfTemplate']['id'] . DS . 'template.html';
+							if($templateFile){
+							
+								$filetoread = fopen($templateFile, "r") or die("Unable to open file!");
+								$contents = fread($filetoread,filesize($templateFile));
+								fclose($filetoread);
+							
+								$content = $this->_generate_template_content($customTable['CustomTable']['fields'],$record,$model,$fontsize,$fontface,$contents,$pdfTemplate['PdfTemplate']['child_table_fields']);							
+							}						
+						}else{
+							$content = $this->_generate_content($customTable['CustomTable']['fields'],$record,$model,$fontsize,$fontface);
+						}					
+					}	
+				}			
+				
+				$additionalFiles = json_decode($record[$model]['additional_files']);
+				if($additionalFiles && is_array($additionalFiles)){
+					foreach($additionalFiles as $additionalFile){
+						$aFile = $this->DownloadFile->find('first',array('conditions'=>array('DownloadFile.id'=>$additionalFile),'recursive'=>-1));
+						if($aFile && $aFile['DownloadFile']['model'] == 'QcDocument'){
+							$url = Router::url('/', true) .'/files/'.$this->Session->read('User.company_id') .'/files/'.$aFile['DownloadFile']['id'] .'/'. $aFile['DownloadFile']['name'].'.'.$aFile['DownloadFile']['file_type'];
+							$this->_generate_onlyoffice_pdf($url,$aFile['DownloadFile']['file_type'],'pdf', null, $aFile['DownloadFile']['name'], $aFile['DownloadFile']['qc_document_id'],false);
+						}	
+					}
+				}
+
+				$pdfs = array();
+				$path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $this->request->params['named']['id'];	
+				$folder = new Folder($path);
+				$pdfs = $folder->find('.*\.pdf');
+				$this->set('pdfs',$pdfs);
+				$this->set('id',$file['DownloadFile']['id']);
+				
+
+			}
+		}else if($this->request->params['named']['type'] == 'qc'){
+			
+			if($this->request->params['named']['id']){
+				$path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $this->request->params['named']['id'];
+				$folderToEmpty = New Folder($path);
+				$folderToEmpty->delete();
+			}
+
+			if($this->request->data['DocumentDownload']['add_cover'] > 0){
+				$this->_add_cover($this->request->data,$this->request->params['named']['id']);
+				$this->set('addcover',false);
+			}
+
+			// run onlyoffice script
+			$this->loadModel('QcDocument');
+			$qcDocument = $this->QcDocument->find('first',array(
+				'recursive'=>-1,			
+				'conditions'=>array('QcDocument.id'=>$this->request->params['named']['id'])));
+
+			$file_type = $qcDocument['QcDocument']['file_type'];
+			$file_name = $qcDocument['QcDocument']['title'];
+			$document_number = $qcDocument['QcDocument']['document_number'];
+			$document_version = $qcDocument['QcDocument']['revision_number'];
+			$file_name = $document_number . '-' . $file_name . '-' . $document_version;
+			$file_name = $this->_clean_table_names($file_name);
+			$file = $file_name . '.' . $file_type;
+
+			$url = Router::url('/', true) .'/files/'.$this->Session->read('User.company_id') .'/qc_documents/'.$qcDocument['QcDocument']['id'] .'/'. $file; 
+			
+			$this->_generate_onlyoffice_pdf($url,$qcDocument['QcDocument']['file_type'], 'pdf' ,null, $file_name ,$qcDocument['QcDocument']['id'],false);	
 
 			$pdfs = array();
 			$path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $this->request->params['named']['id'];	
 			$folder = new Folder($path);
 			$pdfs = $folder->find('.*\.pdf');
 			$this->set('pdfs',$pdfs);
-			$this->set('id',$file['DownloadFile']['id']);
-			
-
+			$this->set('id',$qcDocument['QcDocument']['id']);
 		}
-	}else if($this->request->params['named']['type'] == 'qc'){
-		
-		if($this->request->params['named']['id']){
-			$path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $this->request->params['named']['id'];
-			$folderToEmpty = New Folder($path);
-			$folderToEmpty->delete();
-		}
-
-		if($this->request->data['DocumentDownload']['add_cover'] > 0){
-			$this->_add_cover($this->request->data,$this->request->params['named']['id']);
-			$this->set('addcover',false);
-		}
-
-		// run onlyoffice script
-		$this->loadModel('QcDocument');
-		$qcDocument = $this->QcDocument->find('first',array(
-			'recursive'=>-1,			
-			'conditions'=>array('QcDocument.id'=>$this->request->params['named']['id'])));
-
-		$file_type = $qcDocument['QcDocument']['file_type'];
-		$file_name = $qcDocument['QcDocument']['title'];
-		$document_number = $qcDocument['QcDocument']['document_number'];
-		$document_version = $qcDocument['QcDocument']['revision_number'];
-		$file_name = $document_number . '-' . $file_name . '-' . $document_version;
-		$file_name = $this->_clean_table_names($file_name);
-		$file = $file_name . '.' . $file_type;
-
-		$url = Router::url('/', true) .'/files/'.$this->Session->read('User.company_id') .'/qc_documents/'.$qcDocument['QcDocument']['id'] .'/'. $file; 
-		
-		$this->_generate_onlyoffice_pdf($url,$qcDocument['QcDocument']['file_type'], 'pdf' ,null, $file_name ,$qcDocument['QcDocument']['id'],false);	
-
-		$pdfs = array();
-		$path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $this->request->params['named']['id'];	
-		$folder = new Folder($path);
-		$pdfs = $folder->find('.*\.pdf');
-		$this->set('pdfs',$pdfs);
-		$this->set('id',$qcDocument['QcDocument']['id']);
 	}
-
 	$this->set('signature',$this->request->data['DocumentDownload']['signature']);
 				
 }
@@ -580,7 +592,7 @@ public function _generate_template_content($fields = null, $record = null, $mode
 	tr{background-color: #fff; text-align: left;}
 	td,th{background-color: #fff; text-align: left;}
 </style>";
-		
+
 	foreach($fields as $field){
 		if($field['linked_to'] != -1){
 			foreach($belongsTo as $modelname => $fieldDetails){
@@ -599,26 +611,32 @@ public function _generate_template_content($fields = null, $record = null, $mode
 		}else if($field['field_type'] == 5){
 			$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
 			$contents = str_replace($f, date(Configure::read('dateFormat'),strtotime($record[$model][$field['field_name']])), $contents);			
+		}else if($field['display_type'] == 6 && $field['data_type'] == 'file'){
+			$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
+			$file = json_decode($record[$model][$field['field_name']],true);
+			$file = $file['name'];
+			$contents = str_replace($f, $file, $contents);
 		}else{
 			$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
 			$contents = str_replace($f, $record[$model][$field['field_name']], $contents);
 		}
 
 	}
-	
+
+	$signature = $this->_fetch_signature($record['PreparedBy']['id']);	
+	$contents = str_replace('$record["PreparedBy"]["name"]', $signature . $record['PreparedBy']['name'], $contents);
+	$signature = $this->_fetch_signature($record['ApprovedBy']['id']);
+	$contents = str_replace('$record["ApprovedBy"]["name"]', $signature.$record['ApprovedBy']['name'], $contents);
+
 	foreach($record as $modelN => $fs){
 		if($modelN != $model){
 			foreach($fs as $n => $val){
 				$f = '$record["'.$modelN.'"]["'.$n.'"]';
 				if($val && $f && !is_array($val))$contents = str_replace($f, $val, $contents);
 			}
-		}			
+		}
 	}
 	
-	// prepared by & approved by
-	$contents = str_replace('$record["PreparedBy"]["name"]', $record['PreparedBy']['name'], $contents);
-	$contents = str_replace('$record["ApprovedBy"]["name"]', $record['ApprovedBy']['name'], $contents);
-
 	$contents = str_replace('</head>',$str.'</head>',$contents);
 	
 	$chld = '';
@@ -663,7 +681,7 @@ public function _generate_template_content($fields = null, $record = null, $mode
 				}
 			}		
 			$chld .= '</tr>';			
-
+			
 			$childRecords = $this->$childTableModel->find('all',array('conditions'=>array($childTableModel.'.parent_id'=>$record[$model]['id'])));
 			foreach($childRecords as $childRecord){
 				$chld .= '<tr>';
@@ -674,9 +692,12 @@ public function _generate_template_content($fields = null, $record = null, $mode
 							if($field['linked_to'] != -1){
 								foreach($belongsTo as $childTableModelbelogs => $fieldDetails){
 									if($fieldDetails['foreignKey'] == $field['field_name']){
-										$this->loadModel($modelname);
-										$displayField = $this->$modelname->displayField;
-										$chld .= "<td>".$childRecord[$childTableModelbelogs][$displayField]."</td>";		
+										$this->loadModel($childTableModelbelogs);
+										$displayField = $this->$childTableModelbelogs->displayField;
+										if($field['add_signature'] == 1){
+											$signature = $this->_fetch_signature($childRecord[$childTableModel][$field['field_name']]);
+										}
+										$chld .= "<td>".$signature."".$childRecord[$childTableModelbelogs][$displayField]."</td>";		
 									}
 								}
 
@@ -755,11 +776,15 @@ public function _generate_content($fields = null, $record = null, $model = null,
 	$str .= "<table width='100%' border=1 cellspacing=1 cellpadding=5>";
 	foreach($fields as $field){		
 		if($field['linked_to'] != -1){
+			$signature = '';
 			foreach($belongsTo as $modelname => $fieldDetails){
 				if($fieldDetails['foreignKey'] == $field['field_name']){
 					$this->loadModel($modelname);
 					$displayField = $this->$modelname->displayField;
-					$str .= "<tr><th>".base64_decode($field['field_label'])."</th><td>".$record[$modelname][$displayField]."</td>";		
+					if($field['add_signature'] == 1){
+						$signature = $this->_fetch_signature($record[$model][$field['field_name']]);
+					}
+					$str .= "<tr><th>".base64_decode($field['field_label'])."</th><td>" . $signature . "" .$record[$modelname][$displayField]."</td>";
 				}
 			}
 
@@ -768,13 +793,22 @@ public function _generate_content($fields = null, $record = null, $model = null,
 			$str .= "<tr><th width='30%'>".base64_decode($field['field_label'])."</th><td>".$csvoptions[$record[$model][$field['field_name']]]."</td>";
 		}else if($field['field_type'] == 5){
 			$str .= "<tr><th>".base64_decode($field['field_label'])."</th><td>".date(Configure::read('dateFormat'),strtotime($record[$model][$field['field_name']]))."</td>";
+		}else if($field['display_type'] == 6 && $field['data_type'] == 'file'){
+			$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
+			$file = json_decode($record[$model][$field['field_name']],true);
+			$file = $file['name'];
+			$contents = str_replace($f, $file, $contents);
 		}else{
 			$str .= "<tr><th>".base64_decode($field['field_label'])."</th><td>".$record[$model][$field['field_name']]."</td>";
 		}
 
 	}
-	$str .= "<tr><th>Prepared By</th><td>".$record['PreparedBy']['name']."</td>";
-	$str .= "<tr><th>Prepared By</th><td>".$record['ApprovedBy']['name']."</td>";
+
+	$signature = $this->_fetch_signature($record['PreparedBy']['id']);
+	$str .= "<tr><th>Prepared By</th><td>".$signature."".$record['PreparedBy']['name']."</td>";
+
+	$signature = $this->_fetch_signature($record['ApprovedBy']['id']);
+	$str .= "<tr><th>Prepared By</th><td>".$signature."".$record['ApprovedBy']['name']."</td>";
 	
 	$str .= "</table>";		
 	
@@ -803,46 +837,62 @@ public function _generate_content($fields = null, $record = null, $model = null,
 		$str .= "<table width='100%' border=1 cellspacing=1 cellpadding=5>";
 
 		foreach($childTables as $childTable){
+			
 			$str .= '<h1>' . $childTable['CustomTable']['name'] .'</h1>';
 			$childTableModel = Inflector::classify($childTable['CustomTable']['table_name']);
 			$this->loadModel($childTableModel);
 			$str .= '<tr>';
+			$field = null;
 			foreach(json_decode($childTable['CustomTable']['fields'],true) as $field){
 				$str .= '<th>' . base64_decode($field['field_label']). '</th>';
 			}
 			$str .= '</tr>';			
 
 			$childRecords = $this->$childTableModel->find('all',array('conditions'=>array($childTableModel.'.parent_id'=>$record[$model]['id'])));
+			$belongsTo = $this->$childTableModel->belongsTo;
+			
 			foreach($childRecords as $childRecord){
+				$signature = '';
 				$str .= '<tr>';
+				$field = null;
 				foreach(json_decode($childTable['CustomTable']['fields'],true) as $field){
-					$belongsTo = $this->$model->belongsTo;
-					if($field['linked_to'] != -1){
-						foreach($belongsTo as $childTableModel => $fieldDetails){
+					
+
+					if($field['linked_to'] != -1){						
+						foreach($belongsTo as $cTableModel => $fieldDetails){
 							if($fieldDetails['foreignKey'] == $field['field_name']){
-								$this->loadModel($modelname);
-								$displayField = $this->$modelname->displayField;
-								$str .= "<td>".$childRecord[$childTableModel][$displayField]."</td>";		
+								$this->loadModel($cTableModel);
+								$displayField = $this->$cTableModel->displayField;
+
+								if($field['add_signature'] == 1){
+									$signature = $this->_fetch_signature($childRecord[$childTableModel][$field['field_name']]);
+								}
+								$str .= "<td>".$signature . "". $childRecord[$cTableModel][$displayField]." &nbsp;</td>";		
+							}else{
+
 							}
 						}
-
 					}else if($field['data_type'] == 'radio'){
 						$csvoptions = explode(',',$field['csvoptions']);
-						$str .= "<td>".$csvoptions[$childRecord[$childTableModel][$field['field_name']]]."</td>";
+						$str .= "<td>".$csvoptions[$childRecord[$childTableModel][$field['field_name']]]."&nbsp;</td>";
 					}else if($field['field_type'] == 5){						
-						$str .= "<td>".date(Configure::read('dateFormat',strtotime($childRecord[$childTableModel][$field['field_name']])))."</td>";
-					}else{
-						$str .= "<td>".$childRecord[$childTableModel][$field['field_name']]."</td>";
+						$str .= "<td>".date(Configure::read('dateFormat',strtotime($childRecord[$childTableModel][$field['field_name']])))."&nbsp;</td>";
+					}else{						
+						if($field['data_type'] == 'file'){
+							$str .= "<td>File &nbsp;</td>";
+						}else{
+							$str .= "<td>".$childRecord[$childTableModel][$field['field_name']]."&nbsp;</td>";	
+						}
+						
 					}
 				}
-				$str .= '</tr>';			
+				$str .= '</tr>';				
 			}
 			$t++;
 		}
 
 		$str .= "</table>";		
 	}	
-
 	
 	$header_file = Router::url('/', true) . 'files/pdf/' .$this->Session->read('User.id') . '/' . $record[$model]['id']. '/' . $record[$model]['qc_document_id']. '.html';
 	$filenamae = $model."-".$record[$model][$this->$model->displayField];
@@ -923,6 +973,7 @@ public function _generate_pdf_file($header_file = null,$content = null,$fileName
 		$header_file = $this->viewVars['header_file'];
 	}
 
+
 	if(isset($this->viewVars['pdfHeader']['PdfTemplate'])){
 		$dpi = $this->viewVars['pdfHeader']['PdfTemplate']['dpi'];
 		$outline = $this->viewVars['pdfHeader']['PdfTemplate']['outline']?'true':'false';
@@ -972,6 +1023,10 @@ public function _generate_pdf_file($header_file = null,$content = null,$fileName
 	if(!$margin_right)$margin_right = 10;
 	if(!$margin_top)$margin_top = 30;
 	
+	if($this->request->data['DocumentDownload']['add_header'] == 0){
+		$header_file = false;
+		$header_spacing = 0;
+	}
 
 	if($outline == true){
 		$CakePdf = new CakePdf(array(				
@@ -1051,5 +1106,26 @@ public function _generate_pdf_file($header_file = null,$content = null,$fileName
 	unlink($header_file);
 	return $fileName;
 }	
+	public function _fetch_signature($id = null){
+		$this->loadModel('User');
+		$user = $this->User->find('first', array(
+			'fields'=>array(
+				'User.id',
+				'User.password',
+				'User.employee_id',
+				'Employee.id',
+				'Employee.signature',
+			),
+			'conditions' => array('User.status' => 1, 'User.soft_delete' => 0, 'User.publish' => 1, 'User.employee_id' => $id)));
 
+			$img = WWW_ROOT. DS. 'img'. DS . $this->Session->read('User.company_id'). DS .'signature'. DS. $user['Employee']['id']. DS. 'sign.png';
+			if(file_exists($img)){
+				$response = "<img src='".$img."' width=100><br />";
+			}else if($user['Employee']['signature']){
+				$response = "<img src='".$user['Employee']['signature']."' width=100><br />";
+			}else{
+				$response = 'Signature not available';
+			}			
+		return $response;
+	}
 }

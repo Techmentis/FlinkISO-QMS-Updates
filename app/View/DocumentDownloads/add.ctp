@@ -2,7 +2,7 @@
 <?php echo $this->Html->script(array('jquery.validate.min', 'jquery-form.min', 'sign')); ?>
 <style type="text/css">
 	.wrapper1,.wrapper2 {border-radius: 4px; border: 2px dashed #ccc;position: relative;width: 352px;height: 152px;-moz-user-select: none;-webkit-user-select: none;-ms-user-select: none;user-select: none;margin: auto; }.signature-pad {position: absolute;left: 0;top: 0;width:350px;height:150px;}
-	#signatureModal, .modal-dialog{width: 390px;height: 200px}#clear{width: 350px;border-radius: 0 0 4px 4px;}#fsubmit{margin-bottom: 20px !important}
+	#signatureModal, .modal-dialog{width: 825px;height: 200px}#clear{width: 350px;border-radius: 0 0 4px 4px;}#fsubmit{margin-bottom: 20px !important}
 	.requiredsign{border: 2px dashed red}
 	.chosen-container, .chosen-container-single, .chosen-select{min-width: 1px}
 </style>
@@ -33,85 +33,104 @@
 					<div class="col-md-6 hide"><?php echo $this->Form->input('add_child_records',array('class'=>'checkbox'));?></div>
 					<div class="col-md-6 hide"><?php echo $this->Form->input('add_linked_form_records',array('class'=>'checkbox'));?></div>
 					<div class="col-md-12">
-						<?php
-						if(isset($qcDocument) && $qcDocument['QcDocument']['it_categories'] == 3 || $qcDocument['QcDocument']['it_categories'] == null){
-							echo "Add password to protect your PDF file. Leave blank if you do not wish to. This password will not be stored.";
-						}else{
-							echo "This document requires password to be added before generating the PDF.";
-						}
-						?>
-					</div>
-					<div class="col-md-12"><?php
-					if(isset($qcDocument) && $qcDocument['QcDocument']['it_categories'] == 3){
-						echo $this->Form->input('password',array('class'=>'form-control'));		
-					}else{
-						echo $this->Form->input('password',array('class'=>'form-control','required'=>'required'));							
-					}?></div>
-					<div class="col-md-12 text-center">						
-						<label>Draw Your Signature Below</label></div>
-						<div class="col-md-12 text-center">
-							<div id="signed"></div>
-							<div class="wrapper1">
-								<canvas id="signature-pad" class="signature-pad" width=350 height=150></canvas>					        
+						<div class="row">
+							<div class="col-md-6">
+								<div class="row">
+									<div class="col-md-12 ">
+										<label style="margin:8px 20px" >Draw/ fetch Your Signature Below</label>
+										<div class="col-md-12">
+											<div id="signed"></div>
+											<div class="wrapper1" style="margin:0px">
+												<canvas id="signature-pad" class="signature-pad" width=350 height=150></canvas>					        
+											</div>
+											<div class="btn-group ">
+												<div class="btn tooltip1" onclick="copysign();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Copy Signature"><i class="fa fa-copy "></i></div>
+												<div class="btn tooltip1" onclick="getsignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Fetch Saved Signature"><i class="fa fa-folder-open"></i></div>
+												<div class="btn tooltip1" onclick="savesignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Save Signature"><i class="fa fa-save"></i></div>
+												<div class="btn tooltip1" onclick="clearCanvas();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Clear Signature"><i class="fa fa-eraser"></i></div>							
+											</div>
+											<?php echo $this->Form->hidden('signature',array('id'=>'digital-signature'));?>
+										</div>
+										<div class="col-md-12">
+											<ul class="list-group">
+												<li class="list-group-item"><i class="fa fa-copy"></i> : Copy signature from earlier uploaded png file.</li>
+												<li class="list-group-item"><i class="fa fa-folder-open"></i> : Copy signature from earlier saved image.</li>
+												<li class="list-group-item"><i class="fa fa-save"></i> : Save current signature image.</li>
+												<li class="list-group-item"><i class="fa fa-eraser"></i> : Clear Canvas.</li>
+											</ul>
+										</div>
+									</div>
+								</div>
 							</div>
-							<?php echo $this->Form->hidden('signature',array('id'=>'digital-signature'));?>
-						</div>
-						<div class="col-md-12 text-center ">
-							<div class="btn-group ">
-								<div class="btn tooltip1" onclick="copysign();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Copy Signature"><i class="fa fa-copy "></i></div>
-								<div class="btn tooltip1" onclick="getsignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Fetch Saved Signature"><i class="fa fa-folder-open"></i></div>
-								<div class="btn tooltip1" onclick="savesignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Save Signature"><i class="fa fa-save"></i></div>
-								<div class="btn tooltip1" onclick="clearCanvas();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Clear Signature"><i class="fa fa-eraser"></i></div>							
-							</div>
-						</div>
-						<div class="col-md-12">
-							<ul class="list-group">
-								<li class="list-group-item"><i class="fa fa-copy"></i> : Copy signature from earlier uploaded png file.</li>
-								<li class="list-group-item"><i class="fa fa-folder-open"></i> : Copy signature from earlier saved image.</li>
-								<li class="list-group-item"><i class="fa fa-save"></i> : Save current signature image.</li>
-								<li class="list-group-item"><i class="fa fa-eraser"></i> : Clear Canvas.</li>
-							</ul>
-						</div>
-						<?php 
-						$cover = Configure::read('files') . DS . 'pdf_template' . DS . 'cover' . DS . 'template.html';
-						if(file_exists($cover)){
-							$cover_page_options = array(
-								0=>'No',
-								1=>'Yes',
-								2=>'QC Documents Only',
-								3=>'All'
-							);
-							
-							if(isset($this->request->params['named']['custom_table_id'])){
-								unset($cover_page_options[1]);
-							}
+							<div class="col-md-6">
+								<div class="row">
+									<div class="col-md-12"><?php
+										if(isset($qcDocument) && $qcDocument['QcDocument']['it_categories'] == 1){
+											echo $this->Form->input('password',array('class'=>'form-control'));		
+										}else{
+											echo $this->Form->input('password',array('class'=>'form-control','required'=>'required'));							
+										}?>										
+									</div>
+									<div class="col-md-12">
+										<?php
+										if(isset($qcDocument) && $qcDocument['QcDocument']['it_categories'] == 1){
+											echo "Add password to protect your PDF file. Leave blank if you do not wish to. This password will not be stored.";
+										}else{
+											echo "This is a confidential document. Password is mandatorey. This password will not be stored.";
+										}
+										?>
+									</div>									
+								</div>
+								<div class="row">
+									<?php 
+										$cover = Configure::read('files') . DS . 'pdf_template' . DS . 'cover' . DS . 'template.html';
+										if(file_exists($cover)){
+											$cover_page_options = array(
+												0=>'No',
+												1=>'Yes',
+												2=>'QC Documents Only',
+												3=>'All'
+											);
+											
+											if(isset($this->request->params['named']['custom_table_id'])){
+												unset($cover_page_options[1]);
+											}
 
-							if(isset($this->request->params['named']['controller_name']) && $this->request->params['named']['controller_name'] == 'qc_documents'){								
-								unset($cover_page_options[2]);
-								unset($cover_page_options[3]);
-							}
-							echo '<div class="col-md-12">'.$this->Form->input('add_cover',array('type'=>'radio', 'default'=>0, 'options'=>$cover_page_options)).'</div>';
-						}
-						?>
-						<?php
-						if($this->request->params['pass'][0]){ ?>
-							<?php 					
-							$font_face = array('Arial'=>'Arial','Times New Roman'=>'Times New Roman','Tahoma'=>'Tahoma','Helvetica'=>'Helvetica');
-							?>
-							<div class="col-md-6 "><?php echo $this->Form->input('font_size',array('default'=> 11 , 'class'=>'form-control'));?></div>
-							<div class="col-md-6 "><?php echo $this->Form->input('font_face',array('options'=> $font_face, 'default'=>'Arial', 'class'=>'form-control'));?></div>
-							<div class="col-md-12"><?php echo $this->Form->input('pdf_header_id',array('options'=>$pdfTemplateHeaders,'class'=>'select'));?></div>
-							<div class="col-md-12"><?php echo $this->Form->input('pdf_template_id',array('options'=>$pdfTemplates,'class'=>'select'));?></div>
-							<div class="col-md-12 text-center"><p><br /><?php 
-							if($pdfTemplates){
-								echo $this->Html->link('View Templates',array('controller'=>'pdf_templates','action'=>'index',$this->request->params['named']['custom_table_id'])) . ' | ';
-								echo $this->Html->link('Add New Template',array('controller'=>'pdf_templates','action'=>'add',$this->request->params['named']['custom_table_id']));
-							}else{
-								echo $this->Html->link('Add Template',array('controller'=>'pdf_templates','action'=>'add',$this->request->params['named']['custom_table_id']));	
-							} 
-						?></p>
-					<?php } ?>
-				</div>
+											if(isset($this->request->params['named']['controller_name']) && $this->request->params['named']['controller_name'] == 'qc_documents'){								
+												unset($cover_page_options[2]);
+												unset($cover_page_options[3]);
+											}											
+											echo '<div class="col-md-8">'.$this->Form->input('add_cover',array('type'=>'radio', 'default'=>0, 'options'=>$cover_page_options)).'</div>';
+											$header_page_options = array(1=>'Yes',0=>'No');
+											echo '<div class="col-md-4">'.$this->Form->input('add_header',array('type'=>'radio', 'default'=>0, 'options'=>$header_page_options)).'</div>';
+										}
+										?>
+								</div>
+								<div class="row">
+									<?php
+										if($this->request->params['pass'][0]){ ?>
+											<?php 					
+											$font_face = array('Arial'=>'Arial','Times New Roman'=>'Times New Roman','Tahoma'=>'Tahoma','Helvetica'=>'Helvetica');
+											?>
+											<div class="col-md-6 "><?php echo $this->Form->input('font_size',array('default'=> 11 , 'class'=>'form-control'));?></div>
+											<div class="col-md-6 "><?php echo $this->Form->input('font_face',array('options'=> $font_face, 'default'=>'Arial', 'class'=>'form-control'));?></div>
+											<div class="col-md-12"><?php echo $this->Form->input('pdf_header_id',array('options'=>$pdfTemplateHeaders,'class'=>'select'));?></div>
+											<div class="col-md-12"><?php echo $this->Form->input('pdf_template_id',array('options'=>$pdfTemplates,'class'=>'select'));?></div>
+											<div class="col-md-12 text-center"><p><br /><?php 
+											if($pdfTemplates){
+												echo $this->Html->link('View Templates',array('controller'=>'pdf_templates','action'=>'index',$this->request->params['named']['custom_table_id'])) . ' | ';
+												echo $this->Html->link('Add New Template',array('controller'=>'pdf_templates','action'=>'add',$this->request->params['named']['custom_table_id']));
+											}else{
+												echo $this->Html->link('Add Template',array('controller'=>'pdf_templates','action'=>'add',$this->request->params['named']['custom_table_id']));	
+											} ?></p>
+											<?php } ?>
+											</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				
+							
 
 				<?php echo $this->Form->hidden('record_id',array('default'=>$this->request->params['pass'][0]));?>
 				<?php echo $this->Form->hidden('custom_table_id',array('default'=>$this->request->params['named']['custom_table_id']));?>

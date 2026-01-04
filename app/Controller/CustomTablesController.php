@@ -384,7 +384,6 @@ class CustomTablesController extends AppController {
             $this->Session->setFlash(__('Something went wrong'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect($this->referer());
         }
-
         // run above sql first and then add alter table commands one by one
         foreach ($fields as $chkd) {            
             if($chkd['new'] == 0 && $chkd['field_name'] != $chkd['old_field_name']){
@@ -409,6 +408,9 @@ class CustomTablesController extends AppController {
                     break;
                     case 6: // datetime
                     $type = 'datetime';
+                    break;
+                    case 7: // datetime
+                    $type = 'varchar('.$chkd['length'].')';
                     break;
                 default: // text
                 $type = 'text';
@@ -450,6 +452,9 @@ class CustomTablesController extends AppController {
             break;
             default: // text
             $type = 'text';
+            break;
+            case 7: // datetime
+            $type = 'varchar('.$chkd['length'].')';
             break;
         }
 
@@ -852,6 +857,12 @@ class CustomTablesController extends AppController {
         
         $qcpfile = WWW_ROOT .  'files' . DS . $this->Session->read('User.company_id') . DS . $type . DS . $id . DS . $file_name;
         $tofile = WWW_ROOT .  'files' . DS . $this->Session->read('User.company_id') . DS . 'custom_tables' . DS . $id . DS . $file_name;
+        $tofolder = WWW_ROOT .  'files' . DS . $this->Session->read('User.company_id') . DS . 'custom_tables' . DS . $id . DS;
+
+        if(file_exists($tofolder)){
+            unlink($tofolder);
+        }
+
 
         if (file_exists($qcpfile)) {
             $folder = WWW_ROOT .  'files' . DS . $this->Session->read('User.company_id') . DS . 'custom_tables' . DS . $id;
@@ -1338,7 +1349,6 @@ class CustomTablesController extends AppController {
                     $belongsTo[$fields['field_name']] = $fields['linked_to'];
                 }
             }
-
             $sqlresult = $this->_add_new_table($table_name,$defaultfield,null,$toDrop);
             
             if(is_array($newFields)){

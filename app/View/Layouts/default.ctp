@@ -37,7 +37,7 @@
 }
 echo $this->fetch('script');
 ?>
-
+<style>.chosen-drop{z-index: 999}</style>
 </head>
 <body class="hold-transition skin-blue sidebar-collapse sidebar-mini">
 	<?php if ($this->Session->read('User'))echo $this->Element('control-sidebar'); ?>
@@ -250,12 +250,18 @@ if($this->action == 'index'){?>
 				type: "POST",
 				url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/load_process/<?php echo $this->request->params['named']['custom_table_id'];?>",
 			  success: function(data, result) {                                   
-					$(".content").append(data);				
+					$(".content").append(data);	
 					// $("#main").append(data);
 				},                              
 		}); 
 	});
 </script>
 <?php } ?>
+<script>
+	function addsignature(employee,fieldid){
+		$("#"+fieldid).val(-1).trigger('chosen:updated');
+		$("#addsignature-employee").load("<?php echo Router::url('/', true); ?>/<?php echo $this->request->controller;?>/addsignature/"+employee+"/"+fieldid);
+	}
+</script>
 </body>
 </html>

@@ -1098,11 +1098,23 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 		if ($this->request->controller != 'custom_tables') {
 			if ($this->request->is('post') || $this->request->is('put')) {
-				$model = $this->modelClass;
-				$record = $this->$model->find('first',array('conditions'=>array($model.'.id'=>$id),'recursive'=>-1));
-				$this->_recursive_delete($this->request->data[$model]['id'],$model);
-				$this->redirect(array('action' => 'index','custom_table_id'=>$record[$model]['custom_table_id'],'qc_document_id'=>$record[$model]['qc_document_id']));
-			} else {
+				if($this->request->controller == 'users'){
+					$user = $this->User->find('first',array('conditions'=>array('User.id'=>$id)));
+					if($user['User']['sr_no'] == 1){
+						$this->Session->setFlash(__('You can not delete this user'));
+					}
+					$user = $this->User->find('count');
+					if($user == 1){
+						$this->Session->setFlash(__('You can not delete this user'));
+					}
+					$this->redirect(array('action' => 'index','custom_table_id'=>$record[$model]['custom_table_id'],'qc_document_id'=>$record[$model]['qc_document_id']));
+				}else{
+					$model = $this->modelClass;
+					$record = $this->$model->find('first',array('conditions'=>array($model.'.id'=>$id),'recursive'=>-1));
+					$this->_recursive_delete($this->request->data[$model]['id'],$model);
+					$this->redirect(array('action' => 'index','custom_table_id'=>$record[$model]['custom_table_id'],'qc_document_id'=>$record[$model]['qc_document_id']));
+				}				
+			} else {				
 				$model = $this->modelClass;
 				$this->loadModel($model);
 				$rec = $this->$model->find('first',array('conditions'=>array($model.'.id'=>$this->request->params['pass'][0]),'fields'=>array($model.'.id',$model.'.prepared_by')));
@@ -4128,5 +4140,82 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			fwrite($fp, $content);
 			fclose($fp);
 		}
+	}
+
+	public function addsignature($employee_id = null, $fieldid = null){
+		$this->layout = 'ajax';
+		if ($this->request->is('post') || $this->request->is('put')) {
+			if($this->request->data['AddSignature']['user_password']){
+				$this->loadModel('User');
+				$user = $this->User->find('first', array(
+					'fields'=>array(
+						'User.id',
+						'User.password',
+						'User.employee_id',
+						'Employee.id',
+						'Employee.signature',
+					),
+					'conditions' => array('User.status' => 1, 'User.soft_delete' => 0, 'User.publish' => 1, 'User.employee_id' => $this->request->data['AddSignature']['employee_id'])));
+				
+				if($user){
+					if (trim($user['User']['password']) != trim(Security::hash($this->request->data['AddSignature']['user_password'], 'md5', true))) {
+						$response = 'Wrong password';
+					}else{
+						$img = WWW_ROOT. DS. 'img'. DS . $this->Session->read('User.company_id'). DS .'signature'. DS. $user['Employee']['id']. DS. 'sign.png';
+						if(file_exists($img)){
+							$response = 'Proceed';
+						}else if($user['Employee']['signature']){
+							$response = 'Proceed';
+						}else{
+							$response = 'Signature not available';
+						}						
+					}
+				}else{
+					$response = 'Wrong user';
+				}
+			}else{
+				$response = 'invalid';
+			}			
+			echo $response;	
+			exit;		
+		}else{
+			if($employee_id){
+				$this->loadModel('Employee');
+				$employee = $this->Employee->find(
+						'first',array(
+							'conditions'=>array('Employee.id'=>$employee_id),
+							'recursive'=>-1,
+							'fields'=>array('Employee.id','Employee.name','Employee.signature'))
+				);
+				
+				if($employee){
+					$this->set('employee',$employee);
+				}
+			}
+			$this->set(array('fieldid'=>$fieldid,'employee_id'=>$employee_id));
+			$this->render('/Elements/addsignature');			
+		}
+		
+	}
+
+	public function checkpass(){
+		$this->autoRender = false;
+		if($this->request->data['AddSignature']['user_password']){
+			$this->loadModel('User');
+			$user = $this->User->find('first', array('conditions' => array('User.status' => 1, 'User.soft_delete' => 0, 'User.publish' => 1, 'User.username' => $this->Session->read('User.username'))));
+
+			if($user){
+				if (trim($user['User']['password']) != trim(Security::hash($this->request->data['AddSignature']['user_password'], 'md5', true))) {
+					$response = 'Wrong password';
+				}else{
+					$response = 'Proceed';
+				}
+			}else{
+				$response = 'Wrong user';
+			}
+		}else{
+			$response = 'wrong data';
+		}
+		return $response;		
 	}
 }

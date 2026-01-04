@@ -294,7 +294,10 @@ if($filetype != null){
                                 
                                 var connectEditor = function () {
                                     var config = <?php echo json_encode($config) ?>;
-                                    docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);                                    
+                                    if(docEditor){                                        
+                                    }else{
+                                        docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);
+                                    }
                                 };
 
                                 var fixSize = function () {
@@ -516,9 +519,12 @@ if($filetype != null){
                                         var docEditor;             
                                         var сonnectEditor = function () {
                                             var config = <?php echo json_encode($config) ?>;
-                                            config.width = "100%";
-                                            config.height = "100%";
-                                            docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);
+                                            // config.width = "100%";
+                                            // config.height = "100%";
+                                            if(docEditor){                                        
+                                            }else{
+                                                docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);
+                                            }
                                         };
                                         var fixSize = function () {
                                             var wrapEl = document.getElementsByClassName("form");

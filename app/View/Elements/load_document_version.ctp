@@ -61,8 +61,11 @@ $config  = array();
             var config = <?php echo json_encode($config) ?>;
             config.width = "100%";
             config.height = "100%";
-            console.log(config);
-            docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $this->data['version_key'];?>", config);
+            if(docEditor){                                        
+            }else{
+                docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $this->data['version_key'];?>", config);
+            }
+            
         };
         var fixSize = function () {
             var wrapEl = document.getElementsByClassName("form");

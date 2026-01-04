@@ -160,9 +160,12 @@ if($filetype != null){
 $().ready(function(){
 
     var docEditor;                
-    var сonnectEditor = function () {
+    var connectEditor = function () {
         var config = <?php echo json_encode($config) ?>;
-        docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);                                        
+        if(docEditor){
+        }else{
+            docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);
+        }
     };
     var fixSize = function () {
         var wrapEl = document.getElementsByClassName("form");

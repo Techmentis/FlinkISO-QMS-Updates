@@ -219,8 +219,11 @@
                             // "onRequestHistoryClose":onRequestHistoryClose,
 
                                     };                
-                                    docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);
-                                    console.log(config);
+                                    if(docEditor){                                        
+                                    }else{
+                                        docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);
+                                    }
+
                                 };
 
                                 var fixSize = function () {
@@ -366,8 +369,11 @@
                                         var config = <?php echo json_encode($config) ?>;
                                         config.width = "100%";
                                         config.height = "100%";
-                                        docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);
-                                        console.log(config);
+                                        
+                                        if(docEditor){
+                                        }else{
+                                            docEditor = new DocsAPI.DocEditor("placeholder_<?php echo $placeholderid;?>", config);
+                                        }
                                     };
                                     var fixSize = function () {
                                         var wrapEl = document.getElementsByClassName("form");

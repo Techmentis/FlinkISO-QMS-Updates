@@ -1,3 +1,4 @@
+<?php echo $this->Session->flash();?>	
 <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'PDF Templates','modelClass'=>'PdfTemplate','options'=>array("sr_no"=>"Sr No","name"=>"Name"),'pluralVar'=>'pdfDepartments'))); ?>
 <style type="text/css">
 	.txtfld{width: 96%; border: none;}

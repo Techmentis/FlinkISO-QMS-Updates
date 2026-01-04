@@ -151,7 +151,7 @@ if($this->Session->read('User.is_publisher') == 0){
 				echo "<div class='col-md-2 approval_checkbox_div'><br />".$this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox','onClick'=>'addapp();'))."</div>";
 				$pubshow = true;
 				echo "<div class='col-md-5'>".$this->Form->input('Approval.'.$approvalModel.'.prepared_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'PreparedBy','selected'=>$prepared_by, 'readonly'=>'readonly' , 'class'=>'form-control select'))."</div>";			
-				echo "<div class='col-md-5'>".$this->Form->input('Approval.'.$approvalModel.'.approved_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovedBy','options'=>$approvedByList, 'class'=>'form-control select'))."</div>";
+				echo "<div class='col-md-5'>".$this->Form->input('Approval.'.$approvalModel.'.approved_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovedBy', 'onchange'=>'addsignature(this.value,this.id)', 'options'=>$approvedByList, 'class'=>'form-control select'))."</div>";
 			}else{
 				echo "<div class='col-md-12 hide'>".$this->Form->input('Approval.'.$approvalModel.'.prepared_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'PreparedBy','selected'=>$prepared_by, 'readonly'=>'readonly' , 'class'=>'form-control select'))."</div>";			
 				echo "<div class='col-md-12 text-warning'><strong>Note:</strong> You are not an Approver, you must send this record for approval and approvers will publish the record after varification. Record will not reflect in any reports or dropsowns unless its approved and published.</div>";				
