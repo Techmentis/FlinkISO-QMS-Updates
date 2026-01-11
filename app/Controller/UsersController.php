@@ -659,7 +659,7 @@ class UsersController extends AppController {
                             $this->redirect(array('controller' => 'users', 'action' => 'reset_password'));
                             }    
                         }
-
+                        $this->_rewrite_permissions();
                         $this->redirect(array('action' => 'dashboard'));
                     }
                 }
@@ -1457,5 +1457,46 @@ class UsersController extends AppController {
 
             return $newarray;
         }
+    }
+
+    public function _rewrite_permissions(){
+        $controllers = array();
+        $aCtrlClasses = App::objects('controller');
+        $skip = array('AppController', 'ApprovalsController', 'ApprovalCommentsController', 'UserSessionsController','BillingController','PieChartPanelsController','TrainingsController');
+        foreach ($aCtrlClasses as $controller) {
+            if (!in_array($controller, $skip)) {
+                $controller = str_replace('Controller', '', $controller);
+                $model = Inflector::classify($controller);
+                if($this->loadModel($model)){
+                    $allrecords = $this->$model->find('all',array('recursive'=>-1));
+                    if($allrecords){
+                        foreach($allrecords as $record){
+                            $this->$model->create();
+                            $record[$model]['branchid'] = $this->Session->read('User.branch_id');
+                            $record[$model]['departmentid'] = $this->Session->read('User.department_id');
+                            $record[$model]['created_by'] = $this->Session->read('User.id');
+                            $record[$model]['created'] = date('Y-m-d H:i:s');
+                            $record[$model]['modified'] = date('Y-m-d H:i:s');
+
+                            // for qc docs
+                            $record[$model]['branches'] = json_encode(array($this->Session->read('User.branch_id')));
+                            $record[$model]['departments'] = json_encode(array($this->Session->read('User.department_id')));
+                            $record[$model]['designations'] = json_encode(array($this->Session->read('User.designation_id')));
+                            $record[$model]['editors'] = json_encode(array($this->Session->read('User.id')));
+                            $record[$model]['user_id'] = json_encode(array($this->Session->read('User.id')));
+
+                            // for tables
+                            $record[$model]['users'] = json_encode(array($this->Session->read('User.id')));
+                            $record[$model]['creators'] = json_encode(array($this->Session->read('User.id')));
+                            $record[$model]['editors'] = json_encode(array($this->Session->read('User.id')));
+                            $record[$model]['viewers'] = json_encode(array($this->Session->read('User.id')));
+                            $record[$model]['approvers'] = json_encode(array($this->Session->read('User.id')));
+                          
+                            $this->$model->save($record,false);
+                        }
+                    }
+                }               
+        }        
+        return true;
     }
 }

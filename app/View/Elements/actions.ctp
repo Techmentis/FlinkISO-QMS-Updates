@@ -1,13 +1,3 @@
-<style>
-/*input[type="checkbox"] {
-	margin-bottom: 0px;
-	margin-top : 1px !important
-}*/
-/*.label, .badge{ font-size: 70%}
-.h4-title {font-size: 22px !important;}
-.pdf-btn{padding: 3px 20px}
-.pdf-btn a{color: #777777 !important;}*/
-</style>
 <div class="btn-group btn-no-border" style="padding-top:0px" >
 
 	<?php $controller = $this->request->controller;?>
@@ -32,9 +22,9 @@
 		if($this->Session->read('User.is_mr') == true){
 
 			if($user == null){
-				echo $this->Html->link('<i class="fa fa-user"></i>','javascript:void(0);',array('id'=>$postVal.'-user', 'class'=>'tooltip1 btn btn-sm btn-danger empaction','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Add User'));			
+				echo $this->Html->link('<i class="fa fa-user text-danger"></i>','javascript:void(0);',array('id'=>$postVal.'-user', 'class'=>'tooltip1 btn empaction','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Add User'));
 			}else{
-				echo $this->Html->link('<i class="fa fa-gears"></i>',array('controller'=>'users','action'=>'edit',$user,'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-success empaction','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Edit User'));			
+				echo $this->Html->link('<i class="fa fa-gears text-success"></i>',array('controller'=>'users','action'=>'edit',$user,'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn empaction','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Edit User'));			
 			} ?>
 			<script type="text/javascript">
 				$("#<?php echo $postVal;?>-user").on('click',function(){

@@ -1110,10 +1110,11 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					$this->redirect(array('action' => 'index','custom_table_id'=>$record[$model]['custom_table_id'],'qc_document_id'=>$record[$model]['qc_document_id']));
 				}else{
 					$model = $this->modelClass;
+					$id = $this->request->data[$model]['id'];
 					$record = $this->$model->find('first',array('conditions'=>array($model.'.id'=>$id),'recursive'=>-1));
 					$this->_recursive_delete($this->request->data[$model]['id'],$model);
 					$this->redirect(array('action' => 'index','custom_table_id'=>$record[$model]['custom_table_id'],'qc_document_id'=>$record[$model]['qc_document_id']));
-				}				
+				}
 			} else {				
 				$model = $this->modelClass;
 				$this->loadModel($model);
@@ -1130,6 +1131,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		$this->loadModel('File');
 		// get additional files$files
 		$files = array();
+		$this->loadModel($model);
 		$record = $this->$model->find('first',array('conditions'=>array($model.'.id'=>$id),'recursive'=>-1));
 		// find other tables
 		$this->loadModel('QcDocument');
@@ -1141,6 +1143,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			'QcDocument.title',
 		)
 		));
+		
 		if($docs){
 			foreach($docs as $doc){
 				if($doc['CustomTable']){
@@ -1157,6 +1160,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				}				
 			}
 		}
+		
 		if($record[$model]['additional_files']){
 			$files[] = json_decode($record[$model]['additional_files'],true);
 			$files[] = $record[$model]['file_id'];
@@ -1175,6 +1179,26 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				}
 			}
 		}
+		if($this->$model->hasMany){
+			foreach($this->$model->hasMany as $childModel => $info){
+				$this->loadModel($childModel);
+				$childRecs = $this->$childModel->find('all', array('conditions'=>array($childModel.'.parent_id'=>$id)));
+				if($childRecs){
+					foreach($childRecs as $childRec){
+						$childFilesToDelete = $this->File->delete(array('File.model'=>$childModel,'File.record_id'=>$childRec[$childModel]['id']));
+						$cfolder = Configure::read("files") . DS . $this->$childModel->useTable . DS . $childRec[$childModel]['id'];
+						$cdirToDelete = new Folder($cfolder);
+						$cdirToDelete->delete();
+
+						$this->$childModel->delete($childRec[$childModel]['id']);
+					}
+				}
+			}
+		}
+		$FilesToDelete = $this->File->delete(array('File.model'=>$model,'File.record_id'=>$id));
+		$folder = Configure::read("files") . DS . $this->$model->useTable . DS . $id;
+		$dirToDelete = new Folder($folder);
+		$dirToDelete->delete();		
 		$this->$model->delete($id);
 	}
 
@@ -1191,17 +1215,22 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				}else{					
 					// delete records after checking passwords
 					$this->loadModel('User');
+					$this->loadModel('File');
 					$user = $this->User->find('first', array('conditions' => array('User.status' => 1, 'User.soft_delete' => 0, 'User.publish' => 1, 'User.username' => $this->Session->read('User.username'))));
 					if($user){
 						if (trim($user['User']['password']) != trim(Security::hash($this->data[$model]['password'], 'md5', true))) {
 							// incorrect password
 							$this->Session->setFlash(__('Incorrect Password'));
+							$this->loadModel($model);
+							$hasManies = $this->$model->hasMany;
+							$this->set('hasManies',$hasManies);
 							$this->render('/Elements/bulk_delete');
 						}else{
+							
 							$this->loadModel($model);
 							$records = json_decode($this->data[$model]['ids']);
 							foreach($records as $id){
-								if($id != '' && strlen($id) == 36){									
+								if($id != '' && strlen($id) == 36){
 									foreach($this->data[$model]['has_many'] as $hasMany){
 										$foreignKey = $this->$model->hasMany[$hasMany]['foreignKey'];										
 										$this->loadModel($hasMany);										
@@ -1209,14 +1238,29 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 										foreach($hasManyRecords as $hasManyRecordid => $hasManyRecord){
 											$this->$hasMany->delete($hasManyRecordid);
 											// also need to delete files etc
+											$childFilesToDelete = $this->File->delete(array('File.model'=>$hasMany,'File.record_id'=>$hasManyRecord));
+											$cfolder = Configure::read("files") . DS . $this->$hasMany->useTable . DS . $hasManyRecordid;
+											$cdirToDelete = new Folder($cfolder);
+											$cdirToDelete->delete();
 										}
 									}
 									// after deleteting everything, delete main record
 									$this->$model->delete($id);
+									$FilesToDelete = $this->File->delete(array('File.model'=>$model,'File.record_id'=>$id));
+
+									//files to delete
+									$folder = Configure::read("path") . DS . $this->$model->useTable . DS. $id;
+									$dirToDelete = new Folder($folder);
+									$dirToDelete->delete();
+
 								}
 							}
 							$this->Session->setFlash(__('Records Deleted'));
-							$this->redirect(array('controller'=>$this->request->controller, 'action' => 'index'));
+							$this->redirect(array(
+								'controller'=>$this->request->controller, 
+								'action' => 'index',
+								'custom_table_id'=>$this->request->params['named']['custom_table_id'],
+								'qc_document_id'=>$this->request->params['named']['qc_document_id']));
 						}
 					}else{
 						$this->Session->setFlash(__('Unknown user'));
@@ -2559,13 +2603,18 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 	public function _prepare_update(){
 		$this->_file_clean_up();
+
 		$this->cacheAction = false;
 		$modelName = $this->modelClass;
 		$this->$modelName->CustomTable->virtualFields = array(
 			'document_schedule'=>'select schedule_id from qc_documents where qc_documents.id LIKE CustomTable.qc_document_id',
 			'process_schedule'=>'select schedule_id from processes where processes.id LIKE CustomTable.process_id'
 		);
-		$customTable = $this->$modelName->CustomTable->find('first',array('conditions'=>array('CustomTable.id'=>$this->request->params['named']['custom_table_id']),'recursive'=>-1));
+		$customTable = $this->$modelName->CustomTable->find('first',array('conditions'=>array('CustomTable.id'=>$this->request->params['named']['custom_table_id']),'recursive'=>-1));	
+		$lastval = $this->fetch_last_record($modelName, $this->$modelName->displayField, 'DESC',null);
+		$this->set('lastval',$lastval);
+		
+
 		if($customTable['CustomTable']['document_schedule'])$schedule_id = $customTable['CustomTable']['document_schedule'];
 		if($customTable['CustomTable']['process_schedule'])$schedule_id = $customTable['CustomTable']['process_schedule'];
 		$this->loadModel('Schedule');
@@ -2666,11 +2715,11 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 							'File.controller' => $this->request->controller,
 							'DATE(File.created)'=> date('Y-m-d',strtotime($previous_record_date))
 						)));
-					}
-				}else{
+					}					
+				}else{					
 					$existing_file = null;
 				}
-			}else{
+			}else{				
 				if(isset($this->request->params['named']['parent_record_id']) && ($this->request->params['named']['parent_record_id'] != -1 || $this->request->params['named']['parent_record_id'] != null) ){
 					$findRec = $this->$modelName->find('first',array('recursive'=>-1,'conditions'=>array($modelName.'.parent_id' => $this->request->params['named']['parent_record_id'])));
 					if($findRec[$modelName]['file_id']){
@@ -2946,23 +2995,29 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					}
 				}	
 			}
-			if($this->request->data['Files'])$this->_upload_custom_files($this->request->data['Files'],$this->$modelName->id,null);
+			if(isset ($this->request->data['Files']))$this->_upload_custom_files($this->request->data['Files'],$this->$modelName->id,$this->request->params['named']['custom_table_id']);
+			
 			// get hasMany
 			$hasManies = $this->$modelName->hasMany;
 			foreach($hasManies as $model => $fields){
+				
 				if($this->request->data[$model]){
 					$this->loadModel($model);
 					unset($this->request->data[$model]['count']);
 					unset($this->request->data[$model]['file_id']);
-					unset($this->request->data[$model]['file_key']);					
+					unset($this->request->data[$model]['file_key']);
 					foreach($this->request->data[$model] as $cdata_old){
+						$cdata = array();
 						foreach($cdata_old as $key => $value){
 							if(is_array($value)){
 								$cdata[$key] = json_encode($value);
+								if(!empty($value['tmp_name'])){
+									$file = $value;
+								}
 							}else{
 								$cdata[$key] = $value;
 							}
-						}
+						}						
 						$this->$model->create();
 						$cdata['parent_id'] = $this->$modelName->id;
 						$cdata['created'] = date('Y-m-d H:i:s');
@@ -2971,31 +3026,21 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						$cdata['created_by'] = $this->Session->read('User.id');
 						$cdata['branchid'] = $this->Session->read('User.branch_id');
 						$cdata['departmentid'] = $this->Session->read('User.department_id');
-						$cdata['qc_document_id'] = $this->request->data[$modelName]['qc_document_id'];						
+						$cdata['qc_document_id'] = $this->request->data[$modelName]['qc_document_id'];		
 						try{
-							$this->$model->save($cdata,false);							
-							foreach($this->request->data[$model] as $recs){		
-								foreach($recs as  $key => $value){
-									if(is_array($value)){										
-										if($value['name']){	
-											$path = WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . $this->$model->useTable . DS . $recs['id'] . DS . 'record_files';
-											$recordfilesfolder = new Folder($path_for_save);
-											$recordfilesfolder->create($path);
-											chmod($path, 0777);
-											move_uploaded_file($value['tmp_name'], $path . DS . $value['name']);
-										}else{
-											$this->request->data[$model][$key] = json_encode($value);
-										}
-									}									
-								}
-							}							
+							$this->$model->save($cdata,false);
+							$path = WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . 'record_files' . DS . $cdata['custom_table_id'] . DS . $this->$model->id ;
+							$recordfilesfolder = new Folder($path);
+							$recordfilesfolder->create($path,0777);
+							$move = move_uploaded_file($file['tmp_name'], $path . DS . $file['name']);
 						}catch(Exception $e) {
-					 		// do nothing; 
+					 		$this->Session->setFlash(__('Child record not added/ Updated.'), 'default', array('class' => 'alert alert-danger'));
 						}
 					}
 				}
-			}			
-			if ($this->_show_approvals()) $this->_save_approvals($this->$modelName->id);
+			}
+
+			if ($this->_show_approvals()) $this->_save_approvals($this->$modelName->id);			
 			$this->Session->setFlash(__('Record has been saved'));
 			try{
 				// trigger email here
@@ -3006,7 +3051,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		 	// if parent record id is available, redirect to parent record view page
 			$this->loadModel('QcDocument');
 			$this->loadModel('CustomTable');
-			if(isset($this->request->params['named']['parent_record_id']) && $this->request->params['named']['parent_record_id']){ 
+			if(isset($this->request->params['named']['parent_record_id']) && $this->request->params['named']['parent_record_id']){
 				$this_document = $this->QcDocument->find('first',array(
 					'fields'=>array(
 						'QcDocument.id',
@@ -3043,16 +3088,24 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 	}
 
-	public function _upload_custom_files($files = null, $id = null,$controller = null){
-		if($controller == null)$controller = $this->request->controller;
-		$path = WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . $controller . DS . $id . DS . 'record_files';
-		$recordfilesfolder = new Folder($path_for_save);
-		$recordfilesfolder->create($path);
-		chmod($path, 0777);
-		foreach($files as $file){
-			move_uploaded_file($file['tmp_name'], $path . DS . $file['name']); 
+	public function _upload_custom_files($files = null, $id = null,$custom_table_id = null){
+		if($custom_table_id == null && $custom_table_id != -1){
+			$this->Session->setFlash(__('Unable to save file.'));
+			return false;
+		}else{
+			$path = WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . 'record_files' . DS . $custom_table_id . DS . $id ;
+			$recordfilesfolder = new Folder($path_for_save);
+			$recordfilesfolder->create($path);
+			chmod($path, 0777);
+			foreach($files as $file){
+				$result = move_uploaded_file($file['tmp_name'], $path . DS . $file['name']); 
+				if($result == false){
+					$this->Session->setFlash(__('Unable to upload file.'));
+				}
+			}
+			return true;
 		}
-		return true;
+		
 	}
 
 	public function reloaddocument_copy(){
@@ -3804,10 +3857,9 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 
 	public function fetch_last_record($model = null, $field = null, $order = null, $id = null){
-		$this->autoRender = false;
 		try{
 			$this->loadModel($model);
-			$rec = $this->$model->find('first',array('order'=>array($model.'.'.$field => 'DESC'),'recursive'=>-1));
+			$rec = $this->$model->find('first',array('fields'=>array($model.'.'.$field,$model.'.created') ,'order'=>array($model.'.created' => $order),'recursive'=>-1));
 			if($rec){				
 				return $rec[$model][$field];
 			}else{					
@@ -3815,10 +3867,28 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			}
 		}catch (Exception $e){
 			return false;
+		}		
+	}
+
+	public function _fetch_record($model = null, $key = null, $field = null, $order = null, $id = null){
+		$parent = Inflector::Classify($model);
+		try{
+			$this->loadModel($model);
+			if($order == 'first')$order = ' DESC';
+			if($order == 'last')$order = ' ASC';
+			if(empty($field))$field = $this->$model->displayField;
+
+			$rec = $this->$model->find('first',array('conditions'=>array($model.'.'.$key => $id),'recursive'=>-1));			
+			if($rec){
+				return $rec[$model][$field];
+			}else{
+				return false;
+			}
+		}catch (Exception $e){
+			return false;
 		}
 		exit;
 	}
-
 	public function fetch_record($model = null, $key = null, $field = null, $order = null, $id = null){
 		$this->autoRender = false;
 		$parent = Inflector::Classify($model);
@@ -3826,6 +3896,8 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$this->loadModel($model);
 			if($order == 'first')$order = ' DESC';
 			if($order == 'last')$order = ' ASC';
+			if(empty($field))$field = $this->$model->displayField;
+
 			$rec = $this->$model->find('first',array('conditions'=>array($model.'.'.$key => $id),'recursive'=>-1));			
 			if($rec){
 				return $rec[$model][$field];
@@ -4217,5 +4289,130 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$response = 'wrong data';
 		}
 		return $response;		
+	}
+
+	public function _custom_table_short_info($custom_table_id = null){
+		$this->loadModel('CustomTable');
+		$customTable = $this->CustomTable->find('first',
+			array(
+				'recursive'=>-1,
+				'fields'=>array('CustomTable.id','CustomTable.table_name','CustomTable.name'),
+				'conditions'=>array('CustomTable.id'=>$custom_table_id)));
+		if($customTable){
+			return $customTable;
+		}else{
+			return false;
+		}
+		exit;
+	}
+
+	public function field_render($field = null,$record = null, $model = null){
+		$text = array();
+		switch ($field['display_type']) {
+			case 0: // text/ phone/ email/ textarea/ date / datetime / number / float
+				switch ($field['data_type']){
+					case "text":
+						$text['label'] = base64_decode($field['field_label']);
+						$text['value'] = $record[$model][$field['field_name']];
+					break;
+
+					case "phone":
+						$text['label'] = base64_decode($field['field_label']);
+						$text['value'] = $record[$model][$field['field_name']];
+					break;
+
+					case "email":
+						$text['label'] = base64_decode($field['field_label']);
+						$text['value'] = $record[$model][$field['field_name']];
+					break;
+
+					case "textarea":
+						$text['label'] = base64_decode($field['field_label']);
+						$text['value'] = $record[$model][$field['field_name']];
+					break;
+
+					case "date":
+						$text['label'] = base64_decode($field['field_label']);
+						$text['value'] = date(Configure::read('dateFormat'),strtotime($record[$model][$field['field_name']]));
+					break;
+
+					case "datetime":
+						$text['label'] = base64_decode($field['field_label']);
+						$text['value'] = date(Configure::read('dateTimeFormat'),strtotime($record[$model][$field['field_name']]));
+					break;
+
+					case "number":
+						$text['label'] = base64_decode($field['field_label']);
+						$text['value'] = $record[$model][$field['field_name']];
+					break;
+
+					case "float":
+						$text['label'] = base64_decode($field['field_label']);
+						$text['value'] = $record[$model][$field['field_name']];
+					break;
+				}
+
+			break;
+
+			case 1: // radio
+					$csvoptions = explode(',',$field['csvoptions']);
+					$text['label'] = base64_decode($field['field_label']);
+					$text['value'] = $csvoptions[$record[$model][$field['field_name']]];
+			break;
+
+			case 2: // checkox/ radio !! ISSUE
+					$csvoptions = explode(',',$field['csvoptions']);
+					$text['label'] = base64_decode($field['field_label']);
+					$text['value'] = $csvoptions[$record[$model][$field['field_name']]];
+			break;
+
+			case 3: // dropdown-s
+					$belongsTo = $this->$model->belongsTo;
+					$signature = '';
+					foreach($belongsTo as $modelname => $fieldDetails){
+						if($fieldDetails['foreignKey'] == $field['field_name']){
+							$this->loadModel($modelname);
+							$displayField = $this->$modelname->displayField;
+							if($field['add_signature'] == 1){
+								$signature = $this->_fetch_signature($record[$model][$field['field_name']]);
+							}
+							$text['label'] = base64_decode($field['field_label']);
+							$text['value'] = $signature . "" .$record[$modelname][$displayField];
+						}
+					}
+			break;
+
+			case 4: // dropdown-m
+					if(!empty($record[$model][$field['field_name']])){
+						$values = json_decode($record[$model][$field['field_name']],true);	
+						foreach ($values as $value){
+							$result .= $this->_fetch_record(Inflector::Classify($field['linked_to']), 'id', null, null, $value) .', ';
+						}
+
+					}
+					$text['label'] = base64_decode($field['field_label']);
+					$text['value'] = $result;
+			break;
+
+			case 5:
+					$text['label'] = base64_decode($field['field_label']);
+					$text['value'] = $record[$model][$field['field_name']];
+			break;
+
+			case 6: // file
+					$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
+					$file = json_decode($record[$model][$field['field_name']],true);
+					$file = $file['name'] .'<br /><small>Available for download from the application.</small>';
+					$text['label'] = base64_decode($field['field_label']);
+					$text['value'] = $file;	
+			break;
+
+			case 7: // comments
+					$text['label'] = base64_decode($field['field_label']);
+					$text['value'] = $record[$model][$field['field_name']];
+			break;
+		}
+		return $text;
+		exit;
 	}
 }

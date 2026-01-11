@@ -75,7 +75,7 @@ echo $this->fetch('script');
 	  reserved.
   </footer>
   </div>
-
+<div id="addsignature-employee"></div>
 <?php
 echo $this->Html->script(array(
 	'dist/js/demo',
@@ -162,7 +162,8 @@ if($customTable){ ?>
 				url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/checkunique/"+ val +"/" + name,
 					success: function(data, result) {
 						if(data == true){
-							$("#"+id).val('Value Exists. Add unique value.');
+							$("#"+id).prev('label').append('<small style="color:#ed7c7c"> : Value Exists. Add unique value.</small>');
+							$("#"+id).val('');
 							$("#"+id).addClass('error').removeClass(' valid success');
 						}
 					},
@@ -261,6 +262,24 @@ if($this->action == 'index'){?>
 	function addsignature(employee,fieldid){
 		$("#"+fieldid).val(-1).trigger('chosen:updated');
 		$("#addsignature-employee").load("<?php echo Router::url('/', true); ?>/<?php echo $this->request->controller;?>/addsignature/"+employee+"/"+fieldid);
+	}
+
+	function checkext(ele,exts,eid){
+
+		let pathext = ele;
+		const pathfile = pathext.split(".");
+		const arr = pathfile.length;
+		const ext = pathfile[arr-1];
+		
+		var earr = exts;
+		
+		if($.inArray(ext,earr) > -1){
+			
+		}else{
+			alert('This file type is not allowed : ' + ext);
+			$("#"+eid).val('');
+			$("#"+eid).prev("label").html('');
+		}
 	}
 </script>
 </body>

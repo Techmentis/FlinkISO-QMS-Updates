@@ -97,7 +97,8 @@
 				</div>
 			</div>
 			<div class="row">
-				<?php				
+				<?php	
+				unset($parentQcDocuments[$this->data['QcDocument']['id']]);
 				echo "<div class='col-md-12'>".$this->Form->input('parent_document_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
 
 				if($this->data['QcDocument']['name']){

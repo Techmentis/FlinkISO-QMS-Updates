@@ -594,32 +594,39 @@ public function _generate_template_content($fields = null, $record = null, $mode
 </style>";
 
 	foreach($fields as $field){
-		if($field['linked_to'] != -1){
-			foreach($belongsTo as $modelname => $fieldDetails){
-				if($fieldDetails['foreignKey'] == $field['field_name']){
-					$this->loadModel($modelname);					
-					$displayField = $this->$modelname->displayField;
-					$f = '$record["'.$modelname.'"]["'.$displayField.'"]';
-					$contents = str_replace($f, $record[$modelname][$displayField], $contents);
-				}
+		foreach($fields as $field){
+			$fieldResult = $this->field_render($field,$record,$modelname);
+			if($fieldResult){
+				$f = '$record["'.$modelname.'"]["'.$displayField.'"]';
+				$contents = str_replace($f, $fieldResult['value'], $contents);
 			}
-
-		}else if($field['data_type'] == 'radio'){
-			$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
-			$csvoptions = explode(',',$field['csvoptions']);			
-			$contents = str_replace($f, $csvoptions[$record[$model][$field['field_name']]], $contents);
-		}else if($field['field_type'] == 5){
-			$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
-			$contents = str_replace($f, date(Configure::read('dateFormat'),strtotime($record[$model][$field['field_name']])), $contents);			
-		}else if($field['display_type'] == 6 && $field['data_type'] == 'file'){
-			$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
-			$file = json_decode($record[$model][$field['field_name']],true);
-			$file = $file['name'];
-			$contents = str_replace($f, $file, $contents);
-		}else{
-			$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
-			$contents = str_replace($f, $record[$model][$field['field_name']], $contents);
 		}
+		// if($field['linked_to'] != -1){
+		// 	foreach($belongsTo as $modelname => $fieldDetails){
+		// 		if($fieldDetails['foreignKey'] == $field['field_name']){
+		// 			$this->loadModel($modelname);					
+		// 			$displayField = $this->$modelname->displayField;
+		// 			$f = '$record["'.$modelname.'"]["'.$displayField.'"]';
+		// 			$contents = str_replace($f, $record[$modelname][$displayField], $contents);
+		// 		}
+		// 	}
+
+		// }else if($field['data_type'] == 'radio'){
+		// 	$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
+		// 	$csvoptions = explode(',',$field['csvoptions']);			
+		// 	$contents = str_replace($f, $csvoptions[$record[$model][$field['field_name']]], $contents);
+		// }else if($field['field_type'] == 5){
+		// 	$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
+		// 	$contents = str_replace($f, date(Configure::read('dateFormat'),strtotime($record[$model][$field['field_name']])), $contents);			
+		// }else if($field['display_type'] == 6 && $field['data_type'] == 'file'){
+		// 	$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
+		// 	$file = json_decode($record[$model][$field['field_name']],true);
+		// 	$file = $file['name'] .'<br /><small>Available for download from the application.</small>';
+		// 	$contents = str_replace($f, $file, $contents);
+		// }else{
+		// 	$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
+		// 	$contents = str_replace($f, $record[$model][$field['field_name']], $contents);
+		// }
 
 	}
 
@@ -688,27 +695,11 @@ public function _generate_template_content($fields = null, $record = null, $mode
 				foreach($rearrangeCtabls[$childTable['CustomTable']['table_name']] as $cField){
 					foreach(json_decode($childTable['CustomTable']['fields'],true) as $field){
 						if($cField == $field['field_name']){
-							$belongsTo = $this->$childTableModel->belongsTo;
-							if($field['linked_to'] != -1){
-								foreach($belongsTo as $childTableModelbelogs => $fieldDetails){
-									if($fieldDetails['foreignKey'] == $field['field_name']){
-										$this->loadModel($childTableModelbelogs);
-										$displayField = $this->$childTableModelbelogs->displayField;
-										if($field['add_signature'] == 1){
-											$signature = $this->_fetch_signature($childRecord[$childTableModel][$field['field_name']]);
-										}
-										$chld .= "<td>".$signature."".$childRecord[$childTableModelbelogs][$displayField]."</td>";		
-									}
-								}
 
-							}else if($field['data_type'] == 'radio'){
-								$csvoptions = explode(',',$field['csvoptions']);
-								$chld .= "<td>".$csvoptions[$childRecord[$childTableModel][$field['field_name']]]."</td>";
-							}else if($field['field_type'] == 5){								
-								$chld .= "<td>".date(Configure::read('dateFormat',strtotime($childRecord[$childTableModel][$field['field_name']])))."</td>";
-							}else{
-								$chld .= "<td>".$childRecord[$childTableModel][$field['field_name']]."</td>";
-							}
+							$fieldResult = $this->field_render($field,$childRecord,$childTableModel);
+							if($fieldResult){
+								$chld .= "<td>".$fieldResult['value']."</td>";
+							}							
 						}
 					}
 				}
@@ -719,7 +710,6 @@ public function _generate_template_content($fields = null, $record = null, $mode
 			$t++;
 		}		
 	}	
-
 
 	$fields = array(
         '$qcDocument["QcDocument"]["title"]'=>$this->viewVars['qcDocument']["QcDocument"]["title"],
@@ -753,7 +743,7 @@ public function _generate_template_content($fields = null, $record = null, $mode
 		if($file)$this->onlyoffice_pdf($file);
 	}
 	
-	
+	$contents .= $this->_get_approvals($model, $record[$model]['id']);	
 	$this->_generate_pdf_file($header_file,$contents,$filenamae,$record[$model]['id']);
 }
 
@@ -774,44 +764,18 @@ public function _generate_content($fields = null, $record = null, $model = null,
 </style>";
 	
 	$str .= "<table width='100%' border=1 cellspacing=1 cellpadding=5>";
-	foreach($fields as $field){		
-		if($field['linked_to'] != -1){
-			$signature = '';
-			foreach($belongsTo as $modelname => $fieldDetails){
-				if($fieldDetails['foreignKey'] == $field['field_name']){
-					$this->loadModel($modelname);
-					$displayField = $this->$modelname->displayField;
-					if($field['add_signature'] == 1){
-						$signature = $this->_fetch_signature($record[$model][$field['field_name']]);
-					}
-					$str .= "<tr><th>".base64_decode($field['field_label'])."</th><td>" . $signature . "" .$record[$modelname][$displayField]."</td>";
-				}
-			}
-
-		}else if($field['data_type'] == 'radio'){
-			$csvoptions = explode(',',$field['csvoptions']);
-			$str .= "<tr><th width='30%'>".base64_decode($field['field_label'])."</th><td>".$csvoptions[$record[$model][$field['field_name']]]."</td>";
-		}else if($field['field_type'] == 5){
-			$str .= "<tr><th>".base64_decode($field['field_label'])."</th><td>".date(Configure::read('dateFormat'),strtotime($record[$model][$field['field_name']]))."</td>";
-		}else if($field['display_type'] == 6 && $field['data_type'] == 'file'){
-			$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
-			$file = json_decode($record[$model][$field['field_name']],true);
-			$file = $file['name'];
-			$contents = str_replace($f, $file, $contents);
-		}else{
-			$str .= "<tr><th>".base64_decode($field['field_label'])."</th><td>".$record[$model][$field['field_name']]."</td>";
-		}
-
+	foreach($fields as $field){
+		$fieldResult = $this->field_render($field,$record,$model);
+		if($fieldResult)$str .= "<tr><th>".$fieldResult['label']." &nbsp;</th><td>".$fieldResult['value']." &nbsp;</td></tr>";
 	}
-
+	
 	$signature = $this->_fetch_signature($record['PreparedBy']['id']);
 	$str .= "<tr><th>Prepared By</th><td>".$signature."".$record['PreparedBy']['name']."</td>";
 
 	$signature = $this->_fetch_signature($record['ApprovedBy']['id']);
-	$str .= "<tr><th>Prepared By</th><td>".$signature."".$record['ApprovedBy']['name']."</td>";
+	$str .= "<tr><th>Approved By</th><td>".$signature."".$record['ApprovedBy']['name']."</td>";
 	
 	$str .= "</table>";		
-	
 	$t = 0;
 	$childTables = $this->DocumentDownload->CustomTable->find('all',array(
 		'recursive'=>-1,
@@ -855,36 +819,9 @@ public function _generate_content($fields = null, $record = null, $model = null,
 				$signature = '';
 				$str .= '<tr>';
 				$field = null;
-				foreach(json_decode($childTable['CustomTable']['fields'],true) as $field){
-					
-
-					if($field['linked_to'] != -1){						
-						foreach($belongsTo as $cTableModel => $fieldDetails){
-							if($fieldDetails['foreignKey'] == $field['field_name']){
-								$this->loadModel($cTableModel);
-								$displayField = $this->$cTableModel->displayField;
-
-								if($field['add_signature'] == 1){
-									$signature = $this->_fetch_signature($childRecord[$childTableModel][$field['field_name']]);
-								}
-								$str .= "<td>".$signature . "". $childRecord[$cTableModel][$displayField]." &nbsp;</td>";		
-							}else{
-
-							}
-						}
-					}else if($field['data_type'] == 'radio'){
-						$csvoptions = explode(',',$field['csvoptions']);
-						$str .= "<td>".$csvoptions[$childRecord[$childTableModel][$field['field_name']]]."&nbsp;</td>";
-					}else if($field['field_type'] == 5){						
-						$str .= "<td>".date(Configure::read('dateFormat',strtotime($childRecord[$childTableModel][$field['field_name']])))."&nbsp;</td>";
-					}else{						
-						if($field['data_type'] == 'file'){
-							$str .= "<td>File &nbsp;</td>";
-						}else{
-							$str .= "<td>".$childRecord[$childTableModel][$field['field_name']]."&nbsp;</td>";	
-						}
-						
-					}
+				foreach(json_decode($childTable['CustomTable']['fields'],true) as $childfields){
+						$fieldResult = $this->field_render($childfields,$childRecord,$childTableModel);
+						if($fieldResult)$str .= "<td>".$fieldResult['value']." &nbsp;</td>";
 				}
 				$str .= '</tr>';				
 			}
@@ -893,7 +830,9 @@ public function _generate_content($fields = null, $record = null, $model = null,
 
 		$str .= "</table>";		
 	}	
-	
+
+	$str .= $this->_get_approvals($model, $record[$model]['id']);	
+
 	$header_file = Router::url('/', true) . 'files/pdf/' .$this->Session->read('User.id') . '/' . $record[$model]['id']. '/' . $record[$model]['qc_document_id']. '.html';
 	$filenamae = $model."-".$record[$model][$this->$model->displayField];
 
@@ -906,6 +845,32 @@ public function _generate_content($fields = null, $record = null, $model = null,
 	$this->_generate_pdf_file($header_file,$str,$filenamae,$record[$model]['id']);
 }
 
+public function _get_approvals($model = null,$id = null){
+	$approvalStatuses = array(0=>'Pending',1=>'Approved',2=>'Not Approved');
+	$this->loadModel('Approval');
+	$approvals = $this->Approval->find('all',array(
+		'recursive'=>0,
+		'conditions'=>array('Approval.model_name'=>$model,'Approval.record'=>$id)));
+	
+	$appStr = '';
+	foreach($approvals as $approval){
+		$appStr .= "<br /><h3>Approvals</h3>";
+		$appStr .= "<table width='100%' border=1 cellspacing=1 cellpadding=5>";	
+		$appStr .= "<tr><th>Date/ Time</th><th>From</th><th>To</th><th>Comment</th><th>Response</th><th>Status</th></tr>";
+		
+		$appStr .= "<tr><th>". date(Configure::read('dateTimeFormat'),strtotime($approval['Approval']['created'])) ."</th><th>".$approval['From']['name']."</th><th>".$approval['Employee']['name']."</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th></tr>";
+		
+		$approvalComments = $this->Approval->ApprovalComment->find('all',array(
+			'conditions'=>array('ApprovalComment.approval_id'=>$approval['Approval']['id'])));
+		debug($approvalComments);
+		foreach($approvalComments as $approvalComment){
+			$appStr .= "<tr><td>".date(Configure::read('dateTimeFormat'),strtotime($approvalComment['ApprovalComment']['created']))."</td><td>".$approvalComment['From']['name']."</td><td>".$approvalComment['User']['name']."</td><td>".$approvalComment['ApprovalComment']['comments']."</td><td>".$approvalComment['ApprovalComment']['response']."</td><td>".$approvalStatuses[$approvalComment['ApprovalComment']['response_status']]."</td></tr>";
+		}
+		$appStr .= "</table>";
+	}
+
+	return $appStr;	
+}
 
 public function download_qc_document(){
 	if(isset($this->request->data['DocumentDownload']['qc_document_id'])){

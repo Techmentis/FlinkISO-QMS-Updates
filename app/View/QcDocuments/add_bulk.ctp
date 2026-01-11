@@ -25,7 +25,7 @@ $values = array('Audit Schedule','Audit Checklist','Audit Findings','MRM','Custo
 			<div class="row">
 				<div class="col-md-12">
 					<h4>Add Initial Documents & Data.</h4>
-					<p>Forms for following documents are available to download through our APIs. <strong>You can use this option to add basic QMS documents to understand how system works.</strong>. When you click Submit, system will add all these documents and will copy a blank ".DOCX" files against each document. You can edit these documents to add your content.To edit, goto each document and click edit icon. To add HTML Forms, goto each document's view page and click on Database icon at the bottom. It will take you to the HTML Form Builder. Based on the document, select the HTML Form and click download and save the form. System will then create HTML form for that document. Repete this step for each document.</p>
+					<p>Forms for following documents are available to download through our APIs. <strong>You can use this option to add basic QMS documents to understand how system works.</strong>. When you click Submit, system will add all these documents and will copy a blank ".DOCX" files against each document. You can edit these documents to add your content.To edit, goto each document and click edit icon. To add HTML Forms, goto each document's view page and click on Database icon at the bottom. It will take you to the HTML Form Builder. Based on the document, select the HTML Form and click download and save the form. System will then create HTML form for that document. Repeat this step for each document.</p>
 					<p class="text-warning">You can change document name, number, version from here. Once added these fields can not be changed. You can change all other fields from Edit page of the document. If you wish to continue with these documents, add existing name, number and version and proceed.</p>
 				</div>
 			</div>
@@ -52,11 +52,24 @@ $values = array('Audit Schedule','Audit Checklist','Audit Findings','MRM','Custo
 				
 				<?php 
 				echo "<tr>";
-				for($x = 0; $x <= 8; $x++){
+				$documents = array(
+					0=>'QMS Manual',
+					1=>'Audit Schedule',
+					2=>'Audit Checklist',
+					3=>'Audit Findings',
+					4=>'MRM',
+					5=>'Customer Details',
+					6=>'Customer Complaints',
+					7=>'Supplier Details',
+					8=>'Device/ Equipment',
+					9=>'Calibration',
+					
+				);
+				for($x = 0; $x <= 9; $x++){
 					foreach($fields as $field){
 						
-						if($field == 'title')$default = '';
-						else if($field == 'document_number')$default = '';
+						if($field == 'title')$default =  $documents[$x];
+						else if($field == 'document_number')$default = str_pad($x+1 ,3, '0',STR_PAD_LEFT);
 						else if($field == 'revision_number')$default = 0;
 						else if($field == 'date_created')$default = date('Y-m-d');
 						else if($field == 'date_of_issue')$default = date('Y-m-d');

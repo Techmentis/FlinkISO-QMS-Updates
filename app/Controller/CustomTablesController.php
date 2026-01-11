@@ -122,7 +122,7 @@ class CustomTablesController extends AppController {
         }
 
         $this->paginate = array(
-            'order' => array('CustomTable.childDoc'=>'ASC','CustomTable.sr_no' => 'DESC'), 
+            'order' => array('CustomTable.childDoc'=>'ASC','CustomTable.name' => 'ASC'), 
             'conditions' => array(
                 $accessConditions,                
                 'OR' => array('ltrim(rtrim(CustomTable.custom_table_id))' => "", 'CustomTable.custom_table_id' => null, 'CustomTable.linked >' => 0)));
@@ -137,7 +137,7 @@ class CustomTablesController extends AppController {
     
     public function child($custom_table_id = null) {
         $conditions = $this->_check_request();
-        $this->paginate = array('order' => array('CustomTable.sr_no' => 'DESC'), 'conditions' => array($conditions, 'CustomTable.custom_table_id' => $this->request->params['named']['custom_table_id']));
+        $this->paginate = array('order' => array('CustomTable.name' => 'ASC'), 'conditions' => array($conditions, 'CustomTable.custom_table_id' => $this->request->params['named']['custom_table_id']));
         $this->CustomTable->recursive = 0;
         $customTables = $this->paginate();
         $this->set('customTables', $customTables);
@@ -1305,15 +1305,19 @@ class CustomTablesController extends AppController {
         }        
         
     }
-    public function recreate($id = null) {
+    public function recreate($id = null,$skip = false, $data = null) {
         $this->_clear_cake_cache();
         if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
 
-        
-        if ($this->request->is('post') || $this->request->is('put')) {            
+        if($skip == true){
+            $this->request->data = $data;
+        }
+
+        if ($this->request->is('post') || $this->request->is('put') || $skip == true) {
+
             $updatesql = '';
             $dropsql = '';
             $addsql = '';            
@@ -1363,8 +1367,8 @@ class CustomTablesController extends AppController {
             $this->request->data['CustomTable']['belongs_to'] = json_encode($belongsTo);
             $belongsTo = null;
 
-            if ($this->CustomTable->save($this->request->data)) {
-
+            if ($this->CustomTable->save($this->request->data,false)) {
+                echo "2";
                 unset($this->request->data['History']);
                 unset($this->request->data['CustomTable']['pre_fields']);
                 
@@ -1382,7 +1386,8 @@ class CustomTablesController extends AppController {
                 
                 if($dir_writable_controller == false || $dir_writable_model == false || $dir_writable_view == false){
                     $this->Session->setFlash(__('Unable to change directory permissions. Please manually change app/Controller, app/Model & app/View directories to writable.(0777)'));
-                    $this->redirect(array('action' => 'recreate',$this->request->data['CustomTable']['id']));
+                    if($skip == false) $this->redirect(array('action' => 'recreate',$this->request->data['CustomTable']['id']));
+                    else echo "Unable to change directory permissions. Please manually change app/Controller, app/Model & app/View directories to writable.(0777)";exit;
                 }else{
 
                 }
@@ -1472,11 +1477,18 @@ class CustomTablesController extends AppController {
                 }
 
                 $this->_clear_cake_cache();
-                if ($this->_show_approvals()) $this->_save_approvals($this->CustomTable->id);
+                if($skip == false) {
+                    if ($this->_show_approvals()) $this->_save_approvals($this->CustomTable->id);            
+                    $this->redirect(array('action' => 'recreate',$this->request->data['CustomTable']['id']));    
+                }
                 
-                $this->redirect(array('action' => 'recreate',$this->request->data['CustomTable']['id']));
             } else {
-                $this->Session->setFlash(__('The custom table could not be saved. Please, try again.'));
+                if($skip == false) {
+                    $this->Session->setFlash(__('The custom table could not be saved. Please, try again.'));
+                }else{
+                    echo "The custom table could not be saved. Please, try again.";
+                    exit;
+                }
             }
         }
         
@@ -3089,4 +3101,107 @@ class CustomTablesController extends AppController {
 
     }
     
+
+    public function recreate_all_forms(){
+
+        $controllers = array();
+        $aCtrlClasses = App::objects('controller');
+        $skip = array('AppController', 'ApprovalsController', 'ApprovalCommentsController', 'CustomTablesController', 'FilesController', 'RecordsController', 'UserSessionsController');
+        foreach ($aCtrlClasses as $controller) {
+            if (!in_array($controller, $skip)) {
+                $controller = str_replace('Controller', '', $controller);
+                $name = $this->CustomTable->find('first', array('recursive' => 1, 'conditions' => array('CustomTable.table_name LIKE' => "%" . Inflector::underscore($controller)), 'fields' => array('CustomTable.id', 'CustomTable.name', 'CustomTable.table_version')));
+                if ($name) {
+                    $controller = Inflector::classify($controller);
+                    $linkedTos[$controller] = $name['CustomTable']['name'] . " ver " . $name['CustomTable']['table_version'];
+                } else {
+                    $linkedTos[$controller] = $controller;
+                }
+            }
+        }
+        
+        $customTables = array();
+        $customTables = $this->CustomTable->find('all',array('recursive'=>-1,
+            'conditions'=>array(
+                'CustomTable.id'=>'64eb6612-b195-4ea8-92f2-01e87f14c82d',
+                'OR'=>array(
+                    'CustomTable.custom_table_id ='=>null,
+                    'CustomTable.custom_table_id ='=>'',
+                )                
+            ),            
+        ));
+        
+        if($customTables){
+            foreach($customTables as $customTable){
+                $tocreate['CustomTable']['password'] = $customTable['CustomTable']['password'];
+                $tocreate['CustomTable']['name'] = $customTable['CustomTable']['name'];
+                $tocreate['CustomTable']['table_name'] = $customTable['CustomTable']['table_name'];
+                $tocreate['CustomTable']['table_version'] = $customTable['CustomTable']['table_version'];
+                $tocreate['CustomTable']['re-password'] = $customTable['CustomTable']['re-password'];
+                $tocreate['CustomTable']['fields'] = $customTable['CustomTable']['fields'];
+                $tocreate['CustomTable']['description'] = $customTable['CustomTable']['description'];
+                $tocreate['CustomTable']['qc_document_id'] = $customTable['CustomTable']['qc_document_id'];
+                $tocreate['CustomTable']['count'] = $customTable['CustomTable']['count'];
+                $tocreate['CustomTable']['id'] = $customTable['CustomTable']['id'];
+                $tocreate['CustomTable']['custom_table_id'] = $customTable['CustomTable']['custom_table_id'];
+                $tocreate['CustomTable']['process_id'] = $customTable['CustomTable']['process_id'];
+                $tocreate['CustomTable']['table_type'] = $customTable['CustomTable']['table_type'];
+                $tocreate['CustomTable']['pre_fields'] = $customTable['CustomTable']['pre_fields'];
+                $tocreate['CustomTable']['has_many'] = $customTable['CustomTable']['has_many'];
+                $tocreate['CustomTable']['branchid'] = $customTable['CustomTable']['branchid'];
+                $tocreate['CustomTable']['departmentid'] = $customTable['CustomTable']['departmentid'];
+
+                $fields = json_decode($customTable['CustomTable']['fields'],true);
+                
+                foreach($fields as $field){
+                    $field['field_label'] = base64_decode($field['field_label']);
+                    $tocreate['CustomTableFields'][] = $field;                    
+                }                
+                $tocreate['linkedTos'] = json_encode($linkedTos);
+                $tocreate['linkedTosWithDisplay'] = json_encode($this->_returnDetaultField($fields));               
+                $this->recreate($customTable['CustomTable']['id'],true,$tocreate);               
+            }
+        }
+        $customTables = array();
+        $customTables = $this->CustomTable->find('all',array('recursive'=>-1,
+            'conditions'=>array(
+                'OR'=>array(
+                    'CustomTable.custom_table_id !='=>null,
+                    'CustomTable.custom_table_id !='=>'',
+                )                
+            )
+        ));
+
+        if($customTables){
+            foreach($customTables as $customTable){
+                $tocreate['CustomTable']['password'] = $customTable['CustomTable']['password'];
+                $tocreate['CustomTable']['name'] = $customTable['CustomTable']['name'];
+                $tocreate['CustomTable']['table_name'] = $customTable['CustomTable']['table_name'];
+                $tocreate['CustomTable']['table_version'] = $customTable['CustomTable']['table_version'];
+                $tocreate['CustomTable']['re-password'] = $customTable['CustomTable']['re-password'];
+                $tocreate['CustomTable']['fields'] = $customTable['CustomTable']['fields'];
+                $tocreate['CustomTable']['description'] = $customTable['CustomTable']['description'];
+                $tocreate['CustomTable']['qc_document_id'] = $customTable['CustomTable']['qc_document_id'];
+                $tocreate['CustomTable']['count'] = $customTable['CustomTable']['count'];
+                $tocreate['CustomTable']['id'] = $customTable['CustomTable']['id'];
+                $tocreate['CustomTable']['custom_table_id'] = $customTable['CustomTable']['custom_table_id'];
+                $tocreate['CustomTable']['process_id'] = $customTable['CustomTable']['process_id'];
+                $tocreate['CustomTable']['table_type'] = $customTable['CustomTable']['table_type'];
+                $tocreate['CustomTable']['pre_fields'] = $customTable['CustomTable']['pre_fields'];
+                $tocreate['CustomTable']['has_many'] = $customTable['CustomTable']['has_many'];
+                $tocreate['CustomTable']['branchid'] = $customTable['CustomTable']['branchid'];
+                $tocreate['CustomTable']['departmentid'] = $customTable['CustomTable']['departmentid'];
+                
+                $fields = json_decode($customTable['CustomTable']['fields'],true);
+                
+                foreach($fields as $field){
+                    $field['field_label'] = base64_decode($field['field_label']);
+                    $tocreate['CustomTableFields'][] = $field;                    
+                }                
+                $tocreate['linkedTos'] = json_encode($linkedTos);
+                $tocreate['linkedTosWithDisplay'] = json_encode($this->_returnDetaultField($fields));                
+                $this->recreate_child($customTable['CustomTable']['id'],true,$tocreate);
+            }
+        }
+    }
 }

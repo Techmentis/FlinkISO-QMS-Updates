@@ -248,9 +248,9 @@ $pptarray = array('ppt','pptx');
 		<div class="col-md-12">
 			<h3>How to Build Custom HTML Forms</h3>
 			<p>In order to use this section, you must add Documents to the application first. Once the documents are added, you can build Custom HTML Forms for each document by clicking on Database icon on the document's view page.</p>
-			<p>You can use the existing available forms by downloading them. You can edit those forms as per your requirments once you download them.</p>
+			<p>You can use the existing available forms by downloading them. You can edit those forms as per your requirements once you download them.</p>
 			<p>If the form/ module you need, does not exist, you can build your Forms.</p>
-			<p>Additionally you can also refere to following links & video for more details.
+			<p>Additionally you can also refer to following links & video for more details.
 				<ul>
 					<li><strong><a href="https://www.flinkiso.com/manual/custom-html-forms.html" target="_blank">https://www.flinkiso.com/manual/custom-html-forms.html</a></strong></li>
 					<li><strong><a href="https://www.flinkiso.com/manual/custom-form-layouts.html" target="_blank">https://www.flinkiso.com/manual/custom-form-layouts.html</a></strong></li>

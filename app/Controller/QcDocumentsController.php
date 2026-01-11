@@ -218,7 +218,7 @@ class QcDocumentsController extends AppController {
      */
     public function view($id = null) {
         if (!$this->QcDocument->exists($id)) {
-            throw new NotFoundException(__('Invalid qc document'));
+            throw new NotFoundException(__('Invalid document'));
         }
         $this->_check_access();
         if ($this->request->is('post') || $this->request->is('put')) {
@@ -246,7 +246,7 @@ class QcDocumentsController extends AppController {
 
     public function view_archived($id = null) {
         if (!$this->QcDocument->exists($id)) {
-            throw new NotFoundException(__('Invalid qc document'));
+            throw new NotFoundException(__('Invalid document'));
         }
         if ($this->request->is('post') || $this->request->is('put')) {
             $this->Session->setFlash(__('Approval Saved'));
@@ -272,7 +272,7 @@ class QcDocumentsController extends AppController {
      */
     public function mini_view($id = null) {
         if (!$this->QcDocument->exists($id)) {
-            throw new NotFoundException(__('Invalid qc document'));
+            throw new NotFoundException(__('Invalid document'));
         }
         $options = array('conditions' => array('QcDocument.' . $this->QcDocument->primaryKey => $id));
         $qcDocument = $this->QcDocument->find('first', $options);
@@ -455,10 +455,10 @@ class QcDocumentsController extends AppController {
                 }
 
                 if($this->request->data['QcDocument']['document_type'] == 2)$this->_add_process($this->request->data,$this->QcDocument->id);
-                $this->Session->setFlash(__('The qc document has been saved'));
+                $this->Session->setFlash(__('The document has been saved'));
                 $this->redirect(array('action' => 'index'));
             } else {
-                $this->Session->setFlash(__('The qc document could not be saved. Please, try again.'));
+                $this->Session->setFlash(__('The document could not be saved. Please, try again.'));
             }
         }
         $this->_commons();
@@ -584,7 +584,7 @@ class QcDocumentsController extends AppController {
                 'conditions'=>array('QcDocument.id'=>$this->request->data['QcDocument']['id'])));
 
             if(!$qcDocument){
-                $this->Session->setFlash(__('Incorrrect qc document'));
+                $this->Session->setFlash(__('Incorrect document'));
                 $this->redirect(array('action' => 'view',$this->request->data['QcDocument']['id']));
             }
 
@@ -665,36 +665,7 @@ class QcDocumentsController extends AppController {
             } else {
                 $this->Session->setFlash(__('File move failed....'));
                 $this->redirect(array('action' => 'view',$this->request->data['QcDocument']['id']));
-            }
-            
-            // if ($this->data['QcDocument']['file_key']) {
-            // } else {
-            //     $key = $this->_generate_onlyoffice_key($this->request->data['QcDocument']['id'] . date('Ymdhis'));
-            //     $this->request->data['QcDocument']['file_key'] = $key;
-            //     $this->set('file_key', $key);
-            //     $qcdoc = $this->QcDocument->find('first', array('recursive' => - 1, 'conditions' => array('QcDocument.id' => $id)));
-            //     $this->request->data['QcDocument']['file_key'] = $key;
-            //     $qcdoc['QcDocument']['file_key'] = $key;
-            //     $qcdoc['QcDocument']['file_type'] = $file_type;
-            //     $qcdoc['QcDocument']['file_status'] = 0;
-            //     $this->QcDocument->create();
-            //     $this->QcDocument->save($qcdoc['QcDocument']);
-            //     $this->Session->setFlash(__('File Uploaded'));
-
-            //     $json = [
-            //         "created" => date("Y-m-d H:i:s"),
-            //         'uid'=>$this->Session->read('User.id'),
-            //         'name'=>$this->Session->read('User.name'),
-            //     ];
-
-            //     $version = 1;
-            //     $history_file_for_save = $history_file_for_save.'-hist' . DS . $version;
-            //     $historyFolder = new Folder($history_file_for_save);
-            //     $historyFolder->create($history_file_for_save);
-            //     chmod($history_file_for_save, 0777);
-            //     file_put_contents($history_file_for_save . DS . "createdInfo.json", json_encode($json, JSON_PRETTY_PRINT));
-            // }
-
+            }            
             $this->redirect(array('action' => 'view',$this->request->data['QcDocument']['id']));
         }
     }
@@ -707,7 +678,7 @@ class QcDocumentsController extends AppController {
      */
     public function edit($id = null) {
         if (!$this->QcDocument->exists($id)) {
-            throw new NotFoundException(__('Invalid qc document'));
+            throw new NotFoundException(__('Invalid document'));
         }
 
         if ($this->_show_approvals()) {
@@ -749,7 +720,7 @@ class QcDocumentsController extends AppController {
                 else                
                     $this->redirect(array('action' => 'view', $id,'timestamp'=>date('ymdhis')));
             } else {
-                $this->Session->setFlash(__('The qc document could not be saved. Please, try again.'));
+                $this->Session->setFlash(__('The document could not be saved. Please, try again.'));
             }
         } else {
             $access = $this->request->data['Access'];
@@ -827,7 +798,7 @@ class QcDocumentsController extends AppController {
      */
     public function approve($id = null, $approvalId = null) {
         if (!$this->QcDocument->exists($id)) {
-            throw new NotFoundException(__('Invalid qc document'));
+            throw new NotFoundException(__('Invalid document'));
         }
         $this->loadModel('Approval');
         if (!$this->Approval->exists($approvalId)) {
@@ -844,13 +815,13 @@ class QcDocumentsController extends AppController {
                     $this->request->data[$this->modelClass]['publish'] = 0;
                 }
                 if ($this->QcDocument->save($this->request->data)) {
-                    $this->Session->setFlash(__('The qc document has been saved.'));
+                    $this->Session->setFlash(__('The document has been saved.'));
                     if ($this->_show_approvals()) $this->_save_approvals();
                 } else {
-                    $this->Session->setFlash(__('The qc document could not be saved. Please, try again.'));
+                    $this->Session->setFlash(__('The document could not be saved. Please, try again.'));
                 }
             } else {
-                $this->Session->setFlash(__('The qc document could not be saved. Please, try again.'));
+                $this->Session->setFlash(__('The document could not be saved. Please, try again.'));
             }
         } else {
             $options = array('conditions' => array('QcDocument.' . $this->QcDocument->primaryKey => $id));
@@ -868,14 +839,14 @@ class QcDocumentsController extends AppController {
     public function purge($id = null) {
         $this->QcDocument->id = $id;
         if (!$this->QcDocument->exists()) {
-            throw new NotFoundException(__('Invalid qc document'));
+            throw new NotFoundException(__('Invalid document'));
         }
         $this->request->onlyAllow('post', 'delete');
         if ($this->QcDocument->delete()) {
-            $this->Session->setFlash(__('Qc document deleted'));
+            $this->Session->setFlash(__('document deleted'));
             $this->redirect(array('action' => 'index'));
         }
-        $this->Session->setFlash(__('Qc document was not deleted'));
+        $this->Session->setFlash(__('document was not deleted'));
         $this->redirect(array('action' => 'index'));
     }
     /**
@@ -928,7 +899,7 @@ class QcDocumentsController extends AppController {
                             }
                             $this->redirect(array('action' => 'index'));
                         }else{
-                            $this->Session->setFlash(__('Qc document was not deleted as you are not the creator of the document'));
+                            $this->Session->setFlash(__('Document was not deleted as you are not the creator of the document'));
                             $this->redirect(array('action' => 'index'));
                         }
                     }else{
@@ -1327,7 +1298,7 @@ class QcDocumentsController extends AppController {
             if(copy($from,$to)){
 
             }else{
-                echo "Something went wrong. System cound not find the original document";
+                echo "Something went wrong. System could not find the original document";
             }
             // move new files from files folder to qc document folder
             // rename that file with new version number
@@ -1544,7 +1515,7 @@ class QcDocumentsController extends AppController {
                     }
                 }
             }
-            $this->Session->setFlash(__('Document Added`'));
+            $this->Session->setFlash(__('Document Added'));
             $this->redirect(array('action' => 'index'));  
         }
         $this->_commons();

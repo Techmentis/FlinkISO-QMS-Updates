@@ -20,11 +20,12 @@ $approvalModel = Inflector::classify($this->request->controller);
 $pubshow == false;
 $approvedByList = $approversList;
 
-foreach($approvedByList as $key => $value){
-	if($key != $this->Session->read('User.employee_id')){
-		unset($approvedByList[$key]);
-	}
-}
+// foreach($approvedByList as $key => $value){
+// 	if($key != $this->Session->read('User.employee_id')){
+// 		// unset($approvedByList[$key]);
+// 	}
+// }
+
 
 if($this->action == 'view'){
 	$preparer = $this->viewVars[Inflector::singularize(Inflector::variable($this->request->controller))][Inflector::classify($this->request->controller)]['prepared_by'];

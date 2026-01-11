@@ -200,7 +200,7 @@ class ProcessesController extends AppController {
 
         // add header token
         $headerToken = "";
-        $jwtHeader = 'jvFdQcdBMMyhOCNsva9z';
+        $jwtHeader = Configure::read('onlyofficesecret');
 
         $headerToken = $this->jwtEncode([ "payload" => $arr ]);
         $arr["token"] = $this->jwtEncode($arr);     
@@ -216,13 +216,14 @@ class ProcessesController extends AppController {
             'content' => $data
         )
     );
-
+        
         $context = stream_context_create($opts);
         $response_data = file_get_contents($path, FALSE, $context);
         $downloadUri = json_decode($response_data,true);
         $downloadUri = $downloadUri['fileUrl'];        
-        
-        $new_data = file_get_contents($downloadUri);
+        if($downloadUri){
+            $new_data = file_get_contents($downloadUri);    
+        }        
 
         if ($new_data === FALSE) {
             echo "error";
@@ -363,7 +364,7 @@ class ProcessesController extends AppController {
         if ($this->_show_approvals()) {
             $this->set(array('showApprovals' => $this->_show_approvals()));
         }
-        if ($this->request->is('post') || $this->request->is('put')) {
+        if (($this->request->is('post') || $this->request->is('put')) && !empty($this->request->data['Process'])) {
             $this->request->data[$this->modelClass]['publish'] = $this->request->data['Approval']['publish'];
             $this->request->data['Process']['system_table_id'] = $this->_get_system_table_id();
             foreach ($this->request->data['Process'] as $key => $value) {

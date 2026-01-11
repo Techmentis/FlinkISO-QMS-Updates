@@ -131,10 +131,11 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
             'onClick'=>'selectaddtrs()',
             'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Select All'
         ));
-    if(!in_array($this->request->controller, array('qc_documents','custom_tables','processes','standards'))){
-
-    echo $this->Form->create(Inflector::classify($this->request->controller),array('action'=>'bulk_delete','style'=>'display:inline'),array('class'=>'in-line pull-left','style'=>'display:inline'));    
+    if(!in_array($this->request->controller, array('qc_documents','custom_tables','processes','standards'))){        
+    echo $this->Form->create(Inflector::classify($this->request->controller),array('action'=>'bulk_delete/custom_table_id:'.$this->request->params['named']['custom_table_id'].'/qc_document_id:'.$this->request->params['named']['qc_document_id'], 'style'=>'display:inline'),array('class'=>'in-line pull-left','style'=>'display:inline'));    
+        
         echo '<label for="bulkDeleteSubmit" class="btn btn-app btn-default"><i class="fa fa-trash-o text-danger"></i></label>';
+        
         echo $this->Form->submit('&nbsp;',
             array(
                 'id'=>'bulkDeleteSubmit',

@@ -1,7 +1,7 @@
 <?php echo $this->Session->flash();?>	
 <div class="row">
 	<div class="col-md-12"><h3>Bulk Delete record?</h3></div>
-	<?php 
+	<?php 	
 	if($this->request->data[Inflector::classify($this->request->controller)]['bulk_delete_ids']){
 		$data = explode(',',$this->request->data[Inflector::classify($this->request->controller)]['bulk_delete_ids']);
 		
@@ -11,7 +11,7 @@
 		$ids = json_encode($id);
 	}
 
-	echo $this->Form->create($model,array('action'=>'bulk_delete','custom_table_id'=>$this->request->params['named']['custom_table_id'],'qc_document_id'=>$this->request->params['named']['qc_document_id']),array('class'=>'form'));
+	echo $this->Form->create($model,array('action'=>'bulk_delete/custom_table_id:'.$this->request->params['named']['custom_table_id'].'/qc_document_id:'.$this->request->params['named']['qc_document_id']),array('class'=>'form'));
 	echo $this->Form->hidden('ids',array('default'=>$ids));
 	echo "<div class='col-md-4'>" . $this->Form->input('password',array('type'=>'password','class'=>'form-control')) . "</div>";
 	

@@ -102,5 +102,11 @@ class AppModel extends Model
             $this->loadmodel('Clause');
             $this->GraphPanel->deleteAll(array('conditions'=>array('Clause.standard_id'=>$this->id)));
         }
+
+        if($this->alias == 'File'){
+                $path = Configure::read('files') . DS . 'files'. DS . $this->id;
+                $folder = new Folder($path);
+                if($this->id)$folder->delete();
+            }
     }    
 }

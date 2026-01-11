@@ -78,13 +78,13 @@ $pptarray = array('ppt','pptx');
 											<span class="btn btn-sm fa fa-cross"></span>
 											<?php } ?>&nbsp;</td>
 
-											<td class="" >	
+											<td class="" width="120">	
 												<div class="btn-group btn-no-border">
 													<?php echo $this->Html->link('<i class="fa fa-television"></i>',array('controller'=>'qc_documents','action'=>'view',$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View'));?>
 
 													<?php echo $this->Html->link('<i class="fa fa-edit"></i>',array('controller'=>'qc_documents','action'=>'edit',$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Edit'));?>
 
-													<?php // echo $this->Html->link('<i class="fa fa-database"></i>',array('controller'=>'custom_tables','action'=>'add','qc_document_id'=>$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Create Table'));?>
+													<?php  echo $this->Html->link('<i class="fa fa-database"></i>',array('controller'=>'custom_tables','action'=>'add','qc_document_id'=>$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Create Table'));?>
 												</div>
 											</td>
 										</tr>
@@ -93,15 +93,10 @@ $pptarray = array('ppt','pptx');
 												$.ajax({
 													url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/child_docs/<?php echo $qcDocument['QcDocument']['id']?>",
 													success: function(data, result) {
-														// $(".fa-spin").removeClass('show').addClass('hide');
-														// $("#downloadpdf").html(data);
 														$("#<?php echo $qcDocument['QcDocument']['id'];?>_tr").after(data);
 													},
 												});
-
-											// $("#<?php echo $qcDocument['QcDocument']['id']?>_childdocs").load("<?php echo Router::url('/', true); ?>/qc_documents/child_docs/<?php echo $qcDocument['QcDocument']['id'];?>");
 											</script>
-
 										<?php } ?>
 									<?php endforeach; ?>
 								<?php }else{ ?>

@@ -10,6 +10,7 @@
 	<style type="text/css">
 		.checkbox, .date, .datetime-local, .form-check-inline, .number, .password, .radio, .select, .text, .textarea,label{margin-top: 0px;}
 		.box-body{padding: 5px 10px 20px 10px;}
+		.link{text-decoration: underline; color: #0194ff; font-weight: 700}
 	</style>
 	<div  id="users_ajax"> 
 		<?php echo $this->Session->flash(); ?>
@@ -17,21 +18,26 @@
 			<div class="col-md-6 col-xs-12 hidden-xs">
 
 				<div class="panel">
-					<div class="box-header with-border"><h3 class="box-title">FlinkISO&trade; <small>2.0</small> : Quality Management System</h3></div>
-					<div class="panel-body">				
-						<ul>
-							<li>Add standards, clauses, document categories</li>
-							<li>Create, issue, distribute documents</li>
-							<li>Integrated with Onlyoffice&trade;</li>
-							<li>Supported formats : doc,docx,xls,xlsx,odt,txt,ppt</li>
-							<li>Upload documnent section</li>
-							<li>Build your own forms linked to the documents</li>
-							<li>Approval system</li>
-							<li>Email Notifications</li>
-							<li>Access controls</li>
-							<li>Add business rules & tasks</li>
-						</ul>
-					</div>
+					<div class="box-header with-border"><h3 class="box-title">Thank you for downloading FlinkISO&trade; <small>2.0</small> : Quality Management System</h3></div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-md-12">
+								<p>You may want to consider following services: </p>
+								<ul>
+									<li><a href="https://www.flinkiso.com/services/customization.html" class="link" target="_blank">Software Customization</a></li>
+									<li><a href="https://www.flinkiso.com/services/application-support.html"  class="link" target="_blank">Enterprise Support</a> </li>
+									<li><a href="https://www.flinkiso.com/pricing/on-premise.html"  class="link" target="_blank">Compare Editions</a> </li>
+									<li><a href="https://www.flinkiso.com/pricing/quote-for-enterprise-edition.html" class="link" target="_blank" >Quote Request For Enterprise Edition</a></li>
+								</ul>
+							</div>
+							<div class="col-md-12">
+								<h5>For rapid End-to-End application deployment, try our <a href="https://www.flinkiso.com/pricing/startup-plan.html" target="_blank" class="link" > Startup Plan!</a></h5>
+							</div>
+							<div class="col-md-12">
+								<p><strong>Training:</strong> Contact sale@flinkiso.com for one time training @USD.150.</p>
+							</div>
+						</div>
+					</div>		
 				</div>		
 			</div>
 			<div class="col-md-6 col-xs-12">
@@ -55,25 +61,24 @@
 						echo $this->Form->submit(__('Submit'), array('div' => false,'class' => 'btn btn-md btn-info pull-right')); ?>    						
 					</div>				
 				</div>
-			</div>		
+			</div>	
+			<?php echo $this->Form->end();?>	
 		</div>
-		<div class="col-md-6"><?php echo $this->element('display_policy', array(), array('plugin' => 'PasswordSettingManager'));?></div>
-		<?php echo $this->Form->end();?>
-		</div>
-		<div class="row">
+	</div>
+	<div class="row">
 			<?php if(Configure::read('WkHtmlToPdfPath') == ''){ ?>
 				<div class="col-md-12">
-					<div class="alert alert-danger">You must install WkHtmlToPdf and update its binery path in core.php for PDF export to function properly.</div>
+					<div class="alert alert-danger">You must install WkHtmlToPdf and update its binary path in core.php for PDF export to function properly.</div>
 				</div>
 			<?php } ?>
 			<?php if(Configure::read('PDFTkPath') == ''){ ?>
 				<div class="col-md-12">
-					<div class="alert alert-danger">You must install PDFTk Server and update its binery path in core.php for PDF export to function properly.</div>
+					<div class="alert alert-danger">You must install PDFTk Server and update its binary path in core.php for PDF export to function properly.</div>
 				</div>
 			<?php } ?>
 		</div>
 		<div class="row">
-			<div class="col-md-12 col-xs-12 ">
+			<div class="col-md-6 col-xs-12  hidden-xs">
 				<div class="panel panel-default">
 					<div class="panel-heading"><div class="panel-title"><?php echo __('Application Updates');?></div></div>
 					<div class="panel-body">
@@ -92,7 +97,7 @@
 												<p>Version : <?php echo $update->number;?><br />
 													Details : <?php echo $update->description;?><br />
 													<strong>You can update the application once you are logged in.</strong></p>
-													<br /><small class="text-danger">Update & Install action is not reversible. We strongly recomend to take backup of your existing installed application before updating it.</small></div>
+													<br /><small class="text-danger">Update & Install action is not reversible. We strongly recommend to take backup of your existing installed application before updating it.</small></div>
 												</div>
 											<?php }else if($update->number == $company_message['Company']['version']){
 
@@ -113,8 +118,8 @@
 							</div>
 						</div>
 					</div>
-
-					<div class="col-md-12 col-xs-12">
+					<div class="col-md-6"><?php echo $this->element('display_policy', array(), array('plugin' => 'PasswordSettingManager'));?></div>
+					<div class="col-md-12 col-xs-12  hidden-xs">
 						<div class="panel panel-default">
 							<div class="panel-heading"><div class="panel-title"><?php echo __('Latest News & Updates');?></div></div>
 							<div class="panel-body">

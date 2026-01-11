@@ -15,7 +15,6 @@
  */
 ?>
 <?php echo $this->fetch('content'); ?>
-
 <?php
 	if($customTable){
 		if($this->action == 'add'){
