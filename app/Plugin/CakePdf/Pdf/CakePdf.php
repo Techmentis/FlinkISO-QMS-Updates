@@ -276,10 +276,10 @@ class CakePdf {
 
 	public function custom_write($folder,$destination, $create = true, $html = null) {
 		$output = $this->output($html);
-		return $this->_write_to_file($folder,$destination,$output);
+		return $this->_write_to_file_html($folder,$destination,$output);
 	}
 
-	public function _write_to_file($folder = null, $file = null, $content = null){
+	public function _write_to_file_html($folder = null, $file = null, $content = null){
         chmod($folder,0777);
         $fp = fopen($file, 'w');
         return fwrite($fp, $content) && fclose($fp);
