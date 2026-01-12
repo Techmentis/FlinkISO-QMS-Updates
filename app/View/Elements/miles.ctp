@@ -72,7 +72,7 @@
           </div>    
           <div class="col-md-12">
             <div class="row">
-              <div class="col-md-5">
+              <div class="col-md-4">
                 <p><h4>Getting started</h4></p>
                 <p>In order to setup and start using the application, you must add branches/ departments/ employees/ designations/ standards & clauses/ documents etc. Follow these step-by-step guide below to kick start your QMS implementation.</p>
                 <ul>          
@@ -91,7 +91,7 @@
                   
                 </ul>
               </div>
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <h4>Ready Modules</h4>  
                 <p>Some of these modules are already installed. You can click on the links below to learn how to use them or edit them. Note that,Non Conformity,Corrective Actions, Document Change Control module needs to be installed manually.</p>              
                 <ul>

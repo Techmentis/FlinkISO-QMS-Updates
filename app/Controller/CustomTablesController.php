@@ -85,7 +85,12 @@ class CustomTablesController extends AppController {
      * @return void
      */
     public function index() {
-        $accessConditions = array();
+        if($this->request->params['named']['qc_document_id']){
+            $accessConditions = array('CustomTable.qc_document_id'=>$this->request->params['named']['qc_document_id']);
+        }else{
+            $accessConditions = array();
+        }
+        
         $conditions = $this->_check_request();
         if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 1)$accessConditions[] = array('CustomTable.table_type'=>0);
         else if($this->request->params['named']['table_type'] == 2)$accessConditions[] = array('CustomTable.table_type'=>1);
