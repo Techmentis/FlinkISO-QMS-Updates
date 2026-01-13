@@ -699,6 +699,9 @@ class UsersController extends AppController {
                     'User.soft_delete' => 0
                 )
             ));
+            $companyId = $user['User']['company_id'];
+            $this->loadModel('Company');
+            $companyData = $this->Company->find('first', array('conditions' => array('id' => $companyId), 'recursive' => - 1));
             
             if ($this->Session->read('OPTCode') == $this->request->data['User']['opt_code']) {                
                 $_SESSION['User']['id'] = $user['User']['id'];
