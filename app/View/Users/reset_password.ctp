@@ -22,10 +22,10 @@
 <div  id="users_ajax">
     <?php echo $this->Session->flash(); ?>
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6">
             <?php echo $this->element('display_policy', array(), array('plugin' => 'PasswordSettingManager'));?>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="panel panel-default">
                 <div class="panel-heading"><h4>Reset Password</h4></div>
                 <div class="panel-body">

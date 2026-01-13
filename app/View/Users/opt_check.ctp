@@ -34,7 +34,7 @@
                 <p><?php echo __('Please enter the OTP code which you get in your email'); ?></p>
                 <?php echo $this->Form->create('User', array('role' => 'form', 'class' => 'form')); ?>
                 <div class="row">
-                    <div class="col-md-6"><?php   echo $this->Form->password('opt_code', array('label' => __('OPT Code'))); ?>
+                    <div class="col-md-6"><?php   echo $this->Form->password('opt_code', array('class'=>'form-control', 'label' => __('OPT Code'))); ?>
                     
                     
                     <?php

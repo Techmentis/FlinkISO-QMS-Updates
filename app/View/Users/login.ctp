@@ -24,6 +24,7 @@
 							<div class="col-md-12">
 								<p>You may want to consider following services: </p>
 								<ul>
+									<li><a href="https://www.flinkiso.com/services/training.html.html" class="link" target="_blank">QMS Training</a></li>
 									<li><a href="https://www.flinkiso.com/services/customization.html" class="link" target="_blank">Software Customization</a></li>
 									<li><a href="https://www.flinkiso.com/services/application-support.html"  class="link" target="_blank">Enterprise Support</a> </li>
 									<li><a href="https://www.flinkiso.com/pricing/on-premise.html"  class="link" target="_blank">Compare Editions</a> </li>

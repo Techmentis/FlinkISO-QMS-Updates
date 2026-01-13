@@ -193,14 +193,22 @@ public function confirmPassword($password = null) {
 return false;
 }
 
-public function generateToken($length = 10) {
-	$possible = '0123456789abcdefghijklmnopqrstuvwxyz';
+public function generateToken($length = null) {
+	if(!$length)$length = 10;
+	
+	$possible = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQURSTUVWXYZ';
+	
 	$token = "";
 	$i = 0;
 	while ($i < $length) {
 		$char = substr($possible, mt_rand(0, strlen($possible) - 1), 1);
 		if (!stristr($token, $char)) {
-			$token .= $char;
+			if($i % 4 != 0 || $i < 1){
+				$token .= $char;
+			}else{
+				$token .= "-";
+			}
+			
 			$i++;
 		}
 	}

@@ -163,7 +163,6 @@
 
 				<div class="">
 					<div class="col-md-12">
-						<h3>Build Custom Form <small>Drag & drop type of fields you want from the left side of the panel to right side. Add field name.</small><?php echo $this->Html->link('<i class="fa fa fa-server fa-sm"></i>','javascript:void(0);',array('onclick'=>'open_master()','escape'=>false,'class'=>'pull-right'));?></h3>
 						<?php echo $this->element('custom_forms');?>
 					</div>
 				</div>

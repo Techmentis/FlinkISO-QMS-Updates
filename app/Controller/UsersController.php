@@ -374,7 +374,7 @@ class UsersController extends AppController {
      */
      public function reset_password($params = null, $user = null) {
         $this->layout ='login';
-        if ($this->request->is('post') || $this->request->is('put')) {            
+        if ($this->request->is('post') || $this->request->is('put')) {
             if($this->request->data['User']['username'] && $this->request->data['User']['temppassword'] && $this->request->data['User']['otp']){
                 
                 $user = $this->User->find('first',array('recursive'=>-1,'conditions'=>array(
@@ -400,6 +400,16 @@ class UsersController extends AppController {
             }
             exit;
         }
+        $this->loadModel('PasswordSetting');
+        $this->loadModel('Company');
+        $this->PasswordSetting->recursive = - 1;
+        $this->Company->recursive = - 1;
+        $password_setting = $this->PasswordSetting->find('first');
+        $companies = $this->Company->find('first',array('fields'=>array('Company.id','Company.two_way_authentication','Company.activate_password_setting')));        
+        $password_setting['PasswordSetting']['activate_password_setting'] = $companies['Company']['activate_password_setting'];
+        $opt_code = $companies['Company']['two_way_authentication'];
+        $this->set('password_setting', $password_setting['PasswordSetting']);
+        $this->set('opt_code', $opt_code);
     }
 
     function _crypto_rand_secure($min, $max)
@@ -554,19 +564,15 @@ class UsersController extends AppController {
                         } else if ($personalEmailId != '') {
                             $email = $personalEmailId;
                         }
-                        $otp_code = $this->User->generateToken(6);
+                        $otp_code = $this->User->generateToken(16);
                         if ($email) {
-                            if (Configure::read('evnt') == 'Dev') $env = 'DEV';
-                            elseif (Configure::read('evnt') == 'Qa') $env = 'QA';
-                            else $env = "";
                             try {
-                                App::uses('CakeEmail', 'Network/Email');
-                                
+                                App::uses('CakeEmail', 'Network/Email');                                
                                 $EmailConfig = new CakeEmail("fast");                                
                                 $EmailConfig->to($email);
                                 $EmailConfig->subject('One time OTP Code');
                                 $EmailConfig->template('otpCode');
-                                $EmailConfig->viewVars(array('otp_code' => $otp_code, 'env' => $env));
+                                $EmailConfig->viewVars(array('otp_code' => $otp_code, 'env' => false));
                                 $EmailConfig->emailFormat('html');
                                 $EmailConfig->send();
                             }
@@ -581,87 +587,89 @@ class UsersController extends AppController {
                         }
                     }
                     if (isset($otp_code)) {
+                        $this->Session->setFlash(__('Enter OTP.'));
                         $this->redirect(array('controller' => 'users', 'action' => 'opt_check'));
                     } else {
+                        
                         $_SESSION['User']['id'] = $user['User']['id'];
                         $data['User']['last_login'] = date('Y-m-d H:i:s');
                         $data['User']['last_activity'] = date('Y-m-d H:i:s');
-                    $data['User']['login_status'] = 0; //1
-                    $this->User->save($data, false);
-                    $this->Session->write('User.id', $user['User']['id']);
-                    $this->Session->write('User.employee_id', $user['Employee']['id']);
-                    $this->Session->write('User.branch_id', $user['User']['branch_id']);
-                    $this->Session->write('User.department_id', $user['User']['department_id']);
-                    $this->Session->write('User.designation_id', $user['Employee']['designation_id']);
-                    $this->Session->write('User.branch', $user['Branch']['name']);
-                    $this->Session->write('User.department', $user['Department']['name']);
-                    $this->Session->write('User.name', $user['Employee']['name']);
-                    $this->Session->write('User.username', $user['User']['username']);
-                    $this->Session->write('User.lastLogin', $user['User']['last_login']);
-                    $this->Session->write('User.is_mr', $user['User']['is_mr']);
-                    $this->Session->write('User.is_creator', $user['User']['is_creator']);
-                    $this->Session->write('User.is_publisher', $user['User']['is_publisher']);
-                    $this->Session->write('User.is_mt', $user['User']['is_mt']);
-                    $this->Session->write('User.hod', $user['Employee']['is_hod']);
-                    $this->Session->write('User.company_id', $user['User']['company_id']);
-                    $this->Session->write('User.is_smtp', $user['Company']['is_smtp']);
-                    $this->Session->write('User.division_id', $user['User']['division_id']);
-                    $this->Session->write('User.company_name', $companyData['Company']['name']);
-                    $this->Session->write('User.dir_name', $companyData['Company']['dir_name']);
-                    $this->Session->write('User.timezone', $companyData['Company']['timezone']);
-                    $this->Session->write('User.version', $companyData['Company']['version']);
+                        $data['User']['login_status'] = 0; //1
+                        $this->User->save($data, false);
+                        $this->Session->write('User.id', $user['User']['id']);
+                        $this->Session->write('User.employee_id', $user['Employee']['id']);
+                        $this->Session->write('User.branch_id', $user['User']['branch_id']);
+                        $this->Session->write('User.department_id', $user['User']['department_id']);
+                        $this->Session->write('User.designation_id', $user['Employee']['designation_id']);
+                        $this->Session->write('User.branch', $user['Branch']['name']);
+                        $this->Session->write('User.department', $user['Department']['name']);
+                        $this->Session->write('User.name', $user['Employee']['name']);
+                        $this->Session->write('User.username', $user['User']['username']);
+                        $this->Session->write('User.lastLogin', $user['User']['last_login']);
+                        $this->Session->write('User.is_mr', $user['User']['is_mr']);
+                        $this->Session->write('User.is_creator', $user['User']['is_creator']);
+                        $this->Session->write('User.is_publisher', $user['User']['is_publisher']);
+                        $this->Session->write('User.is_mt', $user['User']['is_mt']);
+                        $this->Session->write('User.hod', $user['Employee']['is_hod']);
+                        $this->Session->write('User.company_id', $user['User']['company_id']);
+                        $this->Session->write('User.is_smtp', $user['Company']['is_smtp']);
+                        $this->Session->write('User.division_id', $user['User']['division_id']);
+                        $this->Session->write('User.company_name', $companyData['Company']['name']);
+                        $this->Session->write('User.dir_name', $companyData['Company']['dir_name']);
+                        $this->Session->write('User.timezone', $companyData['Company']['timezone']);
+                        $this->Session->write('User.version', $companyData['Company']['version']);
 
-                    if ($user['User']['is_mr'] == 1) $this->Session->write('User.is_view_all', 1);
-                    else $this->Session->write('User.is_view_all', $user['User']['is_view_all']);
-                    $this->Session->write('User.is_approver', $user['User']['is_approver']);
-                    
-                    if ($user['User']['agree'] && $user['User']['agree'] != 0) {
-                        $this->Session->write('TANDC', 1);
-                        $this->loadModel('UserSession');
-                        $this->UserSession->create();
-                        $data['UserSession']['ip_address'] = $_SERVER['REMOTE_ADDR'];
-                        $data['UserSession']['browser_details'] = json_encode($_SERVER);
-                        $data['UserSession']['start_time'] = date('Y-m-d H:i:s');
-                        $data['UserSession']['end_time'] = date('Y-m-d H:i:s');
-                        $data['UserSession']['user_id'] = $this->Session->read('User.id');
-                        $data['UserSession']['employee_id'] = $this->Session->read('User.employee_id');
-                        $data['UserSession']['company_id'] = $this->Session->read('User.company_id');
-                        $data['UserSession']['division_id'] = $this->Session->read('User.division_id');
-                        $this->Session->write('User.assigned_branches', $user['User']['assigned_branches']);
-                        $this->UserSession->save($data, false);
-                        $this->Session->write('User.user_session_id', $this->UserSession->id);
-                        $this->redirect(array('controller' => 'users', 'action' => 'terms_and_conditions'));
-                    } else {
-                        $this->loadModel('UserSession');
-                        $this->UserSession->create();
-                        $data['UserSession']['ip_address'] = $_SERVER['REMOTE_ADDR'];
-                        $data['UserSession']['browser_details'] = json_encode($_SERVER);
-                        $data['UserSession']['start_time'] = date('Y-m-d H:i:s');
-                        $data['UserSession']['end_time'] = date('Y-m-d H:i:s');
-                        $data['UserSession']['user_id'] = $this->Session->read('User.id');
-                        $data['UserSession']['employee_id'] = $this->Session->read('User.employee_id');
-                        $data['UserSession']['company_id'] = $this->Session->read('User.company_id');
-                        $this->Session->write('User.assigned_branches', $user['User']['assigned_branches']);
-                        $data['UserSession']['division_id'] = $this->Session->read('User.division_id');
-                        $this->UserSession->save($data, false);
-                        $this->Session->write('User.user_session_id', $this->UserSession->id);
-                        $this->Session->write('User.expired',0);
-
-                        $this->_check_updates();
-
+                        if ($user['User']['is_mr'] == 1) $this->Session->write('User.is_view_all', 1);
+                        else $this->Session->write('User.is_view_all', $user['User']['is_view_all']);
+                        $this->Session->write('User.is_approver', $user['User']['is_approver']);
                         
-                        if($companyData['Company']['activate_password_setting'] == 1){
-                        
-                        $result = $this->requestAction(array('plugin' => 'password_setting_manager', 'controller' => 'password_settings', 'action' => 'get_password_change_remind', urlencode($user['User']['pwd_last_modified'])));
+                        if ($user['User']['agree'] && $user['User']['agree'] != 0) {
+                            $this->Session->write('TANDC', 1);
+                            $this->loadModel('UserSession');
+                            $this->UserSession->create();
+                            $data['UserSession']['ip_address'] = $_SERVER['REMOTE_ADDR'];
+                            $data['UserSession']['browser_details'] = json_encode($_SERVER);
+                            $data['UserSession']['start_time'] = date('Y-m-d H:i:s');
+                            $data['UserSession']['end_time'] = date('Y-m-d H:i:s');
+                            $data['UserSession']['user_id'] = $this->Session->read('User.id');
+                            $data['UserSession']['employee_id'] = $this->Session->read('User.employee_id');
+                            $data['UserSession']['company_id'] = $this->Session->read('User.company_id');
+                            $data['UserSession']['division_id'] = $this->Session->read('User.division_id');
+                            $this->Session->write('User.assigned_branches', $user['User']['assigned_branches']);
+                            $this->UserSession->save($data, false);
+                            $this->Session->write('User.user_session_id', $this->UserSession->id);
+                            $this->redirect(array('controller' => 'users', 'action' => 'terms_and_conditions'));
+                        } else {
+                            $this->loadModel('UserSession');
+                            $this->UserSession->create();
+                            $data['UserSession']['ip_address'] = $_SERVER['REMOTE_ADDR'];
+                            $data['UserSession']['browser_details'] = json_encode($_SERVER);
+                            $data['UserSession']['start_time'] = date('Y-m-d H:i:s');
+                            $data['UserSession']['end_time'] = date('Y-m-d H:i:s');
+                            $data['UserSession']['user_id'] = $this->Session->read('User.id');
+                            $data['UserSession']['employee_id'] = $this->Session->read('User.employee_id');
+                            $data['UserSession']['company_id'] = $this->Session->read('User.company_id');
+                            $this->Session->write('User.assigned_branches', $user['User']['assigned_branches']);
+                            $data['UserSession']['division_id'] = $this->Session->read('User.division_id');
+                            $this->UserSession->save($data, false);
+                            $this->Session->write('User.user_session_id', $this->UserSession->id);
+                            $this->Session->write('User.expired',0);
 
-                        if (!$result['valid']) {
-                            $this->Session->setFlash(__($result['msg']), 'default', array('class' => 'alert-danger'));
-                            $this->redirect(array('controller' => 'users', 'action' => 'reset_password'));
-                            }    
+                            $this->_check_updates();
+
+                            
+                            if($companyData['Company']['activate_password_setting'] == 1){
+                            
+                            $result = $this->requestAction(array('plugin' => 'password_setting_manager', 'controller' => 'password_settings', 'action' => 'get_password_change_remind', urlencode($user['User']['pwd_last_modified'])));
+
+                            if (!$result['valid']) {
+                                $this->Session->setFlash(__($result['msg']), 'default', array('class' => 'alert-danger'));
+                                $this->redirect(array('controller' => 'users', 'action' => 'reset_password'));
+                                }    
+                            }
+                            $this->_rewrite_permissions();
+                            $this->redirect(array('action' => 'dashboard'));
                         }
-                        $this->_rewrite_permissions();
-                        $this->redirect(array('action' => 'dashboard'));
-                    }
                 }
             }
             $this->Session->setFlash(__('Incorrect Login Credentials or your account is locked or already logged in', true), 'default', array('class' => 'alert-danger'));
@@ -679,6 +687,111 @@ class UsersController extends AppController {
         $this->set('password_setting', $password_setting['PasswordSetting']);
         $this->set('opt_code', $opt_code);
     }
+
+    function opt_check()
+    {
+        $this->layout = 'login';
+        if ($this->request->is('post') || $this->request->is('put')) {
+            $user = $this->User->find('first', array(
+                'conditions' => array(
+                    'User.id' => $this->Session->read('UserIdentity'),
+                    'User.publish' => 1,
+                    'User.soft_delete' => 0
+                )
+            ));
+            
+            if ($this->Session->read('OPTCode') == $this->request->data['User']['opt_code']) {                
+                $_SESSION['User']['id'] = $user['User']['id'];
+                $data['User']['last_login'] = date('Y-m-d H:i:s');
+                $data['User']['last_activity'] = date('Y-m-d H:i:s');
+                $data['User']['login_status'] = 0; //1
+                $this->User->save($data, false);
+                $this->Session->write('User.id', $user['User']['id']);
+                $this->Session->write('User.employee_id', $user['Employee']['id']);
+                $this->Session->write('User.branch_id', $user['User']['branch_id']);
+                $this->Session->write('User.department_id', $user['User']['department_id']);
+                $this->Session->write('User.designation_id', $user['Employee']['designation_id']);
+                $this->Session->write('User.branch', $user['Branch']['name']);
+                $this->Session->write('User.department', $user['Department']['name']);
+                $this->Session->write('User.name', $user['Employee']['name']);
+                $this->Session->write('User.username', $user['User']['username']);
+                $this->Session->write('User.lastLogin', $user['User']['last_login']);
+                $this->Session->write('User.is_mr', $user['User']['is_mr']);
+                $this->Session->write('User.is_creator', $user['User']['is_creator']);
+                $this->Session->write('User.is_publisher', $user['User']['is_publisher']);
+                $this->Session->write('User.is_mt', $user['User']['is_mt']);
+                $this->Session->write('User.hod', $user['Employee']['is_hod']);
+                $this->Session->write('User.company_id', $user['User']['company_id']);
+                $this->Session->write('User.is_smtp', $user['Company']['is_smtp']);
+                $this->Session->write('User.division_id', $user['User']['division_id']);
+                $this->Session->write('User.company_name', $companyData['Company']['name']);
+                $this->Session->write('User.dir_name', $companyData['Company']['dir_name']);
+                $this->Session->write('User.timezone', $companyData['Company']['timezone']);
+                $this->Session->write('User.version', $companyData['Company']['version']);
+
+                if ($user['User']['is_mr'] == 1) $this->Session->write('User.is_view_all', 1);
+                else $this->Session->write('User.is_view_all', $user['User']['is_view_all']);
+                $this->Session->write('User.is_approver', $user['User']['is_approver']);
+                
+                if ($user['User']['agree'] && $user['User']['agree'] != 0) {
+                    $this->Session->write('TANDC', 1);
+                    $this->loadModel('UserSession');
+                    $this->UserSession->create();
+                    $data['UserSession']['ip_address'] = $_SERVER['REMOTE_ADDR'];
+                    $data['UserSession']['browser_details'] = json_encode($_SERVER);
+                    $data['UserSession']['start_time'] = date('Y-m-d H:i:s');
+                    $data['UserSession']['end_time'] = date('Y-m-d H:i:s');
+                    $data['UserSession']['user_id'] = $this->Session->read('User.id');
+                    $data['UserSession']['employee_id'] = $this->Session->read('User.employee_id');
+                    $data['UserSession']['company_id'] = $this->Session->read('User.company_id');
+                    $data['UserSession']['division_id'] = $this->Session->read('User.division_id');
+                    $this->Session->write('User.assigned_branches', $user['User']['assigned_branches']);
+                    $this->UserSession->save($data, false);
+                    $this->Session->write('User.user_session_id', $this->UserSession->id);
+                    $this->redirect(array('controller' => 'users', 'action' => 'terms_and_conditions'));
+                } else {
+                    $this->loadModel('UserSession');
+                    $this->UserSession->create();
+                    $data['UserSession']['ip_address'] = $_SERVER['REMOTE_ADDR'];
+                    $data['UserSession']['browser_details'] = json_encode($_SERVER);
+                    $data['UserSession']['start_time'] = date('Y-m-d H:i:s');
+                    $data['UserSession']['end_time'] = date('Y-m-d H:i:s');
+                    $data['UserSession']['user_id'] = $this->Session->read('User.id');
+                    $data['UserSession']['employee_id'] = $this->Session->read('User.employee_id');
+                    $data['UserSession']['company_id'] = $this->Session->read('User.company_id');
+                    $this->Session->write('User.assigned_branches', $user['User']['assigned_branches']);
+                    $data['UserSession']['division_id'] = $this->Session->read('User.division_id');
+                    $this->UserSession->save($data, false);
+                    $this->Session->write('User.user_session_id', $this->UserSession->id);
+                    $this->Session->write('User.expired',0);
+                    $this->_check_updates();                    
+                    if($companyData['Company']['activate_password_setting'] == 1){                    
+                    $result = $this->requestAction(array('plugin' => 'password_setting_manager', 'controller' => 'password_settings', 'action' => 'get_password_change_remind', urlencode($user['User']['pwd_last_modified'])));
+
+                    if (!$result['valid']) {
+                        $this->Session->setFlash(__($result['msg']), 'default', array('class' => 'alert-danger'));
+                        $this->redirect(array('controller' => 'users', 'action' => 'reset_password'));
+                        }    
+                    }
+                    $this->_rewrite_permissions();
+                    $this->redirect(array('action' => 'dashboard'));
+                }
+            } else {                
+                $user['User']['login_status'] = 0;                
+                $this->User->save($user, false);
+                $this->Session->write('User.id', NULL);
+                $this->Session->destroy('User');
+                $this->Session->destroy('OPTCode');
+                $this->Session->destroy('UserIdentity');
+                $this->Session->setFlash(__('Invalid OTP Code.'));
+                $this->redirect(array(
+                    'controller' => 'users',
+                    'action' => 'login'
+                ));
+            }
+        }        
+    }
+
     public function logout() {
         if ($this->Session->read('User.id')) {
             $this->User->read(null, $this->Session->read('User.id'));

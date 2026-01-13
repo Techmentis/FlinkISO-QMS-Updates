@@ -192,8 +192,6 @@
 						<?php			
 						$existingFields = json_decode($this->request->data['CustomTable']['fields'],true);			
 						?>
-						<h3>Build Custom Form <small>Drag & drop type of fields you want from the left side of the panel to right side. Add field name.</small><?php echo $this->Html->link('<i class="fa fa fa-server fa-sm"></i>','javascript:void(0);',array('onclick'=>'open_master()','escape'=>false,'class'=>'pull-right'));?></h3>
-							
 						<?php echo $this->element('recreate_custom_forms',array('existingFields'=>$existingFields,'fieldDetails'=>$fieldDetails,'childTables'=>$this->request->data['ChildTables'],'thisTable'=>Inflector::Classify($this->request->data['CustomTable']['table_name'])));?>
 					</div>
 				</div>
