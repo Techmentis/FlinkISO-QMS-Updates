@@ -66,14 +66,17 @@ public function add($custom_table_id = null,$qc_document_id = null){
     if ($this->request->is('post')) {
         $path = Configure::read('files') . DS . 'pdf_template' . DS . $this->request['data']['PdfTemplate']['custom_table_id'] ;
         if(file_exists($path . DS . 'template.docx') && $this->request['data']['PdfTemplate']['custom_table_id']){
+            
             $pdf_template_folder = new Folder();
             $pdf_template_folder->create($path,0777);
             $url = Router::url('/', true) . 'files/'.$this->Session->read('User.company_id').'/pdf_template/' . $this->request['data']['PdfTemplate']['custom_table_id'] .'/template.docx' ;
+            
             $html = $this->_convert_to_html($url,'docx','html',null,'Template',$this->request['data']['PdfTemplate']['custom_table_id'],$this->Session->read('User.company_id'));
             $html = str_replace('&quot;','"',$html);
             if($this->request->data['PdfTemplate']['html_cleanup'] == 0){
                 $html = $this->_html_cleanup($html);
             }
+
             $this->request->data['PdfTemplate']['template'] = $html;
             $this->request->data['PdfTemplate']['child_table_fields'] = json_encode($this->request->data['PdfTemplate']['child_table_fields']);
             $this->PdfTemplate->create();
@@ -193,8 +196,18 @@ public function add($custom_table_id = null,$qc_document_id = null){
                 }
                 if(!$fontsize)$fontsize = '12';
                 if(!$fontface)$fontface = 'arial';
-                $qcDocument = $this->PdfTemplate->CustomTable->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$customTable['CustomTable']['qc_document_id']),'recursive'=>-1));
+                $qcDocument = $this->PdfTemplate->CustomTable->QcDocument->find('first',array(
+                    'fields'=>array(
+                        'QcDocument.id',
+                        'QcDocument.name',
+                        'QcDocument.file_type',
+                        'QcDocument.title',
+                        'QcDocument.document_number',
+                        'QcDocument.revision_number'
+                    ),
+                    'conditions'=>array('QcDocument.id'=>$customTable['CustomTable']['qc_document_id']),'recursive'=>-1));
                 // $content = $this->_generate_content($customTable['CustomTable']['fields'],$customTable,Inflector::classify($customTable['CustomTable']['table_name']),$fontsize,$fontface); 
+                
                 $html = $content;
                 if(in_array($qcDocument['QcDocument']['file_type'], array('doc','docx')) ){
                     $file_type = $qcDocument['QcDocument']['file_type'];
@@ -207,6 +220,9 @@ public function add($custom_table_id = null,$qc_document_id = null){
                     $fileName = $fileName . '.' . $file_type;
                     $existingDocument = Configure::read('files') . DS . 'qc_documents' . DS . $qcDocument['QcDocument']['id'] . DS . $fileName;
                     $this->set('qcDocument',$qcDocument);
+
+                    $pdfTemplateCount = $this->PdfTemplate->find('count',array('conditions'=>array('PdfTemplate.custom_table_id'=>$this->request->params['pass'][0])));
+                    $this->set('pdfTemplateCount',$pdfTemplateCount);
                     if(!file_exists($existingDocument)){
                     }else{
                         $copydoc = new File($existingDocument);
@@ -384,11 +400,13 @@ public function _generate_content($fields = null, $record = null, $model = null,
 }
 
 public function _convert_to_html($url = null,$filetype = null,$outputtype = null, $password = null, $title = null,$record_id = null,$company_id = null){
-    $delpath =New Folder(WWW_ROOT .'files'. DS . 'pdf' . DS .$this->Session->read('User.id') . DS . $record_id);
+
+    $delpath = New Folder(WWW_ROOT .'files'. DS . 'pdf' . DS .$this->Session->read('User.id') . DS . $record_id);
     if($record_id){
         $delpath->delete(); 
     }
     $path = Configure::read('OnlyofficeConversionApi'). '/ConvertService.ashx';
+    
     $key = $this->_generate_onlyoffice_key($record_id . date('Ymdhis'));
     $payload = array(
         'async'=>false,
@@ -409,9 +427,18 @@ public function _convert_to_html($url = null,$filetype = null,$outputtype = null
     ];
     // add header token
     $headerToken = "";
+    $aurl = array(
+        'controller' => 'pdf_templates',
+        'action' => 'jwtencode',
+        'payload'=>base64_encode(json_encode($arr))
+    );
+
+
+    $token =$this->requestAction($aurl);
+    $arr['token'] = $token;
+    
     $jwtHeader = Configure::read('onlyofficesecret');
     $headerToken = $this->jwtEncode([ "payload" => $arr ]);
-    $arr["token"] = $this->jwtEncode($arr); 
     $data = json_encode($arr);
     // request parameters 
     $opts = array('http' => array(
@@ -423,11 +450,11 @@ public function _convert_to_html($url = null,$filetype = null,$outputtype = null
         'content' => $data
     )
 );
-
     $context = stream_context_create($opts);
     $response_data = file_get_contents($path, FALSE, $context);
     $downloadUri = json_decode($response_data,true);
     $downloadUri = $downloadUri['fileUrl'];
+    
     $new_data = file_get_contents($downloadUri);
     if ($new_data === FALSE) {
         echo "error";
@@ -437,7 +464,7 @@ public function _convert_to_html($url = null,$filetype = null,$outputtype = null
                 $new_data = $this->_html_cleanup($new_data);
             }
         }
-        $savepath = WWW_ROOT . 'files' . DS . $company_id. DS . 'pdf_template' . DS . $record_id;; 
+        $savepath = WWW_ROOT . 'files' . DS . $company_id. DS . 'pdf_template' . DS . $record_id;
         if(file_exists($savepath)){
         }else{
             $folder = new Folder();

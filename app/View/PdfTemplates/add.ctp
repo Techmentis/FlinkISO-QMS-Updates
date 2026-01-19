@@ -36,7 +36,9 @@
 <?php } ?>
 <?php if($this->request->params['pass'][0]){ ?>
 		<?php if($header == false){ ?>
-			<div class="col-md-4"><?php echo $this->Form->input('name',array('class'=>'form-control'));	 ;?></div>
+			<?php if(isset($qcDocument) && !empty($qcDocument['QcDocument']['name']))$name = $qcDocument['QcDocument']['name'] .' Template-'.$pdfTemplateCount;
+			else $name = '';?>
+			<div class="col-md-4"><?php echo $this->Form->input('name',array('class'=>'form-control','default'=>$name));?></div>
 			<div class="col-md-4">
 				<?php 
 					$templateType = array('Content','Header');

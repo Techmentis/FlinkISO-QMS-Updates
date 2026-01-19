@@ -307,7 +307,7 @@
 	<div class="row">
 		<div class="col-md-12">
 			<div class="panel panel-default">
-				<div class="panel-heading"><h4>Preview</h4></div>
+				<div class="panel-heading"><h4>Preview <small>If you do not see the latest changes here, wait a few seconds and refesh the page.</small></h4></div>
 				<div class="panel-body preview"><?php echo $this->request->data['PdfTemplate']['template'];?></div>
 			</div>			
 		</div>

@@ -263,7 +263,7 @@ if($filetype != null){
 
 
                         $token =$this->requestAction($aurl);
-                        $config['token'] = $token;                        
+                        $config['token'] = $token;
                         ?>
                         <?php
                         $version_keys = array();

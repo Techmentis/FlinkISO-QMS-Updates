@@ -411,7 +411,7 @@
 	<div class="col-md-6 text-left">
 		<?php     
 		echo "&nbsp;" . $this->Html->link('<i class="fa fa-edit fa-lg"></i>',array('action'=>'edit',$qcDocument['QcDocument']['id']),array('class'=>'btn btn-lg btn-warning tooltip1','data-original-title'=>'Edit Document','data-toggle'=>'tooltip','data-trigger'=>'hover','data-placement'=>'bottom','escape'=>false));
-		echo "&nbsp;" . $this->Html->link('<i class="fa fa-database fa-lg"></i>',array('controller'=>'custom_tables', 'action'=>'add', 'qc_document_id'=> $qcDocument['QcDocument']['id']),array('class'=>'btn btn-lg btn-info tooltip1','data-original-title'=>'Create table using FlinkISO APIs','data-toggle'=>'tooltip','data-trigger'=>'hover','data-placement'=>'bottom','escape'=>false));        
+		echo "&nbsp;" . $this->Html->link('<i class="fa fa-database fa-lg"></i>',array('controller'=>'custom_tables', 'action'=>'add', 'qc_document_id'=> $qcDocument['QcDocument']['id']),array('class'=>'btn btn-lg btn-info tooltip1','data-original-title'=>'Create table using FlinkISO APIs','data-toggle'=>'tooltip','data-trigger'=>'hover','data-placement'=>'bottom','escape'=>false));		
 		?>
 	</div>
 	<div class="col-md-6 text-right">
