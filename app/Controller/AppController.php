@@ -416,8 +416,7 @@ class AppController extends Controller {
 				                            IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
 				                        )
 				                    ELSE "Un"
-				                END'
-			            '
+				                END'			            
 						);
 						$sharing = $this->QcDocument->find('count',array(					
 							'conditions'=>array(
@@ -460,7 +459,7 @@ class AppController extends Controller {
 				                            IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
 				                        )
 				                    ELSE "Un"
-				                END'
+				                END
 			            	');
 							
 							$sharing = $this->QcDocument->find('count',array(
