@@ -73,8 +73,8 @@
 					<?php if($qcDocument)echo "<div class='col-md-12'>".$this->element('qc_doc_header',array('document'=>$qcDocument))."</div>"; ?>
 					<?php if($process)echo "<div class='col-md-12'>".$this->element('process_doc_header',array('process'=>$process))."</div>"; ?>
 				</div>
-				<?php if($qcDocument){ ?>
-					<div class="row">
+				<div class="row">
+				<?php if($qcDocument){ ?>					
 						<div class="col-md-12">
 							<?php	
 							$key = $key;
@@ -136,10 +136,10 @@
 							));
 							?>
 						</div>
-					</div>
+					
 				<?php } ?>
 				<?php if($process){ ?>
-					<div class="row">
+					
 						<div class="col-md-12">
 							<?php 
 							$key = $process['Process']['file_key'];
@@ -184,9 +184,8 @@
 							));
 							?>
 						</div>
-					</div>
+					
 				<?php } ?>
-				<div class="">
 					<div class="col-md-12">
 
 						<?php			
@@ -194,6 +193,7 @@
 						?>
 						<?php echo $this->element('recreate_custom_forms',array('existingFields'=>$existingFields,'fieldDetails'=>$fieldDetails,'childTables'=>$this->request->data['ChildTables'],'thisTable'=>Inflector::Classify($this->request->data['CustomTable']['table_name'])));?>
 					</div>
+				
 				</div>
 				<?php		
 				$f = $f+1;

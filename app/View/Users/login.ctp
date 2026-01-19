@@ -67,89 +67,93 @@
 		</div>
 	</div>
 	<div class="row">
-			<?php if(Configure::read('WkHtmlToPdfPath') == ''){ ?>
-				<div class="col-md-12">
-					<div class="alert alert-danger">You must install WkHtmlToPdf and update its binary path in core.php for PDF export to function properly.</div>
-				</div>
-			<?php } ?>
-			<?php if(Configure::read('PDFTkPath') == ''){ ?>
-				<div class="col-md-12">
-					<div class="alert alert-danger">You must install PDFTk Server and update its binary path in core.php for PDF export to function properly.</div>
-				</div>
-			<?php } ?>
+<?php if(Configure::read('WkHtmlToPdfPath') == ''){ ?>
+	<div class="col-md-12">
+		<div class="alert alert-danger">You must install WkHtmlToPdf and update its binary path in core.php for PDF export to function properly.</div>
+	</div>
+<?php } ?>
+<?php if(Configure::read('PDFTkPath') == ''){ ?>
+	<div class="col-md-12">
+		<div class="alert alert-danger">You must install PDFTk Server and update its binary path in core.php for PDF export to function properly.</div>
+	</div>
+<?php } ?>
+</div>
+<div class="row">
+<div class="col-md-6 col-xs-12  hidden-xs">
+	<div class="panel panel-default">
+		<div class="panel-heading"><div class="panel-title"><?php echo __('Application Updates');?></div></div>
+		<div class="panel-body">
+			<div id="output"></div>
+				<script>
+					var settings = {
+					    url: "https://www.flinkiso.com/flinkiso-updates/application-updates.xml",
+					    method: "GET",
+					    timeout: 0,
+					    dataType: "xml"
+					};
+
+					$.ajax(settings).done(function (xml) {
+					    $(xml).find("version").each(function () {
+					        var number = $(this).find("number").text().trim();
+					        var date = $(this).find("date").text().trim();
+					        var description = $(this).find("description").text().trim();
+					        $("#output").append(
+					            `<div class="update">
+					                <h5 class="text-info">Version ${number}<br /><small>${date}</small></h5>                
+					                <p>${description}</p>
+					            	<hr />
+					             </div>`
+					        );
+					    });
+					});
+				</script>							
+			</div>
 		</div>
-		<div class="row">
-			<div class="col-md-6 col-xs-12  hidden-xs">
-				<div class="panel panel-default">
-					<div class="panel-heading"><div class="panel-title"><?php echo __('Application Updates');?></div></div>
+	</div>
+		<div class="col-md-6"><?php echo $this->element('display_policy', array(), array('plugin' => 'PasswordSettingManager'));?></div>
+		<div class="col-md-12 col-xs-12  hidden-xs">
+			<div class="panel panel-default">
+				<div class="panel-heading"><div class="panel-title"><?php echo __('Latest News & Updates');?></div></div>
 					<div class="panel-body">
-						<?php
-						try {
-							$updates = Xml::build('http://www.flinkiso.com/flinkiso-updates/application-updates.xml', array(
-								'return' => 'simplexml'
-							));
-
-							if ($updates) {
-								foreach ($updates as $update):	
-									if($update->number > $company_message['Company']['version']){ ?>
-										<div class="row">
-											<div class="col-md-12">
-												<h4>Update Available!</h4>
-												<p>Version : <?php echo $update->number;?><br />
-													Details : <?php echo $update->description;?><br />
-													<strong>You can update the application once you are logged in.</strong></p>
-													<br /><small class="text-danger">Update & Install action is not reversible. We strongly recommend to take backup of your existing installed application before updating it.</small></div>
-												</div>
-											<?php }else if($update->number == $company_message['Company']['version']){
-
-											}else{
-												echo "There are no updates.";
-											}
-										endforeach;
-
-									} else {
-										echo "There are no updates.";
-									}
-
-								}
-								catch (Exception $e) {
-									echo "<h5 class='text-danger'>There are no updates.</small></h5>";
-								}
-								?>
-							</div>
-						</div>
+						<div id="newsoutput"></div>
 					</div>
-					<div class="col-md-6"><?php echo $this->element('display_policy', array(), array('plugin' => 'PasswordSettingManager'));?></div>
-					<div class="col-md-12 col-xs-12  hidden-xs">
-						<div class="panel panel-default">
-							<div class="panel-heading"><div class="panel-title"><?php echo __('Latest News & Updates');?></div></div>
-							<div class="panel-body">
-								<?php
-								try {
-									$xml = Xml::build('http://www.flinkiso.com/flinkiso-updates/news.xml', array(
-										'return' => 'simplexml'
-									));
-
-									if ($xml) {
-										foreach ($xml as $news):
-											echo "<h5 class='text-info'>" . (string) $news->title . "<br /><small>" . (string) $news->date . "</small></h5>";
-											echo "<p>" . (string) $news->description . "</p>";
-											echo "<p><a href=" . (string) $news->link . " class='text-link' target='_blank'>" . (string) $news->link . "</a></p><br />";
-										endforeach;
-
-									} else {
-										echo "Can not access updates";
-									}
-
-								}
-								catch (Exception $e) {
-									echo "<h5 class='text-danger'>There are no updates.</small></h5>";
-								}
-								?>
-							</div>
-						</div>
-					</div>		
 				</div>
-				<?php
-			}
-			?>
+			</div>
+			<script>
+				var settings = {
+				    url: "https://www.flinkiso.com/flinkiso-updates/news.xml",
+				    method: "GET",
+				    timeout: 0,
+				    dataType: "xml"
+				};
+
+				$.ajax(settings).done(function (xml) {
+				    $(xml).find("news").each(function () {
+				        var title = $(this).find("title").text().trim();
+				        var date = $(this).find("date").text().trim();
+				        var description = $(this).find("description").text().trim();
+				        var link = $(this).find("link").text().trim();
+
+				        var $newsBlock = $("<div>", { class: "news-item" });
+
+				        $newsBlock.append(`<h5 class="text-info">${title}<br />`);
+				        $newsBlock.append(`<small>${date}</small></h4>`);
+				        $newsBlock.append(`<p>${description}</p>`);
+
+				        
+				        $("<a>", {
+				            href: link,
+				            target: "_blank",
+				            rel: "noopener noreferrer",
+				            text: link
+				        }).appendTo($newsBlock);
+
+				        $("#newsoutput").append($newsBlock);
+				    });
+				});
+			</script>						
+		</div>		
+	</div>
+<?php
+}
+?>

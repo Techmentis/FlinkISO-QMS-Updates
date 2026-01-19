@@ -76,7 +76,7 @@
 						$file_path = $qcDocument['QcDocument']['id'];
 
 
-	        // $file = $document_number.'-'.$file_name.'-'.$document_version.'.'.$file_type;
+	        			// $file = $document_number.'-'.$file_name.'-'.$document_version.'.'.$file_type;
 						$file = $document_number.'-'.$file_name.'-'.$document_version;
 						$file = ltrim(rtrim($file));
 						$file = str_replace('-', '_', $file);
@@ -117,7 +117,7 @@
 						$file_type = $process['Process']['file_type'];
 						$file_name = $process['Process']['file_name'];
 						
-	        // $file_type = $qcDocument['QcDocument']['file_type'];
+	        			// $file_type = $qcDocument['QcDocument']['file_type'];
 						
 						if($file_type == 'doc' || $file_type == 'docx'){
 							$documentType = 'word';

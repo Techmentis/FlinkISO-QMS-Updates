@@ -149,7 +149,10 @@ $pptarray = array('ppt','pptx');
 													<?php echo $this->Html->link('<i class="fa fa-gears fa-lg text-default"></i>',array('action'=>'view',$customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View/ Recreate'));?>
 
 													<?php echo $this->Html->link('<i class="fa fa-refresh fa-lg text-default"></i>',array('action'=>'unlock' ,'next_action'=>'recreate', $customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View/ Recreate'));?>
-													<?php echo $this->Html->link('<i class="fa fa-file-pdf-o fa-lg text-default"></i>',array('controller'=>'pdf_templates', 'action'=>'add' ,$customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View/ Recreate'));?>
+													<?php echo $this->Html->link('<i class="fa fa-file-pdf-o fa-lg text-default"></i>',array('controller'=>'pdf_templates', 'action'=>'add' ,$customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Create PDF Template'));?>
+
+													<?php if($customTable['CustomTable']['custom_table_id'] == '') 	echo $this->Html->link('<i class="fa fa-link text-info fa-lg "></i>',array('action'=>'add_child','custom_table_id'=> $customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id'],'process_id'=>$customTable['CustomTable']['process_id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> 'Link new table to this table'));
+													?>
 													</div>
 												</div>
 											</div>

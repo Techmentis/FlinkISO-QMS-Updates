@@ -212,7 +212,7 @@
 						<div class="panel-heading"><h5>Main Table: <?php echo $customTable['CustomTable']['table_name'];?></h5></div>
 						<div class="panel-body">							
 							<?php
-							foreach(json_decode($customTable['CustomTable']['fields'],true) as $mainField){								
+							foreach(json_decode($customTable['CustomTable']['fields'],true) as $mainField){
 								if($mainField['linked_to'] == -1){
 									echo  $this->Form->input(Inflector::classify($customTable['CustomTable']['table_name']).'.'.$mainField['field_name'],array('type'=>'text', 'class'=>'txtfld','div'=>false,'label'=>false, 'default'=>'$record["'. Inflector::classify($customTable['CustomTable']['table_name']).'"]["'.$mainField['field_name'].'"]')) .'<i class="fa fa-copy" onclick="myFunction(\''.Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify($mainField['field_name']).'\')"></i>';
 								}else{
