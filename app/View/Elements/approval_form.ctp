@@ -136,12 +136,16 @@ if($this->Session->read('User.is_publisher') == 0){
 			echo "<div class='col-md-12'><br />" . $this->Form->submit('Submit',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Submit','class'=>'btn btn-md btn-success')) . "</div>";
 			echo "</div>";
 			echo $this->Form->end();
-		}else{			
-			if($this->request->data[Inflector::classify($this->request->controller)]['prepared_by']){
+		}else{
+			if($this->request->data[Inflector::classify($this->request->controller)]['prepared_by'] && $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'] != -1){
 				$prepared_by = $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'];
 				$dis = '\'readonly\' => \'readonly\'';
 			}else{
-				$prepared_by = $this->Session->read('User.employee_id');
+				if($this->action = 'add'){
+					$prepared_by = $this->Session->read('User.employee_id');	
+				}else{
+
+				}				
 				$dis = '';
 			} 
 			
@@ -151,7 +155,7 @@ if($this->Session->read('User.is_publisher') == 0){
 				// if($this->Session->read('User.is_approver') == 1){
 				echo "<div class='col-md-2 approval_checkbox_div'><br />".$this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox','onClick'=>'addapp();'))."</div>";
 				$pubshow = true;
-				echo "<div class='col-md-5'>".$this->Form->input('Approval.'.$approvalModel.'.prepared_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'PreparedBy','selected'=>$prepared_by, 'readonly'=>'readonly' , 'class'=>'form-control select'))."</div>";			
+				echo "<div class='col-md-5'>".$this->Form->input('Approval.'.$approvalModel.'.prepared_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'PreparedBy','selected'=>$prepared_by, $dis, 'class'=>'form-control select'))."</div>";			
 				echo "<div class='col-md-5'>".$this->Form->input('Approval.'.$approvalModel.'.approved_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovedBy', 'onchange'=>'addsignature(this.value,this.id)', 'options'=>$approvedByList, 'class'=>'form-control select'))."</div>";
 			}else{
 				echo "<div class='col-md-12 hide'>".$this->Form->input('Approval.'.$approvalModel.'.prepared_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'PreparedBy','selected'=>$prepared_by, 'readonly'=>'readonly' , 'class'=>'form-control select'))."</div>";			
@@ -201,6 +205,8 @@ if($this->Session->read('User.is_publisher') == 0){
 
 		if ($('#Approval<?php echo Inflector::Classify($this->request->controller);?>Publish').is(':checked') == true) {
 			$("#Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("<?php echo $this->Session->read('User.employee_id')?>").trigger('chosen:updated');
+			addsignature("<?php echo $this->Session->read('User.employee_id')?>","Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy");
+			
 		}else{		
 			$("#Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("-1").trigger('chosen:updated');
 		}
@@ -217,8 +223,9 @@ if($this->Session->read('User.is_publisher') == 0){
 	}
 	function approveedit(val){
 		if (val == 1) {
+			addsignature("<?php echo $this->Session->read('User.employee_id')?>","Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy");
 			$('#<?php echo Inflector::Classify($this->request->controller);?>Publish').prop('checked',true);
-			$("#<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("<?php echo $this->Session->read('User.employee_id')?>").trigger('chosen:updated');
+			$("#<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("<?php echo $this->Session->read('User.employee_id')?>").trigger('chosen:updated');			
 		}else{		
 			$('#<?php echo Inflector::Classify($this->request->controller);?>Publish').prop('checked',false);
 			$("#<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("-1").trigger('chosen:updated');

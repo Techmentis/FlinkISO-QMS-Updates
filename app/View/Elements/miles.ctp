@@ -93,7 +93,7 @@
               </div>
               <div class="col-md-3">
                 <h4>Ready Modules</h4>  
-                <p>Some of these modules are already installed. You can click on the links below to learn how to use them or edit them. Note that,Non Conformity,Corrective Actions, Document Change Control module needs to be installed manually.</p>              
+                <p>Some of these modules are already installed. You can click on the links below to learn how to use them or customise them. Note that,Non Conformity,Corrective Actions, Document Change Control module needs to be installed manually.</p>              
                 <ul>
                   <li><a href="https://www.flinkiso.com/quality-management-software/audits.html" title="QMS Audits" target="_blank">Audit Management</a></li>
                   <li><a href="https://www.flinkiso.com/quality-management-software/management-review.html" title="Management Review" target="_blank">Management Review</a></li>

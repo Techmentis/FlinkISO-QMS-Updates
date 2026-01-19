@@ -1325,7 +1325,7 @@ class UsersController extends AppController {
                                 $this->_update_sql($companyId);
                             }
                             
-                            $this->Session->setFlash(__('Account created'));
+                            $this->Session->setFlash(__('Account created successfully. Your email address is your username and password.'));
                             file_put_contents(APP . 'Config/installed.txt', date('Y-m-d, H:i:s'));
                             unlink(APP . 'Config/installed_db.txt');
                             // $this->set('url',$this->request->data['User']['dir_name']);                            
@@ -1365,7 +1365,7 @@ class UsersController extends AppController {
             }
             
         } else{
-            $this->Session->setFlash(__('Incorrect user.'), 'default', array('class' => 'alert-danger'));
+            if($this->action != 'register') $this->Session->setFlash(__('Incorrect user.'), 'default', array('class' => 'alert-danger'));
         }
     }
 

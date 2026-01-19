@@ -299,6 +299,7 @@
 		path1 = path.trim();
 		str1 = path1.replace('//g','_');		
 		str2 = str1.replace('.','');
+		str2 = str1.replace('\'','');
 		str3 = str2.replace(/[` ~!@#$%^&*()|+\-=?;:'",.<>\{\}\[\]\\]/gi,'_');		
 		str4 = str3.replace(/__/g,'');
 		str5 = str4.replace(/\s/g,'');		

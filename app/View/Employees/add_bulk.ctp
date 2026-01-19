@@ -10,14 +10,14 @@
 				<?php echo $this->Form->create('Employee',array('role'=>'form','class'=>'form')); ?>
 				<div class="row">					
 					<?php
-					$str =
-					"Employee Number,Employee Name,Employee Email,Hod,Approver
-					001,Alex John,alex@demo.com,yes,yes
-					002,Erina D,erina@demo.com,yes,no
-					.
-					.
-					.
-					";
+$str =
+"Employee Number,Employee Name,Employee Email,Hod,Approver
+001,Alex John,alex@demo.com,yes,yes
+002,Erina D,erina@demo.com,yes,no
+.
+.
+.
+";
 
 					echo "<div class='col-md-3'>".$this->Form->input('branch_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>'; 
 					echo "<div class='col-md-3'>".$this->Form->input('department_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>'; 

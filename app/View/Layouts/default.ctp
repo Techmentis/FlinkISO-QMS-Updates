@@ -261,7 +261,8 @@ if($this->action == 'index'){?>
 <script>
 	function addsignature(employee,fieldid){
 		$("#"+fieldid).val(-1).trigger('chosen:updated');
-		$("#addsignature-employee").load("<?php echo Router::url('/', true); ?>/<?php echo $this->request->controller;?>/addsignature/"+employee+"/"+fieldid);
+		$("input[type=submit]").hide();
+		$("#addsignature-employee").load("<?php echo Router::url('/', true); ?>/<?php echo $this->request->controller;?>/addsignature/"+employee+"/"+fieldid);		
 	}
 
 	function checkext(ele,exts,eid){

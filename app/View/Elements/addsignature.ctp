@@ -11,7 +11,7 @@
 	<div class="modal-dialog modal-wide">
 		<div class="modal-content">
 			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<button type="button" class="close" id="close-signature-modal" data-dismiss="modal" aria-hidden="true">&times;</button>
 				<h4 class="modal-title"><?php echo __('Add your signature'); ?></h4>				
 			</div>
 			<div class="modal-body">
@@ -89,9 +89,10 @@
 					$("#sign-spin").hide();
 					if(data.responseText == "Proceed"){
 						$("#add-sign-2").hide();
-						$("#loadsign").show();
-						$("#<?php echo $fieldid;?>").val("<?php echo $employee_id;?>").trigger('chosen:updated');
+						$("#<?php echo $fieldid;?>").val("<?php echo $employee_id;?>").trigger('chosen:updated');						
 						$("#response-message").html('Signature fetched successfully. It will be added in View pages.');
+						$("input[type=submit]").show();
+						$("#loadsign").show();						
 					}
 					if(data.responseText == "Wrong password"){
 						$("#loadsign").hide();
@@ -135,11 +136,15 @@
 
 	$().ready(function(){
 		$("select").chosen();
-
+		$("#Approval<?php echo $fieldid;?>").val(-1).trigger('chosen:updated');
 		// $('.tooltip1').tooltip();
 		$("#sign-spin").hide();
 		$('#add-sign').modal('show');        
 		$('#addsignform').validate();
 		$("#loadsign").hide();
+
+		$("#close-signature-modal").on('click',function(){
+			$(".btn").show();
+		})
 	});
 </script>

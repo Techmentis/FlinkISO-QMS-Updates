@@ -190,6 +190,8 @@ $pptarray = array('ppt','pptx');
 													?>
 													
 													<?php echo $this->Html->link('<i class="fa fa-gears fa-lg text-success"></i>',array('action'=>'view',$customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View/ Recreate'));?>
+
+													<?php echo $this->Html->link('<i class="fa fa-refresh fa-lg text-success"></i>',array('action'=>'unlock' ,'next_action'=>'recreate', $customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View/ Recreate'));?>
 												</div>
 											</div>
 										</div>

@@ -711,7 +711,9 @@ class QcDocumentsController extends AppController {
             if($this->request->data['Approval']['QcDocument']['publish'] == 1){
                 $this->request->data['QcDocument']['publish'] = 1;
                 $this->request->data['QcDocument']['approved_by'] = $this->request->data['Approval']['QcDocument']['approved_by'];
+                if($this->request->data['QcDocument']['prepared_by'] == -1)$this->request->data['QcDocument']['prepared_by'] = $this->request->data['Approval']['QcDocument']['prepared_by'];
             }
+
             if ($this->QcDocument->save($this->request->data)) {
                 // if ($this->_show_approvals())
                 if ($this->request->data['Approval']['QcDocument']['user_id']) $this->_save_approvals($this->QcDocument->id);

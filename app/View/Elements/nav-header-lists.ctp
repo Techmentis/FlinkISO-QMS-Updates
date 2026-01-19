@@ -1,4 +1,6 @@
-<style type="text/css">.fa-dark.fa{color: #5c5b5b;}</style>
+<style type="text/css">.fa-dark.fa{color: #5c5b5b;}
+/*table .chosen-drop{position: relative !important; display:block; float:left; }*/
+</style>
 <?php
 if ($unpublished == null)
     $unpublished = 0;
@@ -39,14 +41,16 @@ unset($postData['options']['publish']);
         'data-toggle'=>'tooltip', 'data-trigger'=>'hover',  'data-placement'=>'bottom', 'title'=> 'Index'
     ));    
     
-    echo $this->Html->link('<i class="fa fa-plus"></i>',array('action'=>'add',
-        'qc_document_id' => $this->request->params['named']['qc_document_id'],
-        'custom_table_id' => $this->request->params['named']['custom_table_id'],
-        'process_id' => $this->request->params['named']['process_id'],
-        'timestamp'=>date('ymdhis')
-    ),array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
-    'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Add'
-)); 
+    if($this->request->controller != 'custom_tables'){
+        echo $this->Html->link('<i class="fa fa-plus"></i>',array('action'=>'add',
+            'qc_document_id' => $this->request->params['named']['qc_document_id'],
+            'custom_table_id' => $this->request->params['named']['custom_table_id'],
+            'process_id' => $this->request->params['named']['process_id'],
+            'timestamp'=>date('ymdhis')
+        ),array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
+        'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Add'
+        )); 
+    }    
 
     if($this->request->controller != 'custom_tables' && $this->action == 'index') {
         
@@ -171,13 +175,35 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
     <?php if(($this->action == 'index' || $this->action == 'quick_search' ) && $this->request->controller != 'usage_details'  && $this->request->controller != 'invoices') { ?>
         <div class=" btn-group" style="width:100%;">
             <?php 
-            echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_src_button', 'label'=>false,'placeholder'=>'Add Search query and press Tab.','style'=>'margin-top: -12px'));                        
+            echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_src_button', 'autocomplete'=>'off',  'label'=>false,'placeholder'=>'Add Search query and press Tab.','style'=>'margin-top: -12px'));                        
             ?>
         </div>
     <?php } } ?>
 </div>
 </div>
-
+<div id="srcdivhideshow" class="hidden">
+    <div class="row">
+    <?php
+        if($this->action == 'index' || $this->action == 'quick_search'){
+            echo $this->Form->create(Inflector::classify($this->request->controller),array('action'=>'index','type'=>'get','default' => false,'id'=>'indexsort',),array('class'=>'form','role'=>'form'));
+            if(isset($sortingFields) && is_array($sortingFields) && !empty($sortingFields)){
+                foreach($sortingFields as $sortmodel => $sortingField){
+                    $checkisset = Inflector::pluralize( Inflector::variable($sortmodel));
+                    if(isset($this->viewVars[$checkisset]) && !empty($this->viewVars[$checkisset])){
+                        echo "<div class='col-md-3'>" . $this->Form->input($sortingField, 
+                            array(
+                                'default'=>$this->request->params['named'][$sortingField],
+                                'class'=>'form-control no-margin no-padding','div'=>false, 'label'=>array('class'=>'no-margin no-padding')))."</div>";
+                    }
+                }
+                echo "<div class='col-md-3' >".$this->Form->input('strict',array('class'=>'', 'type'=>'radio', 'default'=>$this->request->params['named']['strict'],'options'=>array(0=>'Yes',1=>'No')))."</div>";
+                echo "<div class='col-md-3' ><br />".$this->Form->submit('Go',array('class'=>'btn btn-sm btn-info'))."</div>";
+                echo $this->Form->end();
+            }
+        }    
+        ?>        
+    </div>
+</div>
 <?php 
 
 $named = $this->request->params['named']['search'];
@@ -210,6 +236,26 @@ $str .= 'timestamp:'.date('ymdhis');
             return false;
         }
     <?php } ?>
+    
+    $().ready(function(){
+        $("#quick_src_button").on('focus',function(){
+            $("#srcdivhideshow").removeClass('hidden', 200, null, function() {});
+        });
+        $("#indexsort").submit(function(event) {
+            var searchstring = "";
+            event.preventDefault();            
+            let form_data = $(this).serializeArray();
+            $.each(form_data, function(i, field) {
+                searchstring += field.name+":"+field.value+"/";
+            });
+            <?php
+            if(isset($this->request->params['named']['custom_table_id']))$str .= "/custom_table_id:".$this->request->params['named']['custom_table_id'];
+            if(isset($this->request->params['named']['qc_document_id']))$str .= "/qc_document_id:".$this->request->params['named']['qc_document_id'];
+            ?>
+            let post_url = $(this).attr("action")+"/quick_search/<?php echo $str;?>/"+searchstring + "/search:"+$("#quick_src_button").val();
+            window.location.href = post_url;             
+        });
+    }) ;      
 
     function openpdf(){
         <?php if($this->request->controller == 'qc_documents' ){ ?>
@@ -228,19 +274,17 @@ $str .= 'timestamp:'.date('ymdhis');
         $("#ad_src").on('click',function(){
             $("#ad_src_result").load("<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/advance_search/custom_table_id:<?php echo $this->request->params['named']['custom_table_id'];?>/qc_document_id:<?php echo $this->request->params['named']['qc_document_id'];?>/process_id:<?php echo $this->request->params['named']['process_id'];?>");
         });
-        
-        $("#quick_src_button").on('change', function(){
-            $("#quick_src_button").val($("#quick_src_button").val().replace(/ /g,"+"));
-            $('#main').load("<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/quick_search/<?php echo $str;?>/search:" + $("#quick_src_button").val());
-            return false;
-        });
-    });
-        
-
-    </script>
-    
-    <div id="pdf_open"></div>
-    <div id="history_open"></div>
+        <?php if($this->request->controller == 'custom_tables'){ ?>
+            $("#quick_src_button").on('change', function(){
+                $("#quick_src_button").val($("#quick_src_button").val().replace(/ /g,"+"));
+                $('#main').load("<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/quick_search/<?php echo $str;?>/search:" + $("#quick_src_button").val());
+                return false;
+            });
+        <?php } ?>                
+    });    
+</script>
+<div id="pdf_open"></div>
+<div id="history_open"></div>
 
 
 

@@ -1372,7 +1372,6 @@ class CustomTablesController extends AppController {
             $belongsTo = null;
 
             if ($this->CustomTable->save($this->request->data,false)) {
-                echo "2";
                 unset($this->request->data['History']);
                 unset($this->request->data['CustomTable']['pre_fields']);
                 
@@ -1453,7 +1452,7 @@ class CustomTablesController extends AppController {
                     $modelFolder = new Folder();
                     $modelFolder->create($folder);
                     chmod($folder, 0777);
-
+                    
                     if($viewCode['index']){
                         $file = $folder . DS . 'index.ctp';
                         $this->_write_to_file($folder,$file,$viewCode['index']);
@@ -1462,6 +1461,18 @@ class CustomTablesController extends AppController {
                     if($viewCode['index']){
                         $file = $folder . DS . 'view.ctp';                                
                         $this->_write_to_file($folder,$file,$viewCode['view']);
+                        
+                    }
+
+                    if($viewCode['json']){
+                        $file = $folder . DS . 'json.ctp';                                
+                        $this->_write_to_file($folder,$file,$viewCode['json']);
+                        
+                    }
+
+                    if($viewCode['xml']){
+                        $file = $folder . DS . 'xml.ctp';                                
+                        $this->_write_to_file($folder,$file,$viewCode['xml']);
                         
                     }
 
@@ -1477,7 +1488,7 @@ class CustomTablesController extends AppController {
                         $file = $folder . DS . 'edit.ctp';                                
                         $this->_write_to_file($folder,$file,$addCode['edit']);
                         
-                    }
+                    }                    
                 }
 
                 $this->_clear_cake_cache();
@@ -1680,7 +1691,6 @@ class CustomTablesController extends AppController {
                     echo "Something went wrong. Please try again";
                 }else{
                     $result = json_decode($result['response']['finalResult'],true);
-                    
                     if($result['controller']){
                         $controller_file_name = Inflector::pluralize(Inflector::Classify($table_name)) . 'Controller.php';
                         $folder = APP . 'Controller';
@@ -1704,6 +1714,16 @@ class CustomTablesController extends AppController {
                     if($result['index']){                        
                         $file = $folder . DS . 'index.ctp';
                         $this->_write_to_file($folder,$file,$result['index']);
+                    }
+
+                    if($result['json']){
+                        $file = $folder . DS . 'json.ctp';
+                        $this->_write_to_file($folder,$file,$result['json']);
+                    }
+
+                    if($result['xml']){
+                        $file = $folder . DS . 'xml.ctp';
+                        $this->_write_to_file($folder,$file,$result['xml']);
                     }
 
                     $addCode = json_decode($result['formFile'],true);
@@ -1969,7 +1989,12 @@ class CustomTablesController extends AppController {
                     $this->CustomTable->set('table_locked', 1);
                     $this->CustomTable->save();
                     $this->Session->setFlash(__('Table unlocked'));
-                    $this->redirect(array('action' => 'view',$this->data['CustomTable']['id']));
+                    if($this->data['CustomTable']['next_action'] == 'recreate'){
+                        $this->redirect(array('action' => 'recreate',$this->data['CustomTable']['id']));    
+                    }else{
+                        $this->redirect(array('action' => 'view',$this->data['CustomTable']['id']));
+                    }
+                    
                 } else {
                     $this->Session->setFlash(__('Incorrect Password'));
                     $this->redirect(array('action' => 'view',$this->data['CustomTable']['id']));

@@ -78,13 +78,14 @@ class AppController extends Controller {
 		Configure::write("path", WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . $this->request->controller);
 		Configure::write("url", Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . $this->request->controller);
 		Configure::write("common_path", 'files' . DS . $this->Session->read('User.company_id') . DS . $this->request->controller);		
-		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind','opt_check');		
+		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind','opt_check','json','xml');
+		
 		if (empty($this->Session->read('User.id')) && !in_array($this->action, $ignore)) {
 			if($this->request->is('ajax'))echo "Session expired. Please login again.";
-			$this->Session->setFlash(__('Login to continue'));
+			if($this->request->action != 'dashboard') $this->Session->setFlash(__('Login to continue.'));
 			$this->redirect(array('controller' => 'users', 'action' => 'login'));
 		}else{
-			$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind','opt_check');
+			$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind','opt_check','json','xml');
 			if (empty($this->Session->read('User.id')) && !in_array($this->action, $ignore)) {
 				try{
 					$this->loadModel('UserSession');
@@ -119,8 +120,108 @@ class AppController extends Controller {
 			$this->_table_menu();
 			$this->_check_lock();
 			if($this->action == 'view')$this->_view();
+			if($this->action == 'json')$this->_json();
 			$this->_get_approver_list();
 			$this->_find_parent();
+			$ignoreControllerSotList = array('custom_tables','standards','qc_document_categories','branches','departments','designations');
+			if(!in_array($this->request->controller, $ignoreControllerSotList)){
+				$this->_sort();	
+			}
+			
+		}
+		
+		if($this->action == 'json'){
+			$callHeaders = getallheaders();
+			
+			if(isset($callHeaders)){
+				$this->loadModel('User');
+				if((isset($callHeaders['user']) && !empty($callHeaders['user'])) && (isset($callHeaders['password']) && !empty($callHeaders['password']))){
+					$this->User->virtualFields = array(
+						'emp_status' => 'select `employment_status` from `employees` where `employees`.`id` LIKE User.employee_id '
+					);
+					
+					$user = $this->User->find('count',array(
+						'conditions'=>array(
+							'User.username'=>$callHeaders['user'],
+							'User.password'=>trim(Security::hash($callHeaders['password'], 'md5', true)),
+							'User.status'=>1,
+							'User.is_mr'=>1,
+							'User.emp_status'=>1
+						)
+					));
+					if($user){						
+						
+					}else{
+						$this->response->statusCode(401);
+						$this->response->type('json');
+						$this->set('_serialize', ['error']);
+						$this->set('error', ['message' => 'Unauthorized']);
+						$this->response->send();
+						exit;
+					}
+				}else{
+					$this->response->statusCode(401);
+					$this->response->type('json');
+					$this->set('_serialize', ['error']);
+					$this->set('error', ['message' => 'Unauthorized']);
+					$this->response->send();
+					exit;
+				}
+			}else{
+				$this->response->statusCode(401);
+				$this->response->type('json');
+				$this->set('_serialize', ['error']);
+				$this->set('error', ['message' => 'Unauthorized']);
+				$this->response->send();
+				exit;
+			}
+		}
+
+		if($this->action == 'xml'){
+			$callHeaders = getallheaders();
+			
+			if(isset($callHeaders)){
+				$this->loadModel('User');
+				if((isset($callHeaders['user']) && !empty($callHeaders['user'])) && (isset($callHeaders['password']) && !empty($callHeaders['password']))){
+					$this->User->virtualFields = array(
+						'emp_status' => 'select `employment_status` from `employees` where `employees`.`id` LIKE User.employee_id '
+					);
+					
+					$user = $this->User->find('count',array(
+						'conditions'=>array(
+							'User.username'=>$callHeaders['user'],
+							'User.password'=>trim(Security::hash($callHeaders['password'], 'md5', true)),
+							'User.status'=>1,
+							'User.is_mr'=>1,
+							'User.emp_status'=>1
+						)
+					));
+					if($user){						
+						
+					}else{
+						$this->response->statusCode(401);
+						$this->response->type('json');
+						$this->set('_serialize', ['error']);
+						$this->set('error', ['message' => 'Unauthorized']);
+						$this->response->send();
+						exit;
+					}
+				}else{
+					$this->response->statusCode(401);
+					$this->response->type('json');
+					$this->set('_serialize', ['error']);
+					$this->set('error', ['message' => 'Unauthorized']);
+					$this->response->send();
+					exit;
+				}
+			}else{
+				$this->response->statusCode(401);
+				$this->response->type('json');
+				$this->set('_serialize', ['error']);
+				$this->set('error', ['message' => 'Unauthorized']);
+				$this->response->send();
+				exit;
+			}
 		}
 	}
 
@@ -959,11 +1060,13 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	    $header = $this->base64_url_encode(json_encode($header));
 	    $payload = $this->base64_url_encode(json_encode($payload));
 	    $signature = $this->base64_url_encode(hash_hmac('SHA256', "$header.$payload", $signing_key, true));
-	    $jwt = "$header.$payload.$signature";
+	    $jwt = $header;
+	    $jwt .= ".".$payload;
+	    $jwt .= ".".$signature;	    
 	    return $jwt;
 	}
 
-	public function base64_url_encode($text):String{
+	public function base64_url_encode(String $text){
     	return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($text));
 	}
 
@@ -1086,6 +1189,22 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			echo "Folder not found";
 		}
 	}
+
+	public function _single_user_check(){
+		$this->loadModel('User');
+		$user = $this->User->find('first',array('conditions'=>array('User.id'=>$id)));
+		if($user['User']['sr_no'] == 1){
+			// $this->Session->setFlash(__('You can not delete this user'));
+			return false;
+		}
+		$user = $this->User->find('count');
+		if($user == 1){
+			// $this->Session->setFlash(__('You can not delete this user'));
+			return false;
+		}
+		// $this->redirect(array('action' => 'index','custom_table_id'=>$record[$model]['custom_table_id'],'qc_document_id'=>$record[$model]['qc_document_id']));
+		
+	}
 	
 	public function delete() {
 		if($this->request->controller == 'processes'){
@@ -1099,15 +1218,11 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		if ($this->request->controller != 'custom_tables') {
 			if ($this->request->is('post') || $this->request->is('put')) {
 				if($this->request->controller == 'users'){
-					$user = $this->User->find('first',array('conditions'=>array('User.id'=>$id)));
-					if($user['User']['sr_no'] == 1){
+					$singleUserCheck = $this->_single_user_check();
+					if($singleUserCheck == false){
 						$this->Session->setFlash(__('You can not delete this user'));
+						$this->redirect(array('action' => 'index','custom_table_id'=>$record[$model]['custom_table_id'],'qc_document_id'=>$record[$model]['qc_document_id']));	
 					}
-					$user = $this->User->find('count');
-					if($user == 1){
-						$this->Session->setFlash(__('You can not delete this user'));
-					}
-					$this->redirect(array('action' => 'index','custom_table_id'=>$record[$model]['custom_table_id'],'qc_document_id'=>$record[$model]['qc_document_id']));
 				}else{
 					$model = $this->modelClass;
 					$id = $this->request->data[$model]['id'];
@@ -1245,6 +1360,11 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 										}
 									}
 									// after deleteting everything, delete main record
+									$singleUserCheck = $this->_single_user_check();
+									if($singleUserCheck == false){
+										$this->Session->setFlash(__('You can not delete this user'));
+										$this->redirect(array('action' => 'index','custom_table_id'=>$record[$model]['custom_table_id'],'qc_document_id'=>$record[$model]['qc_document_id']));	
+									}
 									$this->$model->delete($id);
 									$FilesToDelete = $this->File->delete(array('File.model'=>$model,'File.record_id'=>$id));
 
@@ -1461,21 +1581,39 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 	public function quick_search(){
 		$model = $this->modelClass;
+		$field_condition = array();
 		$this->_pre_search();
 		$fields = array_keys($this->$model->schema());
 		$x = 0;
-		$search_keys = array('name','title','document_number','clause','sub-clause');
+		$search_keys = array('name','title','document_number','clause','sub-clause','employee_number');
 		$src = $this->$model->displayField;
-		$srcs = explode(' ',$this->request->params['named']['search']);
-		$conditions = array();
-		foreach($srcs as $s){
-			foreach ($search_keys as $keys) {
-				if(in_array($keys, $fields)){
-					$field_condition[] = array('LOWER('.$model.'.'.$keys.') LIKE' => '%'.strtolower($s) . '%');
+		unset($this->request->params['named']['timestamp']);
+		$conditions = $field_condition = array();	
+		if($this->request->params['named']['search'] != null){
+			$srcs = explode(' ',$this->request->params['named']['search']);			
+			foreach($srcs as $s){
+				foreach ($search_keys as $keys) {
+					if(in_array($keys, $fields)){
+						$field_condition[] = array('LOWER('.$model.'.'.$keys.') LIKE' => '%'.strtolower($s) . '%');
+					}
 				}
 			}
 		}		
-		if($field_condition)$conditions = array('OR'=>array_merge($conditions,$field_condition));
+		unset($this->request->params['named']['search']);
+		unset($this->request->params['named']['custom_table_id']);
+		unset($this->request->params['named']['qc_document_id']);
+		foreach($this->request->params['named'] as $newSrc => $newVal){
+			if($newVal != -1 && $newVal != 'timestamp' && $newSrc != 'search' && $newSrc != 'strict'){
+				$field_condition[] = array($model.'.'.$newSrc => $newVal);	
+			}
+		}
+
+		if($this->request->params['named']['strict'] == 0){
+			$conditions = array_merge($conditions,$field_condition);
+		}else{
+			$conditions = array('OR'=>array_merge($conditions,$field_condition));
+		}
+
 		$this->paginate = array('limit'=>25, 'order' => array($model.'.id' => 'DESC'), 'conditions' => array($conditions));
 		$this->$model->recursive = 0;
 		$this->set(Inflector::variable(Inflector::tableize($model)), $this->paginate());
@@ -1820,7 +1958,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				$this->set(array(
 					'sDate'=>date('Y-m-d',strtotime($dates[0])),
 					'eDate'=>date('Y-m-d',strtotime($dates[1])),
-					),
+					)
 				);
 
 			}
@@ -2845,7 +2983,43 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		} 
 	}
 
-	public function _view(){
+	public function _json(){
+		$linkedTables = $this->CustomTable->find('all',array(
+			'recursive'=>0,
+			'fields'=>array(
+				'CustomTable.id',
+				'CustomTable.name',
+				'CustomTable.table_name',
+				'CustomTable.field_name',
+				'CustomTable.field_value',
+				'QcDocument.id',
+				'QcDocument.parent_document_id',
+				'QcDocument.title',
+			),
+			'conditions'=>array(
+				'CustomTable.table_type !=' => 2,
+				'QcDocument.parent_document_id' => $this->request->params['named']['qc_document_id'],
+			)));
+		$t = 0;
+		foreach($linkedTables as $linkedTable){
+			if($this->viewVars[Inflector::variable($this->modelClass)][$this->modelClass][$linkedTable['CustomTable']['field_name']] == $linkedTable['CustomTable']['field_value']){
+				$load[$t]['custom_table_id'] = $linkedTable['CustomTable']['id'];
+				$load[$t]['qc_document_id'] = $linkedTable['QcDocument']['id'];
+				$load[$t]['name'] = $linkedTable['QcDocument']['title'];
+				$load[$t]['table_name'] = $linkedTable['CustomTable']['table_name'];
+				$load[$t]['action'] = 'add';
+			}else{
+				$load[$t]['custom_table_id'] = $linkedTable['CustomTable']['id'];
+				$load[$t]['qc_document_id'] = $linkedTable['QcDocument']['id'];
+				$load[$t]['name'] = $linkedTable['QcDocument']['title'];
+				$load[$t]['table_name'] = $linkedTable['CustomTable']['table_name'];
+				$load[$t]['action'] = 'index';
+			} 
+			$t++;
+		}		
+		$this->set('loadLinkedTables',$load);
+	}
+	public function _view(){		
 		if($this->Session->read('User.is_mr') == false && $this->Session->read('User.is_view_all') == false){
 			if(
 				$this->viewVars[Inflector::variable($this->modelClass)][$this->modelClass]['prepared_by'] != $this->Session->read('User.employee_id') || 
@@ -2899,7 +3073,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				$load[$t]['action'] = 'index';
 			} 
 			$t++;
-		}
+		}		
 		$this->set('loadLinkedTables',$load);
 	}
 
@@ -4414,5 +4588,23 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 		return $text;
 		exit;
+	}
+
+	public function _sort(){
+		$model = Inflector::Classify($this->request->controller);
+		try{
+			$this->loadModel($model);
+		}catch (Exception $e){
+			return false;
+		}
+
+		$belongsTos = $this->$model->belongsTo;
+		$skiparray = array('SystemTable','Company','BranchIds','DepartmentIds','CustomTable','CreatedBy','ModifiedBy','QcDocument');
+		foreach($belongsTos as $name => $belongsTo){
+			if(!in_array($name, $skiparray)){
+				$display[$name] = $belongsTo['foreignKey'];
+			}
+		}
+		$this->set('sortingFields',$display);		
 	}
 }
