@@ -132,11 +132,14 @@
 					<div class="panel-body">							
 						<?php
 						foreach(json_decode($this->request->data['CustomTable']['fields'],true) as $mainField){
-							if($mainField['linked_to'] == -1){
+							if(!isset($mainField['linked_to']) || $mainField['linked_to'] == -1){								
 								echo  $this->Form->input(Inflector::classify($this->request->data['CustomTable']['table_name']).'.'.$mainField['field_name'],array('type'=>'text', 'class'=>'txtfld','div'=>false,'label'=>false, 'default'=>'$record["'. Inflector::classify($this->request->data['CustomTable']['table_name']).'"]["'.$mainField['field_name'].'"]')) .'<i class="fa fa-copy" onclick="myFunction(\''.Inflector::classify($this->request->data['CustomTable']['table_name']).Inflector::classify($mainField['field_name']).'\')"></i>';
-							}else{
+							}else{								
 								$defaultField = $this->requestAction(array('action'=> 'get_default',Inflector::classify($mainField['linked_to'])));
-								echo  $this->Form->input(Inflector::classify($mainField['field_name']).'.'.$defaultField,array('type'=>'text', 'class'=>'txtfld','div'=>false,'label'=>false, 'default'=>'$record["'. Inflector::classify($mainField['field_name']).'"]["'.$defaultField.'"]')) .'<i class="fa fa-copy" onclick="myFunction(\''.Inflector::classify($mainField['field_name']).Inflector::classify($defaultField).'\')"></i>';
+								if($defaultField){
+									echo  $this->Form->input(Inflector::classify($mainField['field_name']).'.'.$defaultField,array('type'=>'text', 'class'=>'txtfld','div'=>false,'label'=>false, 'default'=>'$record["'. Inflector::classify($mainField['field_name']).'"]["'.$defaultField.'"]')) .'<i class="fa fa-copy" onclick="myFunction(\''.Inflector::classify($mainField['field_name']).Inflector::classify($defaultField).'\')"></i>';	
+								}
+								
 							}
 
 						}
@@ -186,8 +189,6 @@
 			if(!is_array($this->request->data['PdfTemplate']['child_table_fields'])){
 				$existingChildTables =json_decode($this->request->data['PdfTemplate']['child_table_fields'],true);
 			}
-
-			debug($existingChildTables);
 
 			if($existingChildTables){
 				foreach($existingChildTables as $childTables){ 

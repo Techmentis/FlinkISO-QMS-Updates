@@ -4488,41 +4488,49 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					case "text":
 						$text['label'] = base64_decode($field['field_label']);
 						$text['value'] = $record[$model][$field['field_name']];
+						$text['name'] = $field['field_name'];
 					break;
 
 					case "phone":
 						$text['label'] = base64_decode($field['field_label']);
 						$text['value'] = $record[$model][$field['field_name']];
+						$text['name'] = $field['field_name'];
 					break;
 
 					case "email":
 						$text['label'] = base64_decode($field['field_label']);
 						$text['value'] = $record[$model][$field['field_name']];
+						$text['name'] = $field['field_name'];
 					break;
 
 					case "textarea":
 						$text['label'] = base64_decode($field['field_label']);
 						$text['value'] = $record[$model][$field['field_name']];
+						$text['name'] = $field['field_name'];
 					break;
 
 					case "date":
 						$text['label'] = base64_decode($field['field_label']);
 						$text['value'] = date(Configure::read('dateFormat'),strtotime($record[$model][$field['field_name']]));
+						$text['name'] = $field['field_name'];
 					break;
 
 					case "datetime":
 						$text['label'] = base64_decode($field['field_label']);
 						$text['value'] = date(Configure::read('dateTimeFormat'),strtotime($record[$model][$field['field_name']]));
+						$text['name'] = $field['field_name'];
 					break;
 
 					case "number":
 						$text['label'] = base64_decode($field['field_label']);
 						$text['value'] = $record[$model][$field['field_name']];
+						$text['name'] = $field['field_name'];
 					break;
 
 					case "float":
 						$text['label'] = base64_decode($field['field_label']);
 						$text['value'] = $record[$model][$field['field_name']];
+						$text['name'] = $field['field_name'];
 					break;
 				}
 
@@ -4532,12 +4540,14 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					$csvoptions = explode(',',$field['csvoptions']);
 					$text['label'] = base64_decode($field['field_label']);
 					$text['value'] = $csvoptions[$record[$model][$field['field_name']]];
+					$text['name'] = $field['field_name'];
 			break;
 
 			case 2: // checkox/ radio !! ISSUE
 					$csvoptions = explode(',',$field['csvoptions']);
 					$text['label'] = base64_decode($field['field_label']);
 					$text['value'] = $csvoptions[$record[$model][$field['field_name']]];
+					$text['name'] = $field['field_name'];
 			break;
 
 			case 3: // dropdown-s
@@ -4552,6 +4562,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 							}
 							$text['label'] = base64_decode($field['field_label']);
 							$text['value'] = $signature . "" .$record[$modelname][$displayField];
+							$text['name'] = $field['field_name'];
 						}
 					}
 			break;
@@ -4566,11 +4577,13 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					}
 					$text['label'] = base64_decode($field['field_label']);
 					$text['value'] = $result;
+					$text['name'] = $field['field_name'];
 			break;
 
 			case 5:
 					$text['label'] = base64_decode($field['field_label']);
 					$text['value'] = $record[$model][$field['field_name']];
+					$text['name'] = $field['field_name'];
 			break;
 
 			case 6: // file
@@ -4579,11 +4592,13 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					$file = $file['name'] .'<br /><small>Available for download from the application.</small>';
 					$text['label'] = base64_decode($field['field_label']);
 					$text['value'] = $file;	
+					$text['name'] = $field['field_name'];
 			break;
 
 			case 7: // comments
 					$text['label'] = base64_decode($field['field_label']);
 					$text['value'] = $record[$model][$field['field_name']];
+					$text['name'] = $field['field_name'];
 			break;
 		}
 		return $text;

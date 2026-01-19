@@ -207,7 +207,13 @@ public function add($custom_table_id = null,$qc_document_id = null){
                     ),
                     'conditions'=>array('QcDocument.id'=>$customTable['CustomTable']['qc_document_id']),'recursive'=>-1));
                 // $content = $this->_generate_content($customTable['CustomTable']['fields'],$customTable,Inflector::classify($customTable['CustomTable']['table_name']),$fontsize,$fontface); 
-                
+                // if(!in_array($qcDocument['QcDocument']['file_type'], array('doc','docx')) ){
+                //     $this->Session->setFlash(__('PDF Templates are only available for Doc, Docx file types.', true), 'default', array('class' => 'alert-danger'));
+                //     $this->redirect(array('action' => 'index'));
+                // }
+                $this->set('qcDocument',$qcDocument);
+                $pdfTemplateCount = $this->PdfTemplate->find('count',array('conditions'=>array('PdfTemplate.custom_table_id'=>$this->request->params['pass'][0])));
+                    $this->set('pdfTemplateCount',$pdfTemplateCount);
                 $html = $content;
                 if(in_array($qcDocument['QcDocument']['file_type'], array('doc','docx')) ){
                     $file_type = $qcDocument['QcDocument']['file_type'];
@@ -219,10 +225,7 @@ public function add($custom_table_id = null,$qc_document_id = null){
                     $fileName = $this->_clean_table_names($fileName);
                     $fileName = $fileName . '.' . $file_type;
                     $existingDocument = Configure::read('files') . DS . 'qc_documents' . DS . $qcDocument['QcDocument']['id'] . DS . $fileName;
-                    $this->set('qcDocument',$qcDocument);
-
-                    $pdfTemplateCount = $this->PdfTemplate->find('count',array('conditions'=>array('PdfTemplate.custom_table_id'=>$this->request->params['pass'][0])));
-                    $this->set('pdfTemplateCount',$pdfTemplateCount);
+                                        
                     if(!file_exists($existingDocument)){
                     }else{
                         $copydoc = new File($existingDocument);
@@ -245,16 +248,20 @@ public function add($custom_table_id = null,$qc_document_id = null){
                     }
                     if(!$fontsize)$fontsize = '12';
                     if(!$fontface)$fontface = 'arial';
-                    $qcDocument = $this->PdfTemplate->CustomTable->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$qc_document_id),'recursive'=>-1));
+                    if($qc_document_id){
+                        $qcDocument = $this->PdfTemplate->CustomTable->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$qc_document_id),'recursive'=>-1));
+                    }                    
                     $content = $this->_generate_content($customTable['CustomTable']['fields'],$customTable,Inflector::classify($customTable['CustomTable']['table_name']),$fontsize,$fontface);
                     $html = $content;
                     $file = $path .DS . "template.html" ;
                     $myfile = fopen($file, "w") or die("Unable to open file - 1");
                     fwrite($myfile, $html);
                     fclose($myfile);
+                    
                     $url = Router::url('/', true) . 'files/'.$this->Session->read('User.company_id').'/pdf_template/' . $customTable['CustomTable']['id'] .'/template.html' ;
                     $this->_convert_to_html($url,'html','docx',null,$customTable['CustomTable']['name'],$customTable['CustomTable']['id'],$this->Session->read('User.company_id'));
                 }
+                
                 $this->set('url',$url);
                 $this->set('customTable',$customTable);
                 $key = $this->_generate_onlyoffice_key($customTable['CustomTable']['id'] . date('Ymdhis'));

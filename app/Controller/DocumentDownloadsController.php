@@ -578,7 +578,6 @@ public function _write_html_file($filename = null, $content = null, $record_id =
 }
 
 public function _generate_template_content($fields = null, $record = null, $model = null,$fontsize = null,$fontface = null, $contents = null,$childTableFields = null){	
-
 	$this->set('fontsize',$fontsize);
 	$this->set('fontface',$fontface);
 	$path = WWW_ROOT .'files'. DS . 'pdf' . DS .$this->Session->read('User.id') . DS . $record[$model]['id'] ;
@@ -593,41 +592,12 @@ public function _generate_template_content($fields = null, $record = null, $mode
 	td,th{background-color: #fff; text-align: left;}
 </style>";
 
-	foreach($fields as $field){
-		foreach($fields as $field){
-			$fieldResult = $this->field_render($field,$record,$modelname);
-			if($fieldResult){
-				$f = '$record["'.$modelname.'"]["'.$displayField.'"]';
-				$contents = str_replace($f, $fieldResult['value'], $contents);
-			}
+	foreach($fields as $field){		
+		$fieldResult = $this->field_render($field,$record,$model);		
+		if($fieldResult){
+			$f = '$record["'.$model.'"]["'.$fieldResult['name'].'"]';
+			$contents = str_replace($f, $fieldResult['value'], $contents);			
 		}
-		// if($field['linked_to'] != -1){
-		// 	foreach($belongsTo as $modelname => $fieldDetails){
-		// 		if($fieldDetails['foreignKey'] == $field['field_name']){
-		// 			$this->loadModel($modelname);					
-		// 			$displayField = $this->$modelname->displayField;
-		// 			$f = '$record["'.$modelname.'"]["'.$displayField.'"]';
-		// 			$contents = str_replace($f, $record[$modelname][$displayField], $contents);
-		// 		}
-		// 	}
-
-		// }else if($field['data_type'] == 'radio'){
-		// 	$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
-		// 	$csvoptions = explode(',',$field['csvoptions']);			
-		// 	$contents = str_replace($f, $csvoptions[$record[$model][$field['field_name']]], $contents);
-		// }else if($field['field_type'] == 5){
-		// 	$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
-		// 	$contents = str_replace($f, date(Configure::read('dateFormat'),strtotime($record[$model][$field['field_name']])), $contents);			
-		// }else if($field['display_type'] == 6 && $field['data_type'] == 'file'){
-		// 	$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
-		// 	$file = json_decode($record[$model][$field['field_name']],true);
-		// 	$file = $file['name'] .'<br /><small>Available for download from the application.</small>';
-		// 	$contents = str_replace($f, $file, $contents);
-		// }else{
-		// 	$f = '$record["'.$model.'"]["'.$field['field_name'].'"]';
-		// 	$contents = str_replace($f, $record[$model][$field['field_name']], $contents);
-		// }
-
 	}
 
 	$signature = $this->_fetch_signature($record['PreparedBy']['id']);	
@@ -762,7 +732,6 @@ public function _generate_content($fields = null, $record = null, $model = null,
 	tr{background-color: #fff; text-align: left;}
 	td,th{background-color: #fff; text-align: left;}
 </style>";
-	
 	$str .= "<table width='100%' border=1 cellspacing=1 cellpadding=5>";
 	foreach($fields as $field){
 		$fieldResult = $this->field_render($field,$record,$model);
