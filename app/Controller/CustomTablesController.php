@@ -104,13 +104,19 @@ class CustomTablesController extends AppController {
                     WHEN QcDocument.and_or_condition = true THEN                             
                         (select count(*) from qc_documents WHERE 
                             qc_documents.id = QcDocument.id AND
-                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
+                            qc_documents.user_id LIKE "%'.$this->Session->read('User.id').'%" OR
+                            qc_documents.editors LIKE "%'.$this->Session->read('User.id').'%"
+                            AND
+                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null" ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
                                 IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
-                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "")                 
                         )
                     WHEN QcDocument.and_or_condition = false THEN 
                         (select count(*) from qc_documents WHERE 
                             qc_documents.id = QcDocument.id AND
+                            qc_documents.user_id LIKE "%'.$this->Session->read('User.id').'%" OR
+                            qc_documents.editors LIKE "%'.$this->Session->read('User.id').'%"
+                            AND
                             IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
                             IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
                             IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
