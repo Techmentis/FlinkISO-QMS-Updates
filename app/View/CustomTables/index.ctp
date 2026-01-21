@@ -46,11 +46,17 @@ $pptarray = array('ppt','pptx');
 					echo $this->Html->link('Documents',array('action'=>'index','table_type'=>1),array('class'=>'btn btn-sm btn-bold  btn-default'));
 				}
 				
+				if($this->request->params['named']['table_type'] == 5){
+					echo $this->Html->link('Child Documents',array('action'=>'index','table_type'=>5),array('class'=>'btn btn-sm btn-bold  btn-success'));
+				}else{
+					echo $this->Html->link('Child Documents',array('action'=>'index','table_type'=>5),array('class'=>'btn btn-sm btn-bold  btn-default'));
+				}
+
 				if($this->request->params['named']['table_type'] == 3){
 					echo $this->Html->link('Masters',array('action'=>'index','table_type'=>3),array('class'=>'btn btn-sm btn-bold  btn-success'));
 				}else{
 					echo $this->Html->link('Masters',array('action'=>'index','table_type'=>3),array('class'=>'btn btn-sm btn-bold  btn-default'));
-				}	
+				}				
 			?>
 		</div>
 		<?php echo $this->Form->create(array('class'=>'no-padding no-margin no-background'));?>

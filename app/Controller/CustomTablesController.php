@@ -91,9 +91,10 @@ class CustomTablesController extends AppController {
             $accessConditions = array();
         }        
         $conditions = $this->_check_request();
-        if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 1)$accessConditions[] = array('CustomTable.table_type'=>0);
+        if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 1)$accessConditions[] = array('CustomTable.table_type'=>0,'QcDocument.parent_document_id'=>-1);
         else if($this->request->params['named']['table_type'] == 2)$accessConditions[] = array('CustomTable.table_type'=>1);
         else if($this->request->params['named']['table_type'] == 3)$accessConditions[] = array('CustomTable.table_type'=>2);
+        else if($this->request->params['named']['table_type'] == 5)$accessConditions[] = array('QcDocument.parent_document_id !='=>-1);
         else {$accessConditions[] = array('CustomTable.table_type'=>array(0,1));$this->request->params['named']['table_type'] = 4;}
         
         $this->CustomTable->virtualFields = array(
@@ -137,7 +138,8 @@ class CustomTablesController extends AppController {
                 $accessConditions,                
                 'OR' => array('ltrim(rtrim(CustomTable.custom_table_id))' => "", 'CustomTable.custom_table_id' => null, 'CustomTable.linked >' => 0)));
         $this->CustomTable->recursive = 0;
-        $customTables = $this->paginate();        
+        $customTables = $this->paginate();    
+        
         $this->set('customTables', $customTables);
         $schedules = $this->CustomTable->QcDocument->Schedule->find('list');
         $customArray = $this->CustomTable->customArray;
