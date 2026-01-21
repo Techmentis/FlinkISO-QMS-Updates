@@ -25,12 +25,15 @@ if($action == 'view' || $action == 'mini_view'){
     // if document is Published, then only admin & prepare can adit the document
         $file = urldecode($file);
         if($this->request->controller == 'qc_documents'){
+
         if($this->request->data['QcDocument']['document_status'] == 0){ // check if draft and apply draft rules
-            if($this->action != 'view' && $this->action != 'mini_view' &&  ($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || in_array($this->Session->read('User.id'), json_decode($this->request->data['QcDocument']['user_id'],true)))){
-                if(!$mode)$mode = 'edit';
-            }else{
-                $mode = 'view';
-            }
+            if(is_array($this->request->data['QcDocument']['user_id'])){
+                if($this->action != 'view' && $this->action != 'mini_view' &&  ($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || in_array($this->Session->read('User.id'), json_decode($this->request->data['QcDocument']['user_id'],true)))){
+                    if(!$mode)$mode = 'edit';
+                }else{
+                    $mode = 'view';
+                }   
+            }            
         } else if($this->action != 'view' &&  ($this->request->data['QcDocument']['document_status'] == 1 || $this->request->data['QcDocument']['document_status'] == 2 )){ // published documents
             if( $this->Session->read('User.is_mr') == 1 || 
                 $this->Session->read('User.employee_id') == $this->request->data['QcDocument']['approved_by'] ||

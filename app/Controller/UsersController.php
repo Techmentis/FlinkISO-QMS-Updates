@@ -952,19 +952,27 @@ class UsersController extends AppController {
         $schedules = $this->CustomTable->QcDocument->Schedule->find('list');
         $this->set(compact('schedules'));
 
-
         $this->Approval->virtualFields = array(
             'custom_table_id'=>'select `custom_tables`.`id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name',
             'qc_document_id'=>'select `custom_tables`.`qc_document_id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name',
             'process_id'=>'select `custom_tables`.`process_id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name'
         );
-        $approvals = $this->Approval->find('all', array('order' => array('Approval.created' => 'desc'), 'conditions' => array(
+        $approvalusers = $this->Approval->find('all', 
+            array('order' => array('Approval.created' => 'desc'), 
+                'conditions' => array(
+                    'OR'=>array('Approval.status'=>array(NULL,0)),
+                    'OR'=>array('Approval.user_id'=>array($this->Session->read('User.id'),$this->Session->read('User.employee_id')))                    
+                )
+            ));
+
+        $approvalemployees = $this->Approval->find('all', array('order' => array('Approval.created' => 'desc'), 'conditions' => array(
             'OR' => array('Approval.status is NULL', 'Approval.status' => 0), 
-            // 'OR'=> array(
-            'Approval.user_id' => $this->Session->read('User.id'),
-            'Approval.user_id' => $this->Session->read('User.employee_id')
-                // )
+            'Approval.user' => $this->Session->read('User.employee_id'),
+            
         )));
+        if(is_array($approvalusers) && is_array($approvalemployees))$approvals = array_merge($approvalusers,$approvalemployees);
+        if(is_array($approvalusers))$approvals = $approvalusers;
+        else if(is_array($approvalemployees))$approvals = $approvalemployees;
 
         $this->set('approvals', $approvals);
         $this->loadModel('ApprovalComment');
@@ -976,11 +984,9 @@ class UsersController extends AppController {
             'process_id'=>'select `custom_tables`.`process_id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name'
         );
         $approvalComments = $this->ApprovalComment->find('all', array('conditions' => array(
-        // 'ApprovalComment.approval_statuses >'=> 0,
-            'OR' => array('Approval.status is NULL', 'Approval.status' => 0),
-        // 'Approval.status'=>0,
-            'ApprovalComment.response_status' => 0, 
-            'ApprovalComment.user_id' => $this->Session->read('User.id')
+            'ApprovalComment.response'=>NULL,
+            'OR'=>array('ApprovalComment.response_status'=>array(NULL,0)),
+            'OR'=>array('ApprovalComment.user_id'=>array($this->Session->read('User.id'),$this->Session->read('User.employee_id')))
         ), 
             'group' => array('ApprovalComment.user_id','ApprovalComment.approval_id'), 
             'order' => array('ApprovalComment.sr_no' => 'DESC'),

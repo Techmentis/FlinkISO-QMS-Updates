@@ -25,6 +25,10 @@ class ClausesController extends AppController {
      * @return void
      */
     public function index() {
+        if($this->Session->read('User.is_mr') == 0){
+            $this->Session->setFlash(__('You do not have permission to access ' . $this->request->controller));
+            $this->redirect(array('controller'=>'standards', 'action' => 'index'));
+        }
         $conditions = $this->_check_request();
         $this->paginate = array('order' => array('Clause.sr_no' => 'DESC'), 'conditions' => array($conditions));
         $this->Clause->recursive = 0;
@@ -55,6 +59,10 @@ class ClausesController extends AppController {
      * @return void
      */
     public function add() {
+        if($this->Session->read('User.is_mr') == 0){
+            $this->Session->setFlash(__('You do not have permission to add ' . $this->request->controller));
+            $this->redirect(array('controller'=>'standards', 'action' => 'index'));
+        }
         if ($this->_show_approvals()) {
             $this->loadModel('User');
             $this->User->recursive = 0;
@@ -108,6 +116,10 @@ class ClausesController extends AppController {
      * @return void
      */
     public function edit($id = null) {
+        if($this->Session->read('User.is_mr') == 0){
+            $this->Session->setFlash(__('You do not have permission to edit ' . $this->request->controller));
+            $this->redirect(array('controller'=>'standards', 'action' => 'index'));
+        }
         if (!$this->Clause->exists($id)) {
             throw new NotFoundException(__('Invalid clause'));
         }

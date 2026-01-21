@@ -1,4 +1,4 @@
-<div   id="linkedProcessesDiv">
+<div id="linkedProcessesDiv">
 <div class="box box-default">
 	<div class="box-header data-header" data-widget="collapse">
 		<h3 class="box-title"><span class=""><i class="fa fa-chain"></i></span> Linked Processes</h3>

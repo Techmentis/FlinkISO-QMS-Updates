@@ -341,8 +341,10 @@ $pptarray = array('ppt','pptx');
       </div>
     </div>
     <?php } ?>
-    <div class="row"><div class="col-md-12">
-      <?php echo $this->element('miles',array('masters'=>$masters));?>
-    </div>
+    <?php if($this->Session->read('User.is_mr') == 1){ ?>
+      <div class="row"><div class="col-md-12">
+        <?php echo $this->element('miles',array('masters'=>$masters));?>
+      </div>
+    <?php } ?>    
   </div>
 <?php echo $this->element('custom_triggers',array('customTrigers'=>$customTrigers));?>

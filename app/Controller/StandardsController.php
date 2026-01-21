@@ -130,6 +130,10 @@ class StandardsController extends AppController {
      * @return void
      */
     public function add() {
+        if($this->Session->read('User.is_mr') == 0){
+            $this->Session->setFlash(__('You do not have permission to add standards'));
+            $this->redirect(array('action' => 'index'));
+        }
         if ($this->_show_approvals()) {
             $this->loadModel('User');
             $this->User->recursive = 0;
@@ -281,6 +285,10 @@ class StandardsController extends AppController {
     }
 
     public function delete_standard() {
+        if($this->Session->read('User.is_mr') == 0){
+            $this->Session->setFlash(__('You do not have permission to add standards'));
+            $this->redirect(array('action' => 'index'));
+        }
         if ($this->request->controller != 'custom_tables') {
             if ($this->request->is('post') || $this->request->is('put')) {
                 $standard = $this->Standard->find('first',array('recursive'=>-1,'conditions'=>array('Standard.id'=>$this->request->data['Standard']['id'])));

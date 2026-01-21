@@ -1,7 +1,6 @@
 <?php
 echo $this->Form->hidden('Access.skip_access_check',array('default'=>1));
 echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Session->read('User.id')));
-
 ?>
 <?php if($approvals){ ?>
 	<style type="text/css">
@@ -14,7 +13,11 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 		<div class="col-md-12">
 			<div class="box box-warning">
 				<div class="box-header with-border">
-					<h3 class="box-title">Approval History for <?php echo $approvals[0]['Approval']['model_name'];?>
+					<?php
+						if(isset($customTable) && $customTable['CustomTable']['name'])$approvalPanelTitle = $customTable['CustomTable']['name'];
+						else $approvalPanelTitle = Inflector::humanize($this->request->controller);
+					?>
+					<h3 class="box-title">Approval History for <?php echo $approvalPanelTitle;?>
 					<?php if($this->action == 'edit'){ ?><small>Prepared By : <?php echo $this->request->data['PreparedBy']['name'];?></small><?php } ?></h3>
 					<i class="fa  fa-clock-o pull-right"></i>
 				</div>
@@ -91,6 +94,7 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 			</div>
 		</div>
 	</div>
+<?php $approval = array();?>	
 	<script type="text/javascript">	
 		function approve(approval_id,comments,status){
 			var txt;

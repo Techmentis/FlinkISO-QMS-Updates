@@ -78,14 +78,14 @@ class AppController extends Controller {
 		Configure::write("path", WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . $this->request->controller);
 		Configure::write("url", Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . $this->request->controller);
 		Configure::write("common_path", 'files' . DS . $this->Session->read('User.company_id') . DS . $this->request->controller);		
-		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind','opt_check','json','xml');
+		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind','opt_check','json','xml','return_user_list');
 		
 		if (empty($this->Session->read('User.id')) && !in_array($this->action, $ignore)) {
 			if($this->request->is('ajax'))echo "Session expired. Please login again.";
 			if($this->request->action != 'dashboard') $this->Session->setFlash(__('Login to continue.'));
 			$this->redirect(array('controller' => 'users', 'action' => 'login'));
 		}else{
-			$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind','opt_check','json','xml');
+			$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind','opt_check','json','xml','return_user_list');
 			if (empty($this->Session->read('User.id')) && !in_array($this->action, $ignore)) {
 				try{
 					$this->loadModel('UserSession');
@@ -337,7 +337,7 @@ class AppController extends Controller {
 				));
 			}else{
 				$skip = array('approval_comments','approvals','standards','processes');
-				$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check');
+				$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check','json','xml','return_user_list');
 				if(!in_array($this->action,$ignore)){
 					// $this->Session->setFlash(__('Blocked Action: '. $this->request->action), 'default', array('class' => 'alert alert-danger'));
 					$this->_check_access();
@@ -358,7 +358,7 @@ class AppController extends Controller {
 					$this->_track_history();
 				}
 			}
-		}		
+		}
 	} 
 
 	public function back() {
@@ -366,16 +366,18 @@ class AppController extends Controller {
 	}
 	
 	public function _access_redirect($n = null){
-		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check');
+		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check',);
 		if(!in_array($this->action,$ignore)
 			&& $this->request->controller != 'qc_documents' 			
 			&& $this->request->controller != 'custom_tables'
+			&& $this->request->controller != 'standards'
+			&& $this->request->controller != 'clauses'
 		){
 			if($this->request->is('ajax') == false){
 				if($this->request->controller == 'employees' && $this->action == 'view'){
 				}else{
-					$this->Session->setFlash(__('You are not authorized to view this section:22'), 'default', array('class' => 'alert alert-danger'));
-					$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));
+					$this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
+					$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action,'02',$n));
 				}
 			} else{
 				exit;
@@ -418,14 +420,32 @@ class AppController extends Controller {
 				                    ELSE "Un"
 				                END'			            
 						);
+						// $conditions = $this->_check_request();
+				        if($this->Session->read('User.is_mr') == false){
+				            $accessConditions = array(
+				                'QcDocument.archived !='=>1,
+				                'QcDocument.parent_document_id '=>-1,
+				                'OR'=>array(
+				                    'QcDocument.srct >' => 0,
+				                    'QcDocument.prepared_by LIKE '=>"%".$this->Session->read('User.employee_id')."%",
+				                    'QcDocument.approved_by LIKE '=>"%".$this->Session->read('User.employee_id')."%",
+				                )                
+				            );
+				        }else{
+				            $accessConditions = array(
+				                'QcDocument.archived !='=>1,
+				                'QcDocument.parent_document_id '=>-1,              
+				            );
+				        }
+						
 						$sharing = $this->QcDocument->find('count',array(					
 							'conditions'=>array(
 								'QcDocument.id'=>$this->request->params['named']['qc_document_id'],
-								'QcDocument.srct >' => 0
+								$accessConditions
 							)
 						));
 						if($sharing == 0){
-							$this->Session->setFlash(__('You are not authorized to view this section:33'), 'default', array('class' => 'alert alert-danger'));
+							$this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
 							$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));
 						}
 					}					
@@ -434,45 +454,64 @@ class AppController extends Controller {
 					if($this->request->controller == 'qc_documents' && isset($this->request->params['pass'][0])){
 						$this->loadModel('QcDocument');
 						$existChek = $this->QcDocument->exists($this->request->params['pass'][0]);
+						
 						if($existChek){
 							$this->QcDocument->virtualFields = array(
 							'srct' => '
-			                    CASE
-				                    WHEN QcDocument.and_or_condition = true THEN                             
-				                        (select count(*) from qc_documents WHERE 
-				                            qc_documents.id = QcDocument.id AND
-				                            qc_documents.user_id LIKE "%'.$this->Session->read('User.id').'%" OR
-				                            qc_documents.editors LIKE "%'.$this->Session->read('User.id').'%"
-				                            AND
-				                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null" ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
-				                                IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
-				                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "")                 
-				                        )
-				                    WHEN QcDocument.and_or_condition = false THEN 
-				                        (select count(*) from qc_documents WHERE 
-				                            qc_documents.id = QcDocument.id AND
-				                            qc_documents.user_id LIKE "%'.$this->Session->read('User.id').'%" OR
-				                            qc_documents.editors LIKE "%'.$this->Session->read('User.id').'%"
-				                            AND
-				                            IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
-				                            IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
-				                            IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
-				                        )
-				                    ELSE "Un"
-				                END
+			                   CASE
+			                    WHEN QcDocument.and_or_condition = true THEN                             
+			                        (select count(*) from qc_documents WHERE 
+			                            qc_documents.id = QcDocument.id AND
+			                            qc_documents.user_id LIKE "%'.$this->Session->read('User.id').'%" OR
+			                            qc_documents.editors LIKE "%'.$this->Session->read('User.id').'%"
+			                            AND
+			                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null" ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
+			                                IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
+			                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "")                 
+			                        )
+			                    WHEN QcDocument.and_or_condition = false THEN 
+			                        (select count(*) from qc_documents WHERE 
+			                            qc_documents.id = QcDocument.id AND
+			                            qc_documents.user_id LIKE "%'.$this->Session->read('User.id').'%" OR
+			                            qc_documents.editors LIKE "%'.$this->Session->read('User.id').'%"
+			                            AND
+			                            IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
+			                            IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
+			                            IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
+			                        )
+			                    ELSE "Un"
+			                END
 			            	');
 							
-							$sharing = $this->QcDocument->find('count',array(
-								'conditions'=>array(
-									'QcDocument.id'=>$this->request->params['pass'][0],
-									'QcDocument.srct >' => 0
-								)
-							));
+						// $conditions = $this->_check_request();
+				        if($this->Session->read('User.is_mr') == false){
+				        	$accessConditions = array(
+				                'QcDocument.archived !='=>1,
+				                'QcDocument.parent_document_id '=>-1,
+				                'OR'=>array(
+				                    'QcDocument.srct >' => 0,
+				                    'QcDocument.prepared_by LIKE '=>"%".$this->Session->read('User.employee_id')."%",
+				                    'QcDocument.approved_by LIKE '=>"%".$this->Session->read('User.employee_id')."%",
+				                )                
+				            );
+				        }else{
+				            $accessConditions = array(
+				                'QcDocument.archived !='=>1,
+				                'QcDocument.parent_document_id '=>-1,              
+				            );
+				        }
+						
+						$sharing = $this->QcDocument->find('count',array(					
+							'conditions'=>array(
+								'QcDocument.id'=>$this->request->params['pass'][0],
+								$accessConditions
+							)
+						));
 							if($sharing == 0){
-								$this->Session->setFlash(__('You are not authorized to view this section:44'), 'default', array('class' => 'alert alert-danger'));
+								$this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
 								$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));
 							}
-						}
+						}						
 					}else{
 						$this->loadModel('User');						
 						$access = json_decode($access['User']['user_access'],true);
@@ -504,11 +543,11 @@ class AppController extends Controller {
 
 			}
 		}else{
-			// if MR/ Admin			
+			// if MR/ Admin	
 		}
 	}
 
-	public function _customtableacces(){
+	public function _customtableacces(){		
 		if(isset($this->request->params['named']['custom_table_id']) && $this->request->params['named']['custom_table_id'] != -1){
 			$this->loadModel('CustomTable');
 			$customTable = $this->CustomTable->find('first',array(
@@ -531,12 +570,12 @@ class AppController extends Controller {
 						}
 					break;
 					case 'edit':
-						if(is_array(json_decode($customTable['CustomTable']['editors'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['editors'],true))){
+						if(is_array(json_decode($customTable['CustomTable']['editors'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['creators'],true))){
 							$this->_access_redirect(); 
 						}
 					break;
 					case 'view':
-						if(is_array(json_decode($customTable['CustomTable']['viewers'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['viewers'],true))){
+						if(is_array(json_decode($customTable['CustomTable']['viewers'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['creators'],true))){
 							$this->_access_redirect(); 
 						}
 					break;
@@ -676,7 +715,9 @@ public function get_approvals() {
 		$model = $this->modelClass;
 		$record = $this->request->params['pass'][0];
 		$this->loadModel('Approval');
-		$approvals = $this->Approval->find('all', array('order'=>array('Approval.modified'=>'DESC', 'Approval.status'=>'DESC','Approval.approval_step'=>'ASC'), 'conditions' => array('Approval.model_name' => $model, 'Approval.record' => $record)));
+		$approvals = $this->Approval->find('all', array(
+			'order'=>array('Approval.modified'=>'DESC', 'Approval.status'=>'DESC','Approval.approval_step'=>'ASC'), 
+			'conditions' => array('Approval.model_name' => $model, 'Approval.record' => $record)));
 		return $approvals;
 	}
 }
@@ -737,6 +778,7 @@ public function _save_approvals($record_id = null) {
 
 	if ($cycle) $cycle_count = count($cycle) + 1;
 	else $cycle_count = 1;
+	
 	if ($this->request->data['Approval'][$model]['user_id']) {
 		$approvalusers = $this->request->data['Approval'][$model]['user_id'];
 		foreach ($approvalusers as $approvaluser) {
@@ -754,7 +796,11 @@ public function _save_approvals($record_id = null) {
 				$approvaldata['Approval']['approval_mode'] = $this->request->data['Approval'][$model]['approval_mode'];
 				$approvaldata['Approval']['approval_cycle'] = $cycle_count;
 				$this->Approval->create();
-				$this->Approval->save($approvaldata,false);
+				if($this->Approval->save($approvaldata,false)){
+					
+				}else{
+					$this->Session->setFlash(__('Approval sent.'));
+				}
 				$this->_sent_approval_email(
 					$approvaldata['Approval']['user_id'],
 					0,
@@ -1227,6 +1273,15 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			}
 		}
 		if ($this->request->controller != 'custom_tables') {
+			// block non admin users to delete
+			$stopdelete = array('standards','clauses');
+			if(in_array($this->request->controller, $stopdelete)){
+				if($this->Session->read('User.is_mr') == 0){
+		            $this->Session->setFlash(__('You do not have permission to delete ' . $this->request->controller));
+		            $this->redirect(array('action' => 'index'));
+		        }
+			}
+
 			if ($this->request->is('post') || $this->request->is('put')) {
 				if($this->request->controller == 'users'){
 					$singleUserCheck = $this->_single_user_check();
@@ -1238,7 +1293,8 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					$model = $this->modelClass;
 					$id = $this->request->data[$model]['id'];
 					$record = $this->$model->find('first',array('conditions'=>array($model.'.id'=>$id),'recursive'=>-1));
-					$this->_recursive_delete($this->request->data[$model]['id'],$model);
+					$this->_delete_approvals($id, $model);
+					$this->_recursive_delete($this->request->data[$model]['id'],$model);					
 					$this->redirect(array('action' => 'index','custom_table_id'=>$record[$model]['custom_table_id'],'qc_document_id'=>$record[$model]['qc_document_id']));
 				}
 			} else {				
@@ -1325,7 +1381,20 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		$folder = Configure::read("files") . DS . $this->$model->useTable . DS . $id;
 		$dirToDelete = new Folder($folder);
 		$dirToDelete->delete();		
-		$this->$model->delete($id);
+		$this->$model->delete($id);		
+	}
+
+	public function _delete_approvals($id = null, $model = null){
+		$this->loadModel('Approval');
+		$approvalRecords = $this->Approval->find('all',array('conditions'=>array('Approval.model_name'=>$model,'Approval.record'=>$id)));
+		if($approvalRecords){
+			foreach($approvalRecords as $approvalRecord){
+				$this->Approval->ApprovalComment->deleteAll(array('ApprovalComment.approval_id'=>$approvalRecord['Approval']['id']));
+			}
+			$this->Approval->delete($approvalRecord['Approval']['id']);
+		}else{
+			return true;
+		}
 	}
 
 	public function bulk_delete() {
@@ -2325,10 +2394,22 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	                    END
 	            '
 				);
-				if($this->Session->read('User.is_mr') == false){
-		            $accessConditions = array('CustomTable.srct >' => 0);
+				$conditions = $this->_check_request();
+		        if($this->Session->read('User.is_mr') == false){
+		            $accessConditions = array(
+		                'QcDocument.archived !='=>1,
+		                'QcDocument.parent_document_id '=>-1,
+		                'OR'=>array(
+		                    'QcDocument.srct >' => 0,
+		                    'QcDocument.prepared_by LIKE '=>"%".$this->Session->read('User.employee_id')."%",
+		                    'QcDocument.approved_by LIKE '=>"%".$this->Session->read('User.employee_id')."%",
+		                )                
+		            );
 		        }else{
-		            $accessConditions = array();
+		            $accessConditions = array(
+		                'QcDocument.archived !='=>1,
+		                'QcDocument.parent_document_id '=>-1,              
+		            );
 		        }
 
 				$result = $this->CustomTable->find('all',array(
@@ -3048,8 +3129,16 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				$this->viewVars[Inflector::variable($this->modelClass)][$this->modelClass]['branchid'] != $this->Session->read('User.branch_id') && 
 				!in_array($this->viewVars[Inflector::variable($this->modelClass)][$this->modelClass]['branchid'], json_decode($this->Session->read('User.assigned_branches'),true))
 			){
-				$this->Session->setFlash(__('You are not authorized to view this section: 11'), 'default', array('class' => 'alert alert-danger'));
-				$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));				
+				// allow user to edit profile
+				if(
+					($this->request->controller == 'employees' && $this->request->params['pass'][0] == $this->Session->read('User.employee_id')) || 
+					$this->request->controller == 'qc_documents'
+				){
+
+				}else{
+					$this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
+					$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action,'01'));
+				}				
 			}
 		}
 		// check if this document has linked documents with table
@@ -3125,7 +3214,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				}
 			}
 		}
-
+		
 		if($this->request->data[$modelName]['additional_files'])$additionalFiles = json_decode($this->request->data[$modelName]['additional_files'],true);
 		if($this->request->params['named']['parent_record_id']){
 			$this->request->data[$modelName]['parent_id'] = $this->request->params['named']['parent_record_id'];
@@ -3226,7 +3315,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					}
 				}
 			}
-
+			
 			if ($this->_show_approvals()) $this->_save_approvals($this->$modelName->id);			
 			$this->Session->setFlash(__('Record has been saved'));
 			try{
@@ -4634,5 +4723,17 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			}
 		}
 		$this->set('sortingFields',$display);		
+	}
+
+	public function return_user_list(){
+		$this->autoRender = false;
+		$newoptions = '';
+		$users = $this->_get_user_list();
+		unset($users[$this->Session->read('User.id')]);
+		foreach($users as $userid => $user){
+			$newoptions .= '<option value="'.$userid.'">'.$user.'</option>';
+		}
+		echo $newoptions;
+		exit;		
 	}
 }

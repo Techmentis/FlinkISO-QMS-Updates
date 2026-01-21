@@ -5,14 +5,12 @@
     <?php echo $this->Session->flash(); ?>
     <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Users','modelClass'=>'User','options'=>array(),'pluralVar'=>'users'))); ?>
     <div class="users ">
-        <div class="table-responsive">
+        <div class="table-responsive" style="min-height: 450px;">
             <?php echo $this->Form->create(array('class' => 'no-padding no-margin no-background')); ?>
             <table cellpadding="0" cellspacing="0" class="table table-responsive table-hover index">
                 <tr>
-                    <th><?php echo $this->Paginator->sort('employee_id', __('Employee')); ?></th>
-                    <th><?php echo $this->Paginator->sort('username', __('Username')); ?></th>
-                    <th><?php echo $this->Paginator->sort('department_id', __('Department')); ?></th>
-                    <th><?php echo $this->Paginator->sort('branch_id', __('Branch')); ?></th>
+                    <th><?php echo $this->Paginator->sort('employee_id', __('Employee')); ?>/ <?php echo $this->Paginator->sort('username', __('Username')); ?></th>
+                    <th><?php echo $this->Paginator->sort('branch_id', __('Branch')); ?>/ <?php echo $this->Paginator->sort('department_id', __('Department')); ?></th>                    
                     <th><?php echo $this->Paginator->sort('last_login', __('Last Login')); ?></th>
                     <?php if($this->Session->read('User.is_mr') == true){ ?>
                         <th><?php echo $this->Paginator->sort('is_mr', __('Admin')); ?></th>
@@ -25,22 +23,19 @@
                     <?php } ?>                                        
                     <th><?php echo $this->Paginator->sort('publish', __('Publish')); ?></th>
                     <?php if($this->Session->read('User.is_mr') == true){ ?>
-                        <th>Actions</th>
+                        <th width="120">Actions</th>
                     <?php } ?>
                 </tr>
                 <?php if ($users) {
                     $x = 0;
                     foreach ($users as $user):?>                
                         <tr class="on_page_src" onclick="addrec('<?php echo $user['User']['id'];?>')" id="<?php echo $user['User']['id'];?>_tr">
-                            <td><?php echo $user['User']['name']; ?>&nbsp;</td>
-                            <td><?php echo $user['User']['username']; ?>&nbsp;</td>
+                            <td><?php echo $user['User']['name']; ?>&nbsp;<br /><?php echo $user['User']['username']; ?>&nbsp;</td>
                             <td>
+                                <?php echo $this->Html->link($user['Branch']['name'], array('controller' => 'branches', 'action' => 'view', $user['Branch']['id'])); ?><br />
                                 <?php echo $this->Html->link($user['Department']['name'], array('controller' => 'departments', 'action' => 'view', $user['Department']['id'])); ?>
                             </td>
-                            <td>
-                                <?php echo $this->Html->link($user['Branch']['name'], array('controller' => 'branches', 'action' => 'view', $user['Branch']['id'])); ?>
-                            </td>
-                            <td><?php echo $user['User']['last_login']; ?>&nbsp;</td>
+                            <td><small><?php echo $user['User']['last_login']; ?>&nbsp;</small></td>
                             <?php if($this->Session->read('User.is_mr') == true){ ?>
                             <td>
                                 <?php 

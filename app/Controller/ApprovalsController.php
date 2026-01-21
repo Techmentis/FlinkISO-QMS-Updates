@@ -303,6 +303,7 @@ class ApprovalsController extends AppController {
         $approval = $this->Approval->find('first',array('conditions'=>array('Approval.id'=>$id)));
         $this->Approval->delete($id);
         $this->Approval->ApprovalComment->deleteAll(array('ApprovalComment.approval_id'=>$id));
+        $this->Approval->ApprovalComment->deleteAll(array('ApprovalComment.id'=>$id));
         $this->Session->setFlash(__('Approval Record Deleted'));
         $this->redirect(array('controller'=>'users', 'action' => 'dashboard'));
     }

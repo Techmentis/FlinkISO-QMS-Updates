@@ -291,6 +291,7 @@
 												beforeSend: function( xhr ) {
 													$("#<?php echo $approval['Approval']['id']?>_link_new").remove();
 													$("#<?php echo $approval['Approval']['id']?>_fa").addClass('fa fa-refresh fa-spin');
+													$("input[type=submit]").hide();
 												},                    
 												error: function (err) {
 													

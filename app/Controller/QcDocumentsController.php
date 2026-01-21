@@ -138,7 +138,11 @@ class QcDocumentsController extends AppController {
             $accessConditions = array(
                 'QcDocument.archived !='=>1,
                 'QcDocument.parent_document_id '=>-1,
-                'QcDocument.srct >' => 0
+                'OR'=>array(
+                    'QcDocument.srct >' => 0,
+                    'QcDocument.prepared_by LIKE '=>"%".$this->Session->read('User.employee_id')."%",
+                    'QcDocument.approved_by LIKE '=>"%".$this->Session->read('User.employee_id')."%",
+                )                
             );
         }else{
             $accessConditions = array(
