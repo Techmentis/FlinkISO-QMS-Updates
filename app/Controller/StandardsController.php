@@ -291,36 +291,30 @@ class StandardsController extends AppController {
         }
         if ($this->request->controller != 'custom_tables') {
             if ($this->request->is('post') || $this->request->is('put')) {
+                $this->loadModel('User');
+                $user = $this->User->find('count',array(
+                    'conditions'=>array(
+                        'User.is_mr'=>1,
+                        'User.id'=>$this->Session->read('User.id'),
+                        'User.password'=> Security::hash($this->request->data['Standard']['password'], 'md5', true),                        
+                    )
+                ));
+                
+                if($user == 0){
+                    $this->Session->setFlash(__('You are not authorized to delete.'));
+                    $this->redirect(array('action' => 'index'));
+                }
+
                 $standard = $this->Standard->find('first',array('recursive'=>-1,'conditions'=>array('Standard.id'=>$this->request->data['Standard']['id'])));
                 if($standard){
-                    $standard['Standard']['publish'] = 0;
-                    $standard['Standard']['soft_delete'] = 1;
-                    $this->Standard->create();
-                    if($this->Standard->save($standard,false)){
-                        $this->loadModel('Clause');
-                        $clauses = $this->Clause->find('all',array('recursive'=>-1, 'fields'=>array('Clause.id', 'Clause.standard_id','Clause.publish','Clause.soft_delete'), 'conditions'=>array('Clause.standard_id'=>$standard['Standard']['id'])));
-                        if($clauses){
-                            foreach($clauses as $clause){
-                                $this->Clause->create();
-                                $clause['Clause']['publish'] = 0;
-                                $clause['Clause']['soft_delete'] = 1;
-                                $this->Clause->save($clause,false);
-                            }
-                        }
-                        
-                        $qcDocumentCategories = $this->Standard->QcDocumentCategory->find('all',array('recursive'=>1,'conditions'=>array('QcDocumentCategory.standard_id'=>$standard['Standard']['id'])));
-                        if($qcDocumentCategories){
-                            foreach($qcDocumentCategories as $qcDocumentCategory){
-                                $this->Standard->QcDocumentCategory->create();
-                                $qcDocumentCategory['QcDocumentCategory']['publish'] = 0;
-                                $qcDocumentCategory['QcDocumentCategory']['soft_delete'] = 1;
-                                $this->Standard->QcDocumentCategory->save($qcDocumentCategory,false);
-                            }
-                        }
-                    }
+                    $this->Standard->delete($this->request->data['Standard']['id']);
+                    $this->Session->setFlash(__('The standard successfully delete.'));
+                    $this->redirect(array('action' => 'index'));
+                }else{
+                    $this->Session->setFlash(__('Unable to delete the standard.'));
+                    $this->redirect(array('action' => 'index'));
                 }
-                $this->Session->setFlash(__('The standard successfully delete.'));
-                $this->redirect(array('action' => 'index'));
+                
             } else {
                 $model = $this->modelClass;
                 $this->set('model', $model);

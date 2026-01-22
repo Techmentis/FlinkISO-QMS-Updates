@@ -46,9 +46,12 @@ public function _commons(){
 public function index() {
 	
 	$conditions = $this->_check_request();
-	$this->paginate = array('order'=>array('QcDocumentCategory.sr_no'=>'DESC'),'conditions'=>array($conditions));
+	$this->paginate = array('order'=>array(
+		'QcDocumentCategory.standard_id'=>'DESC',
+		'QcDocumentCategory.name'=>'ASC'),'conditions'=>array($conditions));
 	
 	$this->QcDocumentCategory->recursive = 0;
+	$qcDocumentCategories = $this->paginate();
 	$this->set('qcDocumentCategories', $this->paginate());
 	
 	$this->_get_count();
@@ -134,18 +137,13 @@ public function add_bulk() {
 		}else{
 			
 		}
-
 		if($qcDocumentCategories){
 			foreach($qcDocumentCategories as $qcDocumentCategory){
 				
 				$data['QcDocumentCategory'] = $this->request->data['QcDocumentCategory'];
 				$rec = explode(',',trim($qcDocumentCategory));
-				
-
-				if(count($rec) ==2){
 					$data['QcDocumentCategory']['short_name'] = trim($rec[0]);
-					$data['QcDocumentCategory']['name'] = trim($rec[1]);
-				}
+					$data['QcDocumentCategory']['name'] = str_replace($rec[0].',','',$qcDocumentCategory);
 				
 				$exists = $this->QcDocumentCategory->find('count',array('conditions'=>array(
 					'QcDocumentCategory.name'=>$data['QcDocumentCategory']['name'],
@@ -154,18 +152,17 @@ public function add_bulk() {
 
 				)));
 				$data['QcDocumentCategory']['publish'] = $this->request->data['QcDocumentCategory']['publish'];
-				
 				if($exists == 0){                    
 					try {
 						$this->QcDocumentCategory->create();
 						$this->QcDocumentCategory->save($data['QcDocumentCategory'],false);
 						
 					} catch (Exception $e) {
-						
+						$this->Session->setFlash(__('Some Categories already exists.'));
 					}        
 				}                    
 			}
-
+			
 			$this->Session->setFlash(__('Categories saved.'));
 			$this->redirect(array('action' => 'index'));
                     // exit;

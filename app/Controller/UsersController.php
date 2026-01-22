@@ -67,25 +67,7 @@ class UsersController extends AppController {
 
         $branches = $this->User->Branch->find('list', array('conditions' => array('Branch.publish' => 1, 'Branch.soft_delete' => 0)));
         $this->set('branches',$branches);
-
-        if($this->Session->read('User.is_mr') == 1){
-            // get all the documents
-            $this->loadModel('QcDocument');
-            $qcDocuments = $this->QcDocument->find('all',array(
-                'recursive'=>-1,
-                'conditions'=>array('QcDocument.parent_document_id'=>array(NULL,-1,'')),
-                'fields'=>array('QcDocument.id','QcDocument.title','QcDocument.name','QcDocument.standard_id','QcDocument.user_id','QcDocument.branches','QcDocument.departments','QcDocument.designations','QcDocument.editors')
-            ));            
-            $this->set('qcDocuments',$qcDocuments);
-
-            $this->loadModel('CustomTable');
-            $customTables = $this->CustomTable->find('all',array(
-                'recursive'=>-1,
-                'conditions'=>array('CustomTable.custom_table_id'=> ''),
-                'fields'=>array('CustomTable.id','CustomTable.name','CustomTable.creators','CustomTable.editors','CustomTable.viewers','CustomTable.approvers')
-            ));            
-            $this->set('customTables',$customTables);
-        }
+        
     }
     /**
      * add method
@@ -938,12 +920,7 @@ class UsersController extends AppController {
                 'CustomTable.table_locked' => 0, 
                 'CustomTable.table_name NOT LIKE' => '%_child_%', 
                 'QcDocument.schedule_id != '=>'56d1564b-0acc-48f6-9beb-03a7db1e6cf9',
-                'CustomTable.creators LIKE ' => '%'.$this->Session->read('User.id').'%'
-                // 'OR' => array(
-                //     'QcDocument.departments LIKE ' => '%' . $this->Session->read('User.department_id') . '%', 
-                //     'QcDocument.branches LIKE ' => '%' . $this->Session->read('User.branch_id') . '%', 
-                //     'QcDocument.user_id LIKE ' => '%' . $this->Session->read('User.id') . '%',
-                //     )
+                'CustomTable.creators LIKE ' => '%'.$this->Session->read('User.id').'%'                
                 )
             )
         );
@@ -967,7 +944,7 @@ class UsersController extends AppController {
 
         $approvalemployees = $this->Approval->find('all', array('order' => array('Approval.created' => 'desc'), 'conditions' => array(
             'OR' => array('Approval.status is NULL', 'Approval.status' => 0), 
-            'Approval.user' => $this->Session->read('User.employee_id'),
+            'Approval.user_id' => $this->Session->read('User.employee_id'),
             
         )));
         if(is_array($approvalusers) && is_array($approvalemployees))$approvals = array_merge($approvalusers,$approvalemployees);

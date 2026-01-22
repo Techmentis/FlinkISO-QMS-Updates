@@ -127,8 +127,10 @@ if($this->Session->read('User.is_publisher') == 0){
 	</div>
 	<div class="box-footer">		
 		<?php if($this->action == 'view'){
-			if(in_array($this->Session->read('User.id'),json_decode($customTable['CustomTable']['approvers']))){
-				$disabledPublish = false;
+			if(isset($customTable) && is_array($customTable)){
+				if(in_array($this->Session->read('User.id'),json_decode($customTable['CustomTable']['approvers']))){
+					$disabledPublish = false;
+				}	
 			}
 			echo "<div class='row'>";
 			// if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1){
@@ -157,9 +159,12 @@ if($this->Session->read('User.is_publisher') == 0){
 			} 
 			
 			echo "<div class='row'>";
-			if(in_array($this->Session->read('User.id'),json_decode($customTable['CustomTable']['approvers']))){
-				$disabledPublish = false;
+			if(isset($customTable) && is_array($customTable)){
+				if(in_array($this->Session->read('User.id'),json_decode($customTable['CustomTable']['approvers']))){
+					$disabledPublish = false;
+				}	
 			}
+			
 			if($disabledPublish == false){
 				// if($this->Session->read('User.is_approver') == 1){
 				echo "<div class='col-md-2 approval_checkbox_div'><br />".$this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox','onClick'=>'addapp();'))."</div>";

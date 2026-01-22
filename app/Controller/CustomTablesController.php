@@ -3241,4 +3241,16 @@ class CustomTablesController extends AppController {
             }
         }
     }
+
+    public function custom_table_list(){
+        $this->paginate = array(
+            'limit'=>25,
+            'recursive'=>-1,
+            'fields'=>array('CustomTable.id','CustomTable.name','CustomTable.creators','CustomTable.editors','CustomTable.viewers','CustomTable.approvers'),
+            'conditions'=>array('CustomTable.custom_table_id'=> '')
+        );
+        $customTables = $this->paginate();
+        $this->set('customTables',$customTables);
+
+    }
 }

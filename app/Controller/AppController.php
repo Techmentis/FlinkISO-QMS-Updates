@@ -1297,7 +1297,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					$this->_recursive_delete($this->request->data[$model]['id'],$model);					
 					$this->redirect(array('action' => 'index','custom_table_id'=>$record[$model]['custom_table_id'],'qc_document_id'=>$record[$model]['qc_document_id']));
 				}
-			} else {				
+			} else {
 				$model = $this->modelClass;
 				$this->loadModel($model);
 				$rec = $this->$model->find('first',array('conditions'=>array($model.'.id'=>$this->request->params['pass'][0]),'fields'=>array($model.'.id',$model.'.prepared_by')));

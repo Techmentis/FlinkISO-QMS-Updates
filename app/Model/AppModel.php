@@ -94,13 +94,32 @@ class AppModel extends Model
         if($this->alias == 'CustomTable'){
             // delete graph panels
             $this->loadmodel('GraphPanel');
-            $this->GraphPanel->deleteAll(array('conditions'=>array('GraphPanel.custom_table_id'=>$this->id)));
+            $this->GraphPanel->deleteAll(array('GraphPanel.custom_table_id'=>$this->id));
         }
 
         if($this->alias == 'Standard'){
-            // delete clauses
-            $this->loadmodel('Clause');
-            $this->GraphPanel->deleteAll(array('conditions'=>array('Clause.standard_id'=>$this->id)));
+            $deletearray = array(
+                'Clause',
+                'QcDocument',
+                'QcDocumentCategory'             
+            );
+
+            foreach($deletearray as $delmodel){
+                $this->loadmodel($delmodel);
+                debug($delmodel);
+                $this->$delmodel->deleteAll(array($delmodel.'.standard_id'=>$this->id));
+            }            
+        }
+
+        if($this->alias == 'QcDocument'){
+            $deletearray = array(
+                'ChildQcDocument'                
+            );
+
+            foreach($deletearray as $delmodel){
+                $this->loadmodel($delmodel);
+                $this->$delmodel->deleteAll(array($delmodel.'.qc_document_id'=>$this->id));
+            }                
         }
 
         if($this->alias == 'File'){

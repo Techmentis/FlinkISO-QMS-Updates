@@ -1663,4 +1663,16 @@ class QcDocumentsController extends AppController {
             }
         }
     }
+
+    public function document_list(){
+        $this->paginate = array(
+            'recursive'=>-1,
+            'limit'=>25,
+            'conditions'=>array('QcDocument.parent_document_id'=>array(NULL,-1,'')),
+            'fields'=>array('QcDocument.id','QcDocument.title','QcDocument.name','QcDocument.standard_id','QcDocument.user_id','QcDocument.branches','QcDocument.departments','QcDocument.designations','QcDocument.editors')
+        );
+        $qcDocuments = $this->paginate();
+        $this->set('qcDocuments',$qcDocuments);
+
+    }
 }

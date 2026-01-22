@@ -40,23 +40,20 @@
 						$documentType = 'presentation';
 					}
 
-
+					$blockEdit = array(1,2,4);
 					$editors = json_decode($this->request->data['QcDocument']['editors'],true);
-					if($editors){
-						if(in_array($this->Session->read('User.id'), $editors)){
+					if($editors){					
+						if(in_array($this->Session->read('User.id'), $editors) &&  !in_array($this->request->data['QcDocument']['document_status'], $blockEdit) ){
 							$mode = 'edit';	
 						}else{
 							$mode = 'view';
 						}	
 					}
-
-
-
-
+					
 					$file_path = $this->data['QcDocument']['id'];
 
 					$file = $document_number.'-'.$file_name.'-'.$document_version;
-					$file = ltrim(rtrim($file));
+					$file = ltrim(rtrim($file)); 
 					$file = str_replace('-', '_', $file);
 					$file = ltrim(rtrim(strtolower($file)));
 					$file = preg_replace('/[\@\.\;\" "-]+/', '_', $file);
@@ -91,6 +88,10 @@
 						'docid'=> $this->data['QcDocument']['id']
 					));
 					?>
+					<?php if(in_array($this->request->data['QcDocument']['document_status'], $blockEdit) ){ ?>
+					<div class="no-margin hide"><small>This document is <?php echo $customArray['documentStatuses'][$this->request->data['QcDocument']['document_status']]?>, opening in View mode.</small></div>
+					<?php }?>
+				
 				</div>
 				<div class="col-md-12">
 					<?php echo $this->element('dmtips');?>
