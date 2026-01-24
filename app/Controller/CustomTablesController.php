@@ -2865,7 +2865,7 @@ class CustomTablesController extends AppController {
                 }
             }else{
                 $this->Session->setFlash(__('Invalid Credentials.'));
-                $this->redirect(array('action' => 'unlock', $customTable['CustomTable']['id']));
+                $this->redirect(array('action' => 'unlock', $id));
             }
         }
     }
