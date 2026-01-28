@@ -115,6 +115,14 @@ public function add() {
 
 }
 
+public function _getFirstLettersMultibyte($string) {
+    $words = explode(' ', $string);
+    $initials = '';
+    foreach ($words as $word) {
+        $initials .= mb_strtoupper(mb_substr(trim($word), 0, 1, 'UTF-8'));
+    }
+    return $initials;
+}
 
 public function add_bulk() {
 	if ($this->_show_approvals()) {
@@ -126,7 +134,6 @@ public function add_bulk() {
 	if ($this->request->is('post')) {
 		
 		$this->request->data['QcDocumentCategory']['system_table_id'] = $this->_get_system_table_id();
-		
 		$this->request->data['QcDocumentCategory']['name'] = str_replace('"','',$this->request->data['QcDocumentCategory']['name']);
 		if(strpos($this->request->data['QcDocumentCategory']['name'], '\r\n') !== false){
 			$qcDocumentCategories = explode('\r\n',$this->request->data['QcDocumentCategory']['name']);    
@@ -142,8 +149,15 @@ public function add_bulk() {
 				
 				$data['QcDocumentCategory'] = $this->request->data['QcDocumentCategory'];
 				$rec = explode(',',trim($qcDocumentCategory));
-					$data['QcDocumentCategory']['short_name'] = trim($rec[0]);
+					$shortname = $this->_getFirstLettersMultibyte(trim($rec[0]));
+					$data['QcDocumentCategory']['short_name'] = $shortname;
 					$data['QcDocumentCategory']['name'] = str_replace($rec[0].',','',$qcDocumentCategory);
+					$data['QcDocumentCategory']['name'] = rtrim($data['QcDocumentCategory']['name']);
+					unset($data['QcDocumentCategory']['id']);
+					$data['QcDocumentCategory']['publish'] = $this->request->data['Approval']['QcDocumentCategory']['publish'];
+					$data['QcDocumentCategory']['prepared_by'] = $this->request->data['Approval']['QcDocumentCategory']['prepared_by'];
+					$data['QcDocumentCategory']['approved_by'] = $this->request->data['Approval']['QcDocumentCategory']['approved_by'];
+					
 				
 				$exists = $this->QcDocumentCategory->find('count',array('conditions'=>array(
 					'QcDocumentCategory.name'=>$data['QcDocumentCategory']['name'],
@@ -152,20 +166,17 @@ public function add_bulk() {
 
 				)));
 				$data['QcDocumentCategory']['publish'] = $this->request->data['QcDocumentCategory']['publish'];
-				if($exists == 0){                    
-					try {
-						$this->QcDocumentCategory->create();
-						$this->QcDocumentCategory->save($data['QcDocumentCategory'],false);
+				if($exists == 0){
+					$this->QcDocumentCategory->create();
+					if($this->QcDocumentCategory->save($data,false)){
 						
-					} catch (Exception $e) {
+					}else{
 						$this->Session->setFlash(__('Some Categories already exists.'));
-					}        
+					}					
 				}                    
 			}
-			
 			$this->Session->setFlash(__('Categories saved.'));
-			$this->redirect(array('action' => 'index'));
-                    // exit;
+			$this->redirect(array('action' => 'index'));                    
 		}else{
 			$this->Session->setFlash(__('Categories could not be saved. Please, try again.'));
 			$this->redirect(array('action' => 'add_bulk'));

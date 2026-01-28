@@ -28,7 +28,16 @@ class StandardsController extends AppController {
         $this->set(compact('standards'));
     }
     public function documents() {
-        $clauses = $this->Standard->Clause->find('all', array('conditions' => array('Clause.standard_id' => $this->request->params['pass'][0], 'Clause.sub-clause' => '', 'Clause.publish' => array(0,1), 'Clause.soft_delete' => 0), 'order' => array('Clause.intclause' => 'ASC'), 'recursive' => - 1));
+        $clauses = $this->Standard->Clause->find('all', array('conditions' => array(
+            'Clause.standard_id' => $this->request->params['pass'][0], 
+            'OR'=>array(
+                'Clause.sub-clause' => '',
+                'Clause.sub-clause = Clause.clause',
+            ), 
+            'Clause.publish' => array(0,1), 
+            'Clause.soft_delete' => 0), 
+        'order' => array('Clause.intclause' => 'ASC'), 
+        'recursive' => - 1));
         foreach ($clauses as $clause) {
             $sub_clause = $this->Standard->Clause->find('all', array('recursive' => - 1, 'order' => array('Clause.sub-clause' => 'asc'), 'conditions' => array('Clause.publish' => 1, 'Clause.soft_delete' => 0, 'Clause.standard_id' => $this->request->params['pass'][0], 'Clause.clause' => $clause['Clause']['clause'], 'Clause.sub-clause !=' => '')));
             $final[$clause['Clause']['clause']]['clause'] = $clause['Clause']['clause'];
@@ -177,13 +186,15 @@ class StandardsController extends AppController {
                         $data['Clause']['modified'] = date('Y-m-d h:i:s');
                         $data['Clause']['publish'] = 1;                        
                         $this->Standard->Clause->create();
-                        try{
-                            $this->Standard->Clause->save($data);
-                        }catch(Exception $e) {
-                              // do nothing;
+                        if($this->Standard->Clause->save($data['Clause'],false)){
+
+                        }else{
+                            $this->Session->setFlash(__('Unable to save clause.'));   
                         }
+                        
                     }
                 }
+                
                 if ($this->_show_approvals()) {
                     $this->loadModel('Approval');
                     $this->Approval->create();

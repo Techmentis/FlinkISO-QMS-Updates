@@ -1679,22 +1679,31 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				}
 			}
 		}		
+
+
 		unset($this->request->params['named']['search']);
 		unset($this->request->params['named']['custom_table_id']);
 		unset($this->request->params['named']['qc_document_id']);
+		
 		foreach($this->request->params['named'] as $newSrc => $newVal){
-			if($newVal != -1 && $newVal != 'timestamp' && $newSrc != 'search' && $newSrc != 'strict'){
-				$field_condition[] = array($model.'.'.$newSrc => $newVal);	
+			if($newVal != -1 && $newVal != 'timestamp' && $newSrc != 'search' && $newSrc != 'strict' && $newSrc != 'sort' && $newSrc != 'page' && $newSrc != 'direction'){
+				$field_condition[] = array($model.'.'.$newSrc => $newVal);
 			}
 		}
-
-		if($this->request->params['named']['strict'] == 0){
-			$conditions = array_merge($conditions,$field_condition);
+		
+		if( isset($this->request->params['named']['strict']) && $this->request->params['named']['strict'] == 0){
+			if(is_array($conditions) && is_array($field_condition)){
+				$conditions = array_merge($conditions,$field_condition);				
+			}
+			
 		}else{
-			$conditions = array('OR'=>array_merge($conditions,$field_condition));
+			if(is_array($conditions) && is_array($field_condition)){				
+				$conditions = array('OR'=>array_merge($conditions,$field_condition));				
+			}
+			
 		}
-
-		$this->paginate = array('limit'=>25, 'order' => array($model.'.id' => 'DESC'), 'conditions' => array($conditions));
+		
+		$this->paginate = array('limit'=>25, 'conditions' => $conditions);
 		$this->$model->recursive = 0;
 		$this->set(Inflector::variable(Inflector::tableize($model)), $this->paginate());
 		$this->_commons();

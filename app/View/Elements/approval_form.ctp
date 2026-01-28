@@ -2,9 +2,13 @@
 	$approvals= array();
 	$disabledPublish = false;
 	if($customTable){
-		if(is_array(json_decode($customTable['CustomTable']['approvers'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['approvers'],true)) || $this->Session->read('User.is_mr') != 1){
-			$disabledPublish = true;
-		}			
+		$approverslistFromapprovers = json_decode($customTable['CustomTable']['approvers'],true);
+
+		if(is_array($approverslistFromapprovers)){
+				if(!in_array($this->Session->read('User.id'), $approverslistFromapprovers) || $this->Session->read('User.is_mr') != 1){
+				$disabledPublish = true;
+			}
+		}		
 	}
 ?>
 <script type="text/javascript">
@@ -128,9 +132,11 @@ if($this->Session->read('User.is_publisher') == 0){
 	<div class="box-footer">		
 		<?php if($this->action == 'view'){
 			if(isset($customTable) && is_array($customTable)){
-				if(in_array($this->Session->read('User.id'),json_decode($customTable['CustomTable']['approvers']))){
-					$disabledPublish = false;
-				}	
+				if($approverslistFromapprovers){
+					if(in_array($this->Session->read('User.id'),$approverslistFromapprovers)){
+						$disabledPublish = false;
+					}	
+				}				
 			}
 			echo "<div class='row'>";
 			// if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1){
@@ -160,9 +166,11 @@ if($this->Session->read('User.is_publisher') == 0){
 			
 			echo "<div class='row'>";
 			if(isset($customTable) && is_array($customTable)){
-				if(in_array($this->Session->read('User.id'),json_decode($customTable['CustomTable']['approvers']))){
-					$disabledPublish = false;
-				}	
+				if($approverslistFromapprovers){
+					if(in_array($this->Session->read('User.id'),$approverslistFromapprovers)){
+						$disabledPublish = false;
+					}	
+				}				
 			}
 			
 			if($disabledPublish == false){

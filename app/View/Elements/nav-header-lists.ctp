@@ -1,5 +1,4 @@
 <style type="text/css">.fa-dark.fa{color: #5c5b5b;}
-/*table .chosen-drop{position: relative !important; display:block; float:left; }*/
 </style>
 <?php
 if ($unpublished == null)

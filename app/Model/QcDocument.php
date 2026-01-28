@@ -352,7 +352,9 @@ array(
 		'6'=>'Formats',
 		'7'=>'Template',
 		'8'=>'Masters',
-		'9'=>'Certificate'
+		'9'=>'Certificate',
+		'10'=>'Register',
+		'11'=>'Record'
 	)
 );
 

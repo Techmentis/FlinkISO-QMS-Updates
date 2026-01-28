@@ -163,7 +163,7 @@ class QcDocumentsController extends AppController {
                 'Standard.id',
                 'Standard.name',                
             ),
-            'order' => array('QcDocument.intdocunumber' => 'ASC','QcDocument.title'=>'ASC'),
+            'order' => array('QcDocument.intdocunumber' => 'ASC'),
             'conditions' => array(
                 $accessConditions
             ));

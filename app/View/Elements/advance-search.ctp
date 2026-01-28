@@ -14,11 +14,8 @@
 	 });
 	</script>
 <style>
-
 	.chosen-container, .chosen-container-single, .chosen-select
-	{min-width: 120px; width:100% !important;}
-	/*#ui-datepicker-div,.ui-datepicker,.datepicker{z-index:9999 !important}{z-index: 999999 !important}*/
-/*.modal-footer{text-align: left}*/
+	{min-width: 120px; width:100% !important;}	
 </style>
 
 <div class="">
@@ -118,7 +115,6 @@
 		if(n.value == 'between'){
 
 			i = n.id + "_Value";
-			// $("#"+i).data('datepicker').remove();			
 			$("#"+i).datepicker("destroy");
 			
 			$("#"+i).daterangepicker({

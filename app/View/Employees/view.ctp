@@ -15,7 +15,12 @@
 <div class="nav panel panel-default">
 <div class="employees form col-md-12">	
 		<div class="row">
+			<?php if($this->Session->read('User.employee_id') == $this->request->params['pass'][0]){ ?>	
 			<div class="col-md-7">
+			<?php }else{?> 
+			<div class="col-md-12">	
+			<?php }?>
+			<h3>Employee Profile</h3>
 				<table class="table table-responsive">
 					<tr><td><?php echo __('Name'); ?></td>
 					<td>
@@ -188,6 +193,7 @@
 								?>
 							</td>
 						</tr>
+						<tr><td>Image type : png | Max Size : 20kb</td></tr>						
 						<tr><td><h4>OR</h4></td></tr>
 						<tr>
 							<td>			
@@ -247,7 +253,6 @@
 								?>
 							</td>
 						</tr>
-						<tr><td>Image type : png | Max Size : 20kb</td></tr>
 						<tr><td>Image type : png | Max Size : 800kb</td></tr>					
 				</table>
 				<?php } ?>
