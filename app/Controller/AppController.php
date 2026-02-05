@@ -423,8 +423,8 @@ class AppController extends Controller {
 						// $conditions = $this->_check_request();
 				        if($this->Session->read('User.is_mr') == false){
 				            $accessConditions = array(
-				                'QcDocument.archived !='=>1,
-				                'QcDocument.parent_document_id '=>-1,
+				                // 'QcDocument.archived !='=>1,
+				                // 'QcDocument.parent_document_id '=>-1,
 				                'OR'=>array(
 				                    'QcDocument.srct >' => 0,
 				                    'QcDocument.prepared_by LIKE '=>"%".$this->Session->read('User.employee_id')."%",
@@ -486,8 +486,8 @@ class AppController extends Controller {
 						// $conditions = $this->_check_request();
 				        if($this->Session->read('User.is_mr') == false){
 				        	$accessConditions = array(
-				                'QcDocument.archived !='=>1,
-				                'QcDocument.parent_document_id '=>-1,
+				                // 'QcDocument.archived !='=>1,
+				                // 'QcDocument.parent_document_id '=>-1,
 				                'OR'=>array(
 				                    'QcDocument.srct >' => 0,
 				                    'QcDocument.prepared_by LIKE '=>"%".$this->Session->read('User.employee_id')."%",

@@ -266,7 +266,7 @@
 
     ?>
     <div class="row">
-        <div class="col-md-6"><?php echo $this->Form->input('revision_number',array('class'=>'form-control', 'readonly'=>'readonly','default'=>$qcDocument['QcDocument']['revision_number']+1));?></div>
+        <div class="col-md-6"><?php echo $this->Form->input('revision_number',array('class'=>'form-control','default'=>$qcDocument['QcDocument']['revision_number']+1));?></div>
         <div class="col-md-6"><?php echo $this->Form->input('revision_date',array('class'=>'form-control','default'=>date('Y-m-d')));?></div>
     
         <div class="col-md-12"><br /><?php echo $this->Form->submit('Update Document',array('class'=>'btn btn-lg btn-info'));

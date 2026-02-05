@@ -430,12 +430,11 @@
 					$.ajax({
 						url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/check_duplicates/field:"+field+"/value:"+$("#"+id).val(),
 						success: function(data, result) {
-							console.log(data);
-							if(data == 2){
-								$("#duplicate_errors").html("Document Number should not be more that 7 characters long");
-								$("#QcDocumentDocumentNumber").val('');
-								return false;
-							}
+							// if(data == 2){
+							// 	$("#duplicate_errors").html("Document Number should not be more that 7 characters long");
+							// 	$("#QcDocumentDocumentNumber").val('');
+							// 	return false;
+							// }
 							
 							if(data == 1){
 								if(field == "t"){

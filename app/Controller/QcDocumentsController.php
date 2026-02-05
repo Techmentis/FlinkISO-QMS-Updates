@@ -252,6 +252,9 @@ class QcDocumentsController extends AppController {
             if ($this->request->data['ApprovalComment']['user_id']) $this->_save_approval_comments();
             $this->redirect(array('action' => 'view', $id));
         }
+        $this->QcDocument->virtualFields = array(
+            'childDoc'=>'select count(*) from qc_documents where qc_documents.parent_document_id LIKE QcDocument.id',
+        );
         $options = array('conditions' => array('QcDocument.' . $this->QcDocument->primaryKey => $id));        
         $qcDocument = $this->QcDocument->find('first', $options);
         $this->set('qcDocument', $qcDocument);
@@ -1285,7 +1288,22 @@ class QcDocumentsController extends AppController {
 
     public function update_revision($id = null){
         if ($this->request->is('post') || $this->request->is('put')) {
-            $qcDocument = $this->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$this->request->data['QcDocument']['id']),'recursive'=>-1));            
+            // first check if revision number already exists
+
+            $revCheck = $this->QcDocument->find('count',array(
+                'conditions'=>array(
+                    'QcDocument.id'=>$this->request->data['QcDocument']['id'],
+                    'OR'=>array(
+                        'QcDocument.revision_number'=>$this->request->data['QcDocument']['revision_number'],
+                        'QcDocument.revision_number >'=>$this->request->data['QcDocument']['revision_number']
+                        )
+                    )
+            ));
+            if($revCheck > 0){
+                $this->Session->setFlash(__('Either revision number already exists, OR current revision number is less then existing revision numbers.'));
+                $this->redirect(array('action' => 'update_revision',$this->request->data['QcDocument']['id'],'timestamp'=>date('Ymdhis')));
+            }
+            $qcDocument = $this->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$this->request->data['QcDocument']['id']),'recursive'=>-1));
             $archiveQcDocument = $qcDocument;
             unset($archiveQcDocument['QcDocument']['id']);
             unset($archiveQcDocument['QcDocument']['sr_no']);
@@ -1298,13 +1316,13 @@ class QcDocumentsController extends AppController {
             $archiveQcDocument['QcDocument']['modified'] = date('Y-m-d H:i:s');
             $archiveQcDocument['QcDocument']['modified_by'] = $this->Session->read('User.id');
             $archiveQcDocument['QcDocument']['file_key'] = $this->_generate_onlyoffice_key($qcDocument['QcDocument']['id'] . date('Ymdhis'));
-            $qcDocument['QcDocument']['document_status'] = 4;        
+            $archiveQcDocument['QcDocument']['document_status'] = 4;
             $this->QcDocument->create();
             $this->QcDocument->Save($archiveQcDocument,false);
             //after saving archive record, update current record
             // set publish = 1
             // set document_status = 5
-            $qcDocument['QcDocument']['revision_number'] = $archiveQcDocument['QcDocument']['revision_number'] + 1;
+            $qcDocument['QcDocument']['revision_number'] = $archiveQcDocument['QcDocument']['revision_number'];
             $qcDocument['QcDocument']['revision_date'] = $this->request->data['QcDocument']['revision_date'];
             $qcDocument['QcDocument']['publish'] = 1;
             $qcDocument['QcDocument']['document_status'] = 5;
@@ -1369,7 +1387,8 @@ class QcDocumentsController extends AppController {
                 $this->Session->setFlash(__('Change request successfully completed. Document successfully updated.'));
                 $this->redirect(array('action' => 'view', $qcDocument['QcDocument']['id']));
             }else{
-                echo "Something went wrong. System cound not find the original document";
+                $this->Session->setFlash(__('Something went wrong. System cound not find the original document.'));
+                $this->redirect(array('action' => 'update_revision',$this->request->data['QcDocument']['id'],'timestamp'=>date('Ymdhis')));
             }
         }else{
             // get CR table
