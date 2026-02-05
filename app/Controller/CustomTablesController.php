@@ -71,7 +71,7 @@ class CustomTablesController extends AppController {
         }
         $this->_get_approver_list($creator);
         $processes = $this->CustomTable->Process->find('list', array('recursive' => -1, 'conditions' => array()));
-        $standards = $this->CustomTable->QcDocument->Standard->find('list', array('recursive' => -1, 'conditions' => array()));
+        $standards = $this->CustomTable->QcDocument->Standard->find('list', array('recursive' => -1, 'conditions' => array('Standard.publish'=>1)));
         $clauses = $this->CustomTable->QcDocument->Standard->Clause->find('list', array('recursive' => -1, 'conditions' => array()));
         $departments = $this->CustomTable->QcDocument->CreatedBy->Department->find('list');
         $branches = $this->CustomTable->QcDocument->CreatedBy->Branch->find('list');
@@ -132,6 +132,12 @@ class CustomTablesController extends AppController {
             $accessConditions[] = array();
         }
 
+        if($this->request->params['named']['standard_id']){
+            $accessConditions[] = array(
+                'QcDocument.standard_id'=>$this->request->params['named']['standard_id']
+            );
+        }
+
         $this->paginate = array(
             'order' => array('CustomTable.childDoc'=>'ASC','CustomTable.name' => 'ASC'), 
             'conditions' => array(
@@ -145,6 +151,13 @@ class CustomTablesController extends AppController {
         $customArray = $this->CustomTable->customArray;
         $this->set(array('schedules'=>$schedules,'customArray'=>$customArray));
         $this->_get_count();
+        $standards = $this->CustomTable->QcDocument->Standard->find('list', array('recursive' => -1, 'conditions' => array('Standard.publish'=>1)));
+        $this->set('standards',$standards);
+        // table count
+        foreach($standards as $standard_id => $standard_name){
+            $cTableCount[$standard_id] = $this->CustomTable->find('count',array('conditions'=>array('QcDocument.standard_id'=>$standard_id)));
+        }
+        $this->set('cTableCount',$cTableCount);
     }
     
     public function child($custom_table_id = null) {
@@ -2005,7 +2018,7 @@ class CustomTablesController extends AppController {
                     
                 } else {
                     $this->Session->setFlash(__('Incorrect Password'));
-                    $this->redirect(array('action' => 'view',$this->data['CustomTable']['id']));
+                    $this->redirect(array('action' => 'index'));
                 }
             }
         } else {
@@ -3140,7 +3153,6 @@ class CustomTablesController extends AppController {
     
 
     public function recreate_all_forms(){
-
         $controllers = array();
         $aCtrlClasses = App::objects('controller');
         $skip = array('AppController', 'ApprovalsController', 'ApprovalCommentsController', 'CustomTablesController', 'FilesController', 'RecordsController', 'UserSessionsController');
@@ -3160,7 +3172,6 @@ class CustomTablesController extends AppController {
         $customTables = array();
         $customTables = $this->CustomTable->find('all',array('recursive'=>-1,
             'conditions'=>array(
-                'CustomTable.id'=>'64eb6612-b195-4ea8-92f2-01e87f14c82d',
                 'OR'=>array(
                     'CustomTable.custom_table_id ='=>null,
                     'CustomTable.custom_table_id ='=>'',
@@ -3170,6 +3181,7 @@ class CustomTablesController extends AppController {
         
         if($customTables){
             foreach($customTables as $customTable){
+                $tocreate = array();
                 $tocreate['CustomTable']['password'] = $customTable['CustomTable']['password'];
                 $tocreate['CustomTable']['name'] = $customTable['CustomTable']['name'];
                 $tocreate['CustomTable']['table_name'] = $customTable['CustomTable']['table_name'];
@@ -3187,7 +3199,7 @@ class CustomTablesController extends AppController {
                 $tocreate['CustomTable']['has_many'] = $customTable['CustomTable']['has_many'];
                 $tocreate['CustomTable']['branchid'] = $customTable['CustomTable']['branchid'];
                 $tocreate['CustomTable']['departmentid'] = $customTable['CustomTable']['departmentid'];
-
+                $fields = array();
                 $fields = json_decode($customTable['CustomTable']['fields'],true);
                 
                 foreach($fields as $field){
@@ -3195,7 +3207,7 @@ class CustomTablesController extends AppController {
                     $tocreate['CustomTableFields'][] = $field;                    
                 }                
                 $tocreate['linkedTos'] = json_encode($linkedTos);
-                $tocreate['linkedTosWithDisplay'] = json_encode($this->_returnDetaultField($fields));               
+                $tocreate['linkedTosWithDisplay'] = json_encode($this->_returnDetaultField($fields));
                 $this->recreate($customTable['CustomTable']['id'],true,$tocreate);               
             }
         }
@@ -3208,9 +3220,11 @@ class CustomTablesController extends AppController {
                 )                
             )
         ));
-
+        $customTable = array();
         if($customTables){
             foreach($customTables as $customTable){
+                $tocreate = array();
+                $fields = array();
                 $tocreate['CustomTable']['password'] = $customTable['CustomTable']['password'];
                 $tocreate['CustomTable']['name'] = $customTable['CustomTable']['name'];
                 $tocreate['CustomTable']['table_name'] = $customTable['CustomTable']['table_name'];

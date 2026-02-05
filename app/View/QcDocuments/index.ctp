@@ -10,8 +10,7 @@ $pptarray = array('ppt','pptx');
 <?php echo $this->element('checkbox-script'); ?><div  id="main">
 	<?php echo $this->Session->flash();?>	
 	<div class="qcDocuments ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Qc Documents','modelClass'=>'QcDocument','options'=>array("sr_no"=>"Sr No","document_number"=>"Document Number","reference_number"=>"Reference Number","issue_number"=>"Issue Number","date_of_next_issue"=>"Date Of Next Issue","date_of_issue"=>"Date Of Issue","effective_from_date"=>"Effective From Date","revision_number"=>"Revision Number","date_of_review"=>"Date Of Review","revision_date"=>"Revision Date","document_type"=>"Document Type","it_categories"=>"It Categories","document_status"=>"Document Status","issued_by"=>"Issued By","archived"=>"Archived","change_history"=>"Change History","cr_status"=>"Cr Status","mark_for_cr_update"=>"Mark For Cr Update","temp_date_of_issue"=>"Temp Date Of Issue","temp_effective_from_date"=>"Temp Effective From Date","linked_formats"=>"Linked Formats","cover_page"=>"Cover Page","page_orientation"=>"Page Orientation"),'pluralVar'=>'qcDocuments'))); ?>
-
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Master List Of Documents','modelClass'=>'QcDocument','options'=>array("sr_no"=>"Sr No","document_number"=>"Document Number","reference_number"=>"Reference Number","issue_number"=>"Issue Number","date_of_next_issue"=>"Date Of Next Issue","date_of_issue"=>"Date Of Issue","effective_from_date"=>"Effective From Date","revision_number"=>"Revision Number","date_of_review"=>"Date Of Review","revision_date"=>"Revision Date","document_type"=>"Document Type","it_categories"=>"It Categories","document_status"=>"Document Status","issued_by"=>"Issued By","archived"=>"Archived","change_history"=>"Change History","cr_status"=>"Cr Status","mark_for_cr_update"=>"Mark For Cr Update","temp_date_of_issue"=>"Temp Date Of Issue","temp_effective_from_date"=>"Temp Effective From Date","linked_formats"=>"Linked Formats","cover_page"=>"Cover Page","page_orientation"=>"Page Orientation"),'pluralVar'=>'qcDocuments'))); ?>
 		<script type="text/javascript">
 			$(document).ready(function(){
 				$('table th a, .pag_list li span a').on('click', function() {
@@ -21,6 +20,18 @@ $pptarray = array('ppt','pptx');
 				});
 			});
 		</script>	
+		<div class="btn-group">
+			<?php
+			foreach($standards as $standard_id => $standard){
+					$standardTitle = $standard .'&nbsp;&nbsp;<div class="badge">'.$cTableCount[$standard_id].'</div>';
+					if(isset($this->request->params['named']['standard_id']) && $this->request->params['named']['standard_id'] == $standard_id){
+						echo $this->Html->link($standardTitle,array('action'=>'index','standard_id'=>$standard_id),array('class'=>'btn btn-sm btn-bold  btn-info', 'escape'=>false));
+					}else{
+						echo $this->Html->link($standardTitle,array('action'=>'index','standard_id'=>$standard_id),array('class'=>'btn btn-sm btn-bold  btn-default', 'escape'=>false));
+					}					
+				}
+			?>
+		</div>		
 		<div class="table-responsive" style="overflow:scroll">
 			<?php echo $this->Form->create(array('class'=>'no-padding no-margin no-background'));?>				
 			<table cellpadding="0" cellspacing="0" class="table table-responsive table-hover index">

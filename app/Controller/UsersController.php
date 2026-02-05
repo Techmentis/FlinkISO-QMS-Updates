@@ -1073,9 +1073,7 @@ class UsersController extends AppController {
         if(!$this->request->data['User'] && $this->request->data['register']['email']){
             
             $curl = curl_init();
-            $auth = base64_encode('abc:123');
-            $head ='Authorization: Basic '. $auth;
-
+            
             $path = Configure::read('ApiPath') . 'on_premise_users/register/' . $this->request->data['register']['email'];
             
             curl_setopt_array($curl, array(
@@ -1098,29 +1096,27 @@ class UsersController extends AppController {
             $err = curl_error($curl);
             curl_close($curl);
             
-
-            $this->request->data['User'] = $user;
-
             if($err){
-                CakeLog::write('debug',json_encode($err));
+                CakeLog::write('debug',json_encode($err));                
             }
 
             if($response){
-                CakeLog::write('debug',json_encode($response));
+                $response = json_decode($response,true);
+                if($response['user'] == false){
+                    $this->Session->setFlash(__('Email not registered.'));
+                    $this->redirect(array('controller'=>'users', 'action' => 'register'));
+                }                
             }
         }
-
+        
+        $this->request->data['User'] = $user;
+        
         if ($this->request->data['User']) {
 
             //create Company
-            $description = '<p>FlinkISO is a web based application (available On-Cloud well as On-Premise) which automates the entire ISO documentation process and facilitates customers to electronically store &amp;
-            maintain all the relevant documents, quality &amp; procedure manuals and data at single source on cloud. From this extensive information,
-            system can generate &ldquo;eye to detail reports&rdquo;, YOY performance analysis for the management to gauge, scale the organization growth and productivity,
-            and move forward to take corrective actions.</p>';
+            $description = '<p></p>';
             
-            $welcomeMessage = '<p>TECHMENTIS GLOBAL SERVICES PVT. LTD offers an array of web business solutions through e-commerce, B2B, B2C and mobile applications.
-            Our young and dynamic team not only thrives to create and innovate, but also focuses on building a sustainable business model which enables our clients to remain
-            competitive and profitable in the versatile global market.</p>';
+            $welcomeMessage = '<p></p>';
             
             $company['Company']['name']                = $this->request->data['User']['OnPremiseUser']['company'];
             $company['Company']['id']                  = $this->request->data['User']['OnPremiseUser']['id'];

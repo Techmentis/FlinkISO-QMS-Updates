@@ -15,7 +15,7 @@ if($result['error']==1 or $response == null){
   if($result['message'] == 'Incorrect credentials'){ ?>
     <div class="row">
       <div class="col-md-12">
-        <div class="alert alert-danger">FlinkISO API Subscription Has Expired.</div>
+        <!-- <div class="alert alert-danger">FlinkISO API Subscription Has Expired.</div> -->
         <div class="panel panel-default">
           <div class="panel-body">
             <p>Your FlinkISO API Subcription has expired. Click here to renew the subscription.</p>
@@ -38,6 +38,11 @@ if($result['error']==1 or $response == null){
       </div>
     </div>
   <?php }?>
+  <script>
+    $().ready(function(){
+      $("#submit_id").hide();
+    })
+  </script>
 <?php }else{
   echo $response; ?>
 <script type="text/javascript">

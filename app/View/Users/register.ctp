@@ -21,6 +21,8 @@
                 <h4>Note:</h4>
                 <ul>
                     <li>Make sure CURL is installed and enabled</li>
+                    <li>Check <strong>/var/www/html/flinkiso/app/tmp/logs/debug.log</strong> for cURL specific error</li>
+                    <li>Check <strong>/var/www/html/flinkiso/app/tmp/logs/error.log</strong> for any other error</li>
                     <li>Make sure you are connected to the internet</li>
                     <li>In case you are unable to proceed, try running <strong>TRUNCATE companies; TRUNCATE departments; TRUNCATE designations; TRUNCATE employees; TRUNCATE users;</strong> from phpmyadmin and then try again</li>
                     <li>Contact help@flnkiso.com if the issue persists.</li>

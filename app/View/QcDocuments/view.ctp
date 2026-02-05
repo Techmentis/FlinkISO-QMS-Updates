@@ -10,7 +10,18 @@
 	</style>				
 	<?php echo $this->Session->flash();?>	
 	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'View Qc Documents','modelClass'=>'QcDocument','options'=>array("sr_no"=>"Sr No","document_number"=>"Document Number","reference_number"=>"Reference Number","issue_number"=>"Issue Number","date_of_next_issue"=>"Date Of Next Issue","date_of_issue"=>"Date Of Issue","effective_from_date"=>"Effective From Date","revision_number"=>"Revision Number","date_of_review"=>"Date Of Review","revision_date"=>"Revision Date","document_type"=>"Document Type","it_categories"=>"It Categories","document_status"=>"Document Status","issued_by"=>"Issued By","archived"=>"Archived","change_history"=>"Change History","cr_status"=>"Cr Status","mark_for_cr_update"=>"Mark For Cr Update","temp_date_of_issue"=>"Temp Date Of Issue","temp_effective_from_date"=>"Temp Effective From Date","linked_formats"=>"Linked Formats","cover_page"=>"Cover Page","page_orientation"=>"Page Orientation"),'pluralVar'=>'qcDocuments'))); ?>
-
+	<div class="btn-group">
+			<?php
+			foreach($standards as $standard_id => $standard){
+					$standardTitle = $standard .'&nbsp;&nbsp;<div class="badge">'.$cTableCount[$standard_id].'</div>';
+					if(isset($this->request->params['named']['standard_id']) && $this->request->params['named']['standard_id'] == $standard_id){
+						echo $this->Html->link($standardTitle,array('action'=>'index','standard_id'=>$standard_id),array('class'=>'btn btn-sm btn-bold  btn-info', 'escape'=>false));
+					}else{
+						echo $this->Html->link($standardTitle,array('action'=>'index','standard_id'=>$standard_id),array('class'=>'btn btn-sm btn-bold  btn-default', 'escape'=>false));
+					}					
+				}
+			?>
+		</div>	
 	<div class="">
 		<div class="row">
 			<div class="col-md-8">

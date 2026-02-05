@@ -134,7 +134,7 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
             'onClick'=>'selectaddtrs()',
             'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Select All'
         ));
-    if(!in_array($this->request->controller, array('qc_documents','custom_tables','processes','standards'))){        
+    if(!in_array($this->request->controller, array('qc_documents','custom_tables','processes','standards'))){
     echo $this->Form->create(Inflector::classify($this->request->controller),array('action'=>'bulk_delete/custom_table_id:'.$this->request->params['named']['custom_table_id'].'/qc_document_id:'.$this->request->params['named']['qc_document_id'], 'style'=>'display:inline'),array('class'=>'in-line pull-left','style'=>'display:inline'));    
         
         echo '<label for="bulkDeleteSubmit" class="btn btn-app btn-default"><i class="fa fa-trash-o text-danger"></i></label>';
@@ -174,7 +174,7 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
     <?php if(($this->action == 'index' || $this->action == 'quick_search' ) && $this->request->controller != 'usage_details'  && $this->request->controller != 'invoices') { ?>
         <div class=" btn-group" style="width:100%;">
             <?php 
-            echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_src_button', 'autocomplete'=>'off',  'label'=>false,'placeholder'=>'Add Search query and press Tab.','style'=>'margin-top: -12px'));                        
+            echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_src_button', 'autocomplete'=>'off',  'label'=>false,'placeholder'=>'Quick search with sorting.','style'=>'margin-top: -12px'));                        
             ?>
         </div>
     <?php } } ?>
@@ -192,15 +192,21 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
                         echo "<div class='col-md-3'>" . $this->Form->input($sortingField, 
                             array(
                                 'default'=>$this->request->params['named'][$sortingField],
-                                'class'=>'form-control no-margin no-padding','div'=>false, 'label'=>array('class'=>'no-margin no-padding')))."</div>";
+                                'class'=>'form-control no-margin no-padding','div'=>false, 'id'=>false, 'label'=>array('class'=>'no-margin no-padding')))."</div>";
                     }
                 }
-                echo "<div class='col-md-3' >".$this->Form->input('strict',array('class'=>'', 'type'=>'radio', 'default'=>$this->request->params['named']['strict'],'options'=>array(0=>'Yes',1=>'No')))."</div>";
-                echo "<div class='col-md-3' ><br />".$this->Form->submit('Go',array('class'=>'btn btn-sm btn-info'))."</div>";
+                if($this->request->params['named']['strict'] == null){
+                    echo "<div class='col-md-3' >".$this->Form->input('strict',array('class'=>'', 'type'=>'radio', 'value'=>0,'options'=>array(0=>'Yes',1=>'No')))."</div>";    
+                }else{
+                    echo "<div class='col-md-3' ><div class='pull-left'>".$this->Form->input('strict',array('class'=>'', 'type'=>'radio', 'default'=>$this->request->params['named']['strict'],'options'=>array(0=>'Yes',1=>'No'))). "</div><div class='pull-right'><br />". $this->Form->submit('Go',array('class'=>'btn btn-sm btn-info','style'=>'margin-top:8px'))."</div></div>";
+                }
+                
+                // echo "<div class='col-md-3' ><br />".$this->Form->submit('Go',array('class'=>'btn btn-sm btn-info'))."</div>";
                 echo $this->Form->end();
             }
         }    
-        ?>        
+        ?>
+        <div class="col-md-12"><hr /></div>
     </div>
 </div>
 <?php 
@@ -237,12 +243,21 @@ $str .= 'timestamp:'.date('ymdhis');
     <?php } ?>
     
     $().ready(function(){
+
+        $(document).on('keypress', function(e) {
+            if (e.which === 13 && $("#quick_src_button").val() != '') {
+                event.preventDefault();
+                $("#indexsort").submit();                
+            }
+        });
+
         $("#quick_src_button").on('focus',function(){
             $("#srcdivhideshow").removeClass('hidden', 200, null, function() {});
         });
+        
         $("#indexsort").submit(function(event) {
             var searchstring = "";
-            event.preventDefault();            
+            event.preventDefault();        
             let form_data = $(this).serializeArray();
             $.each(form_data, function(i, field) {
                 searchstring += field.name+":"+field.value+"/";
@@ -284,6 +299,3 @@ $str .= 'timestamp:'.date('ymdhis');
 </script>
 <div id="pdf_open"></div>
 <div id="history_open"></div>
-
-
-

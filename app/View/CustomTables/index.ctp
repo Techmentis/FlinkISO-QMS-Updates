@@ -5,21 +5,10 @@ $sheetarray = array('xls','xlsx');
 $pdfarray = array('pdf');
 $pptarray = array('ppt','pptx');
 ?>
-<?php if($customTables){ ?>
-	<?php echo $this->element('checkbox-script'); ?>
-	<div  id="main">	
+<div  id="main">	
 		<?php echo $this->Session->flash();?>	
 		<div class="customTables ">
-			<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Custom Tables','modelClass'=>'CustomTable','options'=>array("sr_no"=>"Sr No","name"=>"Name","fields"=>"Fields"),'pluralVar'=>'customTables'))); ?>
-			<script type="text/javascript">
-				$(document).ready(function(){
-					$('table th a, .pag_list li span a').on('click', function() {
-						var url = $(this).attr("href");
-						$('#main').load(url);
-						return false;
-					});
-				});
-			</script>
+			<h4>Forms</h4>
 			<style type="text/css">
 				.btn .badge{
 					position: absolute;
@@ -34,31 +23,42 @@ $pptarray = array('ppt','pptx');
 			</style>
 			<div class="btn-group">
 			<?php 
-				if($this->request->params['named']['table_type'] == 4){
-					echo $this->Html->link('All',array('action'=>'index','table_type'=>4),array('class'=>'btn btn-sm btn-bold  btn-success'));
+				if($this->request->params['named']['table_type'] == 4 && !isset($this->request->params['named']['standard_id'])){
+					echo $this->Html->link('All',array('action'=>'index','table_type'=>4),array('class'=>'btn btn-sm btn-bold  btn-info'));
 				}else{
 					echo $this->Html->link('All',array('action'=>'index','table_type'=>4),array('class'=>'btn btn-sm btn-bold  btn-default'));
 				}
 
 				if($this->request->params['named']['table_type'] == 1){
-					echo $this->Html->link('Documents',array('action'=>'index','table_type'=>1),array('class'=>'btn btn-sm btn-bold  btn-success'));
+					echo $this->Html->link('Documents',array('action'=>'index','table_type'=>1),array('class'=>'btn btn-sm btn-bold  btn-info'));
 				}else{
 					echo $this->Html->link('Documents',array('action'=>'index','table_type'=>1),array('class'=>'btn btn-sm btn-bold  btn-default'));
 				}
 				
 				if($this->request->params['named']['table_type'] == 5){
-					echo $this->Html->link('Child Documents',array('action'=>'index','table_type'=>5),array('class'=>'btn btn-sm btn-bold  btn-success'));
+					echo $this->Html->link('Child Documents',array('action'=>'index','table_type'=>5),array('class'=>'btn btn-sm btn-bold  btn-info'));
 				}else{
 					echo $this->Html->link('Child Documents',array('action'=>'index','table_type'=>5),array('class'=>'btn btn-sm btn-bold  btn-default'));
 				}
 
 				if($this->request->params['named']['table_type'] == 3){
-					echo $this->Html->link('Masters',array('action'=>'index','table_type'=>3),array('class'=>'btn btn-sm btn-bold  btn-success'));
+					echo $this->Html->link('Masters',array('action'=>'index','table_type'=>3),array('class'=>'btn btn-sm btn-bold  btn-info'));
 				}else{
 					echo $this->Html->link('Masters',array('action'=>'index','table_type'=>3),array('class'=>'btn btn-sm btn-bold  btn-default'));
-				}				
+				}
+
+				foreach($standards as $standard_id => $standard){
+					$standardTitle = $standard .'&nbsp;&nbsp;<div class="badge">'.$cTableCount[$standard_id].'</div>';
+					if(isset($this->request->params['named']['standard_id']) && $this->request->params['named']['standard_id'] == $standard_id){
+						echo $this->Html->link($standardTitle,array('action'=>'index','standard_id'=>$standard_id),array('class'=>'btn btn-sm btn-bold  btn-info', 'escape'=>false));
+					}else{
+						echo $this->Html->link($standardTitle,array('action'=>'index','standard_id'=>$standard_id),array('class'=>'btn btn-sm btn-bold  btn-default', 'escape'=>false));
+					}					
+				}
 			?>
 		</div>
+<?php if($customTables){ ?>
+	<?php echo $this->element('checkbox-script'); ?>	
 		<?php echo $this->Form->create(array('class'=>'no-padding no-margin no-background'));?>
 		<?php if($customTables){ 
 			$tblcount = 0; ?>
@@ -197,19 +197,7 @@ $pptarray = array('ppt','pptx');
 </div>
 <script>$.ajaxSetup({beforeSend:function(){$("#busy-indicator").show();},complete:function(){$("#busy-indicator").hide();}});</script>
 <script type="text/javascript">	$().ready(function(){$(".tooltip1").tooltip();});</script>
-<?php }else{ ?>
-	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Custom Tables','modelClass'=>'CustomTable','options'=>array("sr_no"=>"Sr No","name"=>"Name","fields"=>"Fields"),'pluralVar'=>'customTables'))); ?>
-
-			<script type="text/javascript">
-				$(document).ready(function(){
-					$('table th a, .pag_list li span a').on('click', function() {
-						var url = $(this).attr("href");
-						$('#main').load(url);
-						return false;
-					});
-				});
-			</script>	
-
+<?php }else{ ?>	
 	<div class="row">
 		<div class="col-md-12">
 			<h3>How to Build Custom HTML Forms</h3>

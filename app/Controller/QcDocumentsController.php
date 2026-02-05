@@ -151,6 +151,10 @@ class QcDocumentsController extends AppController {
             );
         }
 
+        if(isset($this->request->params['named']['standard_id'])){
+            $accessConditions[] = array('QcDocument.standard_id'=>$this->request->params['named']['standard_id']);
+        }
+        
         $this->paginate = array('all',
             'fields'=>array(
                 'QcDocument.id', 'QcDocument.name','QcDocument.title','QcDocument.document_number','QcDocument.revision_number', 'QcDocument.document_status','QcDocument.publish','QcDocument.parent_document_id','QcDocument.parent_id','QcDocument.prepared_by','QcDocument.approved_by','QcDocument.tables','QcDocument.active_tables','QcDocument.standard_id','QcDocument.file_type','QcDocument.parent_document_id','QcDocument.childDoc','QcDocument.srct','QcDocument.and_or_condition','QcDocument.branches','QcDocument.departments','QcDocument.designations',
@@ -173,6 +177,14 @@ class QcDocumentsController extends AppController {
         $this->set('qcDocuments', $qcDocuments);
         $this->_get_count();
         $this->_commons($this->Session->read('User.id'));
+
+        // document count
+        if($this->viewVars['standards'] != null){            
+            foreach($this->viewVars['standards'] as $standard_id => $standard_name){
+                $cTableCount[$standard_id] = $this->QcDocument->find('count',array('conditions'=>array('QcDocument.standard_id'=>$standard_id)));
+            }            
+            $this->set('cTableCount',$cTableCount);
+        }
     }
 
     public function child_docs($id = null) {
@@ -589,7 +601,11 @@ class QcDocumentsController extends AppController {
             }
             
             $full_name = explode('.', $this->request->data['QcDocument']['file']['name']);
-            $file_type = $this->request->data['QcDocument']['file_type'];            
+            $file_type = $this->request->data['QcDocument']['file_type'];
+
+            // if(!$full_name)$full_name = $this->request->data['QcDocument']['file']['type'];
+            if(!$file_type)$file_type = $this->request->data['QcDocument']['file']['type'];
+
             //get qc doc
             $qcDocument = $this->QcDocument->find('first',array(
                 'recursive'=>-1,
@@ -626,17 +642,18 @@ class QcDocumentsController extends AppController {
 
             $folder_new_file = New Folder();
             $folder_new_file->create(Configure::read('path') . DS . $id . DS . $file_name_for_folder, false, 0777);
-
+            
             if (move_uploaded_file($this->request->data['QcDocument']['file']['tmp_name'], $file)) {
                 $key = $this->_generate_onlyoffice_key($this->request->data['QcDocument']['id'] . date('Ymdhis'));
                 $this->set('file_key', $key);
                 $qcdoc = $this->QcDocument->find('first', array('recursive' => - 1, 'conditions' => array('QcDocument.id' => $id)));
                 $qcdoc['QcDocument']['file_key'] = $key;
                 $qcod['QcDocument']['file_status'] = 0;
+                $qcdoc['QcDocument']['file_name'] = $file_name;
                 $qcdoc['QcDocument']['file_type'] = $file_type;
                 $this->request->data['QcDocument']['file_key'] = $key;
                 $this->QcDocument->create();
-                $this->QcDocument->save($qcdoc['QcDocument']);
+                $this->QcDocument->save($qcdoc['QcDocument'],false);
                 $this->Session->setFlash(__('File Uploaded'));
 
                 $json = [

@@ -762,21 +762,6 @@ public function _write_html_file($filename = null, $content = null, $record_id =
     $html = $this->_convert_to_html($url,'html','docx',null,$record_id,$record_id,$this->Session->read('User.company_id'));
 }
 
-
-public function _html_cleanup($html = null){
-    $output = preg_replace('/(<[^>]+) style=".*?"/i', '$1', $html);
-    $output = preg_replace('/cellspacing=".*?"/i', ' cellspacing="1"', $output);
-    $output = preg_replace('/cellpadding=".*?"/i', ' cellpadding="3"', $output);
-    $output = preg_replace('/border=".*?"/i', ' border="1"', $output);
-    $output = str_replace('<span>', '', $output);
-    $output = str_replace('</span>', '', $output);
-    $output = str_replace('<td width="', '<td alt="', $output);
-    $style = '<style>table{width:100%;}</style>';
-    $output = str_replace('</head>',$style.'</head>',$output);
-    $output = str_replace('&quot;','"',$output);
-    return $output;
-}
-
 public function add_cover(){
     $path = Configure::read('files') . DS . 'pdf_template' . DS . 'cover' . DS . 'template.docx';    
     if(file_exists($path)){

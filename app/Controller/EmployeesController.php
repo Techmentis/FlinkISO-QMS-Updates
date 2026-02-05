@@ -356,7 +356,6 @@ class EmployeesController extends AppController {
                     echo "Folder creation failed";
                     exit;
                 }
-
                 $to = $path . DS . 'sign.png';
                 if(move_uploaded_file($this->request->data['Employee']['signature']['tmp_name'], $to)){
                     $this->Session->setFlash(__('Signature file added'));

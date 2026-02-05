@@ -81,8 +81,11 @@ class BillingController extends AppController {
 
     public function backup(){
         $backupFolder = new Folder();
-        $folder = ROOT . DS . 'backup' . DS . date('Y-m-d') . DS . 'app';
+        $backuptime = date('H-i');
+        $folder = ROOT . DS . 'backup' . DS . date('Y-m-d') . DS .  $backuptime . DS . 'app';
+        
         if($backupFolder->create($folder)){
+            
             $folderToCopy = new Folder(APP);
             $folderToCopy->copy(array(
                 'to' => $folder,
@@ -90,7 +93,8 @@ class BillingController extends AppController {
                 'recursive' => true
             ));
 
-            $folder = ROOT . DS . 'backup' . DS . date('Y-m-d') . DS . 'lib';
+            $folder = ROOT . DS . 'backup' . DS . date('Y-m-d') . DS . $backuptime . DS . 'lib';
+            
             $folderToCopy = new Folder(ROOT . DS . 'lib');
             $folderToCopy->copy(array(
                 'to' => $folder,

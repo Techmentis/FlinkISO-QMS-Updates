@@ -86,36 +86,37 @@
 					$("#add-sign-3").hide();
 				},
 				complete: function(data) {
+					let res = $.trim(data.responseText);
 					$("#sign-spin").hide();
-					if(data.responseText == "Proceed"){
+					if(res == "Proceed"){
 						$("#add-sign-2").hide();
 						$("#<?php echo $fieldid;?>").val("<?php echo $employee_id;?>").trigger('chosen:updated');						
 						$("#response-message").html('Signature fetched successfully. It will be added in View pages.');
 						$("input[type=submit]").show();
 						$("#loadsign").show();						
 					}
-					if(data.responseText == "Wrong password"){
+					if(res == "Wrong password"){
 						$("#loadsign").hide();
 						$("#add-sign-3").show();
 						$("#response-message").html('Incorrect Password');
 						$("#<?php echo $fieldid;?>").val(-1).trigger('chosen:updated');
 					}
 
-					if(data.responseText == "Wrong user"){
+					if(res == "Wrong user"){
 						$("#loadsign").hide();
 						$("#add-sign-3").show();
 						$("#response-message").html('User not found');
 						$("#<?php echo $fieldid;?>").val(-1).trigger('chosen:updated');
 					}
 
-					if(data.responseText == "invalid"){
+					if(res == "invalid"){
 						$("#loadsign").hide();
 						$("#add-sign-3").show();
 						$("#response-message").html('Invalid Request');
 						$("#<?php echo $fieldid;?>").val(-1).trigger('chosen:updated');
 					}
 
-					if(data.responseText == "Signature not available"){
+					if(res == "Signature not available"){
 						$("#loadsign").hide();
 						$("#add-sign-3").show();
 						$("#response-message").html('Signature not available for this user.');

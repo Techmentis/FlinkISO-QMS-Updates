@@ -596,6 +596,7 @@ class AppController extends Controller {
 		$con2 = null;
 		$modelName = $this->modelClass;
 		$deptCon = array();
+		$pubCon = array();
 		
 		// check if user/employee is involved departmentwise
 		// and if the user is HoD
@@ -639,7 +640,7 @@ class AppController extends Controller {
 			)
 		);
 	}
-
+	$pubCon = array($modelName.'.publish'=>1);
 	if($this->request->params['named'])
 	{
 		if(isset($this->request->params['named']['published']) && $this->request->params['named']['published'] == 0){
@@ -650,13 +651,13 @@ class AppController extends Controller {
 				)				
 			);
 		}else{
-			$pubCon = array($modelName.'.publish'=>1);
+			
 		}
 		if(isset($this->request->params['named']['published']) && $this->request->params['named']['published']==null)$con1 = null ; else $con1 = $pubCon;
 		if(isset($this->request->params['named']['published']))$conditions=array($onlyBranch,$onlyOwn,$con1);
 		else $conditions=array($onlyBranch,$onlyOwn,$con1);
 	}else{
-		$conditions=array($onlyBranch,$onlyOwn,null,$modelName.'.soft_delete'=>0); 
+		$conditions=array($onlyBranch,$onlyOwn,null,$pubCon,$modelName.'.soft_delete'=>0); 
 	}
 	return array_filter($conditions);	
 
@@ -1247,20 +1248,17 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 	}
 
-	public function _single_user_check(){
+	public function _single_user_check($id = null){
 		$this->loadModel('User');
 		$user = $this->User->find('first',array('conditions'=>array('User.id'=>$id)));
-		if($user['User']['sr_no'] == 1){
-			// $this->Session->setFlash(__('You can not delete this user'));
+		if(!empty($user) && $user['User']['sr_no'] == 1){
 			return false;
 		}
 		$user = $this->User->find('count');
 		if($user == 1){
-			// $this->Session->setFlash(__('You can not delete this user'));
 			return false;
 		}
-		// $this->redirect(array('action' => 'index','custom_table_id'=>$record[$model]['custom_table_id'],'qc_document_id'=>$record[$model]['qc_document_id']));
-		
+		return true;
 	}
 	
 	public function delete() {
@@ -1284,10 +1282,20 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 			if ($this->request->is('post') || $this->request->is('put')) {
 				if($this->request->controller == 'users'){
-					$singleUserCheck = $this->_single_user_check();
+					$singleUserCheck = $this->_single_user_check($this->request->data['User']['id']);
 					if($singleUserCheck == false){
 						$this->Session->setFlash(__('You can not delete this user'));
-						$this->redirect(array('action' => 'index','custom_table_id'=>$record[$model]['custom_table_id'],'qc_document_id'=>$record[$model]['qc_document_id']));	
+						$this->redirect(array('controller'=>'users', 'action' => 'index'));	
+					}else{
+						$this->loadModel('User');
+						$user = $this->User->read(null,$this->request->data['User']['id']);
+						// $this->User->set(array('soft_delete'=>1,'publish'=>0,'status'=>3));
+						$user['User']['soft_delete'] = 1;
+						$user['User']['publish'] = 0;
+						$user['User']['status'] = 3;
+						$this->User->save($user,false);
+						$this->Session->setFlash(__('User is deleted.'));
+						$this->redirect(array('controller'=>'users', 'action' => 'index'));	
 					}
 				}else{
 					$model = $this->modelClass;
@@ -1381,7 +1389,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		$folder = Configure::read("files") . DS . $this->$model->useTable . DS . $id;
 		$dirToDelete = new Folder($folder);
 		$dirToDelete->delete();		
-		$this->$model->delete($id);		
+		$this->$model->delete($id);
 	}
 
 	public function _delete_approvals($id = null, $model = null){
@@ -1668,19 +1676,17 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		$search_keys = array('name','title','document_number','clause','sub-clause','employee_number');
 		$src = $this->$model->displayField;
 		unset($this->request->params['named']['timestamp']);
-		$conditions = $field_condition = array();	
+		$conditions = $field_condition = array();
 		if($this->request->params['named']['search'] != null){
-			$srcs = explode(' ',$this->request->params['named']['search']);			
-			foreach($srcs as $s){
+			// $srcs = explode(' ',$this->request->params['named']['search']);			
+			// foreach($srcs as $s){
 				foreach ($search_keys as $keys) {
 					if(in_array($keys, $fields)){
-						$field_condition[] = array('LOWER('.$model.'.'.$keys.') LIKE' => '%'.strtolower($s) . '%');
+						$field_condition['OR'][] = array('LOWER(REPLACE('.$model.'.'.$keys.', " ","")) LIKE' => '%'.strtolower(str_replace(' ','', $this->request->params['named']['search'])).'%');
 					}
 				}
-			}
+			// }
 		}		
-
-
 		unset($this->request->params['named']['search']);
 		unset($this->request->params['named']['custom_table_id']);
 		unset($this->request->params['named']['qc_document_id']);
@@ -1699,10 +1705,9 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}else{
 			if(is_array($conditions) && is_array($field_condition)){				
 				$conditions = array('OR'=>array_merge($conditions,$field_condition));				
-			}
-			
+			}			
 		}
-		
+
 		$this->paginate = array('limit'=>25, 'conditions' => $conditions);
 		$this->$model->recursive = 0;
 		$this->set(Inflector::variable(Inflector::tableize($model)), $this->paginate());
@@ -2750,6 +2755,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 
 	public function _curl_post($path = null, $linkedTos = null, $data = null,$linkedTosWithDisplay = null){ 
+		$response = array();
 		$postdata = array(
 			'linkedTos'=>$linkedTos,
 			'data'=>$data,
@@ -2786,6 +2792,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 
 	public function _curl_get($path = null){
+		$response = array();
 		$curl = curl_init();
 		$auth = base64_encode('user:'.$this->Session->read('User.company_id'));
 		$head ='Authorization: Basic '. $auth;
@@ -4533,7 +4540,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			}else{
 				$response = 'invalid';
 			}			
-			echo $response;	
+			echo trim($response);
 			exit;		
 		}else{
 			if($employee_id){
@@ -4573,7 +4580,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}else{
 			$response = 'wrong data';
 		}
-		return $response;		
+		return trim($response);
 	}
 
 	public function _custom_table_short_info($custom_table_id = null){
@@ -4744,5 +4751,19 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 		echo $newoptions;
 		exit;		
+	}
+
+	public function _html_cleanup($html = null){
+	    $output = preg_replace('/(<[^>]+) style=".*?"/i', '$1', $html);
+	    $output = preg_replace('/cellspacing=".*?"/i', ' cellspacing="1"', $output);
+	    $output = preg_replace('/cellpadding=".*?"/i', ' cellpadding="3"', $output);
+	    $output = preg_replace('/border=".*?"/i', ' border="1"', $output);
+	    $output = str_replace('<span>', '', $output);
+	    $output = str_replace('</span>', '', $output);
+	    $output = str_replace('<td width="', '<td alt="', $output);
+	    $style = '<style>table{width:100%;}</style>';
+	    $output = str_replace('</head>',$style.'</head>',$output);
+	    $output = str_replace('&quot;','"',$output);
+	    return $output;
 	}
 }
