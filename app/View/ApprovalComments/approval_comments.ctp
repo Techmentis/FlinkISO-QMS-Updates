@@ -298,6 +298,7 @@
 												},
 												success: function(data, result) {
 													$("#<?php echo $approval['Approval']['id']?>_td_to_update").html(data);
+													$("input[type=submit]").show();
 												},						        
 											});	
 										})

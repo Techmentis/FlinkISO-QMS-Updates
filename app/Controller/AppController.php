@@ -4275,7 +4275,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				}
 				// try and get values from model
 			}
-			if($field_details['type'] == 'integer' && ($field_details['length'] == null || $field_details['length'] == 1)){
+			if($field_details['type'] == 'integer' && ($field_details['length'] == null || $field_details['length'] == 1 || $field_details['length'] == 11)){
 				//check in $customArray in Model
 				$fieldDetails['length'] = 1;
 				$customArray = $this->$newModel->customArray;
@@ -4716,6 +4716,13 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			case 7: // comments
 					$text['label'] = base64_decode($field['field_label']);
 					$text['value'] = $record[$model][$field['field_name']];
+					$text['name'] = $field['field_name'];
+			break;
+
+			case 9: // belongs2
+					$csvoptions = explode(',',$field['csvoptions']);
+					$text['label'] = base64_decode($field['field_label']);
+					$text['value'] = $csvoptions[$record[$model][$field['field_name']]];
 					$text['name'] = $field['field_name'];
 			break;
 		}

@@ -243,14 +243,15 @@ $str .= 'timestamp:'.date('ymdhis');
     <?php } ?>
     
     $().ready(function(){
-
-        $(document).on('keypress', function(e) {
-            if (e.which === 13 && $("#quick_src_button").val() != '') {
-                event.preventDefault();
-                $("#indexsort").submit();                
-            }
-        });
-
+        <?php if($this->action == 'index' || $this->action == 'quick_search' || $this->action == 'advance_search'  ){ ?>
+            $(document).on('keypress', function(e) {
+                if (e.which === 13 && $("#quick_src_button").val() != '') {
+                    event.preventDefault();
+                    $("#indexsort").submit();                
+                }
+            });
+        <?php } ?>
+        
         $("#quick_src_button").on('focus',function(){
             $("#srcdivhideshow").removeClass('hidden', 200, null, function() {});
         });

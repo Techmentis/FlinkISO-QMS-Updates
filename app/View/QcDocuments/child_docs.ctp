@@ -22,7 +22,9 @@ if($qcDocuments){
 					<i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i>
 				<?php }?>
 
-				<strong><?php echo $this->Html->link($childDoc['Standard']['name'], array('controller' => 'standards', 'action' => 'view', $childDoc['Standard']['id'])); ?></strong>: <strong><?php echo $this->Html->link($childDoc['QcDocument']['name'],array('action'=>'view',$childDoc['QcDocument']['id'])); ?>&nbsp; </strong> - <small><?php echo h($childDoc['QcDocument']['document_number']); ?>&nbsp;-Rev.No.<?php echo h($childDoc['QcDocument']['revision_number']); ?></small></td>
+				<strong><?php echo $this->Html->link($childDoc['QcDocument']['name'],array('action'=>'view',$childDoc['QcDocument']['id'])); ?>&nbsp; </strong></td>
+				<td><?php echo h($childDoc['QcDocument']['document_number']); ?>&nbsp;</td>
+				<td><?php echo h($childDoc['QcDocument']['revision_number']); ?></td>
 				<td><?php echo h($childDoc['PreparedBy']['name']); ?>&nbsp;</td>
 				<td><?php echo h($childDoc['ApprovedBy']['name']); ?>&nbsp;</td>
 				<td><?php echo h($childDoc['IssuedBy']['name']); ?>&nbsp;</td>
@@ -39,9 +41,9 @@ if($qcDocuments){
 						<span class="btn btn-sm fa fa-check"></span>
 					<?php } else { ?>
 						<span class="btn btn-sm fa fa-close"></span>
-						<?php } ?>&nbsp;</td>
+				<?php } ?>&nbsp;</td>
 
-						<td class="" width="110">	
+						<td class="" width="120">	
 							<div class="btn-group btn-no-border">
 								<?php echo $this->Html->link('<i class="fa fa-television"></i>',array('controller'=>'qc_documents','action'=>'view',$childDoc['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View'));?>
 

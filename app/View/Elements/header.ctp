@@ -50,6 +50,19 @@
             <li class="dropdown" id="mm">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i  id="mega-menu" class="fa fa-database"></i></a>
               <ul class="dropdown-menu mega-menu get-size">
+                <li class="sub-li"><div class="header-li">Masters</div>
+                  <ul class="">
+                    <li class="" ><a href="#" class="header-li-sub"><span></span></a>
+                      <ul class="no-margin no-padding">
+                        <li><?php echo $this->Html->link('Branches',array('controller'=>'branches','action'=>'index'))?></li>
+                        <li><?php echo $this->Html->link('Departments',array('controller'=>'departments','action'=>'index'))?></li>
+                        <li><?php echo $this->Html->link('Designations',array('controller'=>'designations','action'=>'index'))?></li>
+                        <li><?php echo $this->Html->link('Employees',array('controller'=>'employees','action'=>'index'))?></li>
+                        <li><?php echo $this->Html->link('Users',array('controller'=>'users','action'=>'index'))?></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
                 <?php foreach($menus as $standard => $types){  ?>     
                   <li class="sub-li"><div class="header-li"><?php echo $standard;?></div>
                     <ul class="">

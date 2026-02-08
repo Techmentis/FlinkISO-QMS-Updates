@@ -121,6 +121,12 @@ public $belongsTo = array(
 		'conditions' => '',
 		'fields' => array('id', 'name'),
 		'order' => ''
+	),'User' => array(
+		'className' => 'User',
+		'foreignKey' => 'user_id',
+		'conditions' => '',
+		'fields' => array('id', 'name'),
+		'order' => ''
 	),
 	'From' => array(
 		'className' => 'User',

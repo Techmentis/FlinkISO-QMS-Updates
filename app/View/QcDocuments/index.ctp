@@ -36,7 +36,9 @@ $pptarray = array('ppt','pptx');
 			<?php echo $this->Form->create(array('class'=>'no-padding no-margin no-background'));?>				
 			<table cellpadding="0" cellspacing="0" class="table table-responsive table-hover index">
 				<tr>
-					<th><?php echo $this->Paginator->sort('standard_id'); ?> : <?php echo $this->Paginator->sort('title'); ?> - <?php echo $this->Paginator->sort('intdocunumber','Document Number'); ?> - Rev.No.</th>
+					<th><?php echo $this->Paginator->sort('title'); ?></th>
+					<th><?php echo $this->Paginator->sort('intdocunumber','Document Number'); ?></th>
+					<th>Rev.No.</th>
 					<th><?php echo $this->Paginator->sort('prepared_by'); ?></th>
 					<th><?php echo $this->Paginator->sort('approved_by'); ?></th>		
 					<th><?php echo $this->Paginator->sort('issued_by'); ?></th>
@@ -69,25 +71,27 @@ $pptarray = array('ppt','pptx');
 									<i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i>
 								<?php }?>
 								&nbsp;
-								<strong><?php echo $this->Html->link($qcDocument['Standard']['name'], array('controller' => 'standards', 'action' => 'view', $qcDocument['Standard']['id']),array('class'=>$revisionClasss)); ?></strong>: 
-								<strong><?php echo $this->Html->link($qcDocument['QcDocument']['name'],array('action'=>'view',$qcDocument['QcDocument']['id']),array('class'=>$revisionClasss)); ?>&nbsp; </strong> - <small><?php echo h($qcDocument['QcDocument']['document_number']); ?>&nbsp;-Rev.No.<?php echo $qcDocument['QcDocument']['revision_number']; ?></small></td>								
-									<td><?php echo h($qcDocument['PreparedBy']['name']); ?>&nbsp;</td>
-									<td><?php echo h($qcDocument['ApprovedBy']['name']); ?>&nbsp;</td>
-									<td><?php echo h($qcDocument['IssuedBy']['name']); ?>&nbsp;</td>
-									<td><?php echo h($customArray['documentStatuses'][$qcDocument['QcDocument']['document_status']]); ?>&nbsp;</td>
-									<td>
-										<div class="btn-group">
-											<div class="btn btn-xs btn-default"><?php echo h($qcDocument['QcDocument']['tables']); ?></div>
-											<div class="btn btn-xs btn-success"><?php echo h($qcDocument['QcDocument']['active_tables']); ?></div>
-										</div>
-									&nbsp;</td>
+								<strong><?php echo $this->Html->link($qcDocument['QcDocument']['name'],array('action'=>'view',$qcDocument['QcDocument']['id']),array('class'=>$revisionClasss)); ?>&nbsp; </strong>
+								</td>
+								<td><?php echo h($qcDocument['QcDocument']['document_number']); ?></td>
+								<td><?php echo $qcDocument['QcDocument']['revision_number']; ?></td>								
+								<td><?php echo h($qcDocument['PreparedBy']['name']); ?>&nbsp;</td>
+								<td><?php echo h($qcDocument['ApprovedBy']['name']); ?>&nbsp;</td>
+								<td><?php echo h($qcDocument['IssuedBy']['name']); ?>&nbsp;</td>
+								<td><?php echo h($customArray['documentStatuses'][$qcDocument['QcDocument']['document_status']]); ?>&nbsp;</td>
+								<td>
+									<div class="btn-group">
+										<div class="btn btn-xs btn-default"><?php echo h($qcDocument['QcDocument']['tables']); ?></div>
+										<div class="btn btn-xs btn-success"><?php echo h($qcDocument['QcDocument']['active_tables']); ?></div>
+									</div>
+								&nbsp;</td>
 
 									<td width="60">
 										<?php if($qcDocument['QcDocument']['publish'] == 1) { ?>
 											<span class="btn btn-sm fa fa-check"></span>
 										<?php } else { ?>
-											<span class="btn btn-sm fa fa-cross"></span>
-											<?php } ?>&nbsp;</td>
+											<span class="btn btn-sm fa fa-close"></span>
+									<?php } ?>&nbsp;</td>
 
 											<td class="" width="120">	
 												<div class="btn-group btn-no-border">

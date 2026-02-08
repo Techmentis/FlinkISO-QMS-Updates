@@ -17,7 +17,7 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 						if(isset($customTable) && $customTable['CustomTable']['name'])$approvalPanelTitle = $customTable['CustomTable']['name'];
 						else $approvalPanelTitle = Inflector::humanize($this->request->controller);
 					?>
-					<h3 class="box-title">Approval History for <?php echo $approvalPanelTitle;?>
+					<h3 class="box-title">Approval History for <span class="text-black"> <?php echo $approvalPanelTitle;?></span>
 					<?php if($this->action == 'edit'){ ?><small>Prepared By : <?php echo $this->request->data['PreparedBy']['name'];?></small><?php } ?></h3>
 					<i class="fa  fa-clock-o pull-right"></i>
 				</div>
@@ -64,20 +64,20 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 							<tr class="<?php echo $class;?> <?php echo $appClass;?>" onclick="showcomments('<?php echo $approval['Approval']['id']?>','<?php echo $approval['Approval']['id']?>_i');" style="cursor: pointer;">
 								<td><?php echo h($approval['Approval']['created']); ?>&nbsp;</td>
 								<td><?php echo h($approval['From']['name']); ?>&nbsp;</td>
-								<td><?php echo h($approval['Employee']['name']); ?></td>
+								<td><?php echo h($approval['Employee']['name']); ?><?php echo h($approval['User']['name']); ?></td>
 								<td>
 									<?php if($approval['Approval']['user_id'] == $this->Session->read('User.id') && $approval['Approval']['status'] != 1){ ?>
 										<div class="btn-group pull-right">
 											<?php if(count($approval['ApprovalComment']) == 0)$cnt = 1;
 											else $cnt = count($approval['ApprovalComment']);
 											?>									
-											<span class="badge <?php echo $badgeClass;?>"><?php echo $cnt;?></span>					                
+											<span class="alert <?php echo $badgeClass;?>"><?php echo $cnt;?></span>					                
 										</div>
 									<?php } else { ?>
 										<div class="btn-group pull-right">
 											<?php if(count($approval['ApprovalComment']) == 0)$cnt = 1;
 											else $cnt = count($approval['ApprovalComment']);?>
-											<span class="badge <?php echo $badgeClass;?>"><?php echo $cnt;?></span>					                
+											<span class="alert <?php echo $badgeClass;?>"><?php echo $cnt;?></span>					                
 										</div>
 									<?php } ?>
 								</td>
