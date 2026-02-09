@@ -59,7 +59,17 @@
 					<?php } ?>					
 					<?php if($qcDocument['QcDocument']['childDoc'] > 0){;?><li ><a href="#childdocument" data-toggle="tab">Child Documents <span class="badge"><?php echo count($childDocs)?></span></a></li><?php } ?>
 					<li><a href="#tab_3" onclick="loadchangehistory()" data-toggle="tab">Change Requests <span class="badge"><?php echo $crs?></span></a></li>
-					<li><a href="#tab_2" onclick="loadrevisions()" data-toggle="tab">Revisons <span class="badge"><?php echo $qcDocument['QcDocument']['revision_number']?></span></a></li>
+					<?php
+					$revisioncount = 0;
+					if($crs != null){
+						if(is_array($crs)){
+							$revisioncount = count($crs);
+						}else{
+							$revisioncount = 0;
+						}
+					}
+					?>
+					<li><a href="#tab_2" onclick="loadrevisions()" data-toggle="tab">Revisons <span class="badge"><?php echo $revisioncount?></span></a></li>
 					<li><a href="#tab_4" data-toggle="tab">Upload Additional Docs</a></li>
 					<li><a href="#tab_5" data-toggle="tab">Read Receipts</a></li>
 					<li><a href="#tab_6" data-toggle="tab">Downloads</a></li>

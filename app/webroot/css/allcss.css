@@ -2237,7 +2237,7 @@ h5 {
 }
 
 .timeline>li>.timeline-item {
-    border-radius: 3px;
+    border-radius: 8px;
     margin-top: 0;
     background: #fff;
     color: #444;
@@ -2300,15 +2300,17 @@ h5 {
 }
 
 .timeline-item-green {
-    background-color: #eaf7e5 !important;
-    border: 1px solid #cadec2;
-    border-right: 5px solid #cadec2
+    background-color: #fdfdfd !important;
+    border: 1px solid #eaeaea;
+    border-right: 5px solid #eaeaea;
+    /*margin-left: 80px !important;*/
 }
 
 .timeline-item-yellow {
-    background-color: #fffef2 !important;
-    border: 1px solid #dbd8bf;
-    border-left: 5px solid #dbd8bf
+    background-color: #fdfdfd !important;
+    border: 1px solid #dcdcdc;
+    border-left: 5px solid #dcdcdc;
+    margin-left: 70px !important;
 }
 
 .btn.btn-flat {
@@ -4598,6 +4600,10 @@ strong {
 
 .text-gray {
     color: #d2d6de !important
+}
+
+.text-gray-dark {
+    color: #909090 !important
 }
 
 .text-navy {
@@ -16209,7 +16215,16 @@ svg {
 }
 
 .view-record {
-    padding-top: 20px
+    border: 1px solid #ccc;
+    margin: 20px 0;
+    border-radius: 8px;
+    box-shadow: 0px 0px 6px 1px #fcfcfc;
+    padding: 10px;
+}
+.view-record h2{
+    margin-top: 2px !important; 
+    padding-bottom: 10px !important;
+    border-bottom: 1px dotted #ccc;
 }
 
 .btn-light .fa {

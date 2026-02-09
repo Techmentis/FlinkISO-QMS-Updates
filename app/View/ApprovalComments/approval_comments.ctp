@@ -21,7 +21,7 @@
 								<!-- <h3 class="timeline-header"><?php echo $approvalComment['User']['name'];?>&nbsp;</h3> -->
 								<div class="timeline-body" id="<?php echo $approvalComment['ApprovalComment']['id']?>_td_to_update">
 									<p>
-										<?php echo $approvalComment['ApprovalComment']['comments'] ?>
+										<?php echo $approvalComment['ApprovalComment']['comments'] ?><br />
 										<br />-<?php echo $approvalComment['From']['name'];?>&nbsp;
 									</p>
 									<hr />
@@ -58,7 +58,7 @@
 								<div class="timeline-body" id="<?php echo $approvalComment['ApprovalComment']['id']?>_td_to_update">
 									<div class="row">
 										<div class="col-md-12">
-											<?php echo h($approvalComment['ApprovalComment']['comments']); ?>&nbsp;
+											<?php echo h($approvalComment['ApprovalComment']['comments']); ?>&nbsp;<br /><br />
 											<?php 
 											if($approvalComment['Approval']['status'] != 1 && $approvalComment['ApprovalComment']['response_status'] == 0  && ($approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.id') || $approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.employee_id'))){
 													echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.response',array(
@@ -131,7 +131,7 @@
 
 												if($approvalComment['ApprovalComment']['response']){
 													echo '- <strong>'.$approvalComment['User']['name'].'</strong>';
-													echo ' | <small><i class="fa fa-clock-o"></i> <span class="time">'.$approvalComment['ApprovalComment']['modified'].'</span></small>';	
+													// echo '<br /><small><span class="time">'.$approvalComment['ApprovalComment']['modified'].'</span></small>';	
 												}else{
 													// echo "<span class='text-danger'>Response pending...</span>";
 												}																	

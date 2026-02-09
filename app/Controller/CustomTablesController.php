@@ -791,13 +791,13 @@ class CustomTablesController extends AppController {
             }
         }
         if ($this->request->params['named']['qc_document_id'] || $this->request->params['named']['process_id']) {
-            
             // generate table name
             // for documets
             if(isset($this->request->params['named']['qc_document_id'])){
                 $qcDocument = $this->CustomTable->QcDocument->find('first', array('recursive' => 0, 'conditions' => array('QcDocument.id' => $this->request->params['named']['qc_document_id']),));
                 $table_name_version = $this->_make_table_name($this->request->params['named']['qc_document_id'],'qc_documents');
                 $this->set('qcDocument', $qcDocument);
+                $this->set('name', $qcDocument['QcDocument']['name']);
                 $this->set('table_name', $table_name_version[0]);
                 $this->set('table_version', $table_name_version[1]);
                 $this->_set_file($this->request->params['named']['qc_document_id'],'qc_documents');

@@ -716,9 +716,20 @@ public function get_approvals() {
 		$model = $this->modelClass;
 		$record = $this->request->params['pass'][0];
 		$this->loadModel('Approval');
+		$adminCon = array();
+		if($this->Session->read('User.is_mr') == false){
+			$adminCon = array(
+				'OR'=>array(
+					'Approval.user_id'=>array($this->Session->read('User.id'),$this->Session->read('User.employee_id'))
+				)
+				);
+		}else{
+			$adminCon = array();			
+		}
+		
 		$approvals = $this->Approval->find('all', array(
 			'order'=>array('Approval.modified'=>'DESC', 'Approval.status'=>'DESC','Approval.approval_step'=>'ASC'), 
-			'conditions' => array('Approval.model_name' => $model, 'Approval.record' => $record)));
+			'conditions' => array($adminCon, 'Approval.model_name' => $model, 'Approval.record' => $record)));
 		return $approvals;
 	}
 }
@@ -782,6 +793,9 @@ public function _save_approvals($record_id = null) {
 	
 	if ($this->request->data['Approval'][$model]['user_id']) {
 		$approvalusers = $this->request->data['Approval'][$model]['user_id'];
+	}
+	if ($this->request->data['Approval'][$model]['user_id']) {
+		$approvalusers = $this->request->data['Approval'][$model]['user_id'];
 		foreach ($approvalusers as $approvaluser) {
 			if ($approvaluser != - 1) {
 				$approvaldata['Approval']['title'] = $title;
@@ -796,11 +810,11 @@ public function _save_approvals($record_id = null) {
 				$approvaldata['Approval']['comments'] = $this->request->data['Approval'][$model]['comments'];
 				$approvaldata['Approval']['approval_mode'] = $this->request->data['Approval'][$model]['approval_mode'];
 				$approvaldata['Approval']['approval_cycle'] = $cycle_count;
-				$this->Approval->create();
+				$this->Approval->create($approvaldata);
 				if($this->Approval->save($approvaldata,false)){
-					
+					$this->Session->setFlash(__('Approval created.'));
 				}else{
-					$this->Session->setFlash(__('Approval sent.'));
+					$this->Session->setFlash(__('Approval could not be sent.'));
 				}
 				$this->_sent_approval_email(
 					$approvaldata['Approval']['user_id'],
@@ -3332,7 +3346,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				}
 			}
 			
-			if ($this->_show_approvals()) $this->_save_approvals($this->$modelName->id);			
+			if ($this->_show_approvals()) $this->_save_approvals($this->$modelName->id);
 			$this->Session->setFlash(__('Record has been saved'));
 			try{
 				// trigger email here

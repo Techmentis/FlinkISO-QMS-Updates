@@ -152,7 +152,7 @@
 				echo "</div><div class='row'>";
 				
 				echo "<div class='col-md-4'>".$this->Form->input('prepared_by',array('class'=>'form-control',)) . '</div>'; 
-				echo "<div class='col-md-4'>".$this->Form->input('issued_by',array('class'=>'form-control',)) . '</div>'; 
+				echo "<div class='col-md-4'>".$this->Form->input('issued_by',array('class'=>'form-control','onchange'=>'addsignature(this.value,this.id)')) . '</div>'; 
 				echo "<div class='col-md-4'>".$this->Form->input('issuing_authority_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 		
 				
 				

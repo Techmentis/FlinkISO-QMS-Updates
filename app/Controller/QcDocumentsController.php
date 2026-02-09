@@ -481,7 +481,7 @@ class QcDocumentsController extends AppController {
                         }
                     }
                 }
-
+                if ($this->_show_approvals()) $this->_save_approvals($this->QcDocument->id);
                 if($this->request->data['QcDocument']['document_type'] == 2)$this->_add_process($this->request->data,$this->QcDocument->id);
                 $this->Session->setFlash(__('The document has been saved'));
                 $this->redirect(array('action' => 'index'));

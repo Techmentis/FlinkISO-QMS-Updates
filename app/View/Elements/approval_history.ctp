@@ -17,7 +17,7 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 						if(isset($customTable) && $customTable['CustomTable']['name'])$approvalPanelTitle = $customTable['CustomTable']['name'];
 						else $approvalPanelTitle = Inflector::humanize($this->request->controller);
 					?>
-					<h3 class="box-title">Approval History for <span class="text-black"> <?php echo $approvalPanelTitle;?></span>
+					<h3 class="box-title"><span class="text-black"> <?php echo $approvalPanelTitle;?></span><span class="text-gray-dark"> Approval History</span>
 					<?php if($this->action == 'edit'){ ?><small>Prepared By : <?php echo $this->request->data['PreparedBy']['name'];?></small><?php } ?></h3>
 					<i class="fa  fa-clock-o pull-right"></i>
 				</div>
@@ -27,6 +27,7 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 							<th>Date/time</th>
 							<th>From</th>
 							<th>To</th>
+							<th>Comment</th>
 							<th class="text-right">Approve / Reject</th>
 						</tr>
 						
@@ -36,8 +37,7 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 								?>
 								<script type="text/javascript">
 									$().ready(function(){
-										$(".approval_checkbox_div").html('<div class="text-danger">You can not Publish this record unless everyone approves it as Approval Type is ALL.<br /></div>');
-										console.log("<?php echo Inflector::Classify($this->viewVars['customTable']['CustomTable']['table_name']);?>Publish");	
+										$(".approval_checkbox_div").html('<div class="text-danger">You can not Publish this record unless everyone approves it as Approval Type is ALL.<br /></div>');										
 									})
 									
 								</script>
@@ -50,8 +50,8 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 							if($approval['Approval']['status'] == 1)$appClass = ' text-success';
 							elseif($approval['Approval']['status'] == 2)$appClass = ' text-danger';
 
-							if($approval['Approval']['status'] == 1)$badgeClass = ' bg-green';
-							elseif($approval['Approval']['status'] == 2)$badgeClass = ' bg-red';
+							if($approval['Approval']['status'] == 1)$badgeClass = ' btn-success';
+							elseif($approval['Approval']['status'] == 2)$badgeClass = ' btn-danger';
 							else $badgeClass = ' bg-red';
 							?>
 							<?php if($class == ' font-weight-bold'){ ?>					
@@ -65,19 +65,20 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 								<td><?php echo h($approval['Approval']['created']); ?>&nbsp;</td>
 								<td><?php echo h($approval['From']['name']); ?>&nbsp;</td>
 								<td><?php echo h($approval['Employee']['name']); ?><?php echo h($approval['User']['name']); ?></td>
+								<td><?php echo h($approval['Approval']['comments']);?></td>
 								<td>
 									<?php if($approval['Approval']['user_id'] == $this->Session->read('User.id') && $approval['Approval']['status'] != 1){ ?>
 										<div class="btn-group pull-right">
 											<?php if(count($approval['ApprovalComment']) == 0)$cnt = 1;
 											else $cnt = count($approval['ApprovalComment']);
 											?>									
-											<span class="alert <?php echo $badgeClass;?>"><?php echo $cnt;?></span>					                
+											<span class="btn btn-sm <?php echo $badgeClass;?>"><?php echo $cnt;?></span>					                
 										</div>
 									<?php } else { ?>
 										<div class="btn-group pull-right">
 											<?php if(count($approval['ApprovalComment']) == 0)$cnt = 1;
 											else $cnt = count($approval['ApprovalComment']);?>
-											<span class="alert <?php echo $badgeClass;?>"><?php echo $cnt;?></span>					                
+											<span class="btn btn-sm <?php echo $badgeClass;?>"><?php echo $cnt;?></span>					                
 										</div>
 									<?php } ?>
 								</td>

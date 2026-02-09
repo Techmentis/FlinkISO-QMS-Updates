@@ -442,4 +442,17 @@ class EmployeesController extends AppController {
             return false;
         }
     }
+
+    public function deletesignature(){
+        $sign = WWW_ROOT . 'img' . DS . $this->Session->read('User.company_id') . DS . 'signature' . DS . $this->Session->read('User.employee_id') . DS . 'sign.png';
+
+        if(file_exists($sign)){
+            unlink($sign);
+            $this->Session->setFlash(__('Signature deleted.'));
+            $this->redirect(array('action' => 'view',$this->Session->read('User.employee_id')));
+        }else{
+            $this->Session->setFlash(__('Unable to find Signature.'));
+            $this->redirect(array('action' => 'view',$this->Session->read('User.employee_id')));
+        }
+    }
 }

@@ -44,12 +44,12 @@ if($approval){ ?>
 			if(isset($customTable))$approvalPanelTitle = $customTable['CustomTable']['name'];
 			else $approvalPanelTitle = Inflector::humanize($this->request->controller);
 			?>
-			<div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title">Approvals/ Sharing/ Collaboration for <span class="text-black"><?php echo $approvalPanelTitle;?></span></h3>
+			<div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title"><span class="text-black"><?php echo $approvalPanelTitle;?></span><span class="text-gray-dark"> Approvals/ Sharing/ Collaboration</h3>
 				<div class="box-tools pull-right"><button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button></div>
 			</div>
 			<div class="box-body">
 				<div class="row">
-					<div class="col-md-12">
+					<div class="col-md-10">
 						<?php 
 						echo $this->Form->input('Approval.'.$approvalModel.'.'.$approvalModel.'.user_id', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'UserId', 'label'=>'Select user you want to send this record for approval',
 							'name'=>'data[Approval]['.$approvalModel.'][user_id][]', 'options' => $approversList,'multiple'));
@@ -60,6 +60,8 @@ if($approval){ ?>
 
 						?>
 					</div>
+					<div class="col-md-2"><?php echo $this->Html->link('Load All Users','javascript:void(0);',array(
+					'onClick'=>'loadallusers("Approval'.Inflector::Classify($this->request->controller).'UserId_remove")', 'class'=>'btn btn-sm btn-info','style'=>'margin-top:28px'));?> </div>
 					<div class="col-md-12"><?php echo $this->Form->input('Approval.'.$approvalModel.'.comments',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Comments','type'=>'textarea', 'rows'=>2, 'class'=>'form-control'));?></div>
 					<div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_mode',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalMode','type'=>'radio','class'=>'','options'=>array(0=>'View Only',1=>'Edit'),'default'=>1));?></div>
 					<div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_type',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalType','type'=>'radio','class'=>'','options'=>array(0=>'All',1=>'Any'),'default'=>0));?></div>			
@@ -67,7 +69,10 @@ if($approval){ ?>
 					if($approval['Approval']['user_id'] == $this->Session->read('User.id'))	echo $this->Form->input('ApprovalComment.stauts',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Stauts','type'=>'radio','class'=>'','options'=>array(0=>'Pending',1=>'Approved',2=>'Not Approved'),'default'=>0));
 				?></div>
 			</div>
-		</div>	 
+		</div>
+		<div class="box-footer">
+			<p>Note: If you are sending this record to a non-admin user, make sure that user has proper permission to access this table. Non-admin users must have access to "View records added by other users" plus the branch from which this record is added.</p>
+		</div>
 	</div>
 <?php } ?>
 <?php
@@ -106,7 +111,7 @@ if($this->Session->read('User.is_publisher') == 0){
 			<?php }else{ ?>
 				
 			<?php } ?>
-			<!-- this form loads on add page -->		
+			<!-- this form loads on add page -->
 			<div class="row">
 				<div class="col-md-10">
 					<?php 
@@ -187,6 +192,9 @@ if($this->Session->read('User.is_publisher') == 0){
 			
 			echo "</div>";
 		}?>
+			<br /><hr />
+			<p>Note: If you are sending this record to a non-admin user, make sure that user has proper permission to access this table. Non-admin users must have access to "View records added by other users" plus the branch from which this record is added.</p>
+		
 	</div>
 </div>	
 <?php if($preparer && ($preparer == $this->Session->read('User.id') || $preparer == $this->Session->read('User.employee_id'))){ ?>

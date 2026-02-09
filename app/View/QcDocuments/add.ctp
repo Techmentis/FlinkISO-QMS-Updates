@@ -233,10 +233,8 @@
 							echo "</div><div class='row'>";
 							
 							echo "<div class='col-md-4'>".$this->Form->input('prepared_by',array('default'=>$this->Session->read('User.employee_id'), 'class'=>'form-control',)) . '</div>'; 
-							echo "<div class='col-md-4'>".$this->Form->input('issued_by',array('class'=>'form-control',)) . '</div>'; 
+							echo "<div class='col-md-4'>".$this->Form->input('issued_by',array('class'=>'form-control','onchange'=>'addsignature(this.value,this.id)')) . '</div>'; 
 							echo "<div class='col-md-4'>".$this->Form->input('issuing_authority_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 		
-				// echo "<div class='col-md-4'>".$this->Form->input('archived',array('type'=>'checkbox', 'class'=>'',)) . '</div>'; 
-							
 							echo "</div><div class='row'>";
 
 							echo "<div class='col-md-12'>".$this->Form->input('change_history',array('class'=>'form-control',)) . '</div>';
@@ -430,25 +428,17 @@
 					$.ajax({
 						url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/check_duplicates/field:"+field+"/value:"+$("#"+id).val(),
 						success: function(data, result) {
-							// if(data == 2){
-							// 	$("#duplicate_errors").html("Document Number should not be more that 7 characters long");
-							// 	$("#QcDocumentDocumentNumber").val('');
-							// 	return false;
-							// }
-							
 							if(data == 1){
 								if(field == "t"){
 									name = "Title";
 								}else if(field == "n"){
-									name = "Document Number";
-									// clean_document_number(value);
+									name = "Document Number";									
 								}
 
 								$("#"+id).val('');
 								$("#duplicate_errors").html(name + " already exists");
 							}else{
-								$("#duplicate_errors").html("");
-								// clean_document_number(value);
+								$("#duplicate_errors").html("");								
 							}
 						},
 					});	

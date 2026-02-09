@@ -963,9 +963,10 @@ class UsersController extends AppController {
         $approvalComments = $this->ApprovalComment->find('all', array('conditions' => array(
             'ApprovalComment.response'=>NULL,
             'OR'=>array('ApprovalComment.response_status'=>array(NULL,0)),
-            'OR'=>array('ApprovalComment.user_id'=>array($this->Session->read('User.id'),$this->Session->read('User.employee_id')))
+            'OR'=>array(
+                'ApprovalComment.user_id'=>array($this->Session->read('User.id'),$this->Session->read('User.employee_id')))
         ), 
-            'group' => array('ApprovalComment.user_id','ApprovalComment.approval_id'), 
+            // 'group' => array('ApprovalComment.user_id','ApprovalComment.approval_id'), 
             'order' => array('ApprovalComment.sr_no' => 'DESC'),
         ));
        
