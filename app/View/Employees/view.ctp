@@ -176,8 +176,9 @@
 								if(file_exists($sign)){
 									echo "<div class='row'>";
 									echo $this->Form->create('Employee',array('action'=>'upload','type'=>'file'),array('class'=>'form-control'));
-									echo "<div class='col-md-12'>". $this->Html->Image($this->Session->read('User.company_id') . DS . 'signature' . DS . $this->Session->read('User.employee_id') . DS . 'sign.png',array('height'=>'60')) . "</div>";
 									
+									echo "<div class='col-md-12'>". $this->Html->Image($this->Session->read('User.company_id') . DS . 'signature' . DS . $this->Session->read('User.employee_id') . DS . 'sign.png',array('height'=>'60')) . "</div>";
+									echo "<div class='col-md-12'>". $this->Html->link('Delete?',array('action'=>'deletesignature'))."</div>";
 									echo "<div class='col-md-8'><span class='control-fileupload'><i class='fa fa-file-o'></i>". $this->Form->input('signature',array('class'=>$block_class ,  'type'=>'file', 'label'=>'Update Your Signature', 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));')) ."</span></div>";
 									echo "<div class='col-md-4'>" . $this->Form->submit('Add',array('class'=>'btn btn-sm btn-success','style'=>'margin-top:15px')) ."</div>";
 									echo $this->Form->end();

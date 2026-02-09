@@ -366,7 +366,7 @@ class AppController extends Controller {
 	}
 	
 	public function _access_redirect($n = null){
-		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check',);
+		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check');
 		if(!in_array($this->action,$ignore)
 			&& $this->request->controller != 'qc_documents' 			
 			&& $this->request->controller != 'custom_tables'
@@ -561,26 +561,51 @@ class AppController extends Controller {
 					'CustomTable.approvers',
 				),
 				'conditions'=>array('CustomTable.id'=>$this->request->params['named']['custom_table_id'])));
-
+			
 			if($customTable){
 				switch ($this->request->action) {
 					case 'add':
-						if(is_array(json_decode($customTable['CustomTable']['creators'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['creators'],true))){
+						if($customTable['CustomTable']['creators']){
+							if(is_array(json_decode($customTable['CustomTable']['creators'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['creators'],true))){
+								$this->_access_redirect(); 
+							}
+						}else{
 							$this->_access_redirect(); 
 						}
 					break;
 					case 'edit':
-						if(is_array(json_decode($customTable['CustomTable']['editors'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['creators'],true))){
+						if($customTable['CustomTable']['editors']){
+							if(is_array(json_decode($customTable['CustomTable']['editors'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['creators'],true))){
+								$this->_access_redirect(); 
+							}
+						}else{
+							$this->_access_redirect(); 
+						}
+					break;
+					case 'index':
+						if($customTable['CustomTable']['viewers']){
+							if(is_array(json_decode($customTable['CustomTable']['viewers'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['creators'],true))){
+								$this->_access_redirect(); 
+							}
+						}else{
 							$this->_access_redirect(); 
 						}
 					break;
 					case 'view':
-						if(is_array(json_decode($customTable['CustomTable']['viewers'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['creators'],true))){
+						if($customTable['CustomTable']['viewers']){
+							if(is_array(json_decode($customTable['CustomTable']['viewers'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['creators'],true))){
+								$this->_access_redirect(); 
+							}
+						}else{
 							$this->_access_redirect(); 
 						}
 					break;
 					case 'reports':
-						if(is_array(json_decode($customTable['CustomTable']['viewers'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['viewers'],true))){
+						if($customTable['CustomTable']['viewers']){
+							if(is_array(json_decode($customTable['CustomTable']['viewers'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['viewers'],true))){
+								$this->_access_redirect(); 
+							}
+						}else{
 							$this->_access_redirect(); 
 						}
 					break;
@@ -792,7 +817,7 @@ public function _save_approvals($record_id = null) {
 	else $cycle_count = 1;
 	
 	if ($this->request->data['Approval'][$model]['user_id']) {
-		$approvalusers = $this->request->data['Approval'][$model]['user_id'];
+		$approvalusers = $this->request->data['Approval'][$model]['user_id'];		
 	}
 	if ($this->request->data['Approval'][$model]['user_id']) {
 		$approvalusers = $this->request->data['Approval'][$model]['user_id'];

@@ -65,7 +65,7 @@
 <div id="loaddoclist"></div>
 <div id="loadtablelist"></div>
 <script>
-    $("#loaddoclist").load("<?php echo Router::url('/', true); ?>qc_documents/document_list");
-    $("#loadtablelist").load("<?php echo Router::url('/', true); ?>custom_tables/custom_table_list");
+    $("#loaddoclist").load("<?php echo Router::url('/', true); ?>qc_documents/document_list/<?php echo $user['User']['id']?>");
+    $("#loadtablelist").load("<?php echo Router::url('/', true); ?>custom_tables/custom_table_list/<?php echo $user['User']['id']?>");
 $.ajaxSetup({beforeSend: function() {$("#busy-indicator").show();}, complete: function() {$("#busy-indicator").hide();}});
 </script>

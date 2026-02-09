@@ -3045,58 +3045,60 @@ class CustomTablesController extends AppController {
                 }else{
                     $action = 'add'.$this->request->data['action'];
                 }
+
                 if($customTable){
                     switch ($action) {
                         case 'addcreate' :
                             $users = json_decode($customTable['CustomTable']['creators'],true);
                             $users[] = $this->request->data['user_id'];
-                            $customTable['CustomTable']['creators'] = json_encode($users);
+                            $customTable['CustomTable']['creators'] = json_encode(array_values($users));
+
                         break;
 
                         case 'removecreate' :
                             $users = json_decode($customTable['CustomTable']['creators'],true);
                             $users = $this->_removefromarray($users,$this->request->data['user_id']);
-                            $customTable['CustomTable']['creators'] = json_encode($users);
+                            $customTable['CustomTable']['creators'] = json_encode(array_values($users);
 
                         break;
 
                         case 'addedit' :
                             $users = json_decode($customTable['CustomTable']['editors'],true);
                             $users[] = $this->request->data['user_id']; 
-                            $customTable['CustomTable']['editors'] = json_encode($users);
+                            $customTable['CustomTable']['editors'] = json_encode(array_values($users));
                         break;
 
                         case 'removeedit' :
                             $users = json_decode($customTable['CustomTable']['editors'],true);
                             $users = $this->_removefromarray($users,$this->request->data['user_id']);
-                            $customTable['CustomTable']['editors'] = json_encode($users);
+                            $customTable['CustomTable']['editors'] = json_encode(array_values($users));
                         break;
 
                         case 'addview' :
                             $users = json_decode($customTable['CustomTable']['viewers'],true);
                             $users[] = $this->request->data['user_id'];  
-                            $customTable['CustomTable']['viewers'] = json_encode($users);
+                            $customTable['CustomTable']['viewers'] = json_encode(array_values($users));
                         break;
 
                         case 'removeview' :
                             $users = json_decode($customTable['CustomTable']['viewers'],true);
                             $users = $this->_removefromarray($users,$this->request->data['user_id']);
-                            $customTable['CustomTable']['viewers'] = json_encode($users);
+                            $customTable['CustomTable']['viewers'] = json_encode(array_values($users));
                         break;
 
                         case 'addapprove' :
                             $users = json_decode($customTable['CustomTable']['approvers'],true);
                             $users[] = $this->request->data['user_id']; 
-                            $customTable['CustomTable']['approvers'] = json_encode($users); 
+                            $customTable['CustomTable']['approvers'] = json_encode(array_values($users)); 
                         break;
 
                         case 'removeapprove' :
                             $users = json_decode($customTable['CustomTable']['approvers'],true);
                             $users = $this->_removefromarray($users,$this->request->data['user_id']);
-                            $customTable['CustomTable']['approvers'] = json_encode($users);
+                            $customTable['CustomTable']['approvers'] = json_encode(array_values($users));
                         break;
                     }
-
+                    
                     $this->CustomTable->create();
                     $this->CustomTable->save($customTable,false);
 
@@ -3256,12 +3258,19 @@ class CustomTablesController extends AppController {
         }
     }
 
-    public function custom_table_list(){
+    public function custom_table_list($user_id = null){
+
+        if($user_id){
+            $this->loadModel('User');
+            $user = $this->User->find('first',array('recursive'=>-1,'conditions'=>array('User.id'=>$user_id)));
+            $this->set('user',$user);
+        }
+
         $this->paginate = array(
             'limit'=>25,
             'recursive'=>-1,
             'fields'=>array('CustomTable.id','CustomTable.name','CustomTable.creators','CustomTable.editors','CustomTable.viewers','CustomTable.approvers'),
-            'conditions'=>array('CustomTable.custom_table_id'=> '')
+            // 'conditions'=>array('CustomTable.custom_table_id'=> '')
         );
         $customTables = $this->paginate();
         $this->set('customTables',$customTables);

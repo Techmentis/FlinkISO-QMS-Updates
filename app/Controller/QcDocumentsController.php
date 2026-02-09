@@ -1700,7 +1700,14 @@ class QcDocumentsController extends AppController {
         }
     }
 
-    public function document_list(){
+    public function document_list($user_id = null){
+
+        if($user_id){
+            $this->loadModel('User');
+            $user = $this->User->find('first',array('recursive'=>-1,'conditions'=>array('User.id'=>$user_id)));
+            $this->set('user',$user);
+        }
+
         $this->paginate = array(
             'recursive'=>-1,
             'limit'=>25,
