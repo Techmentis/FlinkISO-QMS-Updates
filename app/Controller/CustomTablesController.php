@@ -3058,7 +3058,7 @@ class CustomTablesController extends AppController {
                         case 'removecreate' :
                             $users = json_decode($customTable['CustomTable']['creators'],true);
                             $users = $this->_removefromarray($users,$this->request->data['user_id']);
-                            $customTable['CustomTable']['creators'] = json_encode(array_values($users);
+                            $customTable['CustomTable']['creators'] = json_encode(array_values($users));
 
                         break;
 
