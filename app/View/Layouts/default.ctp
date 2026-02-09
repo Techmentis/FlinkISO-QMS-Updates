@@ -26,6 +26,7 @@
 	'plugins/datepicker/bootstrap-datepicker',    
 ));
 
+
   if($this->action == 'index'){
 	echo $this->Html->script(array(
 		'js-xlsx-master/dist/xlsx.core.min', 
@@ -36,10 +37,10 @@
 }
 echo $this->fetch('script');
 ?>
+<style>.chosen-drop{z-index: 999}</style>
 </head>
 <body class="hold-transition skin-blue sidebar-collapse sidebar-mini">
-	<?php if ($this->Session->read('User'))echo $this->Element('control-sidebar'); ?>		
-	<div id="load_ai_container" class="hide"></div>	
+	<?php if ($this->Session->read('User'))echo $this->Element('control-sidebar'); ?>
 	<div class="wrapper">
 	  <?php echo $this->Element('header');?>
 	  <!-- Left side column. contains the logo and sidebar -->
@@ -58,7 +59,7 @@ echo $this->fetch('script');
 				<div class="show_lock_comments"><i class="fa  fa-exclamation-triangle"></i> <?php echo $lock_message;?></div>
 			<?php } ?>
 
-			<?php echo $this->fetch('content');?> 			
+			<?php echo $this->fetch('content');?> 
 			<div class="row"><div class="col-md-12"><div id="load_process"></div> </div></div>
 			<!-- Info boxes -->
 			<!-- /.row -->  
