@@ -745,6 +745,7 @@ public function get_approvals() {
 		if($this->Session->read('User.is_mr') == false){
 			$adminCon = array(
 				'OR'=>array(
+					'Approval.from'=>array($this->Session->read('User.id'),$this->Session->read('User.employee_id')),
 					'Approval.user_id'=>array($this->Session->read('User.id'),$this->Session->read('User.employee_id'))
 				)
 				);
@@ -2448,22 +2449,23 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	            '
 				);
 				$conditions = $this->_check_request();
-		        if($this->Session->read('User.is_mr') == false){
-		            $accessConditions = array(
-		                'QcDocument.archived !='=>1,
-		                'QcDocument.parent_document_id '=>-1,
-		                'OR'=>array(
-		                    'QcDocument.srct >' => 0,
-		                    'QcDocument.prepared_by LIKE '=>"%".$this->Session->read('User.employee_id')."%",
-		                    'QcDocument.approved_by LIKE '=>"%".$this->Session->read('User.employee_id')."%",
-		                )                
-		            );
-		        }else{
-		            $accessConditions = array(
-		                'QcDocument.archived !='=>1,
-		                'QcDocument.parent_document_id '=>-1,              
-		            );
-		        }
+				$accessConditions = array();
+		        // if($this->Session->read('User.is_mr') == false){
+		        //     $accessConditions = array(
+		        //         'QcDocument.archived !='=>1,
+		        //         'QcDocument.parent_document_id '=>-1,
+		        //         'OR'=>array(
+		        //             'QcDocument.srct >' => 0,
+		        //             'QcDocument.prepared_by LIKE '=>"%".$this->Session->read('User.employee_id')."%",
+		        //             'QcDocument.approved_by LIKE '=>"%".$this->Session->read('User.employee_id')."%",
+		        //         )                
+		        //     );
+		        // }else{
+		        //     $accessConditions = array(
+		        //         'QcDocument.archived !='=>1,
+		        //         'QcDocument.parent_document_id '=>-1,              
+		        //     );
+		        // }
 
 				$result = $this->CustomTable->find('all',array(
 					'recursive'=>0,

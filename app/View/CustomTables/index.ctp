@@ -104,6 +104,7 @@ $pptarray = array('ppt','pptx');
 														if($customTable['CustomTable']['table_type'] == 2)echo $customTable['CustomTable']['name']; 
 														else echo $customTable['CustomTable']['name'];
 													?>
+													<?php echo $customTable['CustomTable']['table_version'];?>
 													<div class="pull-right"> <small><?php echo $schedules[$customTable['QcDocument']['schedule_id']];;?></small></div>
 													<?php
 														if($this->request->params['named']['table_type'] != 3){

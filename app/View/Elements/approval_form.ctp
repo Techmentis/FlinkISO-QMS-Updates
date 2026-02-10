@@ -87,7 +87,7 @@ if($this->Session->read('User.is_publisher') == 0){
 	else $approvalPanelTitle = Inflector::humanize($this->request->controller);
 	echo $this->Form->create('Approval',array('role'=>'form','class'=>'form')); ?>
 	<div class="box box-warning">
-		<div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title">Approvals / Sharing / Collaboration for <?php echo $approvalPanelTitle;?></h3>
+		<div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title"><span class="text-black"><?php echo $approvalPanelTitle;?></span><span class="text-gray-dark"> Approvals/ Sharing/ Collaboration</h3>
 			<div class="box-tools pull-right"><button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button></div>
 		</div>
 		<div class="box-body">

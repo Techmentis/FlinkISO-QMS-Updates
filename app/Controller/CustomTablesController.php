@@ -290,7 +290,7 @@ class CustomTablesController extends AppController {
             // check if any other tables is already created.
             $version = $this->CustomTable->find('count', array('conditions' => array('CustomTable.table_name LIKE' => '%' . $tableName . '%')));
             if($version)$version = $version + 1;
-            else $version = 0;
+            else $version = 1;
             $tableName = $qcDocument['QcDocument']['title'] . '_' . $qcDocument['QcDocument']['revision_number'];
             $tableName = ltrim(rtrim($tableName));
             $tableName = 'tbl_'.$this->_clean_table_names($tableName);
@@ -305,7 +305,7 @@ class CustomTablesController extends AppController {
             // check if any other tables is already created.
             $version = $this->CustomTable->find('count', array('conditions' => array('CustomTable.table_name LIKE' => '%' . $tableName . '%')));
             if($version)$version = $version + 1;
-            else $version = 0;
+            else $version = 1;
             $tableName = $tableName = $process['Process']['name'].'_'. $version;
             $tableName = 'tbl_'.$this->_clean_table_names($tableName);
             $tableName = Inflector::pluralize($tableName . '_v' . $version);
@@ -317,7 +317,7 @@ class CustomTablesController extends AppController {
             $tableName = $tableName . '_v';
             // check if any other tables is already created.
             $version = $this->CustomTable->find('count', array('conditions' => array('CustomTable.table_name LIKE' => '%' . $tableName . '%')));
-            $version = 0;
+            $version = 1;
             $tableName = 'tbl_'.$this->_clean_table_names($tableName);
             $tableName = Inflector::pluralize($tableName .$version);
             return array($tableName, $version);

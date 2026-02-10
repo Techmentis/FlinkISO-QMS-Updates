@@ -11,14 +11,14 @@
 				<div class="row">
 					<?php
 					$str =
-					"Short Name, Name
-					M,Manual
-					F,Format
-					P,Procedure
-					.
-					.
-					.
-					";
+"Short Name, Name
+M,Manual
+F,Format
+P,Procedure
+.
+.
+.
+";
 		// echo "<div class='col-md-6'>".$this->Form->input('short_name',array('class'=>'form-control',)) . '</div>'; 
 					echo "<div class='col-md-6'>".$this->Form->input('standard_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
 					echo "<div class='col-md-6'>".$this->Form->input('parent_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 

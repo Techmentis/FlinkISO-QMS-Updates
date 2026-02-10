@@ -197,11 +197,9 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
                 }
                 if($this->request->params['named']['strict'] == null){
                     echo "<div class='col-md-3' >".$this->Form->input('strict',array('class'=>'', 'type'=>'radio', 'value'=>0,'options'=>array(0=>'Yes',1=>'No')))."</div>";    
-                }else{
-                    echo "<div class='col-md-3' ><div class='pull-left'>".$this->Form->input('strict',array('class'=>'', 'type'=>'radio', 'default'=>$this->request->params['named']['strict'],'options'=>array(0=>'Yes',1=>'No'))). "</div><div class='pull-right'><br />". $this->Form->submit('Go',array('class'=>'btn btn-sm btn-info','style'=>'margin-top:8px'))."</div></div>";
                 }
+                    echo "<div class='col-md-3' ><div class='pull-left'>".$this->Form->input('strict',array('class'=>'', 'type'=>'radio', 'default'=>$this->request->params['named']['strict'],'options'=>array(0=>'Yes',1=>'No'))). "</div><div class='pull-right'><br />". $this->Form->submit('Go',array('class'=>'btn btn-sm btn-info','style'=>'margin-top:8px'))."</div></div>";
                 
-                // echo "<div class='col-md-3' ><br />".$this->Form->submit('Go',array('class'=>'btn btn-sm btn-info'))."</div>";
                 echo $this->Form->end();
             }
         }    

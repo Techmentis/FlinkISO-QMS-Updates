@@ -99,8 +99,8 @@ $pptarray = array('ppt','pptx');
                 $customTable['QcDocument']['data_update_type'],
                 $customTable['QcDocument']['schedule_id']
               ));
-              
-              if(!$last_updated){
+                
+              if(!$last_updated || $last_updated['updated_by'] == null){
                 $chk = 0;
                 $label = 'Pending';
                 $class = "label-danger";
@@ -115,6 +115,7 @@ $pptarray = array('ppt','pptx');
                   $class = "label-success";
                 }
               }
+
               ?>
               <tr>
                 <td>
@@ -122,7 +123,7 @@ $pptarray = array('ppt','pptx');
                     <td><?php echo $schedules[$customTable['QcDocument']['schedule_id']];?></td>
                     <!-- <td><small><?php echo $dataUpdateType[$customTable['QcDocument']['data_update_type']];?></small></td> -->
                     <td><?php
-                    if($last_updated){
+                    if($last_updated['created']){
                       echo $this->Time->timeAgoInWords($last_updated['created']);
                     }else{
                       echo "NIL";
