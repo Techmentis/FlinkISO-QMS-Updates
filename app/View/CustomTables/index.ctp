@@ -91,12 +91,10 @@ $pptarray = array('ppt','pptx');
 														<i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i>
 													<?php }?>
 													<?php
-													if($customTable['CustomTable']['publish'] == 1 && $customTable['CustomTable']['table_locked'] == 0){
-															// echo "<span class='text-success'><i class='fa fa-check'></i></span>";
+													if($customTable['CustomTable']['publish'] == 1 && $customTable['CustomTable']['table_locked'] == 0){															
 														$titleClass = $textColor;
 														$btnClass = 'success';	
-													}else{
-															// echo "<span class='text-danger'><i class='fa fa-exclamation-triangle'></i></span>";	
+													}else{														
 														$titleClass = 'text-danger';
 														$btnClass = 'danger';
 													}?>
@@ -133,7 +131,8 @@ $pptarray = array('ppt','pptx');
 													}else{
 														if($customTable['CustomTable']['description'])
 															echo h(substr($customTable['CustomTable']['description'], 0,120)) .' ...&nbsp;';	
-														else {									
+														else {	
+															if($customTable['QcDocument']['data_type'] == 2)$customTable['QcDocument']['data_type'] = 0;
 															echo '<small>'.$customArray['dataTypes'][$customTable['QcDocument']['data_type']].'<br />';
 															echo $customArray['dataUpdateTypes'][$customTable['QcDocument']['data_update_type']].'</small>';		
 														}

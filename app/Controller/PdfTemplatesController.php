@@ -66,7 +66,7 @@ public function add($custom_table_id = null,$qc_document_id = null){
     if ($this->request->is('post')) {
         $path = Configure::read('files') . DS . 'pdf_template' . DS . $this->request['data']['PdfTemplate']['custom_table_id'] ;
         if(file_exists($path . DS . 'template.docx') && $this->request['data']['PdfTemplate']['custom_table_id']){
-            
+
             $pdf_template_folder = new Folder();
             $pdf_template_folder->create($path,0777);
             $url = Router::url('/', true) . 'files/'.$this->Session->read('User.company_id').'/pdf_template/' . $this->request['data']['PdfTemplate']['custom_table_id'] .'/template.docx' ;
@@ -76,7 +76,7 @@ public function add($custom_table_id = null,$qc_document_id = null){
             if($this->request->data['PdfTemplate']['html_cleanup'] == 0){
                 $html = $this->_html_cleanup($html);
             }
-
+            
             $this->request->data['PdfTemplate']['template'] = $html;
             $this->request->data['PdfTemplate']['child_table_fields'] = json_encode($this->request->data['PdfTemplate']['child_table_fields']);
             $this->PdfTemplate->create();

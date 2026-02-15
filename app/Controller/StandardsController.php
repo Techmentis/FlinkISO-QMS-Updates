@@ -44,6 +44,8 @@ class StandardsController extends AppController {
             $final[$clause['Clause']['clause']]['title'] = $clause['Clause']['title'];
             $final[$clause['Clause']['clause']]['id'] = $clause['Clause']['id'];
             $final[$clause['Clause']['clause']]['sub'] = $sub_clause;
+            $final[$clause['Clause']['clause']]['publish'] = $clause['Clause']['publish'];
+            $final[$clause['Clause']['clause']]['soft_delete'] = $clause['Clause']['soft_delete'];
         }
         $this->set('final', $final);
     }

@@ -1651,6 +1651,9 @@ class CustomTablesController extends AppController {
                 }
             }
 
+            $this->request->data['CustomTable']['belongs_to'] = json_encode($belongsTo);
+            $belongsTo = null;
+
             $sqlresult = $this->_add_new_table($table_name,$defaultfield,null,$toDrop);
             
             if(is_array($newFields)){
@@ -1670,7 +1673,6 @@ class CustomTablesController extends AppController {
             
             $hasMany[] = array('table_name' => $this->request->data['CustomTable']['table_name'], 'friendly_name' => $this->request->data['CustomTable']['name'], 'table_version' => $this->request->data['CustomTable']['table_version']);
 
-    
             $this->CustomTable->create();
             if ($this->CustomTable->save($this->request->data)) {
 
@@ -1732,7 +1734,12 @@ class CustomTablesController extends AppController {
                     $modelFolder = new Folder();
                     $modelFolder->create($folder);
 
-                    if($result['index']){                        
+                    if($result['index']){
+                        $file = $folder . DS . 'index.ctp';
+                        $this->_write_to_file($folder,$file,$result['index']);
+                    }
+
+                    if($result['add']){
                         $file = $folder . DS . 'index.ctp';
                         $this->_write_to_file($folder,$file,$result['index']);
                     }
@@ -1796,6 +1803,11 @@ class CustomTablesController extends AppController {
             // $this->redirect(array('controller' => 'qc_documents', 'action' => 'index'));
         }
 
+        $fields = json_decode($customTable['CustomTable']['fields'],true);
+        foreach($fields as $field){
+            $fieldDetails[] = $field;
+        }
+        $this->set('linkedTosWithDisplay',$this->_returnDetaultField($fields));
         $qcDocument = $this->CustomTable->QcDocument->find('first', array('recursive' => 0, 'conditions' => array('QcDocument.id' => $customTable['CustomTable']['qc_document_id']),));
         $this->set('qcDocument', $qcDocument);
         if ($this->_show_approvals()) {
@@ -3256,6 +3268,9 @@ class CustomTablesController extends AppController {
                 $this->recreate_child($customTable['CustomTable']['id'],true,$tocreate);
             }
         }
+
+        $this->Session->setFlash(__('Re-created all the forms.'));
+        $this->redirect(array('action' => 'index'));
     }
 
     public function custom_table_list($user_id = null){

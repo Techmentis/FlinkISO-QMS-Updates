@@ -12,7 +12,6 @@
 			<?php foreach ($final as $clause) { ?>
 				<div class="panel panel-default">          
 					<div class="panel-heading" role="tab" id="heading_<?php echo str_replace('.', '_', $clause['clause']); ?>">
-						
 						<?php echo $this->Html->link($clause['clause'] .'-'. $clause['title'],'#collapse_'.$standard_id.'_'.str_replace('.', '_', $clause['clause']),array('class'=>'fstrong', 'role'=>'button','data-toggle'=>'collapse','data-parent'=>'#accordion_'.$standard_id,'aria-expanded'=>'true', 'aria-controls'=>'collapse_'.$clause['clause'])); ?>
 						
 					</div>

@@ -966,7 +966,7 @@ class UsersController extends AppController {
             'OR'=>array(
                 'ApprovalComment.user_id'=>array($this->Session->read('User.id'),$this->Session->read('User.employee_id')))
         ), 
-            // 'group' => array('ApprovalComment.user_id','ApprovalComment.approval_id'), 
+            'group' => array('ApprovalComment.user_id','ApprovalComment.approval_id'), 
             'order' => array('ApprovalComment.sr_no' => 'DESC'),
         ));
        

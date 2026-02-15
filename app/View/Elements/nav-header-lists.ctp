@@ -48,8 +48,17 @@ unset($postData['options']['publish']);
             'timestamp'=>date('ymdhis')
         ),array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
         'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Add'
-        )); 
-    }    
+        ));         
+    }else{
+        if($this->action == 'recreate_child' && isset($customTable['ParentTable']['id'])){
+            echo $this->Html->link('<i class="fa fa-arrow-up"></i>',array('action'=>'view',
+                $customTable['ParentTable']['id'],                
+                'timestamp'=>date('ymdhis')
+            ),array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
+            'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Add'
+            )); 
+        }
+    }
 
     if($this->request->controller != 'custom_tables' && $this->action == 'index') {
         

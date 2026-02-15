@@ -1748,6 +1748,12 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			}			
 		}
 
+		if($model == 'QcDocument'){
+			$this->QcDocument->virtualFields = array(
+				'childDoc'=>'select count(*) from qc_documents where qc_documents.parent_document_id LIKE QcDocument.id'
+			);		
+		}
+
 		$this->paginate = array('limit'=>25, 'conditions' => $conditions);
 		$this->$model->recursive = 0;
 		$this->set(Inflector::variable(Inflector::tableize($model)), $this->paginate());
@@ -3247,9 +3253,11 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						if($details['foreignKey'] != 'qc_document_id'){
 							$this->loadModel($bModel);
 							$bModelRecord = $this->$bModel->find('first',array('recursive'=>-1,'conditions'=>array($bModel.'.id'=>$fieldFromMainForm)));
-							$dataarray[$bModel] = array_merge($bModelRecord[$bModel],$belongsToData);
-							$this->$bModel->create();
-							$this->$bModel->save($dataarray[$bModel],false);
+							if(is_array($belongsToData) && is_array($bModelRecord[$bModel])){
+								$dataarray[$bModel] = array_merge($bModelRecord[$bModel],$belongsToData);
+								$this->$bModel->create();
+								$this->$bModel->save($dataarray[$bModel],false);
+							}							
 						}
 					}
 				}
@@ -4118,7 +4126,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				}
 			}
 		}
-		return $linkedTosWithDisplay;		
+		return $linkedTosWithDisplay;
 	}
 
 	public function checkunique($value = null,$field_name = null){
@@ -4223,6 +4231,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		exit;
 	}
 	public function fetch_record($model = null, $key = null, $field = null, $order = null, $id = null){
+		
 		$this->autoRender = false;
 		$parent = Inflector::Classify($model);
 		try{
@@ -4243,9 +4252,9 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		exit;
 	}
 
-	public function field_fetch($model = null, $fieldTobeChanged = null){
+	public function field_fetch($model = null, $fieldTobeChanged = null, $label = false){
 		$selectedModelName = $model;
-		$currModel = $this->modelClass;		
+		$currModel = $this->modelClass;
 		try{
 			$rec = $this->$currModel->$selectedModelName->find('first',array(
 				'conditions'=>array($model.'.id'=>$this->request->params['named']['id']),
@@ -4301,7 +4310,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					}
 				}		
 			}			
-		}else{
+		}else{			
 			$field_details = json_decode(base64_decode($this->request->params['named']['field_details']),true);
 			$findModel = base64_decode($field_details['field_label']);
 			$newModel = $this->$thisModel->belongsTo[$findModel]['className'];
@@ -4337,6 +4346,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			}
 		}
 		$this->set('model',$model);
+		$this->set('label',$label);
 		$this->set('fieldTobeChanged',$fieldTobeChanged);
 		$this->set('fieldDetails',$fieldDetails);
 		$this->set('schema',$this->$model->schema());
@@ -4638,7 +4648,30 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 		exit;
 	}
+	public function field_render_json($field = null,$record = null, $model = null, $custom_table_id = null){
+		$this->loadModel('CustomTable');
+		$customTable = $this->CustomTable->find('first',array(
+			'recursive'=>-1,
+			'fields'=>array('CustomTable.id','CustomTable.fields'),
+			'conditions'=>array('CustomTable.id'=>$custom_table_id)
+		));
 
+		if($customTable){
+			$fields = json_decode($customTable['CustomTable']['fields'],true);
+			foreach($fields as $fld){
+				if($fld['linked_to_field_name'] == $field){
+					$this->loadModel($model);
+					$recordresult = $this->$model->find('first',array(
+						'recursive'=>-1,
+						'fields'=>array($model.'.id',$model.'.'.$field),
+						'conditions'=>array($model.'.id'=>$record)
+					));
+					return $this->field_render($fld,$recordresult,$model);
+				}
+			}
+		}
+		
+	}
 	public function field_render($field = null,$record = null, $model = null){
 		$text = array();
 		switch ($field['display_type']) {
@@ -4760,13 +4793,24 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					$text['name'] = $field['field_name'];
 			break;
 
-			case 9: // belongs2
+			case 9: // belongs2				
+				if(isset($field['csvoptions'])){
 					$csvoptions = explode(',',$field['csvoptions']);
 					$text['label'] = base64_decode($field['field_label']);
 					$text['value'] = $csvoptions[$record[$model][$field['field_name']]];
-					$text['name'] = $field['field_name'];
+					$text['name'] = $field['field_name'];	
+				}else{
+					if($this->$model->customArray[Inflector::pluralize(Inflector::variable($field['linked_to_field_name']))]){	
+					 	$text['label'] = base64_decode($field['field_label']);
+						$text['value'] = $this->$model->customArray[Inflector::pluralize(Inflector::variable($field['linked_to_field_name']))][$record[$model][$field['linked_to_field_name']]];
+						$text['name'] = $field['linked_to_field_name'];
+					}else{
+
+					}
+					
 			break;
-		}
+				}
+		}		
 		return $text;
 		exit;
 	}

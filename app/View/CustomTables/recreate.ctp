@@ -200,11 +200,11 @@
 				echo $this->Form->hidden('count',array('default'=>$f));
 				echo $this->Form->hidden('id',array());
 				echo $this->Form->hidden('custom_table_id',array('default'=>$this->request->data['CustomTable']['custom_table_id']));
-	// echo $this->Form->hidden('qc_document_id',array());
+				// echo $this->Form->hidden('qc_document_id',array());
 				echo $this->Form->hidden('process_id',array());
 				echo $this->Form->hidden('table_type',array());
 				echo $this->Form->hidden('pre_fields',array('default'=>$this->request->data['CustomTable']['fields']));
-	// echo $this->Form->hidden('table_name',array('default'=>$tableName));
+				// echo $this->Form->hidden('table_name',array('default'=>$tableName));
 				echo $this->Form->hidden('has_many',array('default'=>$this->request->params['named']['has_many']));
 				echo $this->Form->hidden('History.pre_post_values', array('value'=>json_encode($this->data)));
 				echo $this->Form->input('branchid', array('type' => 'hidden', 'value' => $this->Session->read('User.branch_id')));

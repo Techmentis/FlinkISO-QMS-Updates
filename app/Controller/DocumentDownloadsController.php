@@ -332,10 +332,12 @@ public function download(){
 				if($record){
 					$customTable = $this->$model->CustomTable->find('first',array('conditions'=>array('CustomTable.id'=>$record[$model]['custom_table_id'])));				
 					//check if file is available for this record
+					
 					$this->loadModel('DownloadFile');
 					$file = $this->DownloadFile->find('first',array('conditions'=>array('DownloadFile.model'=>$model,'DownloadFile.record_id'=>$record[$model]['id'])));	
 					$qcDocument = $this->$model->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$record[$model]['qc_document_id'])));
 					$this->set('qcDocument',$qcDocument);
+
 					if($record){
 						$this->set('record',$record);
 						$this->set('fields',json_decode($customTable['CustomTable']['fields'],true));
@@ -343,37 +345,43 @@ public function download(){
 						$fontface = $this->request->data['DocumentDownload']['font_face'];
 						if(!$fontsize)$fontsize = '12';
 						if(!$fontface)$fontface = 'arial';
-
 						if($this->request->data['DocumentDownload']['pdf_header_id'] != -1){
-							$header_file = $this->_generate_template_header($qcDocument,$fontsize,$fontface,$record,$this->request->data['DocumentDownload']['pdf_header_id'],$model);	
+							$header_file = $this->_generate_template_header($qcDocument,$fontsize,$fontface,$record,$this->request->data['DocumentDownload']['pdf_header_id'],$model);
 							$this->set('header_file',$header_file);
 						}else{
 							if($this->request->data['DocumentDownload']['add_header']){
-								$this->_generate_header($qcDocument,$fontsize,$fontface,$record[$model]['id']);	
+								$header_file = $this->_generate_header($qcDocument,$fontsize,$fontface,$record[$model]['id']);	
 							}
 							
-						}
+						}	
+
 						
 						$this->loadModel('PdfTemplate');
 						if($this->request->data['DocumentDownload']['pdf_template_id'] != -1){
 							$pdfTemplate = $this->PdfTemplate->find('first',array('conditions'=>array('PdfTemplate.id'=>$this->request->data['DocumentDownload']['pdf_template_id']),'recursive'=>-1));	
 							$this->set('pdfTemplate',$pdfTemplate);
-							// open template
 							$templateFile = Configure::read('files') . DS . 'pdf_template' . DS . $pdfTemplate['PdfTemplate']['id'] . DS . 'template.html';
-							if($templateFile){
 							
+							if($templateFile){
 								$filetoread = fopen($templateFile, "r") or die("Unable to open file!");
 								$contents = fread($filetoread,filesize($templateFile));
-								fclose($filetoread);
-							
-								$content = $this->_generate_template_content($customTable['CustomTable']['fields'],$record,$model,$fontsize,$fontface,$contents,$pdfTemplate['PdfTemplate']['child_table_fields']);							
+								fclose($filetoread);							
+								$content = $this->_generate_template_content(
+									$customTable['CustomTable']['fields'],
+									$record,
+									$model,
+									$fontsize,
+									$fontface,
+									$contents,
+									$pdfTemplate['PdfTemplate']['child_table_fields'],
+									$header_file
+								);
 							}						
 						}else{
 							$content = $this->_generate_content($customTable['CustomTable']['fields'],$record,$model,$fontsize,$fontface);
 						}					
 					}	
 				}			
-				
 				$additionalFiles = json_decode($record[$model]['additional_files']);
 				if($additionalFiles && is_array($additionalFiles)){
 					foreach($additionalFiles as $additionalFile){
@@ -422,7 +430,6 @@ public function download(){
 			$file = $file_name . '.' . $file_type;
 
 			$url = Router::url('/', true) .'/files/'.$this->Session->read('User.company_id') .'/qc_documents/'.$qcDocument['QcDocument']['id'] .'/'. $file; 
-			
 			$this->_generate_onlyoffice_pdf($url,$qcDocument['QcDocument']['file_type'], 'pdf' ,null, $file_name ,$qcDocument['QcDocument']['id'],false);	
 
 			$pdfs = array();
@@ -439,6 +446,7 @@ public function download(){
 
 
  public function _generate_template_header($qcDocument = null,$fontsize = null,$fontface = null,$record = null,$template_id = null, $model = null){
+
  	$this->loadModel('PdfTemplate');
  	$header = $this->PdfTemplate->find('first',array('recursive'=>-1, 'conditions'=>array('PdfTemplate.id'=>$template_id)));
  	$header_html =  str_replace('&quot;','"',$header['PdfTemplate']['template']);
@@ -446,7 +454,7 @@ public function download(){
 	$this->set('pdfHeader',$header);
 	
 	$belongsTo = $this->$model->belongsTo;
- 	$fields = $this->viewVars['fields'];
+	$fields = $this->viewVars['fields'];
 	foreach($fields as $field){		
 		if($field['linked_to'] != -1){
 			foreach($belongsTo as $modelname => $fieldDetails){
@@ -465,6 +473,7 @@ public function download(){
 		}
 
 	}
+
 
 	$fields = array(
 		'$qcDocument["QcDocument"]["name"]'=>$qcDocument["QcDocument"]["name"],
@@ -489,13 +498,12 @@ public function download(){
     foreach($fields as $field => $value){       
         $header_html = str_replace($field,$value, $header_html);
     }      
-	
-	$this->_write_html_file($qcDocument['QcDocument']['id'], '<!DOCTYPE html>'.$header_html,$record[$model]['id']);
+	$file = $this->_write_html_file($qcDocument['QcDocument']['id'], '<!DOCTYPE html>'.$header_html,$record[$model]['id']);
+	return $file;
 
  }
 
 public function _generate_header($qcDocument = null, $fontsize = null,$fontface = null,$record_id = null){	
-
 	$headerFile = Configure::read('files') . DS . 'pdf_template' . DS . 'header/template.html';
 	if(file_exists($headerFile)){
 		$filetoread = fopen($headerFile, "r") or die("Unable to open file!");
@@ -574,10 +582,11 @@ public function _write_html_file($filename = null, $content = null, $record_id =
 	$file = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id'). DS . $record_id . DS . $filename .".html" ;
 	$myfile = fopen($file, "w") or die("Unable to open file - 1");
 	fwrite($myfile, $content);
-	fclose($myfile);	
+	fclose($myfile);
+	return $file; 	
 }
 
-public function _generate_template_content($fields = null, $record = null, $model = null,$fontsize = null,$fontface = null, $contents = null,$childTableFields = null){	
+public function _generate_template_content($fields = null, $record = null, $model = null,$fontsize = null,$fontface = null, $contents = null,$childTableFields = null, $header_file = null){	
 	$this->set('fontsize',$fontsize);
 	$this->set('fontface',$fontface);
 	$path = WWW_ROOT .'files'. DS . 'pdf' . DS .$this->Session->read('User.id') . DS . $record[$model]['id'] ;
@@ -593,7 +602,7 @@ public function _generate_template_content($fields = null, $record = null, $mode
 </style>";
 
 	foreach($fields as $field){		
-		$fieldResult = $this->field_render($field,$record,$model);		
+		$fieldResult = $this->field_render($field,$record,$model);
 		if($fieldResult){
 			$f = '$record["'.$model.'"]["'.$fieldResult['name'].'"]';
 			$contents = str_replace($f, $fieldResult['value'], $contents);			
@@ -703,8 +712,10 @@ public function _generate_template_content($fields = null, $record = null, $mode
     foreach($fields as $field => $value){       
         $contents = str_replace($field,$value, $contents);
     }  
+	if(!$header_file){
+		$header_file = Router::url('/', true) . 'files/pdf/' .$this->Session->read('User.id') . '/' . $record[$model]['id']. '/' . $record[$model]['qc_document_id']. '.html';	
+	}
 	
-	$header_file = Router::url('/', true) . 'files/pdf/' .$this->Session->read('User.id') . '/' . $record[$model]['id']. '/' . $record[$model]['qc_document_id']. '.html';
 	$filenamae = $model."-".$record[$model][$this->$model->displayField];
 
 	if($record[$model]['file_id']){
@@ -713,7 +724,7 @@ public function _generate_template_content($fields = null, $record = null, $mode
 		if($file)$this->onlyoffice_pdf($file);
 	}
 	
-	$contents .= $this->_get_approvals($model, $record[$model]['id']);	
+	$contents .= $this->_get_approvals($model, $record[$model]['id']);		
 	$this->_generate_pdf_file($header_file,$contents,$filenamae,$record[$model]['id']);
 }
 
@@ -831,7 +842,6 @@ public function _get_approvals($model = null,$id = null){
 		
 		$approvalComments = $this->Approval->ApprovalComment->find('all',array(
 			'conditions'=>array('ApprovalComment.approval_id'=>$approval['Approval']['id'])));
-		debug($approvalComments);
 		foreach($approvalComments as $approvalComment){
 			$appStr .= "<tr><td>".date(Configure::read('dateTimeFormat'),strtotime($approvalComment['ApprovalComment']['created']))."</td><td>".$approvalComment['From']['name']."</td><td>".$approvalComment['User']['name']."</td><td>".$approvalComment['ApprovalComment']['comments']."</td><td>".$approvalComment['ApprovalComment']['response']."</td><td>".$approvalStatuses[$approvalComment['ApprovalComment']['response_status']]."</td></tr>";
 		}
@@ -957,11 +967,6 @@ public function _generate_pdf_file($header_file = null,$content = null,$fileName
 	if(!$margin_right)$margin_right = 10;
 	if(!$margin_top)$margin_top = 30;
 	
-	if($this->request->data['DocumentDownload']['add_header'] == 0){
-		$header_file = false;
-		$header_spacing = 0;
-	}
-
 	if($outline == true){
 		$CakePdf = new CakePdf(array(				
 			'options' => array(	

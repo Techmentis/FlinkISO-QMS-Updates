@@ -12,6 +12,7 @@ $field_details = json_decode(base64_decode($this->request->params['named']['fiel
 		}
 		
 	}
+	if(!$label == false)$label = Inflector::Humanize($fieldTobeChanged);
 
 	if($type == 'checkbox'){
 		echo '<label>'.Inflector::humanize(Inflector::underscore($selectedModelName)).'</label>';
@@ -25,15 +26,17 @@ $field_details = json_decode(base64_decode($this->request->params['named']['fiel
 			)
 		);		
 	}else{
-
 		// render text fields
 		if(($fieldDetails['type'] == 'string' || $fieldDetails['type'] == 'integer') && ($fieldDetails['length'] != 36 && $fieldDetails['length'] != 1)){	
-			echo '<label>'.Inflector::humanize(Inflector::underscore($selectedModelName)).'</label>';	
+			// echo '<label>'.Inflector::humanize(Inflector::underscore($selectedModelName)).'</label>';	
 			echo $this->Form->input('belongsTos.'.$model.'.'.$fieldTobeChanged,array(
 			'default'=>$record_value,
 			'disabled'=>$disabled, 
 			'required'=>$required, 
-			'class'=>'form-control','label'=> Inflector::Humanize($fieldTobeChanged)));
+			'class'=>'form-control',
+			'label'=> $label
+		));
+			return;
 		}
 
 		if($fieldDetails['type'] == 'boolean'){
@@ -43,8 +46,10 @@ $field_details = json_decode(base64_decode($this->request->params['named']['fiel
 				'default'=>$record_value,
 				'disabled'=>$disabled, 
 				'required'=>$required, 
-				'type'=>'radio','class'=>'','legend'=> Inflector::Humanize($fieldTobeChanged),'options'=>$values));
-
+				'type'=>'radio','class'=>'',
+				'legend'=> $label,
+				'options'=>$values));
+			return;
 		}
 
 		if($fieldDetails['type'] == 'integer' && ($fieldDetails['length'] == null  || $fieldDetails['length'] == 1 )){
@@ -54,8 +59,10 @@ $field_details = json_decode(base64_decode($this->request->params['named']['fiel
 				'default'=>$record_value,
 				'disabled'=>$disabled, 
 				'required'=>$required, 
-				'type'=>'radio','class'=>'','legend'=>Inflector::Humanize($fieldTobeChanged),'options'=>$values));
-
+				'type'=>'radio','class'=>'',
+				'legend'=>$label,
+				'options'=>$values));
+			return;
 		}	
 
 		if($fieldDetails['type'] == 'date'){
@@ -64,7 +71,10 @@ $field_details = json_decode(base64_decode($this->request->params['named']['fiel
 				'default'=>$record_value,
 				'disabled'=>$disabled, 
 				'required'=>$required, 
-				'class'=>'form-control','label'=>Inflector::Humanize($fieldTobeChanged)));
+				'class'=>'form-control',
+				'label'=>$label
+			));
+			return;
 		}
 
 		if($fieldDetails['type'] == 'datetime'){
@@ -74,7 +84,10 @@ $field_details = json_decode(base64_decode($this->request->params['named']['fiel
 				'default'=>$record_value,
 				'disabled'=>$disabled, 
 				'required'=>$required, 
-				'class'=>'form-control','label'=> Inflector::Humanize($fieldTobeChanged)));
+				'class'=>'form-control',
+				'label'=> $label
+			));
+			return;
 		}
 
 		if($fieldDetails['type'] == 'string' && $fieldDetails['length'] == 36){
@@ -84,7 +97,10 @@ $field_details = json_decode(base64_decode($this->request->params['named']['fiel
 				'default'=>$record_value,
 				'disabled'=>$disabled, 
 				'required'=>$required, 
-				'class'=>'form-control','label'=> Inflector::Humanize($fieldTobeChanged),'options'=>$values));		
+				'class'=>'form-control',
+				'label'=> $label,
+				'options'=>$values));		
+			return;
 		}
 	}
 

@@ -7,7 +7,8 @@ $pptarray = array('ppt','pptx');
 <style type="text/css">
 	.childdoc, .childdoc a{color: #5c5c5c;}
 </style>
-<?php echo $this->element('checkbox-script'); ?><div  id="main">
+<?php echo $this->element('checkbox-script'); ?>
+<div  id="main">
 	<?php echo $this->Session->flash();?>	
 	<div class="qcDocuments ">
 		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Master List Of Documents','modelClass'=>'QcDocument','options'=>array("sr_no"=>"Sr No","document_number"=>"Document Number","reference_number"=>"Reference Number","issue_number"=>"Issue Number","date_of_next_issue"=>"Date Of Next Issue","date_of_issue"=>"Date Of Issue","effective_from_date"=>"Effective From Date","revision_number"=>"Revision Number","date_of_review"=>"Date Of Review","revision_date"=>"Revision Date","document_type"=>"Document Type","it_categories"=>"It Categories","document_status"=>"Document Status","issued_by"=>"Issued By","archived"=>"Archived","change_history"=>"Change History","cr_status"=>"Cr Status","mark_for_cr_update"=>"Mark For Cr Update","temp_date_of_issue"=>"Temp Date Of Issue","temp_effective_from_date"=>"Temp Effective From Date","linked_formats"=>"Linked Formats","cover_page"=>"Cover Page","page_orientation"=>"Page Orientation"),'pluralVar'=>'qcDocuments'))); ?>
@@ -150,7 +151,7 @@ $pptarray = array('ppt','pptx');
 					</div>
 				</div>
 			</div>
-		</div>
+		
 		<script>
 			function changedocumentnumber(id,value){
 				$.ajax({
@@ -188,3 +189,4 @@ $pptarray = array('ppt','pptx');
 		</script>
 		<script>$.ajaxSetup({beforeSend:function(){$("#busy-indicator").show();},complete:function(){$("#busy-indicator").hide();}});</script>
 		<script type="text/javascript">	$().ready(function(){$(".tooltip1").tooltip();});</script>
+</div>

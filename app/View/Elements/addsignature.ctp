@@ -1,5 +1,4 @@
 <?php echo $this->Session->flash();?>
-<?php echo $this->Html->script(array('jquery.validate.min', 'jquery-form.min', 'sign')); ?>
 <style type="text/css">
 	.wrapper1,.wrapper2 {border-radius: 4px; border: 2px dashed #ccc;position: relative;width: 250px;height: 152px;-moz-user-select: none;-webkit-user-select: none;-ms-user-select: none;user-select: none;margin: auto; }.signature-pad {position: absolute;left: 0;top: 0;width:250px;height:250px;}
 	#signatureModal, .modal-dialog{width: 250px;height: 200px}#clear{width: 250px;border-radius: 0 0 4px 4px;}#fsubmit{margin-bottom: 20px !important}
