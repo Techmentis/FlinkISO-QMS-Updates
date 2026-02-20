@@ -586,7 +586,7 @@ public function _write_html_file($filename = null, $content = null, $record_id =
 	return $file; 	
 }
 
-public function _generate_template_content($fields = null, $record = null, $model = null,$fontsize = null,$fontface = null, $contents = null,$childTableFields = null, $header_file = null){	
+public function _generate_template_content($fields = null, $record = null, $model = null,$fontsize = null,$fontface = null, $contents = null,$childTableFields = null, $header_file = null){
 	$this->set('fontsize',$fontsize);
 	$this->set('fontface',$fontface);
 	$path = WWW_ROOT .'files'. DS . 'pdf' . DS .$this->Session->read('User.id') . DS . $record[$model]['id'] ;
@@ -661,24 +661,24 @@ public function _generate_template_content($fields = null, $record = null, $mode
 			$chld .= '<tr>';
 			foreach($rearrangeCtabls[$childTable['CustomTable']['table_name']] as $cField){
 				foreach(json_decode($childTable['CustomTable']['fields'],true) as $field){
-					if($cField == $field['field_name']){
+					if($cField == $field['field_name'] || $cField == $field['linked_to_field_name']){
 						$chld .= '<th>' . base64_decode($field['field_label']). '</th>';
 					}					
 				}
 			}		
 			$chld .= '</tr>';			
-			
+		
 			$childRecords = $this->$childTableModel->find('all',array('conditions'=>array($childTableModel.'.parent_id'=>$record[$model]['id'])));
 			foreach($childRecords as $childRecord){
 				$chld .= '<tr>';
 				foreach($rearrangeCtabls[$childTable['CustomTable']['table_name']] as $cField){
 					foreach(json_decode($childTable['CustomTable']['fields'],true) as $field){
-						if($cField == $field['field_name']){
+						if($cField == $field['field_name'] || $cField == $field['linked_to_field_name']){
 
 							$fieldResult = $this->field_render($field,$childRecord,$childTableModel);
 							if($fieldResult){
-								$chld .= "<td>".$fieldResult['value']."</td>";
-							}							
+								$chld .= "<td>".$fieldResult['value']."&nbsp;</td>";
+							}
 						}
 					}
 				}
@@ -689,7 +689,7 @@ public function _generate_template_content($fields = null, $record = null, $mode
 			$t++;
 		}		
 	}	
-
+	
 	$fields = array(
         '$qcDocument["QcDocument"]["title"]'=>$this->viewVars['qcDocument']["QcDocument"]["title"],
         '$qcDocument["QcDocument"]["document_number"]'=>$this->viewVars['qcDocument']["QcDocument"]["document_number"],

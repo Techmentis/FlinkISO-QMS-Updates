@@ -4220,7 +4220,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			if(empty($field))$field = $this->$model->displayField;
 
 			$rec = $this->$model->find('first',array('conditions'=>array($model.'.'.$key => $id),'recursive'=>-1));			
-			if($rec){
+			if($rec){				
 				return $rec[$model][$field];
 			}else{
 				return false;
@@ -4265,6 +4265,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			}
 		}catch(Exception $e){
 		}
+		
 		$this->set('selectedModelName',$selectedModelName);
 		$thisModel = $this->modelClass;
 		$selectedModel = $this->$thisModel->belongsTo[$model];
@@ -4793,7 +4794,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					$text['name'] = $field['field_name'];
 			break;
 
-			case 9: // belongs2				
+			case 9: // belongs2		
 				if(isset($field['csvoptions'])){
 					$csvoptions = explode(',',$field['csvoptions']);
 					$text['label'] = base64_decode($field['field_label']);
@@ -4805,10 +4806,13 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						$text['value'] = $this->$model->customArray[Inflector::pluralize(Inflector::variable($field['linked_to_field_name']))][$record[$model][$field['linked_to_field_name']]];
 						$text['name'] = $field['linked_to_field_name'];
 					}else{
-
+						$text['label'] = base64_decode($field['field_label']);
+						$text['name'] = $field['linked_to_field_name'];
+						// $belongsTo = $this->$model->belongsTo;
+						$text['value'] = $record[$field['linked_model']][$field['linked_to_field_name']];						
 					}
 					
-			break;
+					break;
 				}
 		}		
 		return $text;

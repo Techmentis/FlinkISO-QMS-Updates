@@ -65,7 +65,7 @@
 							<div class="col-md-6">
 								<div class="row">
 									<div class="col-md-12"><?php
-										if(isset($qcDocument) && $qcDocument['QcDocument']['it_categories'] == 1){
+										if(isset($qcDocument) && $qcDocument['QcDocument']['it_categories'] == 3){
 											echo $this->Form->input('password',array('class'=>'form-control'));		
 										}else{
 											echo $this->Form->input('password',array('class'=>'form-control','required'=>'required'));							
@@ -73,7 +73,7 @@
 									</div>
 									<div class="col-md-12">
 										<?php
-										if(isset($qcDocument) && $qcDocument['QcDocument']['it_categories'] == 1){
+										if(isset($qcDocument) && $qcDocument['QcDocument']['it_categories'] == 3){
 											echo "Add password to protect your PDF file. Leave blank if you do not wish to. This password will not be stored.";
 										}else{
 											echo "This is a confidential document. Password is mandatorey. This password will not be stored.";

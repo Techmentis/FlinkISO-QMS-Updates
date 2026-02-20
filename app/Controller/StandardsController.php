@@ -37,9 +37,20 @@ class StandardsController extends AppController {
             'Clause.publish' => array(0,1), 
             'Clause.soft_delete' => 0), 
         'order' => array('Clause.intclause' => 'ASC'), 
-        'recursive' => - 1));
+        'recursive' => - 1));        
         foreach ($clauses as $clause) {
-            $sub_clause = $this->Standard->Clause->find('all', array('recursive' => - 1, 'order' => array('Clause.sub-clause' => 'asc'), 'conditions' => array('Clause.publish' => 1, 'Clause.soft_delete' => 0, 'Clause.standard_id' => $this->request->params['pass'][0], 'Clause.clause' => $clause['Clause']['clause'], 'Clause.sub-clause !=' => '')));
+            $sub_clause = $this->Standard->Clause->find('all', 
+                array('recursive' => - 1, 
+                    'order' => array('Clause.sub-clause' => 'asc'), 
+                    'conditions' => array(
+                        'Clause.publish' => 1, 
+                        'Clause.soft_delete' => 0, 
+                        'Clause.standard_id' => $this->request->params['pass'][0], 
+                        'Clause.clause' => $clause['Clause']['clause'], 
+                        'Clause.sub-clause !=' => ''
+                    )
+                )
+            );            
             $final[$clause['Clause']['clause']]['clause'] = $clause['Clause']['clause'];
             $final[$clause['Clause']['clause']]['title'] = $clause['Clause']['title'];
             $final[$clause['Clause']['clause']]['id'] = $clause['Clause']['id'];
