@@ -362,7 +362,7 @@ class UsersController extends AppController {
                 $user = $this->User->find('first',array('recursive'=>-1,'conditions'=>array(
                     'User.username'=>$this->request->data['User']['username'],
                     'User.password_token'=>$this->request->data['User']['otp'],
-                    'UNIX_TIMESTAMP(User.email_token_expires) >'=> strtotime(date('Y-m-d H:i:s')),
+                    'User.email_token_expires >'=> strtotime(date('Y-m-d H:i:s')),
                 )));
 
                 if($user){
@@ -720,6 +720,25 @@ class UsersController extends AppController {
         $opt_code = $companies['Company']['two_way_authentication'];
         $this->set('password_setting', $password_setting['PasswordSetting']);
         $this->set('opt_code', $opt_code);
+    }
+
+    function two_way_authentication(){
+        $this->loadModel('Company');  
+        $company = $this->Company->find('first',array('fields'=>array('Company.id','Company.two_way_authentication','Company.activate_password_setting')));
+        if ($this->request->is('post') || $this->request->is('put')) {
+            if($this->Session->read('User.is_mr') == true){
+                $company['Company']['two_way_authentication'] = $this->request->data['User']['two_way_authentication'];
+                $this->Company->create();
+                $this->Company->save($company,false); 
+                if($this->request->data['User']['two_way_authentication'] == 1){
+                    $this->Session->setFlash(__('Two way authentication Enabled', true), 'default', array('class' => 'alert-success'));    
+                }else{
+                    $this->Session->setFlash(__('Two way authentication Disabled', true), 'default', array('class' => 'alert-danger'));    
+                }
+                
+            }
+        }
+        $this->set('company',$company);
     }
 
     function opt_check()

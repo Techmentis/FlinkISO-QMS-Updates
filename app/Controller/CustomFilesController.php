@@ -17,40 +17,29 @@ class CustomFilesController extends AppController {
     public function download_file() {
         if ($this->request->is('post')) {
             $this->loadModel('User');
-            $user = $this->User->find('first', array('conditions' => array('User.status' => 1, 'User.soft_delete' => 0, 'User.publish' => 1, 'User.username' => $this->Session->read('User.username'))));
+            $user = $this->User->find('first', array(
+                'recursive'=>-1,
+                'fields'=>array('User.id','User.username','User.status','User.soft_delete','User.publish','User.password'),
+                'conditions' => array('User.status' => 1, 'User.soft_delete' => 0, 'User.publish' => 1, 'User.username' => $this->Session->read('User.username'))));
             if ($user) {
                 if (trim($user['User']['password']) != trim(Security::hash($this->request->data['CustomFile']['password'], 'md5', true))) {
                     $this->Session->setFlash(__('Incorrect password', true), 'default', array('class' => 'alert-danger'));
                     // $this->redirect(array('controller' => 'CustomFile', 'action' => 'download_file','file'=>$this->request->data['CustomFile']['file']));
-                    $this->redirect($this->request->data['CustomFile']['ref']);
+                    $this->redirect($this->request->data['CustomFile']['ref']);            
                 } else {
+                    $this->autoRender = false;
                     $file_path = base64_decode($this->request->data['CustomFile']['file']);
-                    // $file_data = $this->FileUpload->find('first',array('conditions'=>array('FileUpload.id' =>$file_path)));
-                    // //check for permissions
-                    // $permissions = $this->FileUpload->FileShare->find('first',array(
-                    // 'fields'=>array('FileShare.id','FileShare.users','FileShare.everyone','FileShare.file_upload_id'),
-                    // 'recursive'=>-1,
-                    // 'conditions'=>
-                    // array('FileShare.file_upload_id' => $file_path,
-                    //         'FileShare.branch_id' => $this->Session->read('User.branch_id')
-                    //         )));
-                    // if($permissions['FileShare']['everyone'] != 1 ){
-                    //     if(in_array($this->Session->read('User.id'), json_decode($permissions['FileShare']['users'])) == false)
-                    //     $this->redirect(array('controller'=>'file_uploads', 'action'=>'request_access',$file_path));
-                    // }
-                    // $full_path = Configure::read('MediaPath').'CustomFile'. DS . $this->Session->read('User.company_id'). DS .  $file_data['FileUpload']['file_dir'];
-                    
                     $file = base64_decode($this->request->data['CustomFile']['file'], true);
                     $file = explode(DS, $file);
-                    $file_name = $file[count($file) - 1];
-                    
+                    $file_name = $file[count($file) - 1];                    
                     $this->_update_view($this->request->data['CustomFile']['id'], $file_name, 1, 0);
                     $this->autoRender = false;
                     $this->response->file($file_path, array('download' => true, 'name' => $file_name));
-                    $this->response->send();                    
+                    $this->response->send();
+                    exit;
                 }
             }
-        } else {            
+        } else {
             $this->set('ref', $this->referer());
         }
     }

@@ -15,7 +15,7 @@
             <h3>FlinkISO : Two Way Authetication</h3><br />
             <p>Dear User,</p>            
             <p>
-                Below id your OPT Code
+                Below is your OPT Code
                 <br /><br />
                 <strong><?php echo $otp_code ;?></strong>
             </p>

@@ -1386,7 +1386,12 @@ class CustomTablesController extends AppController {
             }
             
             $this->request->data['CustomTable']['system_table_id'] = $this->_get_system_table_id();
-            $this->request->data['CustomTable']['password'] = Security::hash($this->request->data['CustomTable']['password'], 'md5', true);
+            if($skip == true){
+                
+            }else{
+                $this->request->data['CustomTable']['password'] = Security::hash($this->request->data['CustomTable']['password'], 'md5', true);
+            }
+            
             $this->CustomTable->create();
 
             $this->request->data['CustomTable']['belongs_to'] = json_encode($belongsTo);
@@ -1605,10 +1610,14 @@ class CustomTablesController extends AppController {
         return $existingHasManies;
     }
     
-    public function recreate_child($id = null) {
+    public function recreate_child($id = null,$skip = null,$data = null) {
         if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
+        }
+
+        if($skip == true){
+            $this->request->data = $data;
         }
 
         if ($this->request->is('post') || $this->request->is('put')) {
@@ -1662,7 +1671,12 @@ class CustomTablesController extends AppController {
             }           
             
             $this->request->data['CustomTable']['system_table_id'] = $this->_get_system_table_id();
-            $this->request->data['CustomTable']['password'] = Security::hash($this->request->data['CustomTable']['password'], 'md5', true);
+            if($skip == true){
+                $this->request->data = $data;
+            }else{
+                $this->request->data['CustomTable']['password'] = Security::hash($this->request->data['CustomTable']['password'], 'md5', true);    
+            }
+            
             $customTable = $this->CustomTable->find('first', array('recursive'=>-1, 'conditions' => array('CustomTable.id' => $this->request->data['CustomTable']['custom_table_id'])));
             
             $hasMany = json_decode($customTable['CustomTable']['has_many'], true);

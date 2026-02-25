@@ -133,9 +133,10 @@ class ClausesController extends AppController {
             $this->request->data['Clause']['standard'] = $standard['Standard']['name'];
 
             if ($this->Clause->save($this->request->data)) {
-                if ($this->_show_approvals()) $this->_save_approvals();
-                if ($this->_show_evidence() == true) $this->redirect(array('action' => 'view', $id));
-                else $this->redirect(array('controller' => 'clauses', 'action' => 'index'));
+                // if ($this->_show_approvals()) $this->_save_approvals();
+                // if ($this->_show_evidence() == true) $this->redirect(array('action' => 'view', $id));
+                $this->Session->setFlash(__('The clause updated.'));
+                $this->redirect(array('controller' => 'clauses', 'action' => 'edit',$id));
             } else {
                 $this->Session->setFlash(__('The clause could not be saved. Please, try again.'));
             }

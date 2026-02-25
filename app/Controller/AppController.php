@@ -4220,7 +4220,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			if(empty($field))$field = $this->$model->displayField;
 
 			$rec = $this->$model->find('first',array('conditions'=>array($model.'.'.$key => $id),'recursive'=>-1));			
-			if($rec){				
+			if($rec){
 				return $rec[$model][$field];
 			}else{
 				return false;
@@ -4393,7 +4393,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		$response_data = file_get_contents($path, FALSE, $context);
 		$downloadUri = json_decode($response_data,true);
 		$downloadUri = $downloadUri['fileUrl'];
-		
 		if (file_get_contents($downloadUri) === FALSE) {
 			Echo "Error in file conversion";
 			exit;		
@@ -4426,6 +4425,45 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 
 	public function add_password($pdf = null, $password = null, $record_id = null){
+		$allow = '';
+		if($this->request->data){
+			if($this->request->data['DocumentDownload']['printing']){
+				$allow .= 'printing ';
+			}else{
+				$blockprint = 'print=n';
+			}
+
+			if($this->request->data['DocumentDownload']['degraded_printing']){
+				$allow .= 'DegradedPrinting ';
+			}else{
+				
+			}
+
+			if($this->request->data['DocumentDownload']['modify_contents']){
+				$allow .= 'ModifyContents ';
+			}else{
+				
+			}
+
+			if($this->request->data['DocumentDownload']['copy_contents']){
+				$allow .= 'CopyContents ';
+			}else{
+				
+			}
+
+			if($this->request->data['DocumentDownload']['modify_annotations']){
+				$allow .= 'ModifyAnnotations ';
+			}else{
+				
+			}
+		}
+
+		if($allow != ''){
+			$allowcommand = ' allow ' . $allow;
+		}else{
+			$allowcommand = '';
+		}
+
 		$password = $this->request->data['DocumentDownload']['password'];
 		// check if cover pdf exists, if yes, attach it
 		$cover = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id . DS .  'cover-pdf.pdf';
@@ -4439,9 +4477,10 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$output = str_replace($record_id, $this->request->params['named']['id'],$output);
 			$sign = $this->_sign_to_pdf($this->request->data['DocumentDownload']['signature'],$record_id,$this->request->data['DocumentDownload']['font_face'],$this->request->data['DocumentDownload']['font_size']);
 			if($password && $password != ''){
-				$exec = Configure::read('PDFTkPath') . ' ' .$newoutput .' multibackground ' .$sign.  ' output '. $output . ' user_pw '.$password.'';
+				$ownerpass = $password . '-owner';
+				$exec = Configure::read('PDFTkPath') . ' ' .$newoutput .' multistamp ' .$sign.  ' output '. $output . ' user_pw '. $password .' owner_pw '.$ownerpass.' ' . $allowcommand;
 			}else{
-				$exec = Configure::read('PDFTkPath') . ' ' .$newoutput .' multibackground ' .$sign.  ' output '. $output .'';
+				$exec = Configure::read('PDFTkPath') . ' ' .$newoutput .' multistamp ' .$sign.  ' output '. $output .' ' . $allowcommand;
 			}
 			exec($exec);
 			unlink($newoutput);
@@ -4454,9 +4493,10 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$output = str_replace($record_id, $this->request->params['named']['id'],$output);
 			$sign = $this->_sign_to_pdf($this->request->data['DocumentDownload']['signature'],$record_id,$this->request->data['DocumentDownload']['font_face'],$this->request->data['DocumentDownload']['font_size']);			
 			if($password && $password != ''){
-				$exec = Configure::read('PDFTkPath') . ' ' .$input .' multibackground ' .$sign.  ' output '. $output . ' user_pw '.$password.'';
+				$ownerpass = $password . '-owner';
+				$exec = Configure::read('PDFTkPath') . ' ' .$input .' multistamp ' .$sign.  ' output '. $output . ' user_pw '.$password.' owner_pw '.$ownerpass.' ' . $allowcommand;
 			}else{
-				$exec = Configure::read('PDFTkPath') . ' ' .$input .' multibackground ' .$sign.  ' output '. $output .'';
+				$exec = Configure::read('PDFTkPath') . ' ' .$input .' multistamp ' .$sign.  ' output '. $output .' '. $allowcommand;
 			}
 			exec($exec);
 			unlink($input);
@@ -4465,6 +4505,9 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 
 	public function _sign_to_pdf($sign = null,$record_id = null,$font_face = null, $font_size = null){
+		if(!$font_size){
+			$font_size = '6px';
+		}
 		$CakePdf = new CakePdf(array(
 			'options' => array(
 				'print-media-type' => false,
@@ -4472,8 +4515,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				'dpi' => 360,
 				'outline'=>true,
 				'outline-depth'=>2,
-				'enable-local-file-access'=>true,
-				'footer-font-size'     => '6',
+				'enable-local-file-access'=>true,				
 			),
 			'margin' => array(
 				'bottom' => 0,
@@ -4496,7 +4538,6 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$this->set('category',$category);
 			$this->set('status',$status);
 		}
-		
 		$this->set('sign',$sign);
 		$CakePdf->template('sign', 'sign');
 		$CakePdf->viewVars($this->viewVars);		
@@ -4511,7 +4552,9 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			}
 			chmod($dir,0777);
 			chmod($path,0777);
-		}catch(Exception $e){			
+		}catch(Exception $e){
+			echo "Path creation failed";
+			exit;
 		}
 		$pagecontentfilename = 'signpdf';
 		$pdf = $CakePdf->custom_write($path,$path . DS . $pagecontentfilename.'.pdf');
@@ -4519,7 +4562,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		$pagecontentfilename = $path . DS . $pagecontentfilename.'-.pdf';
 		if(!$qcDocument){
 			$qcDocument = $this->viewVars['qcDocument'];
-		}
+		}		
 		if($this->viewVars['addwatermark'] == true){
 			$output = $path . DS . 'signpdf.pdf';
 			$background = WWW_ROOT . 'files' . DS . 'samples' . DS . $qcDocument['QcDocument']['document_status'].'.pdf';
@@ -4528,7 +4571,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			unlink($pagecontentfilename);
 			$this->set('addwatermark',false);
 			return $output;
-		}else{
+		}else{			
 			$output = $path . DS . 'signpdf.pdf';
 			$background = WWW_ROOT . 'files' . DS . 'samples' . DS . $qcDocument['QcDocument']['document_status'].'.pdf';
 			$exec = Configure::read('PDFTkPath') . ' ' .$pagecontentfilename .'  output '. $output .'';

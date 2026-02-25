@@ -21,16 +21,15 @@
     <?php echo $this->Session->flash(); ?>
     <div class="nav panel panel-default">
         <div class="users form col-md-12">
-            <h4><?php //echo __("Add Branch"); ?></h4>
             <?php echo $this->Form->create('User', array('role' => 'form', 'class' => 'form')); ?>
             <div class="row">
-                <div class="col-md-12"><?php   echo $this->Form->input('two_way_authentication', array('type' => 'radio', 'legend' => '<h4>' . __('Two way authentication') . '</h4>', 'options' => array(0 => 'Disable', 1 => 'Enable'), 'default' => $authentication['Company']['two_way_authentication'])); ?>
+                <div class="col-md-12"><?php   echo $this->Form->input('two_way_authentication', array('type' => 'radio', 'legend' => '<h4>' . __('Two way authentication') . '</h4>', 'options' => array(0 => 'Disable', 1 => 'Enable'), 'default' => $company['Company']['two_way_authentication'])); ?>
                 
             </div>
             <div class="col-md-12">
-                <div class="alert alert-danger">
+                <div class="text-danger">
                     <p><strong>Note: </strong>Do not enable Two Way Authentication unless your emails are working. We recomment setting up 
-                        <strong><?php echo $this->Html->link(__('SMTP Details'),array('controller'=>'users','action'=>'smtp_details')); ?></strong>
+                        <strong><?php echo $this->Html->link(__('SMTP Details'),array('controller'=>'settings','action'=>'smtp_details')); ?></strong>
                     first.</p>
                 </div>
             </div>
@@ -39,7 +38,7 @@
             echo $this->Form->input('departmentid', array('type' => 'hidden', 'value' => $this->Session->read('User.department_id')));
             echo $this->Form->input('master_list_of_format_id', array('type' => 'hidden', 'value' => $documentDetails['MasterListOfFormat']['id']));
             ?>
-            <div class="col-md-12" style="padding-left:40px;">
+            <div class="col-md-12">
              
                 <?php echo $this->Form->submit(__('Submit'), array('div' => false, 'class' => 'btn btn-primary btn-success', 'id'=>'submit_id')); ?>
                 <?php echo $this->Html->image('indicator.gif', array('id' => 'submit-indicator')); ?>
