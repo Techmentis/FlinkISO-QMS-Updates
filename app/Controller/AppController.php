@@ -337,7 +337,7 @@ class AppController extends Controller {
 				));
 			}else{
 				$skip = array('approval_comments','approvals','standards','processes');
-				$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check','json','xml','return_user_list');
+				$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check','json','xml','return_user_list','org_chart');
 				if(!in_array($this->action,$ignore)){
 					// $this->Session->setFlash(__('Blocked Action: '. $this->request->action), 'default', array('class' => 'alert alert-danger'));
 					$this->_check_access();
