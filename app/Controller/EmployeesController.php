@@ -264,9 +264,9 @@ class EmployeesController extends AppController {
     public function org_chart($result = array()) {
         $employees = $this->Employee->find('threaded', array('conditions' => array('Employee.publish' => 1), 'fields' => array('Employee.id', 'Employee.name', 'ParentEmployee.id', 'ParentEmployee.name', 'Employee.designation_id', 'Employee.parent_id', 'Designation.id', 'Designation.name'),));
         
-        foreach ($employees as $employee) {
-            if (file_exists(WWW_ROOT . 'img' . DS . $this->Session->read('User.company_id') . DS . 'avatar' . DS . $child_employee['Employee']['id'] . DS . 'avatar.png')) {
-                $imagepath = Router::url('/', true) . "img" . DS . $this->Session->read("User.company_id") . DS . "avatar/". $child_employee['Employee']['id'] ."/avatar.png";
+        foreach ($employees as $employee) {            
+            if (file_exists(WWW_ROOT . 'img' . DS . $this->Session->read('User.company_id') . DS . 'profile' . DS . $employee['Employee']['id'] . DS . 'profile.png')) {
+                $imagepath = Router::url('/', true) . "img" . DS . $this->Session->read("User.company_id") . DS . "profile/". $employee['Employee']['id'] ."/profile.png";
             } else {
                 $imagepath = Router::url('/', true) . "img/img/avatar.png";
             }
@@ -298,8 +298,8 @@ class EmployeesController extends AppController {
             $return = array();
         }
         foreach ($employeesArray as $child_employee) {
-            if (file_exists(WWW_ROOT . 'img' . DS . $this->Session->read('User.company_id') . DS . 'avatar' . DS . $child_employee['Employee']['id'] . DS . 'avatar.png')) {
-                $imagepath = Router::url('/', true) . "img" . DS . $this->Session->read("User.company_id") . DS . "avatar/". $child_employee['Employee']['id'] ."/avatar.png";
+            if (file_exists(WWW_ROOT . 'img' . DS . $this->Session->read('User.company_id') . DS . 'profile' . DS . $child_employee['Employee']['id'] . DS . 'profile.png')) {
+                $imagepath = Router::url('/', true) . "img" . DS . $this->Session->read("User.company_id") . DS . "profile/". $child_employee['Employee']['id'] ."/profile.png";
             } else {
                 $imagepath = Router::url('/', true) . "img/img/avatar.png";              
             }

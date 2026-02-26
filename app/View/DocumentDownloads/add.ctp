@@ -65,7 +65,7 @@
 							<div class="col-md-6">
 								<div class="row">
 									<div class="col-md-12"><?php
-										if(isset($qcDocument) && $qcDocument['QcDocument']['it_categories'] == 1){
+										if(isset($qcDocument) && $qcDocument['QcDocument']['it_categories'] == 3){
 											echo $this->Form->input('password',array('class'=>'form-control'));		
 										}else{
 											echo $this->Form->input('password',array('class'=>'form-control','required'=>'required'));							
@@ -73,13 +73,19 @@
 									</div>
 									<div class="col-md-12">
 										<?php
-										if(isset($qcDocument) && $qcDocument['QcDocument']['it_categories'] == 1){
+										if(isset($qcDocument) && $qcDocument['QcDocument']['it_categories'] == 3){
 											echo "Add password to protect your PDF file. Leave blank if you do not wish to. This password will not be stored.";
 										}else{
-											echo "This is a confidential document. Password is mandatorey. This password will not be stored.";
+											echo "This is a confidential document. Password is mandatory. This password will not be stored.";
 										}
 										?>
-									</div>									
+									</div>
+									<div class="col-md-12"><hr /><label>Advance PDF options</label></div>
+									<div class="col-md-6"><?php echo $this->Form->input('printing',array('class'=>'checkbox', 'type'=>'checkbox', 'multiple'=>'checkbox'));?></div>
+									<div class="col-md-6"><?php echo $this->Form->input('degraded_printing',array('class'=>'checkbox', 'type'=>'checkbox', 'multiple'=>'checkbox'));?></div>
+									<div class="col-md-6"><?php echo $this->Form->input('modify_contents',array('class'=>'checkbox', 'type'=>'checkbox', 'multiple'=>'checkbox'));?></div>
+									<div class="col-md-6"><?php echo $this->Form->input('copy_contents',array('class'=>'checkbox', 'type'=>'checkbox', 'multiple'=>'checkbox'));?></div>
+									<div class="col-md-6"><?php echo $this->Form->input('modify_annotations',array('class'=>'checkbox', 'type'=>'checkbox', 'multiple'=>'checkbox'));?></div>
 								</div>
 								<div class="row">
 									<?php 

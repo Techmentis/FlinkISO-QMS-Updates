@@ -39,8 +39,8 @@
             <li><?php echo $this->Html->link(__('Departments'), array('controller' => 'departments', 'action' => 'index','timestamp'=>date('ymdhis'))); ?></li>
             <li><?php echo $this->Html->link(__('Designations'), array('controller' => 'designations', 'action' => 'index','timestamp'=>date('ymdhis'))); ?></li>            
             <li><?php echo $this->Html->link(__('Employees'), array('controller' => 'employees', 'action' => 'index','timestamp'=>date('ymdhis'))); ?></li>
-            <li><?php echo $this->Html->link(__('Employee Org Chart'), array('controller' => 'employees', 'action' => 'org_chart','timestamp'=>date('ymdhis'))); ?></li>
-            <li><?php echo $this->Html->link(__('Designation Org Chart'), array('controller' => 'designations', 'action' => 'org_chart','timestamp'=>date('ymdhis'))); ?></li>
+            <li><?php echo $this->Html->link(__('Employee Org Chart'), array('controller' => 'employees', 'action' => 'org_chart', 'render'=>'h', 'timestamp'=>date('ymdhis'))); ?></li>
+            <li><?php echo $this->Html->link(__('Designation Org Chart'), array('controller' => 'designations', 'action' => 'org_chart', 'render'=>'h','timestamp'=>date('ymdhis'))); ?></li>
             <li><?php echo $this->Html->link(__('Users'), array('controller' => 'users', 'action' => 'index','timestamp'=>date('ymdhis'))); ?></li>           
           </ul>
         </li>
@@ -96,6 +96,7 @@
           <li><?php echo $this->Html->link(__('Add Logo'), array('controller' => 'settings', 'action' => 'edit', $this->Session->read('User.company_id') , 'timestamp'=>date('ymdhis'))); ?></li>
           <li><?php echo $this->Html->link(__('Add SMTP Email'), array('controller' => 'settings', 'action' => 'smtp_details', $this->Session->read('User.company_id') , 'timestamp'=>date('ymdhis'))); ?></li>
           <li><?php echo $this->Html->link(__('Add Password Policy'), array('controller' => 'settings', 'action' => 'password_setting', $this->Session->read('User.company_id') , 'timestamp'=>date('ymdhis'))); ?></li>
+          <li><?php echo $this->Html->link(__('Two Way Authentication'), array('controller' => 'users', 'action' => 'two_way_authentication', $this->Session->read('User.company_id') , 'timestamp'=>date('ymdhis'))); ?></li>
           <li><?php echo $this->Html->link(__('Define Change History Table'), array('controller' => 'qc_documents', 'action' => 'define_change_history_table', 'timestamp'=>date('ymdhis'))); ?></li>
         </ul>
       </li>

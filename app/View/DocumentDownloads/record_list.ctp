@@ -61,6 +61,13 @@
 	</div>
 <?php } ?>
 <?php echo $this->Form->create('DocumentDownload',array(),array('default'=>false)); ?>
+
+<?php echo $this->Form->hidden('printing',array());?>
+<?php echo $this->Form->hidden('degraded_printing',array());?>
+<?php echo $this->Form->hidden('modify_contents',array());?>
+<?php echo $this->Form->hidden('copy_contents',array());?>
+<?php echo $this->Form->hidden('modify_annotations',array());?>
+
 <?php echo $this->Form->hidden('add_document',array());?>
 <?php echo $this->Form->hidden('add_cover_page',array());?>
 <?php echo $this->Form->hidden('add_parent_records',array());?>
