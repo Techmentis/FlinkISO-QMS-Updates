@@ -117,7 +117,7 @@ public $belongsTo = array(
 		'className' => 'Standard',
 		'foreignKey' => 'standard_id',
 		'conditions' => '',
-		'fields' => array('id', 'name'),
+		'fields' => array('id', 'name','short_name'),
 		'order' => ''
 	),
 	'SystemTable' => array(

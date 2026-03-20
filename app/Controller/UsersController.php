@@ -84,8 +84,8 @@ class UsersController extends AppController {
 
                 $user['User']['employee_id'] = $employee['Employee']['id'];
                 $user['User']['name'] = $employee['Employee']['name'];
-                $user['User']['username'] = $employee['Employee']['office_email'];
-                $user['User']['password'] = Security::hash($employee['Employee']['office_email'], 'md5', true);
+                $user['User']['username'] = $user['User']['email'] = trim($employee['Employee']['office_email']);
+                $user['User']['password'] = Security::hash(trim($employee['Employee']['office_email']), 'md5', true);
                 $user['User']['branch_id'] = $employee['Employee']['branch_id'];
                 $user['User']['department_id'] = $employee['Employee']['department_id'];
                 $user['User']['assigned_branches'] = json_encode(array($employee['Employee']['branch_id']));
@@ -105,7 +105,10 @@ class UsersController extends AppController {
                 $user['User']['limit_login_attempt'] = 1;
                 $user['User']['benchmark'] = 0;
                 $user['User']['agree'] = 0;
-                $user['User']['prepared_by'] = $this->Session->read('User.employee_id');
+                $user['User']['branchid'] = $this->Session->read('User.branch_id');
+                $user['User']['departmentid'] = $this->Session->read('User.branch_id');
+                $user['User']['prepared_by'] = $this->Session->read('User.department_id');
+                $user['User']['created_by'] = $this->Session->read('User.id');
                 $user['User']['system_table_id'] = '5297b2e7-0a9c-46e3-96a6-2d8f0a000005';
 
                 $this->loadModel('User');

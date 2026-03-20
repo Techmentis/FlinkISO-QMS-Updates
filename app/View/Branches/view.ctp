@@ -50,8 +50,8 @@
 						</tr>
 						<tr>
 							<td colspan="2">
-								<?php echo $this->Html->link('Delete This Record?', array('controller' => 'users', 'action' => 'delete', $branch['ModifiedBy']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
-								<?php echo $this->Html->link('Edit This Record?', array('controller' => 'users', 'action' => 'delete', $branch['ModifiedBy']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
+								<?php echo $this->Html->link('Delete This Record?', array('controller' => 'branches', 'action' => 'delete', $branch['Branch']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
+								<?php echo $this->Html->link('Edit This Record?', array('controller' => 'branches', 'action' => 'edit', $branch['Branch']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
 							</td>
 						</tr>
 					</table>

@@ -56,8 +56,8 @@
 &nbsp;</td></tr>
 <tr>
 	<td colspan="2">
-			<?php echo $this->Html->link('Delete This Record?', array('controller' => 'users', 'action' => 'delete', $designation['ModifiedBy']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
-	<?php echo $this->Html->link('Edit This Record?', array('controller' => 'users', 'action' => 'delete', $designation['ModifiedBy']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
+			<?php echo $this->Html->link('Delete This Record?', array('controller' => 'designations', 'action' => 'delete', $designation['Designation']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
+	<?php echo $this->Html->link('Edit This Record?', array('controller' => 'designations', 'action' => 'edit', $designation['Designation']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
 	</td>
 </tr>
 </table>

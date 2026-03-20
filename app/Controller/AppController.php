@@ -2657,7 +2657,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 							$qcdoc['QcDocument']['version'] = $version + 1;
 							$qcdoc['QcDocument']['versions'] = json_encode($versions);
 							$this->QcDocument->create();
-							if($this->QcDocument->save($qcdoc['QcDocument'])){
+							if($this->QcDocument->save($qcdoc['QcDocument'],false)){
 								
 							}else{
 								
@@ -4252,7 +4252,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		exit;
 	}
 
-	public function field_fetch($model = null, $fieldTobeChanged = null, $label = false){
+	public function field_fetch($model = null, $fieldTobeChanged = null, $label = false, $readonly = null){
 		$selectedModelName = $model;
 		$currModel = $this->modelClass;
 		try{
