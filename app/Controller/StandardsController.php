@@ -153,7 +153,7 @@ class StandardsController extends AppController {
         }
         if ($this->request->is('post')) {
             $this->request->data['Standard']['system_table_id'] = $this->_get_system_table_id();
-            $this->request->data[$this->modelClass]['publish'] = $this->request->data['Approval']['Standard']['publish'];
+            $this->request->data[$this->modelClass]['publish'] = 1;
             $this->Standard->create();
             
             if ($this->Standard->save($this->request->data)) {
