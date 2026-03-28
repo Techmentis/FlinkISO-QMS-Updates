@@ -18,3 +18,4 @@ ALTER TABLE custom_triggers ADD notify_departments TINYINT(1) NULL AFTER notify_
 ALTER TABLE users CHANGE password password VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL;
 ALTER TABLE qc_documents ADD and_or_condition TINYINT(1) NULL DEFAULT 0 AFTER designations;
 ALTER TABLE `qc_documents` ADD `data_file_type` INT NULL DEFAULT '0' AFTER `data_type`;
+ALTER TABLE `standards` ADD `short_name` VARCHAR(10) NULL AFTER `name`;
