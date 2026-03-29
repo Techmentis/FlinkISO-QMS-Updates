@@ -10,26 +10,32 @@
                 <?php echo $this->Form->create('Employee',array('role'=>'form','class'=>'form')); ?>
                 <div class="row">
                     <?php
-                    echo "<div class='col-md-4'>".$this->Form->input('name',array('class'=>'form-control',)) . '</div>'; 
-                    echo "<div class='col-md-4'>".$this->Form->input('parent_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
-                    echo "<div class='col-md-4'>".$this->Form->input('employee_number',array('class'=>'form-control',)) . '</div>'; 
-                    echo "<div class='col-md-4'>".$this->Form->input('branch_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>'; 
-                    echo "<div class='col-md-4'>".$this->Form->input('department_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>'; 
-                    echo "<div class='col-md-4'>".$this->Form->input('designation_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>'; 
-                    echo "<div class='col-md-4'>".$this->Form->input('qualification',array('class'=>'form-control',)) . '</div>'; 
-                    echo "<div class='col-md-4'>".$this->Form->input('joining_date',array('class'=>'form-control',)) . '</div>'; 
-                    echo "<div class='col-md-4'>".$this->Form->input('date_of_birth',array('class'=>'form-control',)) . '</div>'; 
-                    echo "<div class='col-md-4'>".$this->Form->input('pancard_number',array('class'=>'form-control',)) . '</div>'; 
-                    echo "<div class='col-md-4'>".$this->Form->input('personal_telephone',array('class'=>'form-control',)) . '</div>'; 
-                    echo "<div class='col-md-4'>".$this->Form->input('office_telephone',array('class'=>'form-control',)) . '</div>'; 
-                    echo "<div class='col-md-4'>".$this->Form->input('mobile',array('class'=>'form-control',)) . '</div>'; 
-                    echo "<div class='col-md-4'>".$this->Form->input('personal_email',array('class'=>'form-control',)) . '</div>'; 
-                    echo "<div class='col-md-4'>".$this->Form->input('office_email',array('class'=>'form-control',)) . '</div>'; 
+                    echo "</div><div class='row'><div class='col-md-12'><h4>Mandatory</h4></div>";
+                    echo "<div class='col-md-3'>".$this->Form->input('employee_number',array('class'=>'form-control',)) . '</div>'; 
+                    echo "<div class='col-md-3'>".$this->Form->input('name',array('class'=>'form-control',)) . '</div>'; 
+                    echo "<div class='col-md-3'>".$this->Form->input('branch_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>';
+                    echo "<div class='col-md-3'>".$this->Form->input('department_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>';  
+                    echo "<div class='col-md-3'>".$this->Form->input('designation_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>'; 
+                    echo "<div class='col-md-3'>".$this->Form->input('office_email',array('class'=>'form-control',)) . '</div>'; 
+                    echo "<div class='col-md-3'>".$this->Form->input('employment_status',array('class'=>'','type'=>'radio','options'=>$customArray['employmentStatuses'],'default'=>1)) . '</div>'; 
+                    echo "<div class='col-md-3'>".$this->Form->input('parent_id',array('class'=>'form-control', 'style'=>'')) . '</div>';                     
+                    
+                    echo "</div><div class='row'><div class='col-md-12'><hr /><h4>Optional</h4></div>";
+                    
+                    echo "<div class='col-md-3'>".$this->Form->input('qualification',array('class'=>'form-control',)) . '</div>'; 
+                    echo "<div class='col-md-3'>".$this->Form->input('joining_date',array('class'=>'form-control',)) . '</div>'; 
+                    echo "<div class='col-md-3'>".$this->Form->input('date_of_birth',array('class'=>'form-control',)) . '</div>'; 
+                    echo "<div class='col-md-3'>".$this->Form->input('pancard_number',array('class'=>'form-control',)) . '</div>'; 
+                    echo "<div class='col-md-3'>".$this->Form->input('personal_telephone',array('class'=>'form-control',)) . '</div>'; 
+                    echo "<div class='col-md-3'>".$this->Form->input('office_telephone',array('class'=>'form-control',)) . '</div>'; 
+                    echo "<div class='col-md-3'>".$this->Form->input('mobile',array('class'=>'form-control',)) . '</div>'; 
+                    echo "<div class='col-md-3'>".$this->Form->input('personal_email',array('class'=>'form-control',)) . '</div>'; 
+                    
                     echo "<div class='col-md-6'>".$this->Form->input('residence_address',array('class'=>'form-control',)) . '</div>'; 
                     echo "<div class='col-md-6'>".$this->Form->input('permenant_address',array('class'=>'form-control',)) . '</div>'; 
                     echo "<div class='col-md-3'>".$this->Form->input('maritial_status',array('class'=>'','type'=>'radio','options'=>$customArray['maritialStatuses'])) . '</div>';      
-                    echo "<div class='col-md-3'>".$this->Form->input('employment_status',array('class'=>'','type'=>'radio','options'=>$customArray['employmentStatuses'])) . '</div>'; 
-                    echo "<div class='col-md-3'>".$this->Form->input('is_approver',array('class'=>'','type'=>'radio','options'=>$customArray['isApprovar'])) . '</div>'; 
+                    
+                    echo "<div class='col-md-3'>".$this->Form->input('is_approver',array('class'=>'','type'=>'radio','options'=>$customArray['isApprovar'],'default'=>0)) . '</div>'; 
                     echo "<div class='col-md-3'>".$this->Form->input('is_hod',array('class'=>'','type'=>'radio','legend'=>'Is HOD?', 'options'=>$customArray['isHod'],'default'=>0)) . '</div>'; 
                     echo "<div class='col-md-6'>".$this->Form->input('prepared_by',array('class'=>'form-control',)) . '</div>'; 
                     echo "<div class='col-md-6'>".$this->Form->input('approved_by',array('class'=>'form-control',)) . '</div>';
