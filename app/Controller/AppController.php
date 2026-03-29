@@ -2618,8 +2618,15 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					$url = $preFile_for_save = $history_file_for_save . DS . $preFileName;
 					$url = str_replace('\/','/',$url);
 					// adding diff.zip file
-					$changesData = file_get_contents($data["changesurl"]);
-					file_put_contents($history_file_for_save. DS . "diff.zip", $changesData, LOCK_EX);
+					if(isset($data["changesurl"])){
+						try{
+							$changesData = file_get_contents($data["changesurl"]);
+							file_put_contents($history_file_for_save. DS . "diff.zip", $changesData, LOCK_EX);
+						}catch(Exception $e){
+
+						}
+					}
+					
 					// adding prev.ext file
 					$fromFile = new File($file_for_save);
 					$fromFile->copy($preFile_for_save,true);
@@ -2643,7 +2650,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					$versions = json_decode($qcdoc['QcDocument']['versions'],true);
 					$versions[] = $newHistory;
 					if (file_get_contents($downloadUri) === FALSE) {
-						
+							
 					} else {
 						$new_data = file_get_contents($downloadUri);
 						if (file_put_contents($file_for_save, $new_data,LOCK_EX)) {
