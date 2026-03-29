@@ -401,10 +401,14 @@ class EmployeesController extends AppController {
     public function update_parent($id = null, $value = null){
         $this->autoRender = false;
         if($this->Session->read('User.is_mr') == true){
-            $this->Employee->read(null,$id);
-            $this->Employee->set('parent_id',$value);
-            $this->Employee->save();
-            return true;
+            if($id != $value){
+                $this->Employee->read(null,$id);
+                $this->Employee->set('parent_id',$value);
+                $this->Employee->save();
+                return true;
+            }else{
+                return false;    
+            }
         }else{
             return false;
         }
