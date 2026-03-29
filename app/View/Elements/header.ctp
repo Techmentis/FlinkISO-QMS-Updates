@@ -86,7 +86,8 @@
                     </li>
                   <?php } ?>
                 </ul>
-              </li>       
+              </li>
+              <li><a href="#"><i class="fa fa-refresh fa-spin" aria-hidden="true" id="uni-ajaxload"></i> </a></li>
             </ul>
             <!-- Navbar Right Menu -->
             <?php if($this->Session->read('User')) echo $this->Element('top-menu');?>

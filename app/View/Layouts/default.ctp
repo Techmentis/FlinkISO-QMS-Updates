@@ -246,6 +246,19 @@ if($this->action == 'index'){?>
 <?php if($this->request->params['named']['custom_table_id']){ ?>
 <script type="text/javascript">
 	$().ready(function(){
+		$("#uni-ajaxload").hide(250);
+		$(document).ajaxSend(function(){
+	    $("#uni-ajaxload").fadeIn(250);
+		});
+		$(document).ajaxComplete(function(){
+		    $("#uni-ajaxload").fadeOut(250);
+		});
+		$(document).ajaxStart(function() {
+		   "#uni-ajaxload"
+		}).ajaxStop(function() {
+		    $("#uni-ajaxload").fadeOut(250);
+		});
+			
 		$.ajax({
 				type: "POST",
 				url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/load_process/<?php echo $this->request->params['named']['custom_table_id'];?>",
@@ -258,6 +271,22 @@ if($this->action == 'index'){?>
 </script>
 <?php } ?>
 <script>
+
+	$().ready(function(){
+		$("#uni-ajaxload").hide(250);
+		$(document).ajaxSend(function(){
+	    $("#uni-ajaxload").fadeIn(250);
+		});
+		$(document).ajaxComplete(function(){
+		    $("#uni-ajaxload").fadeOut(250);
+		});
+		$(document).ajaxStart(function() {
+		   "#uni-ajaxload"
+		}).ajaxStop(function() {
+		    $("#uni-ajaxload").fadeOut(250);
+		});
+	});
+
 	function addsignature(employee,fieldid){
 		$("#"+fieldid).val(-1).trigger('chosen:updated');
 		$("input[type=submit]").hide();

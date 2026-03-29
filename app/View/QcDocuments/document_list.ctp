@@ -9,76 +9,90 @@
                 <table class="table table-responsive table-bordered">
                     <tr>
                         <th>Document</th>
+                        <th>Document Numner</th>
+                        <th>Prepared By</th>
+                        <th>Approved By</th>
                         <th>View</th>
                         <th>Edit</th>
                     </tr>
                     <?php foreach($qcDocuments as $qcDocument){ ?>
                         <tr>
                             <td><?php echo $qcDocument['QcDocument']['name'];?></td>
+                            <td><?php echo $qcDocument['QcDocument']['document_number'];?></td>
+                            <td><?php echo $qcDocument['PreparedBy']['name'];?></td>
+                            <td><?php echo $qcDocument['ApprovedBy']['name'];?></td>
                             <td>
                                 <?php
-                                $view = false;
-                                $class = 'link';
-                                $branches = $departments = $designations = $users = array();
-                                
-                                $branches = json_decode($qcDocument['QcDocument']['branches'],true);
-                                if(is_array($branches)){
-                                    if(in_array($user['User']['branch_id'], $branches)){
-                                        $view = true;
-                                        $class = 'disabled';
-                                    }
-                                }                            
-
-                                $departments = json_decode($qcDocument['QcDocument']['departments'],true);
-                                if(is_array($departments)){
-                                        if(in_array($user['User']['department_id'], $departments)){
-                                        $view = true;
-                                        $class = 'disabled';
-                                    }
-                                }                            
-                                
-                                $designations = json_decode($qcDocument['QcDocument']['designations'],true);
-                                if(is_array($designations)){
-                                    if(in_array($user['User']['designation_id'], $designations)){
-                                        $view = true;
-                                        $class = 'disabled';
-                                    }
-                                }
-
-                                $users = json_decode($qcDocument['QcDocument']['user_id'],true);
-                                if(is_array($users)){
-                                    if(in_array($user['User']['id'], $users)){
-                                        $view = true;
-                                    }    
-                                } 
-                                
-                                
-                                if($view == true){
-                                    if($class != 'disabled'){
-                                        echo "<i class='fa fa-check text-success link' onclick=updateaccess('".$qcDocument['QcDocument']['id']."','".$user['User']['id']."','view',this.id,0); id='qc".$qcDocument['QcDocument']['id']."-removeview'></i>";    
-                                    }else{
-                                        echo "<i class='fa fa-check text-gray'></i>";
-                                    }                                        
+                                if($user['User']['employee_id'] == $qcDocument['QcDocument']['prepared_by']){
+                                    echo "<i class='fa fa-check text-gray link'></i>";
                                 }else{
-                                    echo "<i class='fa fa-remove text-danger link' onclick=updateaccess('".$qcDocument['QcDocument']['id']."','".$user['User']['id']."','view',this.id,1); id='qc".$qcDocument['QcDocument']['id']."-addview'></i>";
+                                    $view = false;
+                                    $class = 'link';
+                                    $branches = $departments = $designations = $users = array();
+                                    
+                                    $branches = json_decode($qcDocument['QcDocument']['branches'],true);
+                                    if(is_array($branches)){
+                                        if(in_array($user['User']['branch_id'], $branches)){
+                                            $view = true;
+                                            $class = 'disabled';
+                                        }
+                                    }                            
+
+                                    $departments = json_decode($qcDocument['QcDocument']['departments'],true);
+                                    if(is_array($departments)){
+                                            if(in_array($user['User']['department_id'], $departments)){
+                                            $view = true;
+                                            $class = 'disabled';
+                                        }
+                                    }                            
+                                    
+                                    $designations = json_decode($qcDocument['QcDocument']['designations'],true);
+                                    if(is_array($designations)){
+                                        if(in_array($user['User']['designation_id'], $designations)){
+                                            $view = true;
+                                            $class = 'disabled';
+                                        }
+                                    }
+
+                                    $users = json_decode($qcDocument['QcDocument']['user_id'],true);
+                                    if(is_array($users)){
+                                        if(in_array($user['User']['id'], $users)){
+                                            $view = true;
+                                        }    
+                                    } 
+                                    
+                                    
+                                    if($view == true){
+                                        if($class != 'disabled'){
+                                            echo "<i class='fa fa-check text-success link' onclick=updateaccess('".$qcDocument['QcDocument']['id']."','".$user['User']['id']."','view',this.id,0); id='qc".$qcDocument['QcDocument']['id']."-removeview'></i>";    
+                                        }else{
+                                            echo "<i class='fa fa-check text-gray'></i>";
+                                        }                                        
+                                    }else{
+                                        echo "<i class='fa fa-remove text-danger link' onclick=updateaccess('".$qcDocument['QcDocument']['id']."','".$user['User']['id']."','view',this.id,1); id='qc".$qcDocument['QcDocument']['id']."-addview'></i>";
+                                    }
                                 }
                                 ?>
                             </td>
                             <td>
                                 <?php
-                                $edit = false;                            
-                                $editors = json_decode($qcDocument['QcDocument']['editors'],true);
-                                if(is_array($editors)){
-                                    if(in_array($user['User']['id'], $editors)){
-                                        $edit = true;
-                                    }
-                                    if($edit == true){
-                                        echo "<i class='fa fa-check text-success link' onclick=updateaccess('".$qcDocument['QcDocument']['id']."','".$user['User']['id']."','edit',this.id,0); id='qc".$qcDocument['QcDocument']['id']."-removeedit'></i>";
+                                if($user['User']['employee_id'] == $qcDocument['QcDocument']['prepared_by']){
+                                    echo "<i class='fa fa-check text-gray link'></i>";
+                                }else{
+                                    $edit = false;                            
+                                    $editors = json_decode($qcDocument['QcDocument']['editors'],true);
+                                    if(is_array($editors)){
+                                        if(in_array($user['User']['id'], $editors)){
+                                            $edit = true;
+                                        }
+                                        if($edit == true){
+                                            echo "<i class='fa fa-check text-success link' onclick=updateaccess('".$qcDocument['QcDocument']['id']."','".$user['User']['id']."','edit',this.id,0); id='qc".$qcDocument['QcDocument']['id']."-removeedit'></i>";
+                                        }else{
+                                            echo "<i class='fa fa-remove text-danger link' onclick=updateaccess('".$qcDocument['QcDocument']['id']."','".$user['User']['id']."','edit',this.id,1); id='qc".$qcDocument['QcDocument']['id']."-addedit'></i>";
+                                        }
                                     }else{
                                         echo "<i class='fa fa-remove text-danger link' onclick=updateaccess('".$qcDocument['QcDocument']['id']."','".$user['User']['id']."','edit',this.id,1); id='qc".$qcDocument['QcDocument']['id']."-addedit'></i>";
                                     }
-                                }else{
-                                    echo "<i class='fa fa-remove text-danger link' onclick=updateaccess('".$qcDocument['QcDocument']['id']."','".$user['User']['id']."','edit',this.id,1); id='qc".$qcDocument['QcDocument']['id']."-addedit'></i>";
                                 }
                                 ?>
                             </td>

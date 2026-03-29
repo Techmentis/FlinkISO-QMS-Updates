@@ -1709,10 +1709,16 @@ class QcDocumentsController extends AppController {
         }
 
         $this->paginate = array(
-            'recursive'=>-1,
+            'recursive'=>0,
             'limit'=>25,
             'conditions'=>array('QcDocument.parent_document_id'=>array(NULL,-1,'')),
-            'fields'=>array('QcDocument.id','QcDocument.title','QcDocument.name','QcDocument.standard_id','QcDocument.user_id','QcDocument.branches','QcDocument.departments','QcDocument.designations','QcDocument.editors')
+            'fields'=>array(
+                'QcDocument.id','QcDocument.title','QcDocument.name', 'QcDocument.document_number', 'QcDocument.standard_id','QcDocument.user_id','QcDocument.branches','QcDocument.departments','QcDocument.designations','QcDocument.editors','QcDocument.prepared_by','QcDocument.approved_by',
+                'PreparedBy.id',
+                'PreparedBy.name',
+                'ApprovedBy.id',
+                'ApprovedBy.name',
+            )
         );
         $qcDocuments = $this->paginate();
         $this->set('qcDocuments',$qcDocuments);

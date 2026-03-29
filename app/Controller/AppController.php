@@ -376,8 +376,11 @@ class AppController extends Controller {
 			if($this->request->is('ajax') == false){
 				if($this->request->controller == 'employees' && $this->action == 'view'){
 				}else{
-					$this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
-					$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action,'02',$n));
+					if(!$this->request->params['named']['custom_table_id']){
+						$this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
+						$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action,'02',$n));	
+					}
+					
 				}
 			} else{
 				exit;
@@ -1160,7 +1163,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	    $signature = $this->base64_url_encode(hash_hmac('SHA256', "$header.$payload", $signing_key, true));
 	    $jwt = $header;
 	    $jwt .= ".".$payload;
-	    $jwt .= ".".$signature;	    
+	    $jwt .= ".".$signature;  
 	    return $jwt;
 	}
 
@@ -3182,10 +3185,15 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				$this->viewVars[Inflector::variable($this->modelClass)][$this->modelClass]['approved_by'] != $this->Session->read('User.employee_id') || 
 				$this->viewVars[Inflector::variable($this->modelClass)][$this->modelClass]['created_by'] != $this->Session->read('User.id')
 			){
-				if($this->request->controller != 'qc_documents'){
-					$this->Session->setFlash(__('You are not authorized to view this section :00'), 'default', array('class' => 'alert alert-danger'));
-					$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));
-				}				
+				if($this->request->controller != 'qc_documents' && isset($this->request->params['named']['custom_table_id'])){
+
+					if(isset($this->request->params['named']['custom_table_id'])){
+						$this->_customtableacces();
+					}else{
+						$this->Session->setFlash(__('You are not authorized to view this section :00'), 'default', array('class' => 'alert alert-danger'));
+						$this->redirect(array('controller' => 'users', 'action' => 'access_denied',$this->action));
+					}					
+				}
 			}
 		}else if($this->Session->read('User.is_mr') == false && $this->Session->read('User.is_view_all') == true){
 			if(
@@ -4279,8 +4287,8 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		$this->loadModel('CustomTable');
 		$table = Inflector::underscore($selectedModel['className']);
 		$this->loadModel('CustomTable');
-		$customTable = $this->CustomTable->find('first',array('recursive'=>-1, 'fields'=>array('CustomTable.id','CustomTable.name','CustomTable.fields'), 'conditions'=>array('CustomTable.table_name LIKE '=> $tableName)));
-		if($customTable){
+		$customTable = $this->CustomTable->find('first',array('recursive'=>-1, 'fields'=>array('CustomTable.id','CustomTable.name','CustomTable.fields'), 'conditions'=>array('CustomTable.table_name LIKE '=> $tableName)));		
+		if($customTable){			
 			$customTableFields = json_decode($customTable['CustomTable']['fields'],true);
 			if($fieldDetails['type'] == 'boolean'){
 				// if field is publish
