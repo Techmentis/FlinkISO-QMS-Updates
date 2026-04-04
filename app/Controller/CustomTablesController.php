@@ -127,7 +127,13 @@ class CustomTablesController extends AppController {
         );
 
         if($this->Session->read('User.is_mr') == false){
-            $accessConditions[] = array('CustomTable.srct >' => 0);
+            $accessConditions[] = array(
+                'OR'=>array(
+                    'CustomTable.srct >' => 0,
+                    'CustomTable.creators LIKE ' => '%'.$this->Session->read('User.id').'%'
+                )
+                
+            );
         }else{
             $accessConditions[] = array();
         }
@@ -137,7 +143,6 @@ class CustomTablesController extends AppController {
                 'QcDocument.standard_id'=>$this->request->params['named']['standard_id']
             );
         }
-
         $this->paginate = array(
             'order' => array('CustomTable.childDoc'=>'ASC','CustomTable.name' => 'ASC'), 
             'conditions' => array(

@@ -98,8 +98,7 @@ class QcDocumentsController extends AppController {
      *
      * @return void
      */
-    public function index() {
-        
+    public function index() {        
         $this->QcDocument->virtualFields = array(
             'intdocunumber' => 'CAST(QcDocument.document_number as UNSIGNED)',
             'parent_id'=>'QcDocument.parent_document_id',
@@ -107,7 +106,7 @@ class QcDocumentsController extends AppController {
             'active_tables' => 'select count(*) from `custom_tables` where `custom_tables`.`publish` = 1 AND `custom_tables`.`table_locked` = 0 AND `custom_tables`.`qc_document_id` LIKE QcDocument.id',
             'childDoc'=>'select count(*) from qc_documents where qc_documents.parent_document_id LIKE QcDocument.id',
             'srct' => '
-                   CASE
+                CASE
                     WHEN QcDocument.and_or_condition = true THEN                             
                         (select count(*) from qc_documents WHERE 
                             qc_documents.id = QcDocument.id AND
@@ -129,8 +128,7 @@ class QcDocumentsController extends AppController {
                             IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
                         )
                     ELSE "Un"
-                END
-            '
+                END'
         );
         
         $conditions = $this->_check_request();

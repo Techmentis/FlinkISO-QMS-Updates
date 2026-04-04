@@ -137,7 +137,7 @@ class AppController extends Controller {
 				$this->loadModel('User');
 				if((isset($callHeaders['user']) && !empty($callHeaders['user'])) && (isset($callHeaders['password']) && !empty($callHeaders['password']))){
 					$this->User->virtualFields = array(
-						'emp_status' => 'select `employment_status` from `employees` where `employees`.`id` LIKE User.employee_id '
+						'emp_status' => 'select `employment_status` from `employees` where `employees`.`id` LIKE User.employee_id  LIMIT 1'
 					);
 					
 					$user = $this->User->find('count',array(
@@ -184,7 +184,7 @@ class AppController extends Controller {
 				$this->loadModel('User');
 				if((isset($callHeaders['user']) && !empty($callHeaders['user'])) && (isset($callHeaders['password']) && !empty($callHeaders['password']))){
 					$this->User->virtualFields = array(
-						'emp_status' => 'select `employment_status` from `employees` where `employees`.`id` LIKE User.employee_id '
+						'emp_status' => 'select `employment_status` from `employees` where `employees`.`id` LIKE User.employee_id  LIMIT 1'
 					);
 					
 					$user = $this->User->find('count',array(
@@ -793,7 +793,7 @@ public function _get_approver_list($creator = null) {
 		if(!$this->viewVars['approversList']){
 			$this->loadModel('Employee');
 			$this->Employee->virtualFields = array(
-				'is_approver'=>'select `users`.`is_approver` from `users` where `users`.`employee_id` LIKE Employee.id'
+				'is_approver'=>'select `users`.`is_approver` from `users` where `users`.`employee_id` LIKE Employee.id  LIMIT 1'
 			);
 			$approversList = $this->Employee->find('list', array(
 				'conditions' => array(
@@ -2145,7 +2145,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		$this->loadModel($model);
 		// get all creators
 		$this->$model->virtualFields = array(
-			'username'=>'select users.username from users where users.id LIKE '.$model.'.created_by'
+			'username'=>'select users.username from users where users.id LIKE '.$model.'.created_by  LIMIT 1'
 		);
 		
 		foreach($users as $userid => $username){
@@ -2910,8 +2910,8 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		$this->cacheAction = false;
 		$modelName = $this->modelClass;
 		$this->$modelName->CustomTable->virtualFields = array(
-			'document_schedule'=>'select schedule_id from qc_documents where qc_documents.id LIKE CustomTable.qc_document_id',
-			'process_schedule'=>'select schedule_id from processes where processes.id LIKE CustomTable.process_id'
+			'document_schedule'=>'select schedule_id from qc_documents where qc_documents.id LIKE CustomTable.qc_document_id  LIMIT 1',
+			'process_schedule'=>'select schedule_id from processes where processes.id LIKE CustomTable.process_id  LIMIT 1'
 		);
 		$customTable = $this->$modelName->CustomTable->find('first',array('conditions'=>array('CustomTable.id'=>$this->request->params['named']['custom_table_id']),'recursive'=>-1));	
 		$lastval = $this->fetch_last_record($modelName, $this->$modelName->displayField, 'DESC',null);
@@ -3648,7 +3648,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 		if($trigger['CustomTrigger']['notify_admins'] == true){
 			$this->Employee->User->virtualFields = array(
-				'office_email'=>'select `employees`.`office_email` from `employees` where `employees`.`id` LIKE User.employee_id'
+				'office_email'=>'select `employees`.`office_email` from `employees` where `employees`.`id` LIKE User.employee_id  LIMIT 1'
 			);
 			$users = $this->Employee->User->find('all',array(
 				'conditions'=>array('User.is_mr'=>1),

@@ -905,7 +905,7 @@ class UsersController extends AppController {
         $this->loadModel('Approval');
         $this->loadModel('CustomTable');
         $this->CustomTable->virtualFields = array(
-            'qc_parent' => 'select `qc_documents`.`parent_document_id` from `   qc_documents` where `qc_documents`.`id` LIKE CustomTable.qc_document_id'
+            'qc_parent' => 'select `qc_documents`.`parent_document_id` from `   qc_documents` where `qc_documents`.`id` LIKE CustomTable.qc_document_id  LIMIT 1'
         );
 
         // options
@@ -952,9 +952,9 @@ class UsersController extends AppController {
         $this->set(compact('schedules'));
 
         $this->Approval->virtualFields = array(
-            'custom_table_id'=>'select `custom_tables`.`id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name',
-            'qc_document_id'=>'select `custom_tables`.`qc_document_id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name',
-            'process_id'=>'select `custom_tables`.`process_id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name'
+            'custom_table_id'=>'select `custom_tables`.`id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name  LIMIT 1',
+            'qc_document_id'=>'select `custom_tables`.`qc_document_id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name  LIMIT 1',
+            'process_id'=>'select `custom_tables`.`process_id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name  LIMIT 1'
         );
         $approvalusers = $this->Approval->find('all', 
             array('order' => array('Approval.created' => 'desc'), 
@@ -978,9 +978,9 @@ class UsersController extends AppController {
         
 
         $this->ApprovalComment->virtualFields = array(
-            'custom_table_id'=>'select `custom_tables`.`id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name',
-            'qc_document_id'=>'select `custom_tables`.`qc_document_id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name',
-            'process_id'=>'select `custom_tables`.`process_id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name'
+            'custom_table_id'=>'select `custom_tables`.`id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name  LIMIT 1',
+            'qc_document_id'=>'select `custom_tables`.`qc_document_id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name  LIMIT 1',
+            'process_id'=>'select `custom_tables`.`process_id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name  LIMIT 1'
         );
         $approvalComments = $this->ApprovalComment->find('all', array('conditions' => array(
             'ApprovalComment.response'=>NULL,
