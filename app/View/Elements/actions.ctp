@@ -21,7 +21,7 @@
 	if($this->request->controller == 'employees'){
 		if($this->Session->read('User.is_mr') == true){
 
-			if($user == null){
+			if($user == null || $user == 0){
 				echo $this->Html->link('<i class="fa fa-user text-danger"></i>','javascript:void(0);',array('id'=>$postVal.'-user', 'class'=>'tooltip1 btn empaction','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Add User'));
 			}else{
 				echo $this->Html->link('<i class="fa fa-gears text-success"></i>',array('controller'=>'users','action'=>'edit',$user,'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn empaction','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Edit User'));			
