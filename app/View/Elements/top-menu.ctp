@@ -1,10 +1,4 @@
 <ul class="nav navbar-nav navbar-right">
-  <li>
-    <?php 
-    echo $this->Html->link($this->Html->image('ai-svgrepo-com.svg',array('width'=>'22px','height'=>'22px' ,'class'=>'no-margin')),'#',
-    array('class'=>'tooltip1 ','escape'=>false,'id'=>'ask_ai_icon'
-    ));?>
-  </li>
   <?php 
   if($this->Session->read('User.is_mr') == true){
     echo '<li class="">'.$this->Html->link('<i class="fa fa-cloud-download"></i>'.$update,array('controller'=>'billing','action'=>'update','timestamp'=>date('ymdhis')),array('class'=>'tooltip1','escape'=>false,'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Updates')).'</li>';
