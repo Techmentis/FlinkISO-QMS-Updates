@@ -23,6 +23,7 @@ ALTER TABLE `users` ADD `is_hod` TINYINT(1) NULL DEFAULT '0' AFTER `is_mt`;
 ALTER TABLE `qc_documents` ADD `published_by` VARCHAR(36) NULL AFTER `issuing_authority_id`;
 ALTER TABLE `qc_documents` ADD `approval_step_id` VARCHAR(36) NULL AFTER `user_session_id`;
 ALTER TABLE `qc_documents` ADD `reviewed_by` VARCHAR(36) NULL AFTER `prepared_by`, ADD `approval_date` DATE NULL AFTER `reviewed_by`, ADD `published_date` DATE NULL AFTER `approval_date`;
+
 CREATE TABLE `approval_processes` (`id` varchar(36) NOT NULL,`sr_no` int(11) NOT NULL,`title` varchar(255) NOT NULL DEFAULT 'Process Title',`process_description` text NOT NULL,`applicable_to` text,`publish` tinyint(1) DEFAULT '1' COMMENT '0=Un 1=Pub',`record_status` tinyint(1) DEFAULT '0' COMMENT '0=Un-locked, 1=Locked',`status_user_id` varchar(36) DEFAULT NULL,`approval_step_id` varchar(36) DEFAULT NULL,`created_by` varchar(36) NOT NULL,`created` datetime NOT NULL,`modified_by` varchar(36) NOT NULL,`approved_by` varchar(36) DEFAULT NULL,`prepared_by` varchar(36) DEFAULT NULL,`modified` datetime NOT NULL,`soft_delete` tinyint(1) NOT NULL DEFAULT '0',`branchid` varchar(36) DEFAULT NULL,`departmentid` varchar(36) DEFAULT NULL,`company_id` varchar(36) DEFAULT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 ALTER TABLE `approval_processes` ADD PRIMARY KEY (`id`), ADD KEY `sr_no` (`sr_no`);
 ALTER TABLE `approval_processes`  MODIFY `sr_no` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;

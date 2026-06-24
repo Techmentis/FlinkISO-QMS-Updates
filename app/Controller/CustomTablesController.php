@@ -3254,7 +3254,13 @@ class CustomTablesController extends AppController {
                 
                 foreach($fields as $field){
                     $field['field_label'] = base64_decode($field['field_label']);
-                    $tocreate['CustomTableFields'][] = $field;                    
+                    if($field['data_type'] == 'comments'){                        
+                        $field['show_comments'] = base64_decode($field['show_comments']);
+                        if($this->_isBase64Encoded($field['show_comments'])){
+                            $field['show_comments'] = base64_decode($field['show_comments']);
+                        }                        
+                    }
+                    $tocreate['CustomTableFields'][] = $field;
                 }                
                 $tocreate['linkedTos'] = json_encode($linkedTos);
                 $tocreate['linkedTosWithDisplay'] = json_encode($this->_returnDetaultField($fields));
@@ -3297,7 +3303,13 @@ class CustomTablesController extends AppController {
                 
                 foreach($fields as $field){
                     $field['field_label'] = base64_decode($field['field_label']);
-                    $tocreate['CustomTableFields'][] = $field;                    
+                    if($field['data_type'] == 'comments'){                        
+                        $field['show_comments'] = base64_decode($field['show_comments']);
+                        if($this->_isBase64Encoded($field['show_comments'])){
+                            $field['show_comments'] = base64_decode($field['show_comments']);
+                        }                        
+                    }
+                    $tocreate['CustomTableFields'][] = $field;                                
                 }                
                 $tocreate['linkedTos'] = json_encode($linkedTos);
                 $tocreate['linkedTosWithDisplay'] = json_encode($this->_returnDetaultField($fields));                
@@ -3330,5 +3342,16 @@ class CustomTablesController extends AppController {
         $customTables = $this->paginate();
         $this->set('customTables',$customTables);
 
+    }
+
+    public function _isBase64Encoded($str) {
+        if (!is_string($str)) {
+            return false;
+        }
+        $decoded = base64_decode($str, true);
+        if ($decoded === false) {
+            return false;
+        }
+        return base64_encode($decoded) === $str;
     }
 }
