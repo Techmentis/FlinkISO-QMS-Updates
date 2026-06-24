@@ -1641,13 +1641,10 @@ class QcDocumentsController extends AppController {
     }
 
     public function fix_names(){
-        Configure::write('debug',1);
         $qcDocuments = $this->QcDocument->find('all',array('conditions'=>array(),'recursive'=>-1,'fields'=>array('QcDocument.id','QcDocument.name','QcDocument.title','QcDocument.version','QcDocument.file_type','QcDocument.issue_number','QcDocument.document_number','QcDocument.revision_number')));
         foreach($qcDocuments as $qcDocument){
-            debug($qcDocument);
             $qcDocument['QcDocument']['name'] = Inflector::humanize($qcDocument['QcDocument']['title']);
             $qcDocument['QcDocument']['title'] = $this->_clean_table_names($qcDocument['QcDocument']['title']);
-            debug($qcDocument);
             $this->QcDocument->create();
             $this->QcDocument->save($qcDocument,false);
         }

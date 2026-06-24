@@ -3199,7 +3199,10 @@ class CustomTablesController extends AppController {
     }
     
 
-    public function recreate_all_forms(){
+    public function recreate_all_forms($autoupdate = null){
+        if($autoupdate == 1){
+            $this->autoRender = false;
+        }
         $controllers = array();
         $aCtrlClasses = App::objects('controller');
         $skip = array('AppController', 'ApprovalsController', 'ApprovalCommentsController', 'CustomTablesController', 'FilesController', 'RecordsController', 'UserSessionsController');
@@ -3302,8 +3305,12 @@ class CustomTablesController extends AppController {
             }
         }
 
-        $this->Session->setFlash(__('Re-created all the forms.'));
-        $this->redirect(array('action' => 'index'));
+        if($autoupdate == 1){
+            return true;
+        }else{
+            $this->Session->setFlash(__('Re-created all the forms.'));
+            $this->redirect(array('action' => 'index'));
+        }        
     }
 
     public function custom_table_list($user_id = null){

@@ -49,9 +49,7 @@
 					</thead>
 					<tbody>
 						<?php $i = 0;?>
-						<?php foreach($this->request->data['ApprovalStep'] as $approvalStep){ 
-							// debug($approvalStep);
-						?>
+						<?php foreach($this->request->data['ApprovalStep'] as $approvalStep){ ?>
 							<tr class="colrows thiscol<?php echo $i?>">
 								<td>
 									<?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.id',array('class'=>'form-control','label'=>false,'default'=>$approvalStep['id'],'required'=>$required)) ?>

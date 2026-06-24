@@ -5008,6 +5008,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 		if(!$approversList){			
 			$skiparray = array('qc_documents','custom_tables');
+			
 			// if(!in_array($this->request->controller, $skiparray)){
 			$actionarray = array('add','edit','view');
 				if(in_array($this->action, $actionarray) ) {

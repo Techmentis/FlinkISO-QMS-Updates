@@ -669,9 +669,6 @@ class UsersController extends AppController {
                         $data['User']['login_status'] = 0; //1
                         $this->User->save($data, false);
 
-                        // debug($user);
-                        // exit;
-
                         $this->Session->write('User.id', $user['User']['id']);
                         $this->Session->write('User.employee_id', $user['Employee']['id']);
                         $this->Session->write('User.branch_id', $user['User']['branch_id']);
@@ -1650,7 +1647,6 @@ class UsersController extends AppController {
     }
 
     public function _remove_from_array($arraytobecleaned = null,$valuetoberemoved = null){
-        // debug($arraytobecleaned);
         if(is_array($arraytobecleaned)){
             foreach($arraytobecleaned as $arr){
                 if($arr == $valuetoberemoved){

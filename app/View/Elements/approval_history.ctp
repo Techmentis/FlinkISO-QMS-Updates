@@ -8,8 +8,6 @@ $showmessage = false;
 if($this->request->data[Inflector::classify($this->request->controller)]['prepared_by'])$prepared_by = $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'];
 else if($this->request->params['named']['prepared_by'])$prepared_by = $this->request->params['named']['prepared_by'];
 
-debug($prepared_by);
-
 ?>
 <style>
 	.btn-success{

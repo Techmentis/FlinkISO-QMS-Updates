@@ -55,7 +55,10 @@
 	  	var myJsonString = JSON.stringify(str);
 	  	$("#seqs").val(myJsonString);	 
 	  	$("#linkedProcessesDiv").load("<?php echo Router::url('/', true); ?>/custom_tables/process_sequence/id:<?php echo $id;?>/processes:"+$("#seqs").val()); 		  	
-	  },	  
+	  },
+	  // update: function(event, ui){
+	  // 	$("linkedProcessesDiv").load("<?php echo Router::url('/', true); ?>/custom_tables/process_sequence/<?php echo $id;?>/"+$("#seqs").val());
+	  // }
 	});	
   });
   </script>
