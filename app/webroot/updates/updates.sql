@@ -30,3 +30,6 @@ ALTER TABLE `approval_processes` ADD PRIMARY KEY (`id`), ADD KEY `sr_no` (`sr_no
 ALTER TABLE `approval_processes`  MODIFY `sr_no` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 ALTER TABLE `custom_tables` ADD `approval_process_id` VARCHAR(36) NULL AFTER `approvers`;
 ALTER TABLE `users` ADD `is_hod` TINYINT(1) NULL DEFAULT '0' AFTER `is_mt`;
+ALTER TABLE `qc_documents` ADD `published_by` VARCHAR(36) NULL AFTER `issuing_authority_id`;
+ALTER TABLE `qc_documents` ADD `approval_step_id` VARCHAR(36) NULL AFTER `user_session_id`;
+ALTER TABLE `qc_documents` ADD `reviewed_by` VARCHAR(36) NULL AFTER `prepared_by`, ADD `approval_date` DATE NULL AFTER `reviewed_by`, ADD `published_date` DATE NULL AFTER `approval_date`;
