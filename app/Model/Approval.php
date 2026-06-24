@@ -115,13 +115,7 @@ public $validate = array(
  * @var array
  */
 public $belongsTo = array(
-	'Employee' => array(
-		'className' => 'Employee',
-		'foreignKey' => 'user_id',
-		'conditions' => '',
-		'fields' => array('id', 'name'),
-		'order' => ''
-	),'User' => array(
+	'User' => array(
 		'className' => 'User',
 		'foreignKey' => 'user_id',
 		'conditions' => '',
@@ -141,33 +135,17 @@ public $belongsTo = array(
 		'conditions' => '',
 		'fields' => array('id', 'name'),
 		'order' => ''
-	),
-	'BranchIds' => array(
-		'className' => 'Branch',
-		'foreignKey' => 'branchid',
+	),'ApprovalProcess' => array(
+		'className' => 'ApprovalProcess',
+		'foreignKey' => 'Approval_process_id',
 		'conditions' => '',
-		'fields' => array('id', 'name'),
+		'fields' => array('id', 'title'),
 		'order' => ''
-	),
-	'DepartmentIds' => array(
-		'className' => 'Department',
-		'foreignKey' => 'departmentid',
+	),'ApprovalStep' => array(
+		'className' => 'ApprovalStep',
+		'foreignKey' => 'approval_step_id',
 		'conditions' => '',
-		'fields' => array('id', 'name'),
-		'order' => ''
-	),
-	'PreparedBy' => array(
-		'className' => 'Employee',
-		'foreignKey' => 'prepared_by',
-		'conditions' => '',
-		'fields' => array('id', 'name'),
-		'order' => ''
-	),
-	'ApprovedBy' => array(
-		'className' => 'Employee',
-		'foreignKey' => 'approved_by',
-		'conditions' => '',
-		'fields' => array('id', 'name'),
+		'fields' => array('id', 'title'),
 		'order' => ''
 	)
 );
@@ -189,7 +167,8 @@ public $hasMany = array(
 		'offset' => '',
 		'exclusive' => '',
 		'finderQuery' => '',
-		'counterQuery' => ''
+		'counterQuery' => '',
+		'dependent' => true
 	)
 );
 

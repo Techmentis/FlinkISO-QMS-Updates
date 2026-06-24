@@ -78,7 +78,7 @@ unset($postData['options']['publish']);
         'timestamp'=>date('ymdhis')
     ),
      array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
-        'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Ubnpublished'
+        'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Ubnpublished/ Pending Approvals'
     ));
 
  }
@@ -133,6 +133,8 @@ if($this->action == 'edit' || $this->action == 'recreate' || $this->action == 'r
     array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
         'data-toggle'=>'tooltip', 'data-trigger'=>'hover',  'data-placement'=>'bottom', 'title'=> 'View Record'
     ));
+
+    // echo $this->Html->link('<i class="fa fa-chain"></i>',array('controller'=>'approval_processes','action'=>'add','controller_name'=>Inflector::classify($this->request->controller), 'timestamp'=>date('ymdhis'),'custom_table_id'=>$this->request->params['named']['custom_table_id']),array('escape'=>false,'class'=>'tooltip1 btn btn-app btn-sm btn-default','data-toggle'=>'tooltip', 'data-trigger'=>'hover','data-placement'=>'bottom', 'title'=> 'Add Auto Approval Process'));    
 }
 
 
@@ -153,7 +155,7 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
                 'id'=>'bulkDeleteSubmit',
                 'onClick'=>'bulkdelete()',
                 'div' => false, 
-                'class'=>'hide',                        
+                'class'=>'hide',
             )
         );
         echo $this->Form->hidden('bulk_delete_ids',array('id'=>'bulk_delete_ids'));

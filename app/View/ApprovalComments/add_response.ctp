@@ -1,1 +1,1 @@
-<span class="text-success">Response Added.</span>
+<span class="text-success"><?php echo $responseresult;?></span>

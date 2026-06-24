@@ -14,7 +14,8 @@
                     <th><?php echo $this->Paginator->sort('last_login', __('Last Login')); ?></th>
                     <?php if($this->Session->read('User.is_mr') == true){ ?>
                         <th><?php echo $this->Paginator->sort('is_mr', __('Admin')); ?></th>
-                        <th><?php echo $this->Paginator->sort('is_view_all', __('View')); ?></th>
+                        <th><?php echo $this->Paginator->sort('is_hod', __('HoD')); ?></th>
+                        <th><?php echo $this->Paginator->sort('is_view_all', __('Reviewer')); ?></th>
                         <th><?php echo $this->Paginator->sort('is_creator', __('Creator')); ?></th>                    
                         <th><?php echo $this->Paginator->sort('is_approver', __('Approver')); ?></th>
                         <th><?php echo $this->Paginator->sort('is_publisher', __('Publisher')); ?></th>                        
@@ -30,7 +31,11 @@
                     $x = 0;
                     foreach ($users as $user):?>                
                         <tr class="on_page_src" onclick="addrec('<?php echo $user['User']['id'];?>')" id="<?php echo $user['User']['id'];?>_tr">
-                            <td><?php echo $user['User']['name']; ?>&nbsp;<br /><?php echo $user['User']['username']; ?>&nbsp;</td>
+                            <td><?php
+                                if($user['User']['is_hod']){ echo '<strong>';}
+                                    echo $user['User']['name']; ?>&nbsp;<br /><?php echo $user['User']['username']; ?>&nbsp;
+                                <?php if($user['User']['is_hod']){ echo '</strong>';} ?>
+                            </td>
                             <td>
                                 <?php echo $this->Html->link($user['Branch']['name'], array('controller' => 'branches', 'action' => 'view', $user['Branch']['id'])); ?><br />
                                 <?php echo $this->Html->link($user['Department']['name'], array('controller' => 'departments', 'action' => 'view', $user['Department']['id'])); ?>
@@ -57,7 +62,28 @@
                                     ));
                                 }
                             ?>&nbsp;
-                        </td>                        
+                        </td>
+                        <td>
+                            <?php 
+                                if($user['User']['is_hod']){
+                                    $str = base64_encode($user['User']['id'].',is_hod,0');
+                                    echo $this->Html->link('<i class="fa fa-check"></i>','javascript:void(0)', array(
+                                        'class'=>'btn btn-sm text-success',
+                                        'onClick'=>'reset_access(\''.$user['User']['id'].'\', \''.$str.'\',this.id,\'is_hod\', 0)',
+                                        'id'=>$user['User']['id'].'_is_hod',
+                                        'escape'=>false
+                                    ));
+                                }else{
+                                    $str = base64_encode($user['User']['id'].',is_hod,1');
+                                    echo $this->Html->link('<i class="fa fa-remove"></i>','#', array(
+                                        'class'=>'btn btn-sm text-danger',
+                                        'onClick'=>'reset_access(\''.$user['User']['id'].'\', \''.$str.'\',this.id,\'is_hod\', 1)',
+                                        'id'=>$user['User']['id'].'_is_hod',
+                                        'escape'=>false
+                                    ));
+                                }
+                            ?>&nbsp;
+                        </td>                      
                         <td>
                             <?php
                             if($user['User']['is_view_all']){

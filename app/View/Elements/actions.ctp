@@ -14,14 +14,10 @@
 	<?php echo $this->Html->link('<i class="fa fa-trash-o"></i>',array('controller'=>$controller,'action'=>'delete',$postVal,'qc_document_id'=>$qc_document_id,'process_id'=>$process_id,'custom_table_id'=>$custom_table_id,'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Delete'));?>
 
 	<?php 
-	// if($this->request->controller == 'processes'){
-	// 	echo $this->Html->link('<i class="fa fa-database"></i>',array('controller'=>'custom_tables', 'action'=>'add', 'process_id'=> $postVal,'qc_document_id'=>$qc_document_id,'custom_table_id'=>$custom_table_id),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Add Table'));		
-	// }
-
 	if($this->request->controller == 'employees'){
 		if($this->Session->read('User.is_mr') == true){
 
-			if($user == null || $user == 0){
+			if($user == null){
 				echo $this->Html->link('<i class="fa fa-user text-danger"></i>','javascript:void(0);',array('id'=>$postVal.'-user', 'class'=>'tooltip1 btn empaction','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Add User'));
 			}else{
 				echo $this->Html->link('<i class="fa fa-gears text-success"></i>',array('controller'=>'users','action'=>'edit',$user,'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn empaction','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Edit User'));			
@@ -40,8 +36,8 @@
 							$("#<?php echo $postVal;?>-user").tooltip().attr({'data-toggle':'tooltip', 'data-original-title':'Adding','data-placement':'left','data-trigger':'hover'}).tooltip('show');
 						},					
 						success: function (result) {
-							$("#<?php echo $postVal;?>-user").removeClass('btn-danger').addClass('btn-success');
-							$("#<?php echo $postVal;?>-user i").removeClass('fa-refresh fa-spin').addClass('fa-check');
+							$("#<?php echo $postVal;?>-user").removeClass('fa-user').addClass('text-success');
+							$("#<?php echo $postVal;?>-user i").removeClass('fa-refresh fa-spin').addClass('fa-check text-success')
 							$("#<?php echo $postVal;?>-user").next().find('.tooltip-inner').html('User added');
 							$("#<?php echo $postVal;?>-user").tooltip().attr({'data-toggle':'tooltip', 'data-original-title':'User added','data-placement':'left','data-trigger':'hover'}).tooltip('show');
 						},
@@ -51,8 +47,6 @@
 					}); 
 				});
 			<?php } ?>
-		</script>
-
-		
+		</script>		
 	<?php } ?>	
 </div>

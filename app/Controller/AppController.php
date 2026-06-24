@@ -78,14 +78,14 @@ class AppController extends Controller {
 		Configure::write("path", WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . $this->request->controller);
 		Configure::write("url", Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . $this->request->controller);
 		Configure::write("common_path", 'files' . DS . $this->Session->read('User.company_id') . DS . $this->request->controller);		
-		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind','opt_check','json','xml','return_user_list');
+		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind','opt_check','json','xml','return_user_list','codigo_nc_number','codigo_ncp_number','codigo_m_number','metrologia');
 		
 		if (empty($this->Session->read('User.id')) && !in_array($this->action, $ignore)) {
 			if($this->request->is('ajax'))echo "Session expired. Please login again.";
 			if($this->request->action != 'dashboard') $this->Session->setFlash(__('Login to continue.'));
 			$this->redirect(array('controller' => 'users', 'action' => 'login'));
 		}else{
-			$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind','opt_check','json','xml','return_user_list');
+			$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind','opt_check','json','xml','return_user_list','codigo_nc_number','codigo_ncp_number','codigo_m_number','metrologia');
 			if (empty($this->Session->read('User.id')) && !in_array($this->action, $ignore)) {
 				try{
 					$this->loadModel('UserSession');
@@ -121,7 +121,7 @@ class AppController extends Controller {
 			$this->_check_lock();
 			if($this->action == 'view')$this->_view();
 			if($this->action == 'json')$this->_json();
-			$this->_get_approver_list();
+			// $this->_get_approver_list();
 			$this->_find_parent();
 			$ignoreControllerSotList = array('custom_tables','standards','qc_document_categories','branches','departments','designations');
 			if(!in_array($this->request->controller, $ignoreControllerSotList)){
@@ -223,6 +223,8 @@ class AppController extends Controller {
 				exit;
 			}
 		}
+		$skipcontrollers = array('branches','departments','designations','employees','users','standards','clauses','custom_tables','approval_processes');
+		if(!in_array($this->request->controller,$skipcontrollers))$this->_fetch_approval_steps();	
 	}
 
 	public function _find_parent(){
@@ -337,7 +339,7 @@ class AppController extends Controller {
 				));
 			}else{
 				$skip = array('approval_comments','approvals','standards','processes');
-				$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check','json','xml','return_user_list','org_chart');
+				$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check','json','xml','return_user_list','org_chart','codigo_nc_number','codigo_ncp_number','codigo_m_number','metrologia');
 				if(!in_array($this->action,$ignore)){
 					// $this->Session->setFlash(__('Blocked Action: '. $this->request->action), 'default', array('class' => 'alert alert-danger'));
 					$this->_check_access();
@@ -366,7 +368,7 @@ class AppController extends Controller {
 	}
 	
 	public function _access_redirect($n = null){
-		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check');
+		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check','codigo_nc_number','codigo_ncp_number','codigo_m_number','metrologia');
 		if(!in_array($this->action,$ignore)
 			&& $this->request->controller != 'qc_documents' 			
 			&& $this->request->controller != 'custom_tables'
@@ -741,6 +743,7 @@ public function _show_approvals() {
 public function get_approvals() {
 	if ($this->action == 'view' || $this->action == 'edit' || $this->action == 'recreate') {
 		// $this->autoRender = false;
+		
 		$model = $this->modelClass;
 		$record = $this->request->params['pass'][0];
 		$this->loadModel('Approval');
@@ -757,8 +760,8 @@ public function get_approvals() {
 		}
 		
 		$approvals = $this->Approval->find('all', array(
-			'order'=>array('Approval.modified'=>'DESC', 'Approval.status'=>'DESC','Approval.approval_step'=>'ASC'), 
-			'conditions' => array($adminCon, 'Approval.model_name' => $model, 'Approval.record' => $record)));
+			'order'=>array('Approval.modified'=>'DESC', 'Approval.status'=>'DESC'), 
+			'conditions' => array('Approval.model_name' => $model, 'Approval.record' => $record)));
 		return $approvals;
 	}
 }
@@ -770,39 +773,7 @@ public function get_approval($id = null, $creator = null) {
 }
 
 public function _get_approver_list($creator = null) {
-	if(isset($this->request->params['named']['custom_table_id'])){
-		if(isset($this->request->params['named']['custom_table_id']) && $this->request->params['named']['custom_table_id'] != -1){
-			$this->loadModel('CustomTable');
-			$customTable = $this->CustomTable->find('first',array(
-				'recursive'=>-1,
-				'fields'=>array(
-					'CustomTable.id',
-					'CustomTable.approvers',
-				),
-				'conditions'=>array('CustomTable.id'=>$this->request->params['named']['custom_table_id'])));
-			$this->loadModel('User');
-			$approversList = $this->User->find('list', array(
-				'fields'=>array('User.employee_id','User.name'),
-				'conditions' => array(
-					'User.id' => json_decode($customTable['CustomTable']['approvers'],true)
-			)));
-		$this->set('approversList', $approversList);
-		return $approversList;		
-		}
-	}else{
-		if(!$this->viewVars['approversList']){
-			$this->loadModel('Employee');
-			$this->Employee->virtualFields = array(
-				'is_approver'=>'select `users`.`is_approver` from `users` where `users`.`employee_id` LIKE Employee.id  LIMIT 1'
-			);
-			$approversList = $this->Employee->find('list', array(
-				'conditions' => array(
-					'Employee.is_approver' => 1 
-			)));
-			$this->set('approversList', $approversList);
-			return $approversList;
-		}
-	}
+	
 }
 
 public function _save_approvals($record_id = null) {	
@@ -823,6 +794,7 @@ public function _save_approvals($record_id = null) {
 	if ($this->request->data['Approval'][$model]['user_id']) {
 		$approvalusers = $this->request->data['Approval'][$model]['user_id'];		
 	}
+	
 	if ($this->request->data['Approval'][$model]['user_id']) {
 		$approvalusers = $this->request->data['Approval'][$model]['user_id'];
 		foreach ($approvalusers as $approvaluser) {
@@ -838,8 +810,10 @@ public function _save_approvals($record_id = null) {
 				$approvaldata['Approval']['approval_type'] = $this->request->data['Approval'][$model]['approval_type'];
 				$approvaldata['Approval']['comments'] = $this->request->data['Approval'][$model]['comments'];
 				$approvaldata['Approval']['approval_mode'] = $this->request->data['Approval'][$model]['approval_mode'];
+				$approvaldata['Approval']['approval_step_id'] = $this->request->data['Approval'][$model]['approval_step_id'];
 				$approvaldata['Approval']['approval_cycle'] = $cycle_count;
-				$this->Approval->create($approvaldata);
+				
+				$this->Approval->create();
 				if($this->Approval->save($approvaldata,false)){
 					$this->Session->setFlash(__('Approval created.'));
 				}else{
@@ -857,6 +831,7 @@ public function _save_approvals($record_id = null) {
 				$rec = $this->$model->find('first', array('conditions' => array($model . '.id' => $this->request->data['Approval'][$model]['record']), 'recursive' => - 1));
 				if ($rec) {
 					$rec[$model]['record_status'] = 1;
+					$rec[$model]['publish'] = 0;
 					// $rec[$this->modelClass]['record_status'] = 1;
 					$this->$model->create();
 					$this->$model->save($rec);
@@ -876,8 +851,8 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$email = $user['Employee']['personal_email'];
 		}
 	}
-	if($message == 1)$subject = 'FlinkISO: Record Approved';
-	else $subject = 'FlinkISO: Approval';
+	if($message == 1)$subject = 'FlinkISO: Record Approved by '. $this->Session->read('User.name');
+	else $subject = 'FlinkISO: Approval from '. $this->Session->read('User.name');
 	if ($email) {
 		try {
 			App::uses('CakeEmail', 'Network/Email');
@@ -890,8 +865,9 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				'message' => $message,
 				'url' => $login_url,
 				'response' => $response,
-				'by' => $this->Session->read('User.username'),
+				'by' => $this->Session->read('User.name'),
 				'mode' => Inflector::humanize($model),
+				'to_name'=>$user['Employee']['name']
 			));
 			$EmailConfig->emailFormat('html');
 			$EmailConfig->send();
@@ -3299,19 +3275,17 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		if($this->request->params['named']['parent_record_id']){
 			$this->request->data[$modelName]['parent_id'] = $this->request->params['named']['parent_record_id'];
 		}
-		$this->request->data['Approval'][$modelName]['publish'] = $this->request->data['Approval'][$modelName]['publish'];		
+		// $this->request->data['Approval'][$modelName]['publish'] = $this->request->data['Approval'][$modelName]['publish'];		
 		if($this->action == 'add'){
 			$this->request->data[$modelName]['prepared_by'] = $this->Session->read('User.employee_id');
+			$this->request->data[$modelName]['approval_step_id'] = $this->request->data['Approval'][$modelName]['approval_step_id'];
 		}
 		if($this->action == 'edit'){
 			// get exisiting record 
 			$existingRecord = $this->$modelName->find('first',array('conditions'=>array($modelName.'.id'=>$this->request->data[$modelName]['id']),'recursive'=>-1));
 			$this->request->data[$modelName]['prepared_by'] = $existingRecord[$modelName]['prepared_by'];
 		}
-		if($this->request->data['Approval'][$modelName]['publish'] == 1){
-			$this->request->data[$modelName]['approved_by'] = $this->request->data['Approval'][$modelName]['approved_by'];
-			$this->request->data[$modelName]['publish'] = 1;
-		}
+		
 		if ($this->$modelName->save($this->request->data,false)) {
 			$new_record_id = $this->$modelName->id;			
 			$this->_update_belongTos($this->request->data);			
@@ -4920,4 +4894,186 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	    $output = str_replace('&quot;','"',$output);
 	    return $output;
 	}
+
+	public function return_ue_name($id = null){
+		$this->loadModel('User');
+		if($id){
+			$user = $this->User->find('first',array(
+				'recursive'=>-1,
+				'fields'=>array('User.name'),
+				'conditions'=>array('User.id'=>$id)
+			));
+
+			if($user){
+				return $user['User']['name'];
+			}else{
+				return 'User not found';
+			}
+		}
+		return 'User not found';
+	}
+
+	public function _get_pre_user($employee_id = null){
+		$this->loadModel('User');
+		$user = $this->User->find('first',array(
+			'recursive'=>-1,
+			'fields'=>array('User.id','User.employee_id'),
+			'conditions'=>array('User.employee_id'=>$employee_id)
+		));
+
+		if($user){
+			return $user['User']['id'];
+		}else{
+			return null;
+		}
+	}
+
+
+	public function fetch_last_value($field = null,$lp = null){
+		$this->autoRender = false;
+		$model = $this->modelClass;
+		$this->loadModel($model);
+		$record = $this->$model->find('first',array('fields'=>array($model.'.'.$field),'order'=>array($model.'.'.$field => 'DESC')));
+		if($record){
+			$lastvalue = $record[$model][$field];	
+			if($lp){
+				$lastvalue = ltrim($lastvalue,'0');				
+			}
+			$lastvalue = $lastvalue + 1;
+		}else{
+			$lastvalue = 0;
+		}
+
+		if($lp){
+			$lastvalue = str_pad($lastvalue,$lp,0, STR_PAD_LEFT);
+		}
+		return $lastvalue;	
+	}
+
+	public function _fetch_approval_steps($custom_table_id = null){
+		$this->loadModel('ApprovalProcess');
+
+		if($this->request->params['named']['custom_table_id']){
+			$approvalProcess = $this->ApprovalProcess->find('first',array(
+				'conditions'=>array(
+					// 'OR'=>array(
+					// 	'CustomTable.custom_table_id'=> null,
+					// 	'CustomTable.custom_table_id'=> '',
+					// 	'CustomTable.custom_table_id'=> 'NULL',
+					// ),					
+					'ApprovalProcess.applicable_to LIKE '=>'%'.$this->request->params['named']['custom_table_id'].'%')
+				)
+			);			
+		}else if($this->request->controller == 'qc_documents'){
+			$approvalProcess = $this->ApprovalProcess->find('first',array('conditions'=>array('ApprovalProcess.applicable_to LIKE '=> '%'.'qc_documents' .'%')));
+		}
+		if($approvalProcess){
+			$this->set('approvalProcess',$approvalProcess);
+			$currentStep = $this->_current_step($approvalProcess);
+			$this->set('currentStep',$currentStep[0]);
+			$this->set('approversList',$currentStep[1]);
+			$modelClass = $this->modelClass;
+			
+			$fields = $this->$modelClass->schema();
+			if(array_key_exists('approval_step_id', $fields)){ 			
+			}else{
+				$updatesql = 'ALTER TABLE `'.$this->request->controller.'` ADD `approval_step_id` VARCHAR(36) NULL DEFAULT NULL AFTER `status_user_id`;';
+				$this->$modelClass->query($updatesql);
+
+			}
+
+			return $approvalProcess;
+		}		
+		 
+	}
+
+	public function _current_step($approvalProcess = null){
+		$this->loadModel('ApprovalStep');
+		if($this->action == 'add'){
+			$currentStep = $this->ApprovalStep->find('first',array('conditions'=>array('ApprovalStep.id'=>$approvalProcess['ApprovalStep'][0]['id'])));
+			$this->set('currentStep',$currentStep);
+			$approversList = $this->_get_approver_lists($this->Session->read('User.id'),$currentStep['ApprovalStep']);			
+			$this->set('approversList',$approversList);
+		}else{			
+			$model = $this->modelClass;
+			if($this->request->data[$model]['approval_step_id']){
+				$currentStep = $this->ApprovalStep->find('first',array('conditions'=>array('ApprovalStep.id'=>$this->request->data[$model]['approval_step_id'])));			
+				$approversList = $this->_get_approver_lists($this->Session->read('User.id'),$currentStep['ApprovalStep']);
+				$this->set('approversList',$approversList);
+			}else if($this->viewVars[Inflector::variable($this->modelClass)][$this->modelClass]['approval_step_id']){
+				$currentStep = $this->ApprovalStep->find('first',array('conditions'=>array('ApprovalStep.id'=>$this->viewVars[Inflector::variable($this->modelClass)][$this->modelClass]['approval_step_id'])));
+				$approversList = $this->_get_approver_lists($this->Session->read('User.id'),$currentStep['ApprovalStep']);
+				$this->set('approversList',$approversList);
+			}
+		}
+		if(!$approversList){			
+			$skiparray = array('qc_documents','custom_tables');
+			// if(!in_array($this->request->controller, $skiparray)){
+			$actionarray = array('add','edit','view');
+				if(in_array($this->action, $actionarray) ) {
+					// $this->Session->setFlash(__('Contact your admin. This process step does not have any approvers. Please add approvers first before you proceed.'));
+					// $this->redirect(array('controller'=>'approval_processes', 'action' => 'view', $currentStep['ApprovalStep']['approval_process_id'],'timestamp'=>date('Ymdhis'))); 	
+				}
+				
+			// }			
+		}else{
+			
+		}	
+
+		return array($currentStep,$approversList);	
+		
+	}
+
+	public function _get_approver_lists($creator = null,$approvalSteps = null) {
+		if($approvalSteps['send_to_reviwers'] == 1){ // reviewer
+			$ucon = array(
+				'User.is_view_all'=>1,								
+			);
+		}else if($approvalSteps['send_to_publishers'] == 1){ // publishers
+			$ucon = array(
+				'User.is_publisher'=>1,				
+			);
+		}else if($approvalSteps['send_to_department_hod'] == 1){ // hods
+			$ucon = array(
+				'User.is_hod'=>1,				
+			);
+		}else if($approvalSteps['send_to_approvers'] == 1){ // hods
+			$ucon = array(
+				'User.is_approver'=>1,				
+			);
+		}else if($approvalSteps['send_to_admins'] == 1){
+			$ucon = array('User.is_mr'=>1); // admin
+		}else if($approvalSteps['send_to_users'] == 1){ // users
+			$ucon = array('User.id'=>json_decode($autoApprovals['ApprovalStep']['send_to_users'],true));
+		}
+
+		if($approvalSteps['ignore_department'] == 1){
+			$deptCon = array('User.department_id'=>$this->Session->read('User.department_id'));
+		}else{
+			$deptCon = array();
+		}
+
+		if($approvalSteps['ignore_branch'] == 1){
+			$bCon = array('User.branch_id'=>$this->Session->read('User.branch_id'));
+		}else{
+			$bCon = array();
+		}
+
+			
+
+		$this->loadModel('User');
+		$this->User->virtualFields = array(
+			'is_hod' => 'select `is_hod` from employees where employees.id LIKE User.employee_id LIMIT 1'
+		);
+		$approversList = $this->User->find('list', array(
+			'fields'=>array('User.id','User.name'),
+			'conditions' => array(				
+				$ucon,
+				$deptCon,
+				$bCon,
+				'User.id !=' => $creator			
+		)));		
+		return $approversList;	
+	}
+
 }

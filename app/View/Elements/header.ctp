@@ -29,6 +29,12 @@
               'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Document Categories'
             )).'</li>';
 
+          echo '<li>'. $this->Html->link('<i class="fa fa-random"></i>',array('controller'=>'approval_processes', 'action'=>'index','timestamp'=>date('ymdhis')),
+            array('class'=>'tooltip1 btn','escape'=>false,
+              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Auto Approval Process'
+            )).'</li>';
+
+
           echo '<li>'. $this->Html->link('<i class="fa fa-folder-open"></i>',array('controller'=>'qc_documents', 'action'=>'index','timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn','escape'=>false,
               'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Documents'

@@ -202,7 +202,7 @@
 
 							echo "</div><div class='row'>";
 
-							echo "<div class='col-md-4'>".$this->Form->input('date_of_review',array('class'=>'form-control','value'=>date('Y-m-d',strtotime('+3 year')))) . '</div>';
+							echo "<div class='col-md-4'>".$this->Form->input('date_of_review',array('disabled', 'class'=>'form-control','value'=>date('Y-m-d',strtotime('+3 year')))) . '</div>';
 							echo "<div class='col-md-4'>".$this->Form->input('revision_date',array('class'=>'form-control','value'=>date('Y-m-d',strtotime('+3 year 1 week')))) . '</div>'; 
 							echo "<div class='col-md-4'>".$this->Form->input('date_of_next_issue',array('class'=>'form-control','value'=>date('Y-m-d',strtotime('+3 year +2 week')))) . '</div>';
 							
@@ -286,9 +286,11 @@
 													echo "<div class='col-md-2'><br />".$this->Form->input('select_all_users',array('type'=>'checkbox','class'=>'checkbox','onClick'=>'selectall("QcDocumentUserId",this)'))."</div>";
 													echo "</div>";
 
+													$defaultEditors = array_merge(array_keys($approversList),array($this->Session->read('User.id')));
+													
 													echo "<div class='row'>";
 													echo "<div class='col-md-12'><hr /></div>";
-													echo "<div class='col-md-12'>".$this->Form->input('editors',array('name'=>'data[QcDocument][editors][]','label'=>'Who can edit this document?','multiple', 'options'=>$usernames,'default'=>$this->Session->read('User.id'),  'class'=>'form-control', 'required'=>'required',  'style'=>'')) . '</div>'; 
+													echo "<div class='col-md-12'>".$this->Form->input('editors',array('name'=>'data[QcDocument][editors][]','label'=>'Who can edit this document?','multiple', 'options'=>$usernames,'default'=> $defaultEditors,  'class'=>'form-control', 'required'=>'required',  'style'=>'')) . '</div>'; 
 													echo "<div class='hide'><br />".$this->Form->input('select_all_editors',array('type'=>'checkbox','class'=>'checkbox','onClick'=>'selectall("QcDocumentEditors",this)'))."</div>";
 													echo "</div>";
 												}
@@ -303,9 +305,12 @@
 								</div>
 							</div>
 														
-							<?php 		
+							<?php 
 							unset($customArray['documentStatuses'][3]);
 							unset($customArray['documentStatuses'][6]);
+							unset($customArray['documentStatuses'][1]);
+							unset($customArray['documentStatuses'][2]);
+							unset($customArray['documentStatuses'][5]);
 							echo "<div class='row'>";
 							echo "<div class='col-md-8'>".$this->Form->input('document_status',array('default'=>0,'type'=>'radio', 'class'=>'','options'=>$customArray['documentStatuses'])) . '</div>';
 							echo "<div class='col-md-2'><br />" . $this->Form->input('allow_download',array('type'=>'checkbox','class'=>'checkbox')) ."</div>";
@@ -348,10 +353,20 @@
 							?>
 
 						</div>
+						<div class="row">
+						    <div class="col-md-8">
+						        <div class="row">
+						            <div class="col-md-12">
+						            <?php echo $this->element('approval_history',array('approval'=>$approval,'approvals'=>$approvals,'current_approval'=>$this->request->params['named']['approval_id'],'approvalComments',$approvalComments));?>
+						            </div>						            
+						        </div>
+						    </div>
+						    <div class="col-md-4">
+						        <?php echo $this->element('approval_process',array('approvalProcess'=>$approvalProcess));?>
+						    </div>
+						</div>
 
 						<div class="">
-							<?php echo $this->element('approval_form',array('approval'=>$approval));?>
-							<?php echo $this->element('approval_history',array('approval'=>$approval,'approvals'=>$approvals,'current_approval'=>$this->request->params['named']['approval_id'],'approvalComments',$approvalComments));?>
 							<?php echo $this->Form->submit(__('Submit'), array('div' => false, 'class' => 'btn btn-primary btn-success','id'=>'submit_id')); ?>
 							<?php echo $this->Html->image('indicator.gif', array('id' => 'submit-indicator','class'=>'hide')); ?>
 							<?php echo $this->Form->end(); ?>

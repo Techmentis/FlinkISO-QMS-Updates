@@ -1,276 +1,323 @@
 <?php 
-	$approvals= array();
-	$disabledPublish = false;
-	if($customTable){
-		$approverslistFromapprovers = json_decode($customTable['CustomTable']['approvers'],true);
 
-		if(is_array($approverslistFromapprovers)){
-				if(!in_array($this->Session->read('User.id'), $approverslistFromapprovers) || $this->Session->read('User.is_mr') != 1){
-				$disabledPublish = true;
-			}
-		}		
+if(!$currentStep['ApprovalStep']['id']){ ?>
+	<div class="box box-warning">
+		<div class="box-header with-border data-header" data-widget="collapse">
+			<h3 class="box-title"><span class="text-black"><?php echo $approvalPanelTitle;?></span>
+				<span class="text-gray-dark"> Approvals/ Sharing/ Collaboration</span>
+			</h3>
+		</div>
+		<div class="box-body">
+			<div class="row">
+				<div class="col-md-11">
+					<p>Approval process is not available for this form.</p>
+					<p>You can add approval process to this form by adding this form under exsting approval process, or you can create a new process.</p>
+					<p>Once you add this from under any approval process, you must update the form using FlinkISO APIs.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		$().ready(function(){
+			$('[id*="submit_id"]').hide();
+		})
+	</script>
+<?php }else{ ?>
+
+
+	<?php 
+	if($this->action == 'view'){	
+		$preparer = $this->viewVars[Inflector::singularize(Inflector::variable($this->request->controller))][Inflector::classify($this->request->controller)]['prepared_by'];
 	}
-?>
-<script type="text/javascript">
-	$(document).ready(function() {
-		$('select').chosen( { width: '100%' } );
-	});
-</script>
-<?php
-echo $this->Form->hidden('Access.skip_access_check',array('default'=>1));
-echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Session->read('User.id')));
-?>
-<?php 
-$approvalModel = Inflector::classify($this->request->controller);
-$pubshow == false;
-$approvedByList = $approversList;
 
-if($this->action == 'view'){	
-	$preparer = $this->viewVars[Inflector::singularize(Inflector::variable($this->request->controller))][Inflector::classify($this->request->controller)]['prepared_by'];
-}
+	if($this->action == 'edit'){
+		$preparer = $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'];	
+	}
 
-if($this->action == 'edit'){
-	$preparer = $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'];	
-}
+	if($this->action == 'add'){
+		$preparer = $this->Session->read('User.employee_id');
+	}
 
-if($this->action == 'add'){
-	$preparer = $this->Session->read('User.employee_id');
-}
 
-if($approval){ ?>
-	<?php if($preparer && ($preparer == $this->Session->read('User.id') || $preparer == $this->Session->read('User.employee_id'))){ ?>		
+		$approvals= array();
+		$disabledPublish = false;
+		if($customTable){
+			$approverslistFromapprovers = json_decode($customTable['CustomTable']['approvers'],true);
+
+			if(is_array($approverslistFromapprovers)){
+					if(!in_array($this->Session->read('User.id'), $approverslistFromapprovers) || $this->Session->read('User.is_mr') != 1){
+					$disabledPublish = true;
+				}
+			}		
+		}
+
+		if($this->Session->read('User.employee_id') == $preparer || $this->Session->read('User.id') == $preparer ){
+			$disabledPublish = true;
+		}
+	?>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			// $('select').chosen( { width: '100%' } );
+		});
+	</script>
+	<?php
+	echo $this->Form->hidden('Access.skip_access_check',array('default'=>1));
+	echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Session->read('User.id')));
+	?>
+	<?php 
+	$approvalModel = Inflector::classify($this->request->controller);
+	$pubshow == false;
+	$approvedByList = $approversList;
+	if($approval){ ?>
+		<?php if($preparer && ($preparer == $this->Session->read('User.id') || $preparer == $this->Session->read('User.employee_id'))){ ?>		
+			<div class="box box-warning">
+				<?php
+				if(isset($customTable))$approvalPanelTitle = $customTable['CustomTable']['name'];
+				else $approvalPanelTitle = Inflector::humanize($this->request->controller);
+				?>
+				<div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title"><span class="text-black"><?php echo $approvalPanelTitle;?></span><span class="text-gray-dark"> Approvals/ Sharing/ Collaboration
+				<?php if($currentStep) echo '<br /><small>'.$currentStep['ApprovalStep']['title'].'</small>'; ?>
+				</h3>
+					<div class="box-tools pull-right"><button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button></div>
+				</div>
+				<div class="box-body">
+					<div class="row">
+						<div class="col-md-10">
+							<?php 
+							echo $this->Form->input('Approval.'.$approvalModel.'.'.$approvalModel.'.user_id', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'UserId', 'label'=>'Select user you want to send this record for approval',
+								'name'=>'data[Approval]['.$approvalModel.'][user_id][]', 'options' => $approversList,'multiple'));
+							echo $this->Form->hidden('Approval.'.$approvalModel.'.'.$approvalModel.'.from', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'From', 'default'=>$this->Session->read('User.id')));
+							echo $this->Form->hidden('Approval.'.$approvalModel.'.record', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Record','default'=>$this->request->params['pass'][0]));
+							echo $this->Form->hidden('Approval.'.$approvalModel.'.controller_name', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ControllerName','default'=>$this->request->controller));
+							echo $this->Form->hidden('Approval.'.$approvalModel.'.model_name', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ModelName','default'=>Inflector::classify($this->request->controller)));
+
+							?>
+						</div>
+						<div class="col-md-2"><?php echo $this->Html->link('Load All Users','javascript:void(0);',array(
+						'onClick'=>'loadallusers("Approval'.Inflector::Classify($this->request->controller).'UserId_remove")', 'class'=>'btn btn-sm btn-info','style'=>'margin-top:28px'));?> </div>
+						<div class="col-md-12"><?php echo $this->Form->input('Approval.'.$approvalModel.'.comments',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Comments','type'=>'textarea', 'rows'=>2, 'class'=>'form-control'));?></div>
+						<div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_mode',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalMode','type'=>'radio','class'=>'','options'=>array(0=>'View Only',1=>'Edit'),'default'=>1));?></div>
+						<div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_type',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalType','type'=>'radio','class'=>'','options'=>array(0=>'All',1=>'Any'),'default'=>0));?></div>			
+						<div class="col-md-4"><?php 
+						if($approval['Approval']['user_id'] == $this->Session->read('User.id'))	echo $this->Form->input('ApprovalComment.stauts',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Stauts','type'=>'radio','class'=>'','options'=>array(0=>'Pending',1=>'Approved',2=>'Not Approved'),'default'=>0));
+
+						echo $this->Form->hidden('Approval.'.$approvalModel.'.approval_step_id',array('type'=>'text', 'default'=>$currentStep['ApprovalStep']['id']))
+					?></div>
+				</div>
+			</div>
+			<div class="box-footer">
+				<p>Note: If you are sending this record to a non-admin user, make sure that user has proper permission to access this table. Non-admin users must have access to "View records added by other users" plus the branch from which this record is added.</p>
+			</div>
+		</div>			
+	<?php } ?>		
+	<?php
+	if($this->Session->read('User.is_publisher') == 0){	
+		echo "<div class='row'><div class='col-md-12 approval_checkbox_div'>" . $this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox'))."</div></div>"; ?>
+	<?php }
+	?>
+	<?php }else{ 
+		if(isset($customTable) && $customTable['CustomTable']['name'])$approvalPanelTitle = $customTable['CustomTable']['name'];
+		else $approvalPanelTitle = Inflector::humanize($this->request->controller);
+		echo $this->Form->create('Approval',array('role'=>'form','class'=>'form')); ?>
 		<div class="box box-warning">
-			<?php
-			if(isset($customTable))$approvalPanelTitle = $customTable['CustomTable']['name'];
-			else $approvalPanelTitle = Inflector::humanize($this->request->controller);
-			?>
-			<div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title"><span class="text-black"><?php echo $approvalPanelTitle;?></span><span class="text-gray-dark"> Approvals/ Sharing/ Collaboration</h3>
+			<div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title"><span class="text-black"><?php echo $approvalPanelTitle;?></span><span class="text-gray-dark"> Approvals/ Sharing/ Collaboration
+				<?php if($currentStep) echo '<br /><small>'.$currentStep['ApprovalStep']['title'].'</small>'; ?>
+				</h3>
 				<div class="box-tools pull-right"><button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button></div>
 			</div>
 			<div class="box-body">
-				<div class="row">
-					<div class="col-md-10">
-						<?php 
-						echo $this->Form->input('Approval.'.$approvalModel.'.'.$approvalModel.'.user_id', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'UserId', 'label'=>'Select user you want to send this record for approval',
-							'name'=>'data[Approval]['.$approvalModel.'][user_id][]', 'options' => $approversList,'multiple'));
-						echo $this->Form->hidden('Approval.'.$approvalModel.'.'.$approvalModel.'.from', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'From', 'default'=>$this->Session->read('User.id')));
-						echo $this->Form->hidden('Approval.'.$approvalModel.'.record', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Record','default'=>$this->request->params['pass'][0]));
-						echo $this->Form->hidden('Approval.'.$approvalModel.'.controller_name', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ControllerName','default'=>$this->request->controller));
-						echo $this->Form->hidden('Approval.'.$approvalModel.'.model_name', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ModelName','default'=>Inflector::classify($this->request->controller)));
-
-						?>
-					</div>
-					<div class="col-md-2"><?php echo $this->Html->link('Load All Users','javascript:void(0);',array(
-					'onClick'=>'loadallusers("Approval'.Inflector::Classify($this->request->controller).'UserId_remove")', 'class'=>'btn btn-sm btn-info','style'=>'margin-top:28px'));?> </div>
-					<div class="col-md-12"><?php echo $this->Form->input('Approval.'.$approvalModel.'.comments',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Comments','type'=>'textarea', 'rows'=>2, 'class'=>'form-control'));?></div>
-					<div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_mode',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalMode','type'=>'radio','class'=>'','options'=>array(0=>'View Only',1=>'Edit'),'default'=>1));?></div>
-					<div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_type',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalType','type'=>'radio','class'=>'','options'=>array(0=>'All',1=>'Any'),'default'=>0));?></div>			
-					<div class="col-md-4"><?php 
-					if($approval['Approval']['user_id'] == $this->Session->read('User.id'))	echo $this->Form->input('ApprovalComment.stauts',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Stauts','type'=>'radio','class'=>'','options'=>array(0=>'Pending',1=>'Approved',2=>'Not Approved'),'default'=>0));
-				?></div>
-			</div>
-		</div>
-		<div class="box-footer">
-			<p>Note: If you are sending this record to a non-admin user, make sure that user has proper permission to access this table. Non-admin users must have access to "View records added by other users" plus the branch from which this record is added.</p>
-		</div>
-	</div>
-<?php } ?>
-<?php
-// if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1){
-if($this->Session->read('User.is_publisher') == 0){	
-	echo "<div class='row'><div class='col-md-12 approval_checkbox_div'>" . $this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox'))."</div></div>"; ?>
-<?php }
-?>
-<?php }else{ 
-	
-	if(isset($customTable) && $customTable['CustomTable']['name'])$approvalPanelTitle = $customTable['CustomTable']['name'];
-	else $approvalPanelTitle = Inflector::humanize($this->request->controller);
-	echo $this->Form->create('Approval',array('role'=>'form','class'=>'form')); ?>
-	<div class="box box-warning">
-		<div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title"><span class="text-black"><?php echo $approvalPanelTitle;?></span><span class="text-gray-dark"> Approvals/ Sharing/ Collaboration</h3>
-			<div class="box-tools pull-right"><button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button></div>
-		</div>
-		<div class="box-body">
-			<?php if($approvalComments){ ?>
-				<div class="row">
-					<div class="col-md-12">
-						<table cellpadding="0" cellspacing="0" class="table table-hover">
-							<tr>
-								<th><?php echo $this->Paginator->sort('user_id'); ?></th>
-								<th><?php echo $this->Paginator->sort('comments'); ?></th>
-							</tr>			
-							<?php foreach ($approvalComments as $approvalComment): ?>
+				<?php if($approvalComments){ ?>
+					<div class="row">
+						<div class="col-md-12">
+							<table cellpadding="0" cellspacing="0" class="table table-hover">
 								<tr>
-									<td><?php echo h($approvalComment['User']['name']); ?></td>
-									<td><?php echo h($approvalComment['ApprovalComment']['comments']); ?>&nbsp;</td>						
-								</tr>
-							<?php endforeach; ?>					
-						</table>
+									<th><?php echo $this->Paginator->sort('user_id'); ?></th>
+									<th><?php echo $this->Paginator->sort('comments'); ?></th>
+								</tr>			
+								<?php foreach ($approvalComments as $approvalComment): ?>
+									<tr>
+										<td><?php echo h($approvalComment['User']['name']); ?></td>
+										<td><?php echo h($approvalComment['ApprovalComment']['comments']); ?>&nbsp;</td>						
+									</tr>
+								<?php endforeach; ?>					
+							</table>
+						</div>
 					</div>
-				</div>
-			<?php }else{ ?>
+				<?php }else{ ?>
+					
+				<?php } ?>
+				<!-- this form loads on add page -->
+				<?php if($this->action == 'add' || (isset($this->request->data[Inflector::classify($this->request->controller)]['prepared_by']) && $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'] == $this->Session->read('User.employee_id'))){ 
+					$approvalFieldsDispabed = '';	
+				 }else{
+				 	$approvalFieldsDispabed = 'readonly';
+				} ?>
+						<div class="row">
+							<div class="col-md-10">
+								<?php 
+								echo $this->Form->input('Approval.'.$approvalModel.'.user_id', array('class'=>'',$approvalFieldsDispabed, 'id'=>'Approval'.Inflector::Classify($this->request->controller).'UserId','label'=>'Select user you want to send this record for approval',
+									'name'=>'data[Approval]['.$approvalModel.'][user_id][]', 'options' => $approversList,'multiple'));
+								echo $this->Form->hidden('Approval.'.$approvalModel.'.from', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'From','default'=>$this->Session->read('User.id')));
+								echo $this->Form->hidden('Approval.'.$approvalModel.'.record', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Record','default'=>$this->request->params['pass'][0]));
+								echo $this->Form->hidden('Approval.'.$approvalModel.'.controller_name', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ControllerName','default'=>$this->request->controller));
+								echo $this->Form->hidden('Approval.'.$approvalModel.'.model_name', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ModelName','default'=>Inflector::classify($this->request->controller)));
+								?>
+							</div>
+							<div class="col-md-2"><?php echo $this->Html->link('Load All Users','javascript:void(0);',array(
+								'onClick'=>'loadallusers("Approval'.Inflector::Classify($this->request->controller).'UserId_remove")', 'class'=>'btn btn-sm btn-info','style'=>'margin-top:28px'));?> </div>
+							<div class="col-md-12"><?php echo $this->Form->input('Approval.'.$approvalModel.'.comments',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Comments','type'=>'textarea', $approvalFieldsDispabed, 'rows'=>2, 'class'=>'form-control'));?></div>
+							<div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_mode',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalMode','type'=>'radio','class'=>'','options'=>array(0=>'View Only',1=>'Edit'), 'readonly', 'default'=>$currentStep['ApprovalStep']['approval_mode']));?></div>
+							
+							<div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_type',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalType','type'=>'radio','class'=>'', 'readonly', 'options'=>array(0=>'All',1=>'Any'),'default'=>$currentStep['ApprovalStep']['approval_type']));?></div>			
+							<div class="col-md-4"><?php 
+							if($approval['Approval']['user_id'] == $this->Session->read('User.id'))	echo $this->Form->input('ApprovalComment.Stauts',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'stauts','type'=>'radio','class'=>'','options'=>array(0=>'Pending',1=>'Approved',2=>'Not Approved'),'default'=>0));
+						?></div>
+					</div>		
+		</div>
+		<div class="box-footer">		
+			<?php if($this->action == 'view'){
+				if(isset($customTable) && is_array($customTable)){
+					if($approverslistFromapprovers){
+						if(in_array($this->Session->read('User.id'),$approverslistFromapprovers)){
+							$disabledPublish = false;
+						}	
+					}				
+				}
+				echo "<div class='row'>";
+				// if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1){
+				if($this->Session->read('User.is_publisher') == 1 && $disabledPublish == false){
+					echo "<div class='col-md-12 approval_checkbox_div'>" . $this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox'))."</div>";
+					$pubshow = true;
+				}else{
+					echo "<div class='col-md-12 text-warning'><strong>Note:</strong> You are not an Approver, you must send this record for approval and approvers will publish the record after varification. Record will not reflect in any reports or dropsowns unless its approved and published.</div>";
+				}
+
+				echo "<div class='col-md-12'><br />" . $this->Form->submit('Submit',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Submit','class'=>'btn btn-md btn-success')) . "</div>";
+				echo "</div>";
+				echo $this->Form->end();
+			}else{
+
+				if($this->request->data[Inflector::classify($this->request->controller)]['prepared_by'] && $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'] != -1){
+					$prepared_by = $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'];
+					$dis = '\'readonly\' => \'readonly\'';
+				}else{
+					if($this->action = 'add'){
+						// $prepared_by = $this->Session->read('User.employee_id');	
+					}else{
+						$prepared_by = $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'];
+						$dis = '\'readonly\' => \'readonly\'';
+					}				
+					// $dis = '';
+				} 
 				
-			<?php } ?>
-			<!-- this form loads on add page -->
-			<div class="row">
-				<div class="col-md-10">
-					<?php 
-					echo $this->Form->input('Approval.'.$approvalModel.'.user_id', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'UserId','label'=>'Select user you want to send this record for approval',
-						'name'=>'data[Approval]['.$approvalModel.'][user_id][]', 'options' => $approversList,'multiple'));
-					echo $this->Form->hidden('Approval.'.$approvalModel.'.from', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'From','default'=>$this->Session->read('User.id')));
-					echo $this->Form->hidden('Approval.'.$approvalModel.'.record', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Record','default'=>$this->request->params['pass'][0]));
-					echo $this->Form->hidden('Approval.'.$approvalModel.'.controller_name', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ControllerName','default'=>$this->request->controller));
-					echo $this->Form->hidden('Approval.'.$approvalModel.'.model_name', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ModelName','default'=>Inflector::classify($this->request->controller)));
-					?>
-				</div>
-				<div class="col-md-2"><?php echo $this->Html->link('Load All Users','javascript:void(0);',array(
-					'onClick'=>'loadallusers("Approval'.Inflector::Classify($this->request->controller).'UserId_remove")', 'class'=>'btn btn-sm btn-info','style'=>'margin-top:28px'));?> </div>
-				<div class="col-md-12"><?php echo $this->Form->input('Approval.'.$approvalModel.'.comments',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Comments','type'=>'textarea',  'rows'=>2, 'class'=>'form-control'));?></div>
-				<div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_mode',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalMode','type'=>'radio','class'=>'','options'=>array(0=>'View Only',1=>'Edit'),'default'=>1));?></div>
-				<div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_type',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalType','type'=>'radio','class'=>'','options'=>array(0=>'All',1=>'Any'),'default'=>0));?></div>			
-				<div class="col-md-4"><?php 
-				if($approval['Approval']['user_id'] == $this->Session->read('User.id'))	echo $this->Form->input('ApprovalComment.Stauts',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'stauts','type'=>'radio','class'=>'','options'=>array(0=>'Pending',1=>'Approved',2=>'Not Approved'),'default'=>0));
-			?></div>
-		</div>	
-		
-	</div>
-	<div class="box-footer">		
-		<?php if($this->action == 'view'){
-			if(isset($customTable) && is_array($customTable)){
-				if($approverslistFromapprovers){
-					if(in_array($this->Session->read('User.id'),$approverslistFromapprovers)){
-						$disabledPublish = false;
-					}	
-				}				
-			}
-			echo "<div class='row'>";
-			// if($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1){
-			if($this->Session->read('User.is_publisher') == 1 && $disabledPublish == false){
-				echo "<div class='col-md-12 approval_checkbox_div'>" . $this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox'))."</div>";
-				$pubshow = true;
-			}else{
-				echo "<div class='col-md-12 text-warning'><strong>Note:</strong> You are not an Approver, you must send this record for approval and approvers will publish the record after varification. Record will not reflect in any reports or dropsowns unless its approved and published.</div>";
-			}
-
-			echo "<div class='col-md-12'><br />" . $this->Form->submit('Submit',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Submit','class'=>'btn btn-md btn-success')) . "</div>";
-			echo "</div>";
-			echo $this->Form->end();
-		}else{
-
-			if($this->request->data[Inflector::classify($this->request->controller)]['prepared_by'] && $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'] != -1){
-				$prepared_by = $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'];
-				$dis = '\'readonly\' => \'readonly\'';
-			}else{
-				if($this->action = 'add'){
-					$prepared_by = $this->Session->read('User.employee_id');	
+				echo "<div class='row'>";
+				if(isset($customTable) && is_array($customTable)){
+					if($approverslistFromapprovers){
+						if(in_array($this->Session->read('User.id'),$approverslistFromapprovers)){
+							$disabledPublish = false;
+						}	
+					}				
+				}
+				
+				if($disabledPublish == false){				
+					echo "<div class='col-md-2 approval_checkbox_div'><br />".$this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox','onClick'=>'addapp();'))."</div>";
+					$pubshow = true;
+					echo "<div class='col-md-5'>".$this->Form->input('Approval.'.$approvalModel.'.prepared_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'PreparedBy','selected'=>$prepared_by, $dis, 'onchange'=>'addsignature(this.value,this.id)', 'class'=>'form-control select'))."</div>";			
+					echo "<div class='col-md-5'>".$this->Form->input('Approval.'.$approvalModel.'.approved_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovedBy', 'onchange'=>'addsignature(this.value,this.id)', 'options'=>$approvedByList, 'class'=>'form-control select'))."</div>";
 				}else{
 
-				}				
-				$dis = '';
-			} 
+					echo "<div class='col-md-12 hide'>".$this->Form->input('Approval.'.$approvalModel.'.prepared_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'PreparedBy','selected'=>$prepared_by, 'readonly'=>'readonly' , 'class'=>'form-control select'))."</div>";			
+					echo "<div class='col-md-12 text-warning'><strong>Note:</strong> You are not an Approver, you must send this record for approval and approvers will publish the record after varification. Record will not reflect in any reports or dropsowns unless its approved and published.</div>";				
+				}			
+				
+				echo "</div>";
+			}?>
+				<br /><hr />
+				<p>Note: If you are sending this record to a non-admin user, make sure that user has proper permission to access this table. Non-admin users must have access to "View records added by other users" plus the branch from which this record is added.</p>
 			
-			echo "<div class='row'>";
-			if(isset($customTable) && is_array($customTable)){
-				if($approverslistFromapprovers){
-					if(in_array($this->Session->read('User.id'),$approverslistFromapprovers)){
-						$disabledPublish = false;
-					}	
-				}				
-			}
-			
-			if($disabledPublish == false){
-				// if($this->Session->read('User.is_approver') == 1){
-				echo "<div class='col-md-2 approval_checkbox_div'><br />".$this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox','onClick'=>'addapp();'))."</div>";
-				$pubshow = true;
-				echo "<div class='col-md-5'>".$this->Form->input('Approval.'.$approvalModel.'.prepared_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'PreparedBy','selected'=>$prepared_by, $dis, 'class'=>'form-control select'))."</div>";			
-				echo "<div class='col-md-5'>".$this->Form->input('Approval.'.$approvalModel.'.approved_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovedBy', 'onchange'=>'addsignature(this.value,this.id)', 'options'=>$approvedByList, 'class'=>'form-control select'))."</div>";
-			}else{
-
-				echo "<div class='col-md-12 hide'>".$this->Form->input('Approval.'.$approvalModel.'.prepared_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'PreparedBy','selected'=>$prepared_by, 'readonly'=>'readonly' , 'class'=>'form-control select'))."</div>";			
-				echo "<div class='col-md-12 text-warning'><strong>Note:</strong> You are not an Approver, you must send this record for approval and approvers will publish the record after varification. Record will not reflect in any reports or dropsowns unless its approved and published.</div>";				
-			}			
-			
-			echo "</div>";
-		}?>
-			<br /><hr />
-			<p>Note: If you are sending this record to a non-admin user, make sure that user has proper permission to access this table. Non-admin users must have access to "View records added by other users" plus the branch from which this record is added.</p>
+		</div>
+	</div>	
+	<?php echo $this->Form->hidden('Approval.'.$approvalModel.'.approval_step_id',array('type'=>'text', 'default'=>$currentStep['ApprovalStep']['id']))	;?>
+	<?php if($preparer && ($preparer == $this->Session->read('User.id') || $preparer == $this->Session->read('User.employee_id'))){ ?>
 		
-	</div>
-</div>	
-<?php if($preparer && ($preparer == $this->Session->read('User.id') || $preparer == $this->Session->read('User.employee_id'))){ ?>
-	
-<?php }else{
-	// if(($this->Session->read('User.is_mr') == 1 || $this->Session->read('User.is_approver') == 1 || $this->Session->read('User.is_hod') == 1) && $pubshow != 1){
-	if($this->Session->read('User.is_publisher') == 1  && $pubshow != 1){
-		echo $this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox'));
-	}
-} ?>	
-<?php } ?>
-<script type="text/javascript">
-	$().ready(function(){
+	<?php }else{	
+		if($this->Session->read('User.is_publisher') == 1  && $pubshow != 1){
+			echo $this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox'));
+		}
+	} ?>	
+	<?php } ?>
+	<script type="text/javascript">
+		$().ready(function(){
 
-		$("#Approval<?php echo Inflector::Classify($this->request->controller);?>Comments").prop('required',false);
+			$("#Approval<?php echo Inflector::Classify($this->request->controller);?>UserId").chosen({
+			    max_selected_options: 1
+			});
 
-		$("#Approval<?php echo Inflector::Classify($this->request->controller);?>UserId").on('change',function(){			
-			if($("#Approval<?php echo Inflector::Classify($this->request->controller);?>UserId option:selected").text() == 'Select'){
-				$("#Approval<?php echo Inflector::Classify($this->request->controller);?>UserId option:selected").html('').trigger("chosen:updated");				
-			}
 
-			if($("#Approval<?php echo Inflector::Classify($this->request->controller);?>UserId option:selected").text() != 'Select' && $("#Approval<?php echo Inflector::Classify($this->request->controller);?>UserId option:selected").text() != ''){
-				$('#Approval<?php echo Inflector::Classify($this->request->controller);?>Publish').prop('checked', false);
-				$('#Approval<?php echo Inflector::Classify($this->request->controller);?>Publish').prop('disabled',true);
-				$("#Approval<?php echo Inflector::Classify($this->request->controller);?>Comments").prop('required',true);
-				$("#Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("-1").trigger('chosen:updated').prop('disabled',true).trigger('chosen:updated').prop('disabled',false);
-			}else{
-				$('#Approval<?php echo Inflector::Classify($this->request->controller);?>Publish').prop('checked', false);
-				$('#Approval<?php echo Inflector::Classify($this->request->controller);?>Publish').prop('disabled',false);
-				$("#Approval<?php echo Inflector::Classify($this->request->controller);?>Comments").prop('required',false);
-				$("#Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("-1").trigger('chosen:updated').prop('disabled',false).trigger('chosen:updated').prop('disabled',false);
-			}
-		})
+			$("#ApprovalQcDocumentUserId").chosen({
+			    max_selected_options: 1
+			});
 
-		$('select').chosen();
-	});
+			$("#Approval<?php echo Inflector::Classify($this->request->controller);?>Comments").prop('required',false);
 
-	function loadallusers(id){
-		var id = id.replace(/_remove$/, "");
-		$.ajax({
-			url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/return_user_list/",
-				success: function(data, result) {
-					$("#"+id).empty().trigger('chosen:updated');
-					$("#"+id).append(data).trigger('chosen:updated');
-				},
+			$("#Approval<?php echo Inflector::Classify($this->request->controller);?>UserId").on('change',function(){			
+				if($("#Approval<?php echo Inflector::Classify($this->request->controller);?>UserId option:selected").text() == 'Select'){
+					$("#Approval<?php echo Inflector::Classify($this->request->controller);?>UserId option:selected").html('').trigger("chosen:updated");				
+				}
+
+				if($("#Approval<?php echo Inflector::Classify($this->request->controller);?>UserId option:selected").text() != 'Select' && $("#Approval<?php echo Inflector::Classify($this->request->controller);?>UserId option:selected").text() != ''){
+					$('#Approval<?php echo Inflector::Classify($this->request->controller);?>Publish').prop('checked', false);
+					$('#Approval<?php echo Inflector::Classify($this->request->controller);?>Publish').prop('disabled',true);
+					$("#Approval<?php echo Inflector::Classify($this->request->controller);?>Comments").prop('required',true);
+					$("#Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("-1").trigger('chosen:updated').prop('disabled',true).trigger('chosen:updated').prop('disabled',false);
+				}else{
+					$('#Approval<?php echo Inflector::Classify($this->request->controller);?>Publish').prop('checked', false);
+					$('#Approval<?php echo Inflector::Classify($this->request->controller);?>Publish').prop('disabled',false);
+					$("#Approval<?php echo Inflector::Classify($this->request->controller);?>Comments").prop('required',false);
+					$("#Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("-1").trigger('chosen:updated').prop('disabled',false).trigger('chosen:updated').prop('disabled',false);
+				}
+			})
+
+			$('select').chosen();
 		});
-	}
-	
-	function addapp(){
 
-		if ($('#Approval<?php echo Inflector::Classify($this->request->controller);?>Publish').is(':checked') == true) {
-			$("#Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("<?php echo $this->Session->read('User.employee_id')?>").trigger('chosen:updated');
-			addsignature("<?php echo $this->Session->read('User.employee_id')?>","Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy");
-			
-		}else{
-			$("#Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("-1").trigger('chosen:updated');
+		function loadallusers(id){
+			var id = id.replace(/_remove$/, "");
+			$.ajax({
+				url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/return_user_list/",
+					success: function(data, result) {
+						$("#"+id).empty().trigger('chosen:updated');
+						$("#"+id).append(data).trigger('chosen:updated');
+					},
+			});
 		}
-	}
-</script>
-<script type="text/javascript">
-	function addappedit(){
+		
+		function addapp(){
 
-				// if ($('#<?php echo Inflector::Classify($this->request->controller);?>Publish').is(':checked') == true) {
-		$("#<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("<?php echo $this->Session->read('User.employee_id')?>").trigger('chosen:updated');
-				// }else{		
-				// 	$("#<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("-1").trigger('chosen:updated');
-				// }
-	}
-	function approveedit(val){
-		if (val == 1) {
-			addsignature("<?php echo $this->Session->read('User.employee_id')?>","Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy");
-			$('#<?php echo Inflector::Classify($this->request->controller);?>Publish').prop('checked',true);
-			$("#<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("<?php echo $this->Session->read('User.employee_id')?>").trigger('chosen:updated');			
-		}else{		
-			$('#<?php echo Inflector::Classify($this->request->controller);?>Publish').prop('checked',false);
-			$("#<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("-1").trigger('chosen:updated');
+			if ($('#Approval<?php echo Inflector::Classify($this->request->controller);?>Publish').is(':checked') == true) {
+				$("#Approval<?php echo Inflector::Classify($this->request->controller);?>Publish").prop("disabled",false);
+				$("#Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("<?php echo $this->Session->read('User.employee_id')?>").trigger('chosen:updated');
+				addsignature("<?php echo $this->Session->read('User.employee_id')?>","Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy");
+				
+			}else{
+				$("#Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("-1").trigger('chosen:updated');
+			}
 		}
-	}
-</script>
+	</script>
+	<script type="text/javascript">
+		function addappedit(){				
+			$("#<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("<?php echo $this->Session->read('User.employee_id')?>").trigger('chosen:updated');				
+		}
+		function approveedit(val){
+			if (val == 1) {
+				addsignature("<?php echo $this->Session->read('User.employee_id')?>","Approval<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy");
+				$('#<?php echo Inflector::Classify($this->request->controller);?>Publish').prop('checked',true);
+				$("#<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("<?php echo $this->Session->read('User.employee_id')?>").trigger('chosen:updated');			
+			}else{		
+				$('#<?php echo Inflector::Classify($this->request->controller);?>Publish').prop('checked',false);
+				$("#<?php echo Inflector::Classify($this->request->controller);?>ApprovedBy").val("-1").trigger('chosen:updated');
+			}
+		}
+	</script>
+
+<?php } ?>

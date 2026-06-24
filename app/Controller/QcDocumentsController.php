@@ -92,6 +92,7 @@ class QcDocumentsController extends AppController {
             $this->get_approval($this->request->params['named']['approval_id'], $creator);
             $this->_get_approval_comnments($this->request->params['named']['approval_id'], $creator);
         }
+        $this->_fetch_approval_steps();
     }
     /**
      * index method
@@ -126,7 +127,7 @@ class QcDocumentsController extends AppController {
                             IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
                             IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
                             IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
-                        )
+                        )            
                     ELSE "Un"
                 END'
         );
@@ -155,7 +156,31 @@ class QcDocumentsController extends AppController {
         
         $this->paginate = array('all',
             'fields'=>array(
-                'QcDocument.id', 'QcDocument.name','QcDocument.title','QcDocument.document_number','QcDocument.revision_number', 'QcDocument.document_status','QcDocument.publish','QcDocument.parent_document_id','QcDocument.parent_id','QcDocument.prepared_by','QcDocument.approved_by','QcDocument.tables','QcDocument.active_tables','QcDocument.standard_id','QcDocument.file_type','QcDocument.parent_document_id','QcDocument.childDoc','QcDocument.srct','QcDocument.and_or_condition','QcDocument.branches','QcDocument.departments','QcDocument.designations',
+                'QcDocument.id', 
+                'QcDocument.name',
+                'QcDocument.title',
+                'QcDocument.document_number',
+                'QcDocument.revision_number',
+                'QcDocument.document_status',
+                'QcDocument.publish',
+                'QcDocument.parent_document_id',
+                'QcDocument.parent_id',
+                'QcDocument.prepared_by',
+                'QcDocument.approved_by',
+                'QcDocument.tables',
+                'QcDocument.active_tables',
+                'QcDocument.standard_id',
+                'QcDocument.file_type',
+                'QcDocument.parent_document_id',
+                'QcDocument.childDoc',
+                'QcDocument.srct',
+                'QcDocument.and_or_condition',
+                'QcDocument.branches',
+                'QcDocument.departments',
+                'QcDocument.designations',
+                'QcDocument.reviewed_by',
+                'QcDocument.published_by',
+                'QcDocument.standard_id',
                 'PreparedBy.id',
                 'PreparedBy.name',
                 'ApprovedBy.id',
@@ -163,7 +188,9 @@ class QcDocumentsController extends AppController {
                 'IssuedBy.id',
                 'IssuedBy.name',
                 'Standard.id',
-                'Standard.name',                
+                'Standard.name',
+                'ReviewedBy.id',
+                'ReviewedBy.name',                
             ),
             'order' => array('QcDocument.intdocunumber' => 'ASC'),
             'conditions' => array(
@@ -243,18 +270,39 @@ class QcDocumentsController extends AppController {
         if (!$this->QcDocument->exists($id)) {
             throw new NotFoundException(__('Invalid document'));
         }
-        $this->_check_access();
+        
+        $options = array('conditions' => array('QcDocument.' . $this->QcDocument->primaryKey => $id));        
+        $qcDocument = $this->QcDocument->find('first', $options);
+
+        if($this->request->data['Access']['allow_access_user'] == $this->Session->read('User.id')){
+            if($this->request->data['Access']['approval_mode'] == 0 && $qcDocument['QcDocument']['prepared_by'] == $this->Session->read('User.employee_id')){
+                $this->redirect(array('action' => 'edit', $id, 
+                    'approval_id'=> trim($this->request->params['named']['approval_id']),
+                    'approval_step_id'=> trim($this->request->params['named']['approval_step_id']),
+                    'approval_comment_id'=> $this->request->params['named']['approval_comment_id'],
+                    'qc_document_id'=> $id,
+                    'custom_table_id'=> $this->request->params['named']['custom_table_id'],
+                    'prepared_by'=>$qcDocument['QcDocument']['prepared_by'],
+                    'timestamp'=>date('ymdhis')
+                ));
+            }
+        }else{
+            $this->_check_access();
+        }
+        
         if ($this->request->is('post') || $this->request->is('put')) {
             $this->Session->setFlash(__('Approval Saved'));
             if ($this->request->data['Approval']['user_id']) $this->_save_approvals();
             if ($this->request->data['ApprovalComment']['user_id']) $this->_save_approval_comments();
             $this->redirect(array('action' => 'view', $id));
         }
+        
+
         $this->QcDocument->virtualFields = array(
             'childDoc'=>'select count(*) from qc_documents where qc_documents.parent_document_id LIKE QcDocument.id',
         );
-        $options = array('conditions' => array('QcDocument.' . $this->QcDocument->primaryKey => $id));        
-        $qcDocument = $this->QcDocument->find('first', $options);
+        
+
         $this->set('qcDocument', $qcDocument);
         $this->_commons($qcDocument['QcDocument']['created_by']);
         $this->set('childDocs', $this->_get_child_docs($id));
@@ -382,6 +430,8 @@ class QcDocumentsController extends AppController {
             // $this->request->data[$this->modelClass]['publish'] = $this->request->data['Approval']['publish'];
             $this->request->data['QcDocument']['version'] = 1;
 
+            $this->request->data['QcDocument']['approval_step_id'] = $this->request->data['Approval']['QcDocument']['approval_step_id'];
+
             if($this->request->data['QcDocument']['select_all_branches'] == 1){
                 $this->request->data['QcDocument']['branches'] = json_encode(array_keys($this->_get_branch_list()));
             }
@@ -396,7 +446,7 @@ class QcDocumentsController extends AppController {
             }
             if($this->request->data['Approval']['QcDocument']['publish'] == 1){
                 $this->request->data['QcDocument']['publish'] = 1;
-                $this->request->data['QcDocument']['approved_by'] = $this->request->data['Approval']['QcDocument']['approved_by'];
+                $this->request->data['QcDocument']['approved_by'] = $this->request->data['Approval']['QcDocument']['approved_by'];                
             }
 
             $document_number = $this->request->data['QcDocument']['document_number'];
@@ -409,7 +459,6 @@ class QcDocumentsController extends AppController {
             }
 
             $this->request->data['QcDocument']['document_number'] = $new_document_number;
-
             if ($this->QcDocument->save($this->request->data)) {
                 if (!empty($this->request->data['QcDocument']['file']['name'])) $this->_step1($this->request->data, $this->QcDocument->id);
                 else{
@@ -727,6 +776,12 @@ class QcDocumentsController extends AppController {
             $this->request->data['QcDocument']['linked_document_ids'] = json_encode($this->request->data['QcDocument']['linked_document_ids']);
             $this->request->data['QcDocument']['additional_clauses'] = json_encode($this->request->data['QcDocument']['additional_clauses']);
             $this->request->data['QcDocument']['publish'] = $this->request->data['Approval']['QcDocument']['publish'];
+            // if($this->request->data['Approval'][0]['approval_step_id'])$this->request->data['QcDocument']['approval_step_id'] = $this->request->data['Approval'][0]['approval_step_id'];
+            // else $this->request->data['QcDocument']['approval_step_id'] = $this->request->data['Approval']['QcDocument']['approval_step_id'];
+
+
+            
+
             if($this->request->data['QcDocument']['select_all_branches'] == 1){
                 $this->request->data['QcDocument']['branches'] = json_encode(array_keys($this->_get_branch_list()));
             }
@@ -738,12 +793,14 @@ class QcDocumentsController extends AppController {
             }
             if($this->request->data['QcDocument']['select_all_users'] == 1){
                 $this->request->data['QcDocument']['user_id'] = json_encode(array_keys($this->_get_user_list()));
-            }            
-            if($this->request->data['Approval']['QcDocument']['publish'] == 1){
-                $this->request->data['QcDocument']['publish'] = 1;
-                $this->request->data['QcDocument']['approved_by'] = $this->request->data['Approval']['QcDocument']['approved_by'];
-                if($this->request->data['QcDocument']['prepared_by'] == -1)$this->request->data['QcDocument']['prepared_by'] = $this->request->data['Approval']['QcDocument']['prepared_by'];
             }
+            
+            unset($this->request->data['QcDocument']['publish']);
+            // if($this->request->data['Approval']['QcDocument']['publish'] == 1){
+            //     $this->request->data['QcDocument']['publish'] = 1;
+            //     $this->request->data['QcDocument']['approved_by'] = $this->request->data['Approval']['QcDocument']['approved_by'];
+            //     if($this->request->data['QcDocument']['prepared_by'] == -1)$this->request->data['QcDocument']['prepared_by'] = $this->request->data['Approval']['QcDocument']['prepared_by'];
+            // }
 
             if ($this->QcDocument->save($this->request->data)) {
                 // if ($this->_show_approvals())
@@ -821,6 +878,18 @@ class QcDocumentsController extends AppController {
         }
         $this->_commons($this->request->data['QcDocument']['created_by']);
         if($this->Session->read('User.id') != $this->request->data['QcDocument']['created_by'])$this->_doc_access($this->request->data,$access);
+
+        // check all approvals
+        $this->loadModel('Approval');
+        $pandingApprovals = $this->Approval->find('count',array(            
+            'conditions'=>array(
+                'Approval.model_name'=>'QcDocument',
+                'Approval.record'=>$id,
+                'Approval.approval_status'=>0
+            )));
+        
+        $this->set('pandingApprovals',$pandingApprovals);
+
     }
     /**
      * approve method
@@ -1720,6 +1789,5 @@ class QcDocumentsController extends AppController {
         );
         $qcDocuments = $this->paginate();
         $this->set('qcDocuments',$qcDocuments);
-
     }
 }

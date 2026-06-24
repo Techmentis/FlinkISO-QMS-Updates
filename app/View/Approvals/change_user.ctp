@@ -1,6 +1,5 @@
 <?php echo $this->Html->script(array('jquery.validate.min', 'jquery-form.min')); ?>
 <?php echo $this->fetch('script'); ?>
-
 <script>
     $.validator.setDefaults({
         submitHandler: function(form) {

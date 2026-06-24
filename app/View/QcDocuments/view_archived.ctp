@@ -151,7 +151,7 @@
 							if($qcDocument['QcDocument']['archived'] == true){
 								
 
-								$url = Router::url('/', true). 'files' . DS . $this->Session->read('User.company_id') . DS . 'archive' . DS . $qcDocument['QcDocument']['parent_id'] . DS . $qcDocument['QcDocument']['revision_number'] . DS . $qcDocument['QcDocument']['cr_id'] . DS . 'archived.' . $qcDocument['QcDocument']['file_type'];
+								$url = Router::url('/', true). 'files' . '/' . $this->Session->read('User.company_id') . '/' . 'archive' . '/' . $qcDocument['QcDocument']['parent_id'] . '/' . $qcDocument['QcDocument']['revision_number'] . '/' . $qcDocument['QcDocument']['cr_id'] . '/' . 'archived.' . $qcDocument['QcDocument']['file_type'];
 								
 								$key = $qcDocument['QcDocument']['file_key'];
 								$file_type = $qcDocument['QcDocument']['file_type'];

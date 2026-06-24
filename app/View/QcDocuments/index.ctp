@@ -51,7 +51,7 @@ $pptarray = array('ppt','pptx');
 				</tr>
 				<?php if($qcDocuments){ ?>
 					<?php foreach ($qcDocuments as $qcDocument):
-						if($qcDocument['QcDocument']['document_status'] ==  6 || $qcDocument['QcDocument']['document_status'] ==  3 ){
+						if($qcDocument['QcDocument']['document_status'] ==  6 || $qcDocument['QcDocument']['document_status'] ==  3 || $qcDocument['QcDocument']['publish'] == 0){
 							$revisionClasss = ' text-danger';
 						}else{
 							$revisionClasss = '';

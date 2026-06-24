@@ -429,11 +429,15 @@ class ProcessesController extends AppController {
 
     public function _fetch_images($str = null){
         $tag_close = '"/>';
-        foreach (explode('<img', $str) as $key => $value) {
-           if(strpos($value, $tag_close) !== FALSE){
-                $images[] = '<img'. substr($value, 0, strpos($value, $tag_close)).'"/>';
+        if(is_array($str)){
+
+        }else{
+             foreach (explode('<img', $str) as $key => $value) {
+               if(strpos($value, $tag_close) !== FALSE){
+                    $images[] = '<img'. substr($value, 0, strpos($value, $tag_close)).'"/>';
+               }
            }
-       }
+        }       
         return $images;
     }
 

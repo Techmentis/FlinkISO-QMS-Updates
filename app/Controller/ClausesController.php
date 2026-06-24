@@ -128,13 +128,10 @@ class ClausesController extends AppController {
         }
         if ($this->request->is('post') || $this->request->is('put')) {
             $this->request->data['Clause']['system_table_id'] = $this->_get_system_table_id();
-            // $this->request->data[$this->modelClass]['publish'] = $this->request->data['Approval'][$this->modelClass]['publish'];
             $standard = $this->Clause->Standard->find('first',array('conditions'=>array('Standard.id'=>$this->request->data['Clause']['standard_id']),'recursive'=>-1));
             $this->request->data['Clause']['standard'] = $standard['Standard']['name'];
 
             if ($this->Clause->save($this->request->data)) {
-                // if ($this->_show_approvals()) $this->_save_approvals();
-                // if ($this->_show_evidence() == true) $this->redirect(array('action' => 'view', $id));
                 $this->Session->setFlash(__('The clause updated.'));
                 $this->redirect(array('controller' => 'clauses', 'action' => 'edit',$id));
             } else {

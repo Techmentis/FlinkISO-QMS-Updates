@@ -1,3 +1,4 @@
+<?php if($document){ ?>
 <div class="box box-info doc-header">
 	<div class="box-header"><h3 class="box-title" style="width:100%">Document : <?php echo $document['QcDocument']['name']?> <span class="pull-right"><i class="fa fa-folder-open"></i></span></h3></div>
 	<div class="box-body">
@@ -23,3 +24,4 @@
 		</div>
 	</div>
 </div>
+<?php } ?>

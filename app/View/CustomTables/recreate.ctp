@@ -47,7 +47,7 @@
 						
 						
 						<?php echo "<div class='col-md-12'>".$this->Form->input('description',array('class'=>'form-control',)) . '</div>'; ?>	
-						
+						<?php echo "<div class='col-md-12'>".$this->Form->input('approval_process_id',array( 'class'=>'form-control',)) . '</div>'; ?>
 						<?php 
 						if(!empty($this->request->data['CustomTable']['qc_document_id'])){
 							echo "<div class='col-md-12 hide'>".$this->Form->hidden('qc_document_id',array('class'=>'form-control',)) . '</div>';					

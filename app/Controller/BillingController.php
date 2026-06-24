@@ -180,6 +180,12 @@ class BillingController extends AppController {
         }else{
             CakeLog::write('debug','Lib folder copy failed');
         }
+
+        try{
+            $this->requestAction(array('controller'=>'custom_tables','action'=>'recreate_all_forms',1));
+        }catch(Exception $e){
+                
+        }        
         echo "<span class='text-success'><h4>Update Complete!</span></h4></br>";
     }
 

@@ -59,10 +59,11 @@ $pptarray = array('ppt','pptx');
         <div class="icon"><i class="fa fa-folder-open"></i></div></div>
     </div>
   </div>
-  
-  <div class="pie" id="pie" style="margin-bottom:0; padding: 0;">
-    <script type="text/javascript">$("#pie").load("<?php echo Router::url('/', true); ?>graph_panels/index");</script>
-  </div>
+  <?php if($this->Session->read('User.is_mr') == true || $this->Session->read('User.is_hod') == true ){ ?>
+    <div class="pie" id="pie" style="margin-bottom:0; padding: 0;">
+      <script type="text/javascript">$("#pie").load("<?php echo Router::url('/', true); ?>graph_panels/index");</script>
+    </div>
+  <?php } ?>
   <div class="row">
     <div class="col-xs-12">
       <div class="box box-info">
@@ -264,8 +265,7 @@ $pptarray = array('ppt','pptx');
                         <?php
                         if($approvalComment['Approval']['approval_mode'] == 1 ){$action = 'edit';$aClass = "danger";}
                         else {$action = 'view';$aClass = "danger";}
-                        // if($approvalComment['Approval']['approval_mode'] == 1 )$action = 'edit';
-                        // else $action = 'view';
+                        
                         $names = '';
                         $names = '';
                         if($recs[Inflector::classify($approvalComment['Approval']['controller_name'])]['qc_document_id'])$names .= '/qc_document_id:'.$recs[Inflector::classify($data['controller'])]['qc_document_id'];
@@ -274,11 +274,12 @@ $pptarray = array('ppt','pptx');
                             'process_id'];
 
                             $names .= '/approval_id:'.$approvalComment['Approval']['id'].'/approval_comment_id:'.$approvalComment['ApprovalComment']['id'];
-                            $names .= '/approval_id:'.$approvalComment['Approval']['id'];
+                            $names .= '/approval_step_id:'.$approvalComment['Approval']['approval_step_id'];
                             $names .= '/qc_document_id:'.$approvalComment['ApprovalComment']['qc_document_id'];
                             $names .= '/custom_table_id:'.$approvalComment['ApprovalComment']['custom_table_id'];
                             // debug($approvalComment['Approval']['record']);
                             echo $this->Form->create($approvalComment['Approval']['controller_name'],array('controller'=>$approvalComment['Approval']['controller_name'],'action'=>$action.'/'.$approvalComment['Approval']['record'].$names,'id'=>false),array('class'=>'form-control'));
+                            echo $this->Form->hidden('Access.approval_mode',array('default'=>$approvalComment['Approval']['approval_mode']));
                             echo $this->Form->hidden('Access.skip_access_check',array('default'=>1));
                             echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Session->read('User.id')));
                             echo $this->Form->submit($action,array('class'=>'btn btn-xs btn-'.$aClass.''));

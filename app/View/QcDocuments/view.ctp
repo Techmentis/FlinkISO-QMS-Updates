@@ -146,16 +146,17 @@
 											<td><?php echo h($customArray['documentTypes'][$qcDocument['QcDocument']['document_type']]); ?>&nbsp;</td>
 											<th><?php echo __('Document Security'); ?></th>
 											<td><?php echo h($customArray['itCategories'][$qcDocument['QcDocument']['it_categories']]); ?>&nbsp;</td>
-											<th><?php echo __('Issued By'); ?></th>
-											<td><?php echo h($qcDocument['IssuedBy']['name']); ?>&nbsp;</td>		
-										</tr>
-										<tr>
-											<th><?php echo __('Issuing Authority'); ?></th>
-											<td><?php echo $this->Html->link($qcDocument['IssuingAuthority']['name'], array('controller' => 'employees', 'action' => 'view', $qcDocument['IssuingAuthority']['id'])); ?>&nbsp;</td>
 											<th><?php echo __('Prepared By'); ?></th>
 											<td><?php echo h($qcDocument['PreparedBy']['name']); ?>&nbsp;</td>
+										</tr>
+										<tr>
+											<th><?php echo __('Reviewed By'); ?></th>
+											<td><?php echo h($qcDocument['ReviewedBy']['name']); ?>&nbsp;</td>
 											<th><?php echo __('Approved By'); ?></th>
 											<td><?php echo h($qcDocument['ApprovedBy']['name']); ?>&nbsp;</td>
+											<th><?php echo __('Published By'); ?></th>
+											<td><?php echo h($qcDocument['PublishedBy']['name']); ?>&nbsp;</td>
+											
 										</tr>	
 									</tbody>
 								</table>
@@ -165,7 +166,7 @@
 							if($qcDocument['QcDocument']['archived'] == true){
 
 
-								$url = WWW_ROOT . DS . 'files' . DS . $this->Session->read('User.company_id') . DS . 'archive' . DS . $qcDocument['QcDocument']['parent_id'] . DS . $qcDocument['QcDocument']['revision_number'] . DS . $qcDocument['QcDocument']['cr_id'] . DS . 'archived.' . $qcDocument['QcDocument']['file_type'];
+								$url = WWW_ROOT . '/' . 'files' . '/' . $this->Session->read('User.company_id') . '/' . 'archive' . '/' . $qcDocument['QcDocument']['parent_id'] . '/' . $qcDocument['QcDocument']['revision_number'] . '/' . $qcDocument['QcDocument']['cr_id'] . '/' . 'archived.' . $qcDocument['QcDocument']['file_type'];
 								$key = $qcDocument['QcDocument']['file_key'];
 								$file_type = $qcDocument['QcDocument']['file_type'];
 								$file_name = $qcDocument['QcDocument']['title'];
@@ -348,6 +349,10 @@
 										<thead><h4>Document Sharing</h4></thead>
 										<tbody>
 											<tr>
+												<th>Strict Shareing</th>
+												<td><strong><?php echo $qcDocument['QcDocument']['and_or_condition']?'Yes':'No';?> </strong></td>
+											</tr>
+											<tr>
 												<th>Schedule</th>
 												<td><strong><?php echo $qcDocument['Schedule']['name'];?></strong></td>
 											</tr>
@@ -440,8 +445,21 @@
 	<?php echo $this->Js->writeBuffer();?>
 </div>
 <div class="row">
-	<div class="col-md-12">		
-		<?php echo $this->element('approval_history',array('approvals'=>$approvals,'current_approval'=>$this->request->params['named']['approval_id'],'approvalComments',$approvalComments));?>
-	</div>
+    <div class="col-md-8">
+        <div class="row">
+            <div class="col-md-12">			            	
+            <?php echo $this->element('approval_history',array(
+            	'approval'=>$approval,
+            	'approvals'=>$approvals,
+            	'current_approval'=>$this->request->params['named']['approval_id'],
+            	'approvalComments',$approvalComments,
+            	'prepared_by'=>$qcDocument['QcDocument']['prepared_by']
+            ));?>
+            </div>			            
+        </div>
+    </div>
+    <div class="col-md-4">
+        <?php echo $this->element('approval_process',array('approvalProcess'=>$approvalProcess));?>
+    </div>
 </div>
 <script>$.ajaxSetup({beforeSend:function(){$("#busy-indicator").show();},complete:function(){$("#busy-indicator").hide();}});</script>

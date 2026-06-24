@@ -94,8 +94,14 @@ class UsersController extends AppController {
                 if($employee['Employee']['is_approver'] == 1)$user['User']['is_approver'] = 1;
                 else $user['User']['is_approver'] = 0;
 
-                if($employee['Employee']['is_hod'] == 1)$user['User']['is_view_all'] = 1;
-                else $user['User']['is_view_all'] = 0;
+                if($employee['Employee']['is_hod'] == 1){
+                    $user['User']['is_view_all'] = 1;
+                    $user['User']['is_hod'] = 1;
+                }else{
+                    $user['User']['is_view_all'] = 0;    
+                    $user['User']['is_hod'] = 0;
+                }
+                
 
                 $user['User']['is_mt'] = 0;
                 $user['User']['status'] = 1;
@@ -110,7 +116,7 @@ class UsersController extends AppController {
                 $user['User']['prepared_by'] = $this->Session->read('User.department_id');
                 $user['User']['created_by'] = $this->Session->read('User.id');
                 $user['User']['system_table_id'] = '5297b2e7-0a9c-46e3-96a6-2d8f0a000005';
-
+                
                 $this->loadModel('User');
                 $this->User->create();
                 if($this->User->save($user,false)){
@@ -144,6 +150,10 @@ class UsersController extends AppController {
                         }
                         
                     }
+                }else{
+                    debug($this->User->validationErrors);
+                    echo "failed";
+                    exit;
                 }
 
                 return true;
@@ -185,9 +195,7 @@ class UsersController extends AppController {
         if (!$this->User->exists($id)) {
             throw new NotFoundException(__('Invalid user'));
         }
-        // if ($this->_show_approvals()) {
-        //     $this->set(array('showApprovals' => $this->_show_approvals()));
-        // }
+        
         if ($this->request->is('post') || $this->request->is('put')) {
             $this->request->data['User']['system_table_id'] = $this->_get_system_table_id();
             $this->request->data['User']['assigned_branches'] = json_encode($this->request->data['User']['assigned_branches']);
@@ -232,10 +240,22 @@ class UsersController extends AppController {
         if($this->Session->read('User.is_mr') == true){
             if ($this->request->is('ajax')) {
                 $str = base64_decode($this->request->data['str']);
-                $values = explode(',',$str);            
+                $values = explode(',',$str);                    
+                $user = $this->User->find('first',array('recursive'=>-1,'conditions'=>array('User.id'=>$values[0])));
                 
-                $user= $this->User->find('first',array('recursive'=>-1,'conditions'=>array('User.id'=>$values[0])));
                 if($user){
+                    // if HOD
+
+                    if($values[1] == 'is_hod'){
+                        $this->loadModel('Employee');
+                        $employee = $this->Employee->find('first',array('recursive'=>-1,'conditions'=>array('Employee.id'=>$user['User']['employee_id'])));
+                        if($employee){
+                            $employee['Employee']['is_hod'] = $values[2];
+                            $this->Employee->create();
+                            $this->Employee->save($employee,false);
+                            // return $values[2];
+                        }                        
+                    }                    
                     if($values[1] == 'is_mr'){                
                         $user['User']['is_mr'] = $values[2];
                         $user['User']['is_view_all'] = $values[2];
@@ -243,6 +263,7 @@ class UsersController extends AppController {
                         $user['User']['is_publisher'] = $values[2];
                         $user['User']['is_creator'] = $values[2];
                     }
+                    
                     if($values[1] == 'is_view_all'){                
                         $user['User']['is_view_all'] = $values[2];
                     }
@@ -258,8 +279,12 @@ class UsersController extends AppController {
                     if($values[1] == 'is_creator'){
                         $user['User']['is_creator'] = $values[2];
                     }
-                    // $user['User']['copy_acl_from'] = NULL;
-                $this->User->create();
+                    
+                    if($values[1] == 'is_hod'){
+                        $user['User']['is_hod'] = $values[2];
+                    }
+                                        
+                    $this->User->create();
                     if($this->User->save($user,false)){
                         if($values[1] == 'is_mr'){                
                             return $user['User']['is_mr'];
@@ -278,6 +303,9 @@ class UsersController extends AppController {
                         }
                         if($values[1] == 'is_creator'){                
                             return $user['User']['is_creator'];
+                        }
+                        if($values[1] == 'is_hod'){                
+                            return $user['User']['is_hod'];
                         }
                     }else{
                         return 10;
@@ -490,6 +518,7 @@ class UsersController extends AppController {
                         'User.password',
                         'User.is_mr',
                         'User.is_mt',
+                        'User.is_hod',
                         'User.is_approver',
                         'User.is_view_all',
                         'User.is_creator',
@@ -512,8 +541,8 @@ class UsersController extends AppController {
                         'Employee.branch_id',
                         'Branch.id',
                         'Branch.name',
-                        'DepartmentIds.id',
-                        'DepartmentIds.name',
+                        'Department.id',
+                        'Department.name',
                         'Company.id',
                         'Company.name',
                         'Company.is_smtp',
@@ -639,10 +668,15 @@ class UsersController extends AppController {
                         $data['User']['last_activity'] = date('Y-m-d H:i:s');
                         $data['User']['login_status'] = 0; //1
                         $this->User->save($data, false);
+
+                        // debug($user);
+                        // exit;
+
                         $this->Session->write('User.id', $user['User']['id']);
                         $this->Session->write('User.employee_id', $user['Employee']['id']);
                         $this->Session->write('User.branch_id', $user['User']['branch_id']);
                         $this->Session->write('User.department_id', $user['User']['department_id']);
+                        $this->Session->write('User.department', $user['DepartmentIds']['name']);
                         $this->Session->write('User.designation_id', $user['Employee']['designation_id']);
                         $this->Session->write('User.branch', $user['Branch']['name']);
                         $this->Session->write('User.department', $user['Department']['name']);
@@ -653,7 +687,7 @@ class UsersController extends AppController {
                         $this->Session->write('User.is_creator', $user['User']['is_creator']);
                         $this->Session->write('User.is_publisher', $user['User']['is_publisher']);
                         $this->Session->write('User.is_mt', $user['User']['is_mt']);
-                        $this->Session->write('User.hod', $user['Employee']['is_hod']);
+                        $this->Session->write('User.is_hod', $user['User']['is_hod']);
                         $this->Session->write('User.company_id', $user['User']['company_id']);
                         $this->Session->write('User.is_smtp', $user['Company']['is_smtp']);
                         $this->Session->write('User.division_id', $user['User']['division_id']);
@@ -778,8 +812,9 @@ class UsersController extends AppController {
                 $this->Session->write('User.is_mr', $user['User']['is_mr']);
                 $this->Session->write('User.is_creator', $user['User']['is_creator']);
                 $this->Session->write('User.is_publisher', $user['User']['is_publisher']);
-                $this->Session->write('User.is_mt', $user['User']['is_mt']);
-                $this->Session->write('User.hod', $user['Employee']['is_hod']);
+                $this->Session->write('User.is_approver', $user['User']['is_approver']);
+                $this->Session->write('User.is_mt', $user['User']['is_mt']); // view all
+                $this->Session->write('User.is_hod', $user['User']['is_hod']);
                 $this->Session->write('User.company_id', $user['User']['company_id']);
                 $this->Session->write('User.is_smtp', $user['Company']['is_smtp']);
                 $this->Session->write('User.division_id', $user['User']['division_id']);
@@ -956,10 +991,11 @@ class UsersController extends AppController {
             'qc_document_id'=>'select `custom_tables`.`qc_document_id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name  LIMIT 1',
             'process_id'=>'select `custom_tables`.`process_id` from `custom_tables` where `custom_tables`.`table_name` = Approval.controller_name  LIMIT 1'
         );
+        
         $approvalusers = $this->Approval->find('all', 
             array('order' => array('Approval.created' => 'desc'), 
                 'conditions' => array(
-                    'OR'=>array('Approval.status'=>array(NULL,0)),
+                    'Approval.approval_status'=> 0,
                     'OR'=>array('Approval.user_id'=>array($this->Session->read('User.id'),$this->Session->read('User.employee_id')))                    
                 )
             ));
@@ -988,7 +1024,7 @@ class UsersController extends AppController {
             'OR'=>array(
                 'ApprovalComment.user_id'=>array($this->Session->read('User.id'),$this->Session->read('User.employee_id')))
         ), 
-            'group' => array('ApprovalComment.user_id','ApprovalComment.approval_id'), 
+            // 'group' => array('ApprovalComment.user_id','ApprovalComment.approval_id'),             
             'order' => array('ApprovalComment.sr_no' => 'DESC'),
         ));
        

@@ -76,8 +76,10 @@ class CustomTablesController extends AppController {
         $departments = $this->CustomTable->QcDocument->CreatedBy->Department->find('list');
         $branches = $this->CustomTable->QcDocument->CreatedBy->Branch->find('list');
         $schedules = $this->CustomTable->QcDocument->Schedule->find('list');
-        $this->set(compact('processes','standards','clauses','departments','branches','schedules'));
+        $approvalProcesses = $this->CustomTable->ApprovalProcess->find('list');
+        $this->set(compact('processes','standards','clauses','departments','branches','schedules','approvalProcesses'));
         $reserved_fields = array("id", "name", "prepared_by", "approved_by", "created", "modified", "sr_no", "qd_document_id", "file_id", "file_key" ,"created_by" ,"modified_by" ,"status_user_id" ,"record_status" ,"branchid" ,"departmentid" ,"company_id" ,"soft_delete" ,"process_id");
+
     }
     /**
      * index method
@@ -101,7 +103,7 @@ class CustomTablesController extends AppController {
             'linked' => 'select count(*) from `custom_tables` where `custom_tables`.`custom_table_id` LIKE CustomTable.id ',
             'childDoc' => 'select count(*) from `qc_documents` where QcDocument.parent_document_id LIKE `qc_documents`.id ',
             'srct' => '
-                CASE
+                   CASE
                     WHEN QcDocument.and_or_condition = true THEN                             
                         (select count(*) from qc_documents WHERE 
                             qc_documents.id = QcDocument.id AND
@@ -123,7 +125,8 @@ class CustomTablesController extends AppController {
                             IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
                         )
                     ELSE "Un"
-                END'
+                END
+            '
         );
 
         if($this->Session->read('User.is_mr') == false){
@@ -393,6 +396,7 @@ class CustomTablesController extends AppController {
         `publish` tinyint(1) DEFAULT '1' COMMENT '0=Un 1=Pub',
         `record_status` tinyint(1) DEFAULT '0' COMMENT '0=Un-locked, 1=Locked',
         `status_user_id` varchar(36) DEFAULT NULL,
+        `approval_step_id` varchar(36) DEFAULT NULL,
         `created_by` varchar(36) NOT NULL,
         `created` datetime NOT NULL,
         `modified_by` varchar(36) NOT NULL,
@@ -557,9 +561,6 @@ class CustomTablesController extends AppController {
             $file_name = $qcDoc['QcDocument']['title'];
             $document_number = $qcDoc['QcDocument']['document_number'];
             $document_version = $qcDoc['QcDocument']['revision_number'];
-            
-            // $file_name = $document_number . '-' . $file_name . '-' . $document_version . '.' . $file_type;
-
             $file_name = $document_number . '-' . $file_name . '-' . $document_version;
             $file_name = $this->_clean_table_names($file_name);
             $file_name = $file_name . '.' . $file_type;
@@ -825,7 +826,7 @@ class CustomTablesController extends AppController {
                     'recursive'=>-1,
                     'fields'=>array('CustomTable.id','CustomTable.fields'),
                     'conditions'=>array('CustomTable.qc_document_id'=>$qcDocument['QcDocument']['parent_document_id'])));
-
+                
                 if($parent){
                     $parentFields = json_decode($parent['CustomTable']['fields'],true);                    
                     foreach ($parentFields as $f) {                        
@@ -1401,8 +1402,20 @@ class CustomTablesController extends AppController {
 
             $this->request->data['CustomTable']['belongs_to'] = json_encode($belongsTo);
             $belongsTo = null;
-
             if ($this->CustomTable->save($this->request->data,false)) {
+
+                // update approval process 
+                $this->loadModel('ApprovalProcess');
+                $apprpvalProcess = $this->ApprovalProcess->find('first',array('conditions'=>array('ApprovalProcess.id'=>$this->request->data['CustomTable']['approval_process_id'])));
+                if($apprpvalProcess){
+                    $applicableTos = json_decode($apprpvalProcess['ApprovalProcess']['applicable_to'],true);
+                    if(!in_array($this->request->data['CustomTable']['id'], $applicableTos)){
+                        $applicableTos[] = $this->request->data['CustomTable']['id'];
+                        $apprpvalProcess['ApprovalProcess']['applicable_to'] = json_encode($applicableTos);
+                        $this->ApprovalProcess->create();
+                        $this->ApprovalProcess->save($apprpvalProcess,false);
+                    }
+                }
                 unset($this->request->data['History']);
                 unset($this->request->data['CustomTable']['pre_fields']);
                 
@@ -2734,6 +2747,7 @@ class CustomTablesController extends AppController {
                 `publish` tinyint(1) DEFAULT '1' COMMENT '0=Un 1=Pub',
                 `record_status` tinyint(1) DEFAULT '0' COMMENT '0=Un-locked, 1=Locked',
                 `status_user_id` varchar(36) DEFAULT NULL,
+                `approval_step_id` varchar(36) DEFAULT NULL,
                 `created_by` varchar(36) NOT NULL,
                 `created` datetime NOT NULL,
                 `modified_by` varchar(36) NOT NULL,

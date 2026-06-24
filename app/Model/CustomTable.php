@@ -156,6 +156,13 @@ public $belongsTo = array(
 		'conditions' => '',
 		'fields' => array('id', 'name'),
 		'order' => ''
+	),
+	'ApprovalProcess' => array(
+		'className' => 'ApprovalProcess',
+		'foreignKey' => 'approval_process_id',
+		'conditions' => '',
+		'fields' => array('id', 'title'),
+		'order' => ''
 	)
 );
 
@@ -244,7 +251,7 @@ public $hasMany = array(
 		'exclusive' => '',
 		'finderQuery' => '',
 		'counterQuery' => ''
-	),
+	)
 );
 
 public $customArray = array(

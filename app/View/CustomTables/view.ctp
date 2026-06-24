@@ -82,9 +82,7 @@ echo $this->fetch('script');
 					$mode = 'view';
 
 					$file_path = $customTable['CustomTable']['id'];
-
-
-	        // $file = $document_number.'-'.$file_name.'-'.$document_version.'.'.$file_type;
+	        
 					$file = $document_number.'-'.$file_name.'-'.$document_version;
 					$file = ltrim(rtrim($file));
 					$file = str_replace('-', '_', $file);
@@ -130,10 +128,8 @@ echo $this->fetch('script');
 					$key = $process['Process']['file_key'];
 					$file_type = $process['Process']['file_type'];
 					$file_name = $process['Process']['name'];
-			        // $document_number = $process['QcDocument']['document_number'];
-			        // $document_version = $process['QcDocument']['revision_number'];
-
-					$file_type = $process['Process']['file_type'];
+			        
+			        $file_type = $process['Process']['file_type'];
 					
 					if($file_type == 'doc' || $file_type == 'docx'){
 						$documentType = 'word';
@@ -274,7 +270,11 @@ echo $this->fetch('script');
 								}
 							}
 
-							if($customTable['CustomTable']['custom_table_id'] == '') 	echo $this->Html->link('<i class="fa fa-link text-info fa-lg "></i>',array('action'=>'add_child','custom_table_id'=> $customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id'],'process_id'=>$customTable['CustomTable']['process_id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> 'Link new table to this table'));
+							if($customTable['CustomTable']['custom_table_id'] == ''){
+								echo $this->Html->link('<i class="fa fa-list-ol fa-lg "></i>',array('action'=>'add_child','custom_table_id'=> $customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id'],'process_id'=>$customTable['CustomTable']['process_id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> 'Link new table to this table'));
+								
+								echo $this->Html->link('<i class="fa fa-chain fa-lg"></i>',array('controller'=>'approval_processes','action'=>'add','controller_name'=>Inflector::classify($customTable['CustomTable']['table_name']), 'timestamp'=>date('ymdhis'),'custom_table_id'=>$customTable['CustomTable']['id']),array('escape'=>false,'class'=>'tooltip1 btn btn-sm','data-toggle'=>'tooltip', 'data-trigger'=>'hover','data-placement'=>'bottom', 'title'=> 'Add Auto Approval Process'));    	
+							} 	
 							?>
 						</div>
 

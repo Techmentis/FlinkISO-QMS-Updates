@@ -4,7 +4,7 @@ $env = $env;
 echo $message = "
 <style>
 body {
-	font-family: Arial;font-size: 13px;padding: 20px 0px;width: 100%;line-height: 20px;background: #ffffff;
+	margin:0; padding: 10px; background-color: #fff; width:100%; font-family:arial;text-align:left;
 }
 
 label{ }

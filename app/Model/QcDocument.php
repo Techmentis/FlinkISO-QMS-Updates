@@ -255,6 +255,13 @@ public $belongsTo = array(
 		'fields' => array('id', 'name'),
 		'order' => ''
 	),
+	'ReviewedBy' => array(
+		'className' => 'Employee',
+		'foreignKey' => 'reviewed_by',
+		'conditions' => '',
+		'fields' => array('id', 'name'),
+		'order' => ''
+	),
 	'ApprovedBy' => array(
 		'className' => 'Employee',
 		'foreignKey' => 'approved_by',
@@ -265,6 +272,13 @@ public $belongsTo = array(
 	'IssuedBy' => array(
 		'className' => 'Employee',
 		'foreignKey' => 'issued_by',
+		'conditions' => '',
+		'fields' => array('id', 'name'),
+		'order' => ''
+	),
+	'PublishedBy' => array(
+		'className' => 'Employee',
+		'foreignKey' => 'published_by',
 		'conditions' => '',
 		'fields' => array('id', 'name'),
 		'order' => ''
@@ -344,7 +358,7 @@ array(
 		'3' => 'Public/ Uncontrolled'
 	),'documentTypes' => array(
 		'0'=>'Manual',
-		'1'=>'Procedure',
+		'1'=>'Procedure (SOP)',
 		'2'=>'Process',
 		'3'=>'Work Instructions',
 		'4'=>'Policy',

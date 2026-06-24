@@ -22,7 +22,7 @@
  */
 
 App::uses("Model", "Model");
-
+App::uses('ClassRegistry', 'Utility');
 /**
  * Application model for Cake.
  *
@@ -39,7 +39,7 @@ class AppModel extends Model
     {        
         foreach ($this->data[$this->alias] as $key => $value) {
             if($value && !is_array($value))$this->data[$this->alias][$key] = ltrim(rtrim($value));
-        }
+        }        
     }
 
     public function beforeFind($query)
@@ -49,6 +49,11 @@ class AppModel extends Model
 
     public function afterSave($created, $options = []){
 
+    }
+
+    public function beforeDelete($cascade = true) {
+        $this->deletedId = $this->id;
+        return true;
     }
 
     public function afterDelete(){
@@ -75,7 +80,7 @@ class AppModel extends Model
             if($this->alias == 'QcDocument'){
                 $path = Configure::read('files') . DS . 'qc_documents'. DS . $this->id;
                 $folder = new Folder($path);
-                if($this->id)$folder->delete();
+                if($this->id)$folder->delete();                
             }
 
             if($this->alias == 'Process'){
@@ -123,9 +128,13 @@ class AppModel extends Model
         }
 
         if($this->alias == 'File'){
-                $path = Configure::read('files') . DS . 'files'. DS . $this->id;
-                $folder = new Folder($path);
-                if($this->id)$folder->delete();
-            }
+            $path = Configure::read('files') . DS . 'files'. DS . $this->id;
+            $folder = new Folder($path);
+            if($this->id)$folder->delete();
+        }
+
+        // delete approvals and related records                
+        $this->Approval = ClassRegistry::init('Approval');
+        $this->Approval->deleteAll(array('Approval.record' => $this->deletedId,'Approval.model_name'=>$this->alias));
     }    
 }

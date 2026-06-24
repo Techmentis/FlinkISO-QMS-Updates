@@ -88,9 +88,7 @@
 			$.ajax({
 				url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/update_parent/"+id+"/"+value,
 				success: function(data, result) {
-	        	// $(".fa-spin").removeClass('show').addClass('hide');
-	        	// $("#downloadpdf").html(data);
-				},						        
+	        	},						        
 			});	
 		}
 	</script>

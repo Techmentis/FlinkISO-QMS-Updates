@@ -216,6 +216,16 @@
 				<?php 		echo "<div class='row'>";
 				unset($customArray['documentStatuses'][3]);
 				unset($customArray['documentStatuses'][6]);
+
+				if($pandingApprovals != 0){
+					if($this->request->data['QcDocument']['publish'] == 0){
+						unset($customArray['documentStatuses'][1]);
+						unset($customArray['documentStatuses'][2]);
+						unset($customArray['documentStatuses'][5]);
+					}
+				}
+				
+
 				echo "<div class='col-md-6'>".$this->Form->input('document_status',array('default'=>0,'type'=>'radio', 'class'=>'','options'=>$customArray['documentStatuses'])) . '</div>';
 				echo "<div class='col-md-3'><br />" . $this->Form->input('allow_download',array('type'=>'checkbox','class'=>'checkbox')) ."</div>";
 				echo "<div class='col-md-3'><br />" . $this->Form->input('allow_print',array('type'=>'checkbox','class'=>'checkbox')) ."</div>";
@@ -249,27 +259,28 @@
 				<div class="col-md-12">
 					<p><strong>Note:</strong> By default, update version in set to NO. If you want to update the version, click yes. It will create a copy of this document and store it as a older version. This may affect your billing.</p>		
 				</div>
+			</div>			
+			<div class="row">
+			    <div class="col-md-8">
+			        <div class="row">
+			            <div class="col-md-12">			            	
+			            <?php echo $this->element('approval_history',array('approval'=>$approval,'approvals'=>$approvals,'current_approval'=>$this->request->params['named']['approval_id'],'approvalComments',$approvalComments));?>
+			            </div>			            
+			        </div>
+			    </div>
+			    <div class="col-md-4">
+			        <?php echo $this->element('approval_process',array('approvalProcess'=>$approvalProcess));?>
+			    </div>
 			</div>
+
 			<div class="">
-				<?php
-				if ($showApprovals && $showApprovals['show_panel'] == true) {		
-					if($this->request->params['named']['approval_id'])echo $this->element('approval_form',array('approval'=>$approval));
-					else echo $this->element('approval_form');
-				} else {
-					echo $this->Form->input('publish', array('label' => __('Publish')));
-				}
-				?>
 				<?php echo $this->Form->submit(__('Submit'), array('div' => false, 'class' => 'btn btn-primary btn-success','id'=>'submit_id')); ?>
-				<?php echo $this->Html->image('indicator.gif', array('id' => 'submit-indicator')); ?>
+				<?php echo $this->Html->image('indicator.gif', array('id' => 'submit-indicator','class'=>'hide')); ?>
 				<?php echo $this->Form->end(); ?>
 
 				<?php echo $this->Js->writeBuffer();?>
 			</div>
-			<div class="row">
-				<div class="col-md-12">		
-					<?php echo $this->element('approval_history',array('approvals'=>$approvals,'current_approval'=>$this->request->params['named']['approval_id'],'approvalComments',$approvalComments));?>
-				</div>
-			</div>
+		</div>
 		</div>
 
 	</div>

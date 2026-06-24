@@ -1,7 +1,5 @@
 <script  src="https://www.paypal.com/sdk/js?client-id=BAABcB51IbtCT0Yb0sCwfVdbeHIwxjR0kjU2_3xL3gntGNF99TxO3zuuY7fRWbcg2_jd12CpQgpJZlib4E&components=hosted-buttons&disable-funding=venmo&currency=USD"></script>
-<style>
-  #checkout-button{display: none;}
-</style>
+<style>#checkout-button{display: none;}</style>
 <?php 
 $str = 'company_id:'.$this->Session->read('User.company_id');
 $response =  $this->requestAction(array('action'=>'curl','post','custom_forms','elements','data'=>json_encode(array($existingFields,$fieldDetails))));

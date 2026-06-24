@@ -1,14 +1,11 @@
 <?php echo $this->Html->script(array('jquery.validate.min', 'jquery-form.min')); ?>
 <?php echo $this->fetch('script'); ?>
-
 <?php echo $this->Html->css(array('dragdrop')); ?>
 <?php echo $this->fetch('css'); ?>
-
 <style type="text/css">
 	#dropHere {padding: 0px;width:100%;height: 736px;border: 1px solid #dddddd;margin: 10px 0;border-radius: 2px;background-image: url('<?php echo Router::url('/', true); ?>img/vline.svg'); background-repeat: repeat-y;background-size: 100% 100%;
 	}
 </style>
-
 <div id="customTables_ajax">
 	<?php echo $this->Session->flash();?>
 	<div class="customTables ">
@@ -31,6 +28,7 @@
 					<?php echo "<div class='col-md-12 hide'>".$this->Form->hidden('fields',array('class'=>'form-control',)) . '</div>'; ?>
 					<?php echo "<div class='col-md-2'>".$this->Form->input('password',array('type'=>'password', 'class'=>'form-control',)) . '</div>'; ?>
 					<?php echo "<div class='col-md-2'>".$this->Form->input('re-password',array('type'=>'password', 'class'=>'form-control',)) . '</div>'; ?>				
+					<?php echo "<div class='col-md-12'>".$this->Form->input('approval_process_id',array( 'class'=>'form-control',)) . '</div>'; ?>
 					<?php 
 					if(!empty($this->request->params['named']['qc_document_id'])){						
 						echo "<div class='col-md-12 hide'>".$this->Form->hidden('qc_document_id',array('class'=>'form-control','default'=>$this->request->params['named']['qc_document_id'])) . '</div>';					
@@ -178,8 +176,6 @@
 					<div class="box-body">
 						<div class="row">
 							<?php 
-							
-							// echo "<div class='col-md-6'><br /><div class='nomargin-checkbox'><label>Do you want this document to be shared with users for scheduled data enrty? If yes, click YES below. You must define schedule & data type.</label>".$this->Form->input('add_records',array('type'=>'checkbox','label'=>'Yes')) . '</div></div>'; 
 							echo "<div class='col-md-2'>".$this->Form->input('QcDocument.schedule_id',array(
 								'required'=>'required',
 								)) . '</div>'; 
@@ -232,16 +228,12 @@
 			<?php		
 			echo $this->Form->hidden('count',array('default'=>1));
 			
-			if($this->request->params['named']['qc_document_id']){
-		// echo $this->Form->hidden('qc_document_id',array('default'=>$this->request->params['named']['qc_document_id']));	
+			if($this->request->params['named']['qc_document_id']){		
 				echo $this->Form->hidden('table_type',array('default'=>0));	
 			}else if($this->request->params['named']['process_id']){
 				echo $this->Form->hidden('process_id',array('default'=>$this->request->params['named']['process_id']));
-		// echo $this->Form->hidden('table_type',array('default'=>1));	
 			}
-			
-			
-	// echo $this->Form->hidden('table_name',array('default'=>$tableName));
+						
 			echo $this->Form->hidden('History.pre_post_values', array('value'=>json_encode($this->data)));
 			echo $this->Form->input('branchid', array('type' => 'hidden', 'value' => $this->Session->read('User.branch_id')));
 			echo $this->Form->input('departmentid', array('type' => 'hidden', 'value' => $this->Session->read('User.department_id')));		

@@ -90,7 +90,7 @@ public $belongsTo = array(
 		'foreignKey' => 'approval_id',
 		'conditions' => '',
 		'fields' => array('id','status','approval_mode','approval_status','controller_name','record','model_name','created','comments','user_id','from'),
-		'order' => ''
+		'order' => '',
 	),
 	'From' => array(
 		'className' => 'User',

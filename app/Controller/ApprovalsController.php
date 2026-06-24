@@ -69,30 +69,18 @@ class ApprovalsController extends AppController {
             ),            
             'conditions' => array(
                 $conditions, 
-                'Approval.soft_delete' => 0,
-                // 'DATE_FORMAT(Approval.created,"%Y-%m-%d") between ? and ?' => array(date('Y-m-d',strtotime($startDate)),date('Y-m-d',strtotime($endDate))),
-                // 'Approval.new_date BETWEEN ? AND ?' => array($startDate,$endDate),
-                
-                // 'or'=>array(
-                //     "Approval.status" => NULL,
-                //     "Approval.status" => 'Forwarded',
-                //     'Approval.status_user_id'=>$this->Session->read('User.id')) 
+                'Approval.soft_delete' => 0,                
             ),                         
-            'order' => array('Approval.sr_no DESC'), 
-            // 'group'=> array('Approval.record'), 
+            'order' => array('Approval.sr_no DESC'),             
             'recursive' => -1,
             'limit'=>$limit
         ));
         
-        $newApprovals = $froms = $tos = $users = array();
-        
+        $newApprovals = $froms = $tos = $users = array();        
         foreach ($approvals as $key=>$approval){            
-            $this->loadModel($approval['Approval']['model_name']);
-            
-            $records= $this->{$approval['Approval']['model_name']}->find('first', array('conditions'=>array('id'=>$approval['Approval']['record']), 'recursive' => -1));
-            
-            if($this->request->data['Approval']['publish_status'] && $this->request->data['Approval']['publish_status'] != -1){
-                
+            $this->loadModel($approval['Approval']['model_name']);            
+            $records= $this->{$approval['Approval']['model_name']}->find('first', array('conditions'=>array('id'=>$approval['Approval']['record']), 'recursive' => -1));            
+            if($this->request->data['Approval']['publish_status'] && $this->request->data['Approval']['publish_status'] != -1){                
                 if($this->request->data['Approval']['publish_status'] == 1){
                     if($records[$approval['Approval']['model_name']]['publish'] == 0 || $records[$approval['Approval']['model_name']]['publish'] == null){
                         $approval['Approval']['title'] =  $records[$approval['Approval']['model_name']][$this->{$approval['Approval']['model_name']}->displayField];
@@ -129,8 +117,7 @@ class ApprovalsController extends AppController {
             $usersList[$app['Approval']['user_id']] = $app['Approval']['user_id'];
             $usersList[$app['Approval']['from']] = $app['Approval']['from'];
             $modelNames[$app['Approval']['model_name']] = $app['Approval']['model_name'];
-        }
-        
+        }        
         if($usersList){
             $this->loadModel('User');
             $users = $this->User->find('list',array(
@@ -144,18 +131,14 @@ class ApprovalsController extends AppController {
             $publishStatuses = array(1=>'Unpublished',2=>'Published');
     
             $froms = $tos = $users;
-        }
-        
+        }        
         $this->set(compact('froms','tos','modelNames','statuses','recordStatuses','publishStatuses','startDate','endDate'));
         $this->_get_count();
     }
 
     public function change_user(){
         if ($this->request->is('post')) {
-            
-            
-            $model = Inflector::Classify($this->request->data['Approval']['controller_name']);
-            
+            $model = Inflector::Classify($this->request->data['Approval']['controller_name']);            
             $this->loadModel($model);
             $rec = $this->$model->find('first',array('conditions'=>array($model.'.id'=>$this->request->data['Approval']['record'])));
             if($rec && strlen($this->request->data['Approval']['approver_id']) == 36){
@@ -182,8 +165,7 @@ class ApprovalsController extends AppController {
 
         }
         $approval  = $this->Approval->find('first',array('conditions'=>array('Approval.id'=>$this->request->params['pass'][0])));
-        $this->set('approval',$approval);
-        
+        $this->set('approval',$approval);    
     }
 
     public function approved() {
@@ -196,7 +178,6 @@ class ApprovalsController extends AppController {
             $condition2 = array();
         }
         $this->paginate = array('order' => array('Approval.modified' => 'DESC'), 'conditions' => array($conditions, $condition2, "Approval.status " => 1 ), 'recursive' => -1);
-
         $approvals = $this->paginate();
         foreach ($approvals as $key=>$approval){
          
@@ -208,10 +189,8 @@ class ApprovalsController extends AppController {
 
         $PublishedEmployeeList = $this->_get_employee_list();
         $this->set('PublishedEmployeeList', $PublishedEmployeeList);
-
         $userList = $this->_get_user_list();
         $this->set('userList', $userList);
-        
         $this->set('approvals', $approvals);        
         $this->_get_count();
     }
@@ -228,12 +207,7 @@ class ApprovalsController extends AppController {
                 $approval['Approval']['status'] = 1;
                 $this->Approval->create();
                 if ($this->Approval->save($approval)) {
-                    // check if approval is all or any
-                    // if all check if other's approved it
-                    // if yes then publish the recod
-                    // 0 = all / 1 = any
-                    if ($approval['Approval']['approval_type'] == 0) {
-                        // check other closers
+                    if ($approval['Approval']['approval_type'] == 0) {                        
                         $all = $approval = $this->Approval->find('count', array('conditions' => array('Approval.model_name' => $approval['Approval']['model_name'], 'Approval.model_name' => $approval['Approval']['record'],)));
                         $approved = $this->Approval->find('count', array('conditions' => array('Approval.status' => 1, 'Approval.model_name' => $approval['Approval']['model_name'], 'Approval.model_name' => $approval['Approval']['record'],)));
                         if ($all == $approved) {
@@ -255,8 +229,7 @@ class ApprovalsController extends AppController {
                         } else {
                             echo "Changed saved";
                         }
-                    } else {
-                        // publish the record
+                    } else {                        
                         $model = $approval['Approval']['model_name'];
                         $this->loadModel($model);
                         $rec = $this->$model->find('first', array('recursive' => - 1, 'conditions' => array($model . '.id' => $approval['Approval']['record']),));
@@ -283,7 +256,6 @@ class ApprovalsController extends AppController {
             $id = $this->request->params['named']['id'];
             $comments = $this->request->params['named']['comments'];
             $approval = $this->Approval->find('first', array('recursive' => - 1, 'conditions' => array('Approval.id' => $id)));            
-            // check if user can close this
             if ($this->Session->read('User.id') == $approval['Approval']['user_id']) {
                 $approval['Approval']['approver_comments'] = $comments;
                 $approval['Approval']['modified'] = date('Y-m-d H:i:s');
@@ -304,6 +276,7 @@ class ApprovalsController extends AppController {
         $this->Approval->delete($id);
         $this->Approval->ApprovalComment->deleteAll(array('ApprovalComment.approval_id'=>$id));
         $this->Approval->ApprovalComment->deleteAll(array('ApprovalComment.id'=>$id));
+        $this->_release_record($approval['Approval']['model_name'],$approval['Approval']['record']);
         $this->Session->setFlash(__('Approval Record Deleted'));
         $this->redirect(array('controller'=>'users', 'action' => 'dashboard'));
     }
@@ -314,5 +287,19 @@ class ApprovalsController extends AppController {
         $this->Approval->ApprovalComment->delete($id);
         $this->Session->setFlash(__('Approval Comment Deleted'));
         $this->redirect(array('controller'=>'users', 'action' => 'dashboard'));
+    }
+
+    public function _release_record($model = null, $record = null){
+        if($model){
+            $this->loadModel($model);
+            $rec = $this->$model->find('first', array('conditions' => array($model . '.id' => $record), 'recursive' => - 1));
+            if ($rec) {
+                $rec[$model]['record_status'] = 1;
+                $rec[$model]['publish'] = 0;
+                $this->$model->create();
+                $this->$model->save($rec);
+            }
+        }
+        return true;
     }
 }

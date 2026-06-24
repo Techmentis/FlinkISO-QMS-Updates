@@ -1,8 +1,23 @@
 <?php
 echo $this->Form->hidden('Access.skip_access_check',array('default'=>1));
 echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Session->read('User.id')));
+echo $this->Form->hidden('Approval.'.$approvalModel.'.approval_step_id',array('type'=>'text', 'default'=>$currentStep['ApprovalStep']['id']));
+$showmessage = false;
+
+
+if($this->request->data[Inflector::classify($this->request->controller)]['prepared_by'])$prepared_by = $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'];
+else if($this->request->params['named']['prepared_by'])$prepared_by = $this->request->params['named']['prepared_by'];
+
+debug($prepared_by);
+
 ?>
-<?php if($approvals){ ?>
+<style>
+	.btn-success{
+		background-color:#5cb85c !important;
+		color: #fff !important;
+	}
+</style>
+<?php if($approvals){ ?>	
 	<style type="text/css">
 		.font-weight-bold{font-weight: 600;color: #3566b1 !important;}.table-border-dark{border: 1px solid #000;}.btn .badge{position: absolute;top: -10px;}
 	</style>
@@ -31,7 +46,9 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 							<th class="text-right">Approve / Reject</th>
 						</tr>
 						
-						<?php foreach ($approvals as $approval):
+						<?php 
+						$lastapproval = $approvals[0];
+						foreach ($approvals as $approval):
 							if($approval['Approval']['approval_mode'] == 1 && $approval['Approval']['approval_status'] == 0){ 
 								if($this->viewVars['customTable']['CustomTable']['table_name']){
 								?>
@@ -44,6 +61,7 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 							<?php } }
 
 							$appClass = '';
+							$badgeClass = ' btn-default';
 							if($approval['Approval']['id'] == $current_approval)$class = ' font-weight-bold';
 							else $class = '';
 
@@ -53,15 +71,22 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 							if($approval['Approval']['status'] == 1)$badgeClass = ' btn-success';
 							elseif($approval['Approval']['status'] == 2)$badgeClass = ' btn-danger';
 							else $badgeClass = ' bg-red';
+
+
+							if($badgeClass == ' bg-red')$showmessage = true;	
+
+							if(!$currentStep['ApprovalStep']['id'])$approval_step_id = $approval['Approval']['approval_step_id'];
+							else $approval_step_id = $currentStep['ApprovalStep']['id'];
+
 							?>
 							<?php if($class == ' font-weight-bold'){ ?>					
 								<script type="text/javascript">
 									$().ready(function(){
-										$('#<?php echo $approval['Approval']['id'];?>_div').load('<?php echo Router::url('/', true); ?>approval_comments/approval_comments/approval_id:<?php echo $approval['Approval']['id'];?>/action:<?php echo $this->action;?>');
+										$('#<?php echo $approval['Approval']['id'];?>_div').load('<?php echo Router::url('/', true); ?>approval_comments/approval_comments/approval_id:<?php echo $approval['Approval']['id'];?>/action:<?php echo $this->action;?>/approval_step_id:<?php echo $approval_step_id;?>/prepared_by:<?php echo $prepared_by;?>');
 									});
 								</script>
 							<?php } ?>				
-							<tr class="<?php echo $class;?> <?php echo $appClass;?>" onclick="showcomments('<?php echo $approval['Approval']['id']?>','<?php echo $approval['Approval']['id']?>_i');" style="cursor: pointer;">
+							<tr class="<?php echo $class;?> <?php echo $appClass;?>" onclick="showcomments('<?php echo $approval['Approval']['id']?>','<?php echo $approval['Approval']['id']?>_i','<?php echo $approval_step_id; ?>');" style="cursor: pointer;">
 								<td><?php echo h($approval['Approval']['created']); ?>&nbsp;</td>
 								<td><?php echo h($approval['From']['name']); ?>&nbsp;</td>
 								<td><?php echo h($approval['Employee']['name']); ?><?php echo h($approval['User']['name']); ?></td>
@@ -72,13 +97,13 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 											<?php if(count($approval['ApprovalComment']) == 0)$cnt = 1;
 											else $cnt = count($approval['ApprovalComment']);
 											?>									
-											<span class="btn btn-sm <?php echo $badgeClass;?>"><?php echo $cnt;?></span>					                
+											<span class="badge btn-sm <?php echo $badgeClass;?>"><?php echo $cnt;?></span>&nbsp;&nbsp;&nbsp;&nbsp;
 										</div>
 									<?php } else { ?>
 										<div class="btn-group pull-right">
 											<?php if(count($approval['ApprovalComment']) == 0)$cnt = 1;
 											else $cnt = count($approval['ApprovalComment']);?>
-											<span class="btn btn-sm <?php echo $badgeClass;?>"><?php echo $cnt;?></span>					                
+											<span class="badge badge-sm <?php echo $badgeClass;?>"><?php echo $cnt;?></span>&nbsp;&nbsp;&nbsp;&nbsp;
 										</div>
 									<?php } ?>
 								</td>
@@ -87,15 +112,21 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 								<td colspan="6" style="padding:0" id="<?php echo $approval['Approval']['id'];?>_tr">
 									<div id="<?php echo $approval['Approval']['id'];?>_div"></div>
 								</td>
-							</tr>					
-							
-						<?php endforeach; ?>				
+							</tr>												
+						<?php endforeach; ?>
+						<?php if($showmessage == true){ ?>						
+						<tr>
+							<td colspan="5">Click on the message to respond.</td>
+						</tr>
+						<?php } ?>
 					</table>
 				</div>
 			</div>
 		</div>
-	</div>
-<?php $approval = array();?>	
+	</div>	
+
+<?php 
+$approval = array();?>	
 	<script type="text/javascript">	
 		function approve(approval_id,comments,status){
 			var txt;
@@ -111,11 +142,11 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 			
 		}
 
-		function showcomments(approval_id,fa_id){
-			$("#"+fa_id).removeClass('fa-list').addClass('fa-refresh fa-spin');
+		function showcomments(approval_id,fa_id,approval_step_id){
+			$("#"+fa_id).removeClass('fa-list').addClass('fa-refresh fa-spin');				
 			
 			if($('#'+approval_id+'_div').html().length == 0){			
-				$('#'+approval_id+'_div').load('<?php echo Router::url('/', true); ?>approval_comments/approval_comments/approval_id:'+approval_id +'/custom_table_id:<?php echo $customTable["CustomTable"]["id"];?>', function(responseTxt, statusTxt, xhr){			
+				$('#'+approval_id+'_div').load('<?php echo Router::url('/', true); ?>approval_comments/approval_comments/approval_id:'+approval_id +'/custom_table_id:<?php echo $customTable["CustomTable"]["id"];?>'+'/approval_step_id:'+approval_step_id+'/prepared_by:<?php echo $prepared_by;?>', function(responseTxt, statusTxt, xhr){			
 					if(statusTxt == 'success'){
 						$("#"+fa_id).removeClass('fa-refresh fa-spin').addClass('fa-check');	
 					}
@@ -123,10 +154,14 @@ echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Sess
 			}else{
 				$('#'+approval_id+'_div').html('');
 			}
-
-			
 		}							
 	</script>
 <?php }else{ ?> 
 	<!-- add 1st response -->
 <?php } ?>
+
+<?php 
+	if($lastapproval['Approval']['approval_step_id'] != $currentStep['ApprovalStep']['id'])echo $this->element('approval_form',array('approval'=>$approval));	
+?>
+
+
