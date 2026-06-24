@@ -286,7 +286,11 @@
 													echo "<div class='col-md-2'><br />".$this->Form->input('select_all_users',array('type'=>'checkbox','class'=>'checkbox','onClick'=>'selectall("QcDocumentUserId",this)'))."</div>";
 													echo "</div>";
 
-													$defaultEditors = array_merge(array_keys($approversList),array($this->Session->read('User.id')));
+													if($approversList){
+														$defaultEditors = array_merge(array_keys($approversList),array($this->Session->read('User.id')));
+													}else{
+														$defaultEditors =  null;
+													}
 													
 													echo "<div class='row'>";
 													echo "<div class='col-md-12'><hr /></div>";
