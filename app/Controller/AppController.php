@@ -5077,4 +5077,15 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		return $approversList;	
 	}
 
+	public function _isBase64Encoded($str) {
+        if (!is_string($str)) {
+            return false;
+        }
+        $decoded = base64_decode($str, true);
+        if ($decoded === false) {
+            return false;
+        }
+        return base64_encode($decoded) === $str;
+    }	
+
 }
