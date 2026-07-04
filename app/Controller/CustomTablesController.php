@@ -3342,16 +3342,5 @@ class CustomTablesController extends AppController {
         $customTables = $this->paginate();
         $this->set('customTables',$customTables);
 
-    }
-
-    public function _isBase64Encoded($str) {
-        if (!is_string($str)) {
-            return false;
-        }
-        $decoded = base64_decode($str, true);
-        if ($decoded === false) {
-            return false;
-        }
-        return base64_encode($decoded) === $str;
-    }
+    }    
 }
