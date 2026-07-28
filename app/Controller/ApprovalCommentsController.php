@@ -68,9 +68,19 @@ class ApprovalCommentsController extends AppController {
         }
 
         if($approval_status == 1){
+
+            // new steps
+            //check if there is a next step
+            // if not run the existing code
+            // if yes, send email to preparer 
+            // also update record and update current step with a new step id
+            // if no next id, remove the step id from the record
+
+            // preparer will then send the record to next step
             $this->loadModel('ApprovalStep');
             $currentStep = $this->ApprovalStep->find('first',array('recursive'=>-1, 'conditions'=>array('ApprovalStep.id'=>$approval_step_id)));
             if($currentStep){
+                 // find if there is a next step
                 $next = $currentStep['ApprovalStep']['process_step'] + 1;
                 $nextStep = $this->ApprovalStep->find('first',array('recursive'=>-1, 'conditions'=>array(
                     'ApprovalStep.approval_process_id'=>$currentStep['ApprovalStep']['approval_process_id'],
@@ -78,6 +88,7 @@ class ApprovalCommentsController extends AppController {
                 )));
                 
                 if($nextStep){
+
                     $approval = $this->ApprovalComment->Approval->find('first',array('recursive'=>-1,'conditions'=>array('Approval.id'=>$approval_id)));
                     if($approval){
                         $approval['Approval']['status'] = $approval['Approval']['approval_status'] = 1;
@@ -98,19 +109,25 @@ class ApprovalCommentsController extends AppController {
                     $this->loadModel($model);
                     $rec = $this->$model->find('first', array('conditions' => array($model . '.id' => $approval['Approval']['record']), 'recursive' => - 1));
                     if ($rec) {
+
+
                         if($currentStep['ApprovalStep']['send_to_publishers'] == true){
                             $rec[$model]['publish'] = 1;
                             $rec[$model]['published_date'] = date('Y-m-d');
                             $rec[$model]['published_by'] = $this->Session->read('User.employee_id');
                         }
+
                         if($currentStep['ApprovalStep']['send_to_approvers'] == true){
                             $rec[$model]['approval_date'] = date('Y-m-d');
                             $rec[$model]['approved_by'] = $this->Session->read('User.employee_id');
                         }
+
                         if($currentStep['ApprovalStep']['send_to_reviwers'] == true){
                             $rec[$model]['date_of_review'] = date('Y-m-d');
                             $rec[$model]['reviewed_by'] = $this->Session->read('User.employee_id');
                         }
+
+
                         $rec[$model]['approval_step_id'] = $nextStep['ApprovalStep']['id'];
                         $this->$model->create();
                         if($this->$model->save($rec,false)){
@@ -122,6 +139,8 @@ class ApprovalCommentsController extends AppController {
                     }
                                         
                 }else{
+                    // next record not found
+                    // close approval                    
                     $approval = $this->ApprovalComment->Approval->find('first',array('recursive'=>-1,'conditions'=>array('Approval.id'=>$approval_id)));
                     if($approval){
                         $approval['Approval']['status'] = $approval['Approval']['approval_status'] = 1;
@@ -142,11 +161,14 @@ class ApprovalCommentsController extends AppController {
                         }
                     }
                     
+                    // update record
+
                     $model = $approval['Approval']['model_name'];
                     $this->loadModel($model);
                     $rec = $this->$model->find('first', array('conditions' => array($model . '.id' => $approval['Approval']['record']), 'recursive' => - 1));
 
                     if ($rec) {
+
                         if($currentStep['ApprovalStep']['send_to_publishers'] == true){
                             $rec[$model]['published_date'] = date('Y-m-d');
                             $rec[$model]['published_by'] = $this->Session->read('User.employee_id');
@@ -156,6 +178,7 @@ class ApprovalCommentsController extends AppController {
                                 $rec[$model]['published_by'] = $this->Session->read('User.employee_id');
                             }
                         }
+
                         if($currentStep['ApprovalStep']['send_to_approvers'] == true){
                             $rec[$model]['approval_date'] = date('Y-m-d');
                             $rec[$model]['approved_by'] = $this->Session->read('User.employee_id');
@@ -165,6 +188,7 @@ class ApprovalCommentsController extends AppController {
                                 $rec[$model]['approved_by'] = $this->Session->read('User.employee_id');
                             }
                         }
+
                         if($currentStep['ApprovalStep']['send_to_reviwers'] == true){
                             $rec[$model]['date_of_review'] = date('Y-m-d');
                             $rec[$model]['reviewed_by'] = $this->Session->read('User.employee_id');
@@ -174,8 +198,11 @@ class ApprovalCommentsController extends AppController {
                                 $rec[$model]['reviewed_by'] = $this->Session->read('User.employee_id');
                             }
                         }
+
                         $rec[$model]['record_status'] = 1;
                         $rec[$model]['publish'] = 1;
+                        $rec[$model]['approval_step_id'] = null;
+
                         $this->$model->create();
                         if($this->$model->save($rec,false)){
                             $this->set('responseresult','Comment added.'); 
@@ -185,12 +212,17 @@ class ApprovalCommentsController extends AppController {
                         }
                     }
                 }                
-            }                    
+            }
+            
+            
             if(!$nextStep){
                 
             }            
 
         }else{
+            // add response_status 1 to main response
+            // create new response
+            // first get approval record
             $approvalComment = $this->ApprovalComment->find('first', array('conditions' => array('ApprovalComment.id' => $id)));
             if ($approvalComment) {
                 //update response_status

@@ -974,6 +974,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					$this->loadModel($model);
 					$rec = $this->$model->find('first', array('conditions' => array($model . '.id' => $this->request->data['ApprovalComment']['record']), 'recursive' => - 1));
 					$rec[$model]['publish'] = 1;
+					$rec[$model]['approval_step_id'] = null;
 					// $rec[$this->modelClass]['record_status'] = 1;
 					$this->$model->create();
 					$this->$model->save($rec);
@@ -3259,7 +3260,9 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 
 	public function _add(){
-		$modelName = $this->modelClass;			
+		$modelName = $this->modelClass;
+		$this->loadModel($modelName);
+		
 		foreach($this->request->data[$modelName] as $key => $value){
 			if(is_array($value)){
 				if($this->request->data[$modelName][$key]['name']){
@@ -3280,12 +3283,13 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$this->request->data[$modelName]['prepared_by'] = $this->Session->read('User.employee_id');
 			$this->request->data[$modelName]['approval_step_id'] = $this->request->data['Approval'][$modelName]['approval_step_id'];
 		}
+
 		if($this->action == 'edit'){
 			// get exisiting record 
 			$existingRecord = $this->$modelName->find('first',array('conditions'=>array($modelName.'.id'=>$this->request->data[$modelName]['id']),'recursive'=>-1));
 			$this->request->data[$modelName]['prepared_by'] = $existingRecord[$modelName]['prepared_by'];
 		}
-		
+
 		if ($this->$modelName->save($this->request->data,false)) {
 			$new_record_id = $this->$modelName->id;			
 			$this->_update_belongTos($this->request->data);			
@@ -5005,6 +5009,13 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				$approversList = $this->_get_approver_lists($this->Session->read('User.id'),$currentStep['ApprovalStep']);
 				$this->set('approversList',$approversList);
 			}
+
+			if(!$currentStep){
+				$currentStep = $this->ApprovalStep->find('first',array('conditions'=>array('ApprovalStep.id'=>$approvalProcess['ApprovalStep'][0]['id'])));
+				$this->set('currentStep',$currentStep);
+				$approversList = $this->_get_approver_lists($this->Session->read('User.id'),$currentStep['ApprovalStep']);			
+				$this->set('approversList',$approversList);
+			}	
 		}
 		if(!$approversList){			
 			$skiparray = array('qc_documents','custom_tables');
@@ -5021,7 +5032,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			
 		}	
 
-		return array($currentStep,$approversList);	
+		return array($currentStep,$approversList);
 		
 	}
 

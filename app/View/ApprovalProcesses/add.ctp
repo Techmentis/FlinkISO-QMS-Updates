@@ -19,7 +19,7 @@
 					<div class="col-md-12">
 						<h4>Add Steps</h4>
 						<div class="table-responsive">
-							<table class="table table-bordered table-condenced" id="apptble">
+							<table class="table table-bordered table-condenced" id="apptble" style="min-width: 1800px;">
 								<thead>
 									<tr>
 										<th rowspan="2" width="80">#</th>

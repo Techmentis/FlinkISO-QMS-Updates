@@ -4,7 +4,7 @@
             <h3 class="box-title">
                 <span class="text-gray-dark"><?php echo $approvalProcess['ApprovalProcess']['title'];?></span>
             </h3>
-            <p><?php echo $approvalProcess['ApprovalProcess']['process_description'];?></p>
+            <p><?php echo nl2br($approvalProcess['ApprovalProcess']['process_description']);?></p>
         </div>
         <div class="box-body no-padding">
             <ul class="list-group">        	

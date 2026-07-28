@@ -1,3 +1,4 @@
+<?php echo $this->Session->flash();?>
 <?php echo $this->Html->script(array('jquery.validate.min', 'jquery-form.min')); ?>
 <?php echo $this->fetch('script'); ?>
 
@@ -17,8 +18,7 @@
 			background-size: 100% 100%;
 		}
 	</style>
-	<div id="customTables_ajax">
-		<?php echo $this->Session->flash();?>
+	<div id="customTables_ajax">		
 		<div class="customTables ">
 			<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Custom Tables','modelClass'=>'CustomTable','options'=>array(),'pluralVar'=>'customTables'))); ?>
 

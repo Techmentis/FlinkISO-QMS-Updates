@@ -234,15 +234,15 @@
 			echo $this->Form->hidden('count',array('default'=>1));
 			
 			if($this->request->params['named']['qc_document_id']){
-		// echo $this->Form->hidden('qc_document_id',array('default'=>$this->request->params['named']['qc_document_id']));	
+				// echo $this->Form->hidden('qc_document_id',array('default'=>$this->request->params['named']['qc_document_id']));	
 				echo $this->Form->hidden('table_type',array('default'=>0));	
 			}else if($this->request->params['named']['process_id']){
 				echo $this->Form->hidden('process_id',array('default'=>$this->request->params['named']['process_id']));
-		// echo $this->Form->hidden('table_type',array('default'=>1));	
+				// echo $this->Form->hidden('table_type',array('default'=>1));	
 			}
 			
 			
-	// echo $this->Form->hidden('table_name',array('default'=>$tableName));
+			// echo $this->Form->hidden('table_name',array('default'=>$tableName));
 			echo $this->Form->hidden('History.pre_post_values', array('value'=>json_encode($this->data)));
 			echo $this->Form->input('branchid', array('type' => 'hidden', 'value' => $this->Session->read('User.branch_id')));
 			echo $this->Form->input('departmentid', array('type' => 'hidden', 'value' => $this->Session->read('User.department_id')));		
@@ -250,15 +250,7 @@
 
 
 			<div class="">
-
-				<?php
-				if ($showApprovals && $showApprovals['show_panel'] == true) {
-					echo $this->element('approval_form');
-				} else {
-					echo $this->Form->input('publish', array('label' => __('Publish')));
-				}
-				?>
-
+				<?php echo $this->Form->input('publish', array('label' => __('Publish')));?>
 				<div class=""><?php echo $this->Form->submit(__('Submit'), array('div' => false, 'class' => 'btn btn-primary btn-success pull-right','id'=>'submit_id')); ?></div>
 				<?php echo $this->Html->image('indicator.gif', array('id' => 'submit-indicator')); ?>
 				<?php echo $this->Form->end(); ?>

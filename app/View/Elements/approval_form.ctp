@@ -147,10 +147,11 @@ if(!$currentStep['ApprovalStep']['id']){ ?>
 					
 				<?php } ?>
 				<!-- this form loads on add page -->
-				<?php if($this->action == 'add' || (isset($this->request->data[Inflector::classify($this->request->controller)]['prepared_by']) && $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'] == $this->Session->read('User.employee_id'))){ 
-					$approvalFieldsDispabed = '';	
+				<!-- add enable/ disable here -->
+				<?php if($this->action == 'add' || ($this->action == 'edit' && (isset($this->request->data[Inflector::classify($this->request->controller)]['prepared_by']) && $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'] == $this->Session->read('User.employee_id')))){ 
+					$approvalFieldsDispabed = '';
 				 }else{
-				 	$approvalFieldsDispabed = 'readonly';
+				 		$approvalFieldsDispabed = 'readonly';				 	
 				} ?>
 						<div class="row">
 							<div class="col-md-10">

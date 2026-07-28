@@ -70,9 +70,9 @@ $pptarray = array('ppt','pptx');
 								<th><?php echo $this->Paginator->sort('name'); ?></th>
 								<th><?php echo $this->Paginator->sort('table_name'); ?></th>								
 								<th><?php echo $this->Paginator->sort('qc_document_id'); ?></th>
-								<th><?php echo $this->Paginator->sort('table_version'); ?></th>
-								<th><?php echo $this->Paginator->sort('publish'); ?></th>
-								<th>Action</th>
+								<!-- <th><?php echo $this->Paginator->sort('table_version'); ?></th> -->
+								<!-- <th><?php echo $this->Paginator->sort('publish'); ?></th> -->
+								<th width="280">Action</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -80,10 +80,10 @@ $pptarray = array('ppt','pptx');
 							<tr>
 								<td><?php echo $customTable['CustomTable']['name'];?></td>
 								<td><?php echo $customTable['CustomTable']['table_name'];?></td>
-								<td><?php echo $customTable['QcDocument']['name'];?></td>
-								<td><?php echo $customTable['CustomTable']['table_version'];?></td>
-								<td><?php echo $customTable['CustomTable']['publish'];?></td>
-								<td>
+								<td><?php echo $customTable['QcDocument']['document_number'];?> - <?php echo $customTable['QcDocument']['name'];?></td>
+								<!-- <td><?php echo $customTable['CustomTable']['table_version'];?></td> -->
+								<!-- <td><?php echo $customTable['CustomTable']['publish'];?></td> -->
+								<td style="text-align:right">
 									<div class="btn-group btn-no-border">
 										<?php
 										if($customTable['CustomTable']['publish'] == 1 && $customTable['CustomTable']['table_locked'] == 0 && $customTable['QcDocument']['parent_document_id'] == -1){

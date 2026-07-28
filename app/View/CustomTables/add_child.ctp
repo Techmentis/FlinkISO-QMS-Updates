@@ -61,7 +61,7 @@
 					echo "<div class='col-md-12'>".$this->element('process_doc_header',array('document'=>$process))."</div>"; 
 				?>
 				
-				<?php echo "<div class='col-md-4'>".$this->Form->input('name',array('class'=>'form-control','required','default'=>$customTable['CustomTable']['name'].' Child '.$table_version)) . '</div>'; ?>
+				<?php echo "<div class='col-md-4'>".$this->Form->input('name',array('class'=>'form-control','required','default'=>Inflector::Humanize($table_name))) . '</div>'; ?>
 				<?php echo "<div class='col-md-3'>".$this->Form->input('table_name',array('class'=>'form-control', 'readonly', 'default'=>$table_name)) . '</div>'; ?>
 				<?php echo "<div class='col-md-1'>".$this->Form->input('table_version',array('label'=>'Version', 'class'=>'form-control', 'readonly', 'default'=>$table_version)) . '</div>'; ?>
 				<?php echo "<div class='col-md-12 hide'>".$this->Form->hidden('fields',array('class'=>'form-control',)) . '</div>'; ?>
@@ -210,15 +210,13 @@
 			?>
 
 
-			<div class="">
-				<?php
-				if ($showApprovals && $showApprovals['show_panel'] == true) {
-					echo $this->element('approval_form');
-				} else {
-					echo $this->Form->input('publish', array('label' => __('Publish')));
-				}
-				?>
-				<div class=""><?php echo $this->Form->submit(__('Submit'), array('div' => false, 'class' => 'btn btn-primary btn-success','id'=>'submit_id')); ?></div>
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<?php echo $this->Form->input('publish', array('label' => __('Publish')));?>
+				</div>
+				<div class="col-md-12">
+					<div class=""><?php echo $this->Form->submit(__('Submit'), array('div' => false, 'class' => 'btn btn-primary btn-success pull-right','id'=>'submit_id')); ?></div>
+				</div>
 				<?php echo $this->Html->image('indicator.gif', array('id' => 'submit-indicator')); ?>
 				<?php echo $this->Form->end(); ?>
 

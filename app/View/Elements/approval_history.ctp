@@ -3,7 +3,7 @@ echo $this->Form->hidden('Access.skip_access_check',array('default'=>1));
 echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Session->read('User.id')));
 echo $this->Form->hidden('Approval.'.$approvalModel.'.approval_step_id',array('type'=>'text', 'default'=>$currentStep['ApprovalStep']['id']));
 $showmessage = false;
-
+$showpanel = true;
 
 if($this->request->data[Inflector::classify($this->request->controller)]['prepared_by'])$prepared_by = $this->request->data[Inflector::classify($this->request->controller)]['prepared_by'];
 else if($this->request->params['named']['prepared_by'])$prepared_by = $this->request->params['named']['prepared_by'];
@@ -110,7 +110,9 @@ else if($this->request->params['named']['prepared_by'])$prepared_by = $this->req
 								<td colspan="6" style="padding:0" id="<?php echo $approval['Approval']['id'];?>_tr">
 									<div id="<?php echo $approval['Approval']['id'];?>_div"></div>
 								</td>
-							</tr>												
+							</tr>	
+
+						<?php if($approval['Approval']['approval_status'] == 0)$showpanel = false;?>
 						<?php endforeach; ?>
 						<?php if($showmessage == true){ ?>						
 						<tr>
@@ -159,7 +161,7 @@ $approval = array();?>
 <?php } ?>
 
 <?php 
-	if($lastapproval['Approval']['approval_step_id'] != $currentStep['ApprovalStep']['id'])echo $this->element('approval_form',array('approval'=>$approval));	
+	if($lastapproval['Approval']['approval_step_id'] != $currentStep['ApprovalStep']['id'] || $showpanel == true)echo $this->element('approval_form',array('approval'=>$approval,'showpanel'=>$showpanel));	
 ?>
 
 

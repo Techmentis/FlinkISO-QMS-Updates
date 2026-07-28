@@ -147,7 +147,7 @@ class CustomTablesController extends AppController {
             );
         }
         $this->paginate = array(
-            'order' => array('CustomTable.childDoc'=>'ASC','CustomTable.name' => 'ASC'), 
+            'order' => array('CustomTable.name' => 'ASC'), 
             'conditions' => array(
                 $accessConditions,                
                 'OR' => array('ltrim(rtrim(CustomTable.custom_table_id))' => "", 'CustomTable.custom_table_id' => null, 'CustomTable.linked >' => 0)));
@@ -675,6 +675,19 @@ class CustomTablesController extends AppController {
                     $this->CustomTable->QcDocument->save($qcDocument,false);
                 }
 
+                // update approval process 
+                $this->loadModel('ApprovalProcess');
+                $apprpvalProcess = $this->ApprovalProcess->find('first',array('conditions'=>array('ApprovalProcess.id'=>$this->request->data['CustomTable']['approval_process_id'])));
+                if($apprpvalProcess){
+                    $applicableTos = json_decode($apprpvalProcess['ApprovalProcess']['applicable_to'],true);
+                    if(!in_array($this->request->data['CustomTable']['id'], $applicableTos)){
+                        $applicableTos[] = $this->request->data['CustomTable']['id'];
+                        $apprpvalProcess['ApprovalProcess']['applicable_to'] = json_encode($applicableTos);
+                        $this->ApprovalProcess->create();
+                        $this->ApprovalProcess->save($apprpvalProcess,false);
+                    }
+                }
+
                 // update qc document schedule & types
                 
                 $file = Configure::read('path') . DS . $this->CustomTable->id . DS . $file_name;
@@ -734,7 +747,6 @@ class CustomTablesController extends AppController {
                             }
 
                             if($result['model']){
-
                                 $name = Inflector::Classify($table_name) . '.php';
                                 $folder = APP . 'Model';
                                 $file = $folder . DS . $name;
@@ -793,7 +805,7 @@ class CustomTablesController extends AppController {
                 }
                 $this->redirect(array('action' => 'index', 'qc_document_id' => $this->request->params['named']['qc_document_id'],'process_id' => $this->request->params['named']['process_id']));
             } else {
-                $this->Session->setFlash(__('The custom table could not be saved. Please, try again.'));
+                $this->Session->setFlash(__('The custom table '.$this->request->data['CustomTable']['table_name'].' could not be saved. Please, try again.'));
             }
         }
         if ($this->request->params['named']['qc_document_id'] || $this->request->params['named']['process_id']) {
@@ -938,6 +950,12 @@ class CustomTablesController extends AppController {
             $this->set(array('showApprovals' => $this->_show_approvals()));
         }
         $this->_commons($this->Session->read('User.id'));
+        $this->CustomTable->virtualFields = array(
+            'linked' => 'select count(*) from `custom_tables` where `custom_tables`.`custom_table_id` LIKE CustomTable.id ',
+            'childDoc' => 'select count(*) from `qc_documents` where QcDocument.parent_document_id LIKE `qc_documents`.id ',
+        );
+
+        $customTable = $this->CustomTable->find('first', array('conditions' => array('CustomTable.id' => $this->request->params['named']['custom_table_id'])));
         // afert form submit
         if ($this->request->is('post')) {            
 
@@ -958,7 +976,7 @@ class CustomTablesController extends AppController {
             $fieldTypes = $this->CustomTable->customArray['fieldTypes'];
             $friendlyName = $this->request->data['CustomTable']['name'];
 
-            if($this->request->params['named']['qc_document_id'] != ''){
+            if($this->request->params['named']['qc_document_id'] != ''){                
                 $qcDocument = $this->CustomTable->QcDocument->find('first', array('recursive' => 0, 'conditions' => array('QcDocument.id' => $this->request->params['named']['qc_document_id']),));
                 $table_name_version = $this->_make_child_table_name($this->request->params['named']['qc_document_id'],'qc_documents',$customTable['CustomTable']['linked']);
             // for processes                
@@ -977,9 +995,7 @@ class CustomTablesController extends AppController {
             $this->request->data['CustomTable']['fields'] = json_encode($this->request->data['CustomTableFields']);
             $this->request->data['CustomTable']['system_table_id'] = $this->_get_system_table_id();
             
-            $this->CustomTable->create();
-            
-            $customTable = $this->CustomTable->find('first', array('conditions' => array('CustomTable.id' => $this->request->data['CustomTable']['custom_table_id'])));
+            $this->CustomTable->create();            
             $hasMany = json_decode($customTable['CustomTable']['has_many'], true);
             $hasMany[] = array('table_name' => $this->request->data['CustomTable']['table_name'], 'friendly_name' => $this->request->data['CustomTable']['name'], 'table_version' => $this->request->data['CustomTable']['table_version']);
             
@@ -1082,13 +1098,12 @@ class CustomTablesController extends AppController {
 
                 if ($this->_show_approvals()) $this->_save_approvals($this->CustomTable->id);
                 $this->Session->setFlash(__('Form created'));
-                $this->redirect(array('action' => 'index', 'qc_document_id' => $this->request->params['named']['qc_document_id']));
+                $this->redirect(array('action' => 'recreate_child',$this->CustomTable->id, 'qc_document_id' => $this->request->params['named']['qc_document_id']));
             } else {
-                $this->Session->setFlash(__('The custom table could not be saved. Please, try again.'));
+                $this->Session->setFlash(__('The custom table '.$this->request->data['CustomTable']['table_name'].' could not be saved. Please, try again.'));
             }
         }
         
-
         if ($this->request->params['named']['qc_document_id'] || $this->request->params['named']['process_id']) {
             
             // generate table name
@@ -1124,7 +1139,7 @@ class CustomTablesController extends AppController {
             $this->redirect(array('controller' => 'qc_documents', 'action' => 'index'));
         }
         $this->set('key', $this->_generate_onlyoffice_key($qcDocument['QcDocument']['id']));
-        $customTable = $this->CustomTable->find('first',array('conditions'=>array('CustomTable.id'=>$this->request->params['named']['custom_table_id']),'recursive'=>-1));
+        // $customTable = $this->CustomTable->find('first',array('conditions'=>array('CustomTable.id'=>$this->request->params['named']['custom_table_id']),'recursive'=>-1));
         $this->set('customTable',$customTable);
     }
     /**
@@ -1543,10 +1558,9 @@ class CustomTablesController extends AppController {
                 
             } else {
                 if($skip == false) {
-                    $this->Session->setFlash(__('The custom table could not be saved. Please, try again.'));
+                    $this->Session->setFlash(__('The custom table '.$this->request->data['CustomTable']['table_name'].' could not be saved. Please, try again.'));
                 }else{
-                    echo "The custom table could not be saved. Please, try again.";
-                    exit;
+                    echo "The custom table ".$this->request->data['CustomTable']['table_name']." could not be saved. Please, try again.";
                 }
             }
         }
@@ -1629,16 +1643,22 @@ class CustomTablesController extends AppController {
     }
     
     public function recreate_child($id = null,$skip = null,$data = null) {
+        
         if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
+        }
+
+        if (!$this->CustomTable->exists($id)) {
+            throw new NotFoundException(__('Invalid Table'));
         }
 
         if($skip == true){
             $this->request->data = $data;
         }
 
-        if ($this->request->is('post') || $this->request->is('put')) {
+
+        if ($this->request->is('post') || $this->request->is('put')  || $skip == true) {
             
             foreach ($this->request->data['CustomTableFields'] as $chkd) {
                 if ($chkd['field_name']) $chkarray[] = $chkd['field_name'];
@@ -1689,10 +1709,11 @@ class CustomTablesController extends AppController {
             }           
             
             $this->request->data['CustomTable']['system_table_id'] = $this->_get_system_table_id();
+            
             if($skip == true){
-                $this->request->data = $data;
+                
             }else{
-                $this->request->data['CustomTable']['password'] = Security::hash($this->request->data['CustomTable']['password'], 'md5', true);    
+                $this->request->data['CustomTable']['password'] = Security::hash($this->request->data['CustomTable']['password'], 'md5', true);
             }
             
             $customTable = $this->CustomTable->find('first', array('recursive'=>-1, 'conditions' => array('CustomTable.id' => $this->request->data['CustomTable']['custom_table_id'])));
@@ -1706,8 +1727,8 @@ class CustomTablesController extends AppController {
             $hasMany[] = array('table_name' => $this->request->data['CustomTable']['table_name'], 'friendly_name' => $this->request->data['CustomTable']['name'], 'table_version' => $this->request->data['CustomTable']['table_version']);
 
             $this->CustomTable->create();
-            if ($this->CustomTable->save($this->request->data)) {
-
+            
+            if ($this->CustomTable->save($this->request->data,false)) {
                 unset($this->request->data['History']);
                 unset($this->request->data['CustomTable']['pre_fields']);
                 
@@ -1739,9 +1760,10 @@ class CustomTablesController extends AppController {
                     $this->Session->setFlash(__('Unable to change directory permissions. Please manually change app/Controller, app/Model & app/View directories to writable.(0777)'));
                     $this->redirect(array('action' => 'recreate_child',$this->request->data['CustomTable']['id']));
                 }else{
-
+                    
                 }
 
+                
                 if($result['error'] == 1){
                     echo "Something went wrong. Please try again";
                 }else{
@@ -1800,17 +1822,22 @@ class CustomTablesController extends AppController {
                         $file = $folder . DS . $name;
                         $this->_write_to_file($folder,$file,$result['parentModelFile']);
                     }                    
-                }
+                }                
 
                 $this->CustomTable->create();
                 $this->CustomTable->save($customTable);
 
                 $sqlresult = $this->_add_new_table($customTable['CustomTable']['table_name'],$defaultfield,$sqld,$this->request->data['CustomTableFields']);
                 
-                if ($this->_show_approvals()) $this->_save_approvals($this->CustomTable->id);
-                $this->redirect(array('action' => 'recreate_child',$this->request->params['pass'][0]));
-            } else {
-                $this->Session->setFlash(__('The custom table could not be saved. Please, try again.'));
+                if($skip == true){
+
+                }else{
+                    if ($this->_show_approvals()) $this->_save_approvals($this->CustomTable->id);
+                    $this->redirect(array('action' => 'recreate_child',$this->request->params['pass'][0]));    
+                }
+                
+            } else {                
+                $this->Session->setFlash(__('The custom table '.$customTable['CustomTable']['table_name'].' could not be saved. Please, try again.'));
             }
         }
         $customTable = $this->CustomTable->find('first', array('recursive' => 0, 'conditions' => array('CustomTable.id' => $id)));
@@ -3267,6 +3294,7 @@ class CustomTablesController extends AppController {
                 $this->recreate($customTable['CustomTable']['id'],true,$tocreate);               
             }
         }
+        
         $customTables = array();
         $customTables = $this->CustomTable->find('all',array('recursive'=>-1,
             'conditions'=>array(
@@ -3276,7 +3304,7 @@ class CustomTablesController extends AppController {
                 )                
             )
         ));
-        $customTable = array();
+        
         if($customTables){
             foreach($customTables as $customTable){
                 $tocreate = array();
@@ -3287,6 +3315,7 @@ class CustomTablesController extends AppController {
                 $tocreate['CustomTable']['table_version'] = $customTable['CustomTable']['table_version'];
                 $tocreate['CustomTable']['re-password'] = $customTable['CustomTable']['re-password'];
                 $tocreate['CustomTable']['fields'] = $customTable['CustomTable']['fields'];
+                $tocreate['CustomTable']['form_layout'] = $customTable['CustomTable']['form_layout'];
                 $tocreate['CustomTable']['description'] = $customTable['CustomTable']['description'];
                 $tocreate['CustomTable']['qc_document_id'] = $customTable['CustomTable']['qc_document_id'];
                 $tocreate['CustomTable']['count'] = $customTable['CustomTable']['count'];
@@ -3312,7 +3341,9 @@ class CustomTablesController extends AppController {
                     $tocreate['CustomTableFields'][] = $field;                                
                 }                
                 $tocreate['linkedTos'] = json_encode($linkedTos);
-                $tocreate['linkedTosWithDisplay'] = json_encode($this->_returnDetaultField($fields));                
+                $tocreate['linkedTosWithDisplay'] = json_encode($this->_returnDetaultField($fields));
+                // debug($tocreate);
+                // debug($customTable);
                 $this->recreate_child($customTable['CustomTable']['id'],true,$tocreate);
             }
         }

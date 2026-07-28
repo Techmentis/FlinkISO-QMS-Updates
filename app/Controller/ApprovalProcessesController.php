@@ -46,6 +46,7 @@ public function _commons(){
 		'fields'=>array('CustomTable.id','CustomTable.table_name'),
 		'conditions'=>array(
 			$existscondition,
+			'CustomTable.table_name LIKE' => 'tbl%'
 			// 'OR'=>array(
 			// 	'CustomTable.custom_table_id'=> '',
 			// 	'CustomTable.custom_table_id'=> NULL

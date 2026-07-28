@@ -32,7 +32,7 @@ echo $this->fetch('script');
 		z-index: 2;
 	}
 	.btn:hover{
-	/*	margin-right: -1px;
+	/*	mrgin-right: -1px;
 		margin-left: -1px !important;
 		border: 1px solid transparent;*/
 	}
@@ -82,7 +82,9 @@ echo $this->fetch('script');
 					$mode = 'view';
 
 					$file_path = $customTable['CustomTable']['id'];
-	        
+
+
+	        // $file = $document_number.'-'.$file_name.'-'.$document_version.'.'.$file_type;
 					$file = $document_number.'-'.$file_name.'-'.$document_version;
 					$file = ltrim(rtrim($file));
 					$file = str_replace('-', '_', $file);

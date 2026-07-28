@@ -63,6 +63,14 @@ if($filetype != null){
         $heading = 'Word';
     }
 
+    if($file_type == 'txt'){
+        $documentType = 'word';
+        $icon = ' fa-file-text';
+        $border_color = '#3f628a;';
+        $docType = 'word';
+        $heading = 'Text';
+    }
+
     if($file_type == 'xls' || $file_type == 'xlsx'){
         $documentType = 'cell';
         $icon = ' fa-file-excel-o';
