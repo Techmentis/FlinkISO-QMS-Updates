@@ -180,9 +180,9 @@ $().ready(function(){
             $("#ofccontainerbtn<?php echo $placeholderid;?>").removeClass('fa-plus');
             $("#ofccontainerbtn<?php echo $placeholderid;?>").addClass('fa-minus');
             if (window.addEventListener) {
-                сonnectEditor();
+                connectEditor();
             } else if (window.attachEvent) {
-                сonnectEditor();
+                connectEditor();
             }
         }else{
             $("#ofccontainerbtn<?php echo $placeholderid;?>").removeClass('fa-minus');
