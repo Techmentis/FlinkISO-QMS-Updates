@@ -23,7 +23,7 @@ public function _get_system_table_id() {
 }
 
 public function _commons(){	
-	$this->set('PublishedUserList',$this->_get_designation_list());	
+	$this->set('PublishedUserList',$this->_get_user_list());	
 	$this->set('PublishedDepartmentList',$this->_get_department_list());
 	$this->set('PublishedDesignationList',$this->_get_designation_list());
 	$this->loadModel('CustomTable');
@@ -204,16 +204,18 @@ public function edit($id = null) {
 				$this->redirect($this->referer());
 			}
 		}
-		
+
 		if ($this->ApprovalProcess->save($this->request->data)) {
 			$this->loadModel('ApprovalStep');
 			foreach($this->request->data['ApprovalStep']['steps'] as $approvalStep){
+				if(is_array( $approvalStep['send_to_users'])){
+					$approvalStep['send_to_users'] = json_encode($approvalStep['send_to_users']);
+				}
 				if(!isset($approvalStep['send_to_designation']))$approvalStep['send_to_designation'] = '-1';
 				$approvalStep['approval_process_id'] = $this->ApprovalProcess->id;			
 				$this->ApprovalStep->create();
 				$this->ApprovalStep->save($approvalStep,false);
 			}
-
 			if ($this->_show_approvals()) $this->_save_approvals();
 
 			$this->redirect(array('action' => 'view', $id));

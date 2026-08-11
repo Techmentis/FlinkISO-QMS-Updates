@@ -339,7 +339,7 @@ class AppController extends Controller {
 				));
 			}else{
 				$skip = array('approval_comments','approvals','standards','processes');
-				$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check','json','xml','return_user_list','org_chart');
+				$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','pull_signature_from_user_id','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check','json','xml','return_user_list','org_chart');
 				if(!in_array($this->action,$ignore)){
 					// $this->Session->setFlash(__('Blocked Action: '. $this->request->action), 'default', array('class' => 'alert alert-danger'));
 					$this->_check_access();
@@ -368,7 +368,7 @@ class AppController extends Controller {
 	}
 	
 	public function _access_redirect($n = null){
-		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check','codigo_nc_number','codigo_ncp_number','codigo_m_number','metrologia');
+		$ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature', 'pull_signature_from_user_id', 'save_signature','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check','generate_dcn_number');
 		if(!in_array($this->action,$ignore)
 			&& $this->request->controller != 'qc_documents' 			
 			&& $this->request->controller != 'custom_tables'
@@ -721,12 +721,12 @@ public function _track_history($track = null) {
 	$history['History']['created_by'] = $this->Session->read('User.id');
 	$history['History']['user_session_id'] = $this->Session->read('User.user_session_id');
 	try{
-		$this->History->save($history);
+		$this->History->save($history,false);
 	}catch(Exception $e){
 
 	}
 	try{
-		$this->History->save($history); 
+		$this->History->save($history,false); 
 	}catch(Exception $e){
 		//update usersession .. end time
 		$this->History->UserSession->read(null,$this->Session->read('User.user_session_id'));
@@ -743,7 +743,6 @@ public function _show_approvals() {
 public function get_approvals() {
 	if ($this->action == 'view' || $this->action == 'edit' || $this->action == 'recreate') {
 		// $this->autoRender = false;
-		
 		$model = $this->modelClass;
 		$record = $this->request->params['pass'][0];
 		$this->loadModel('Approval');
@@ -1116,7 +1115,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	public function _generate_onlyoffice_key($record_id = null) {
 		$filekey = $record_id;
 		$stat = date('ymdhis');
-		$filekey = $filekey . $stat;		
+		$filekey = $filekey . $stat;
 		if (strlen($filekey) > 20) $filekey = crc32($filekey);
 		$filekey = preg_replace("[^0-9-.a-zA-Z_=]", "_", $filekey);
 		$filekey = substr($filekey, 0, min(array(strlen($filekey), 20)));
@@ -1391,16 +1390,17 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 		if($this->$model->hasMany){
 			foreach($this->$model->hasMany as $childModel => $info){
-				$this->loadModel($childModel);
-				$childRecs = $this->$childModel->find('all', array('conditions'=>array($childModel.'.parent_id'=>$id)));
+				
+				$childModelName  = $info['className'];
+				$this->loadModel($childModelName);
+				$childRecs = $this->$childModelName->find('all', array('conditions'=>array($childModelName.'.parent_id'=>$id)));
 				if($childRecs){
 					foreach($childRecs as $childRec){
-						$childFilesToDelete = $this->File->delete(array('File.model'=>$childModel,'File.record_id'=>$childRec[$childModel]['id']));
-						$cfolder = Configure::read("files") . DS . $this->$childModel->useTable . DS . $childRec[$childModel]['id'];
+						$childFilesToDelete = $this->File->delete(array('File.model'=>$childModelName,'File.record_id'=>$childRec[$childModelName]['id']));
+						$cfolder = Configure::read("files") . DS . $this->$childModelName->useTable . DS . $childRec[$childModelName]['id'];
 						$cdirToDelete = new Folder($cfolder);
 						$cdirToDelete->delete();
-
-						$this->$childModel->delete($childRec[$childModel]['id']);
+						$this->$childModelName->delete($childRec[$childModelName]['id']);
 					}
 				}
 			}
@@ -1620,7 +1620,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$file['File']['file_status'] = 1;
 			$file['File']['last_saved'] = date('Y-m-d H:i:s');
 			$this->File->create();
-			$this->File->save($file);
+			$this->File->save($file,false);
 			// update record key
 			if ($local['tmp'] != 'tmp') {
 				$model = $local['File']['model'];
@@ -1629,7 +1629,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				if ($rec) {
 					$rec[$model]['file_key'] = $key;
 					$this->$model->create();
-					$this->$model->save($rec[$model]);
+					$this->$model->save($rec[$model],false);
 				}
 			}
 		}
@@ -2551,7 +2551,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 							$qcdoc['QcDocument']['last_saved'] = $last_modified;
 							$qcdoc['QcDocument']['version'] = 1;							
 							$this->QcDocument->create();
-							$this->QcDocument->save($qcdoc['QcDocument']);
+							$this->QcDocument->save($qcdoc['QcDocument'],false);
 							$json = [
 								"created" => date("Y-m-d H:i:s"),
 								'uid'=>$data['history']['changes'][0]['user']['id'],
@@ -2627,7 +2627,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					$versions = json_decode($qcdoc['QcDocument']['versions'],true);
 					$versions[] = $newHistory;
 					if (file_get_contents($downloadUri) === FALSE) {
-							
+						
 					} else {
 						$new_data = file_get_contents($downloadUri);
 						if (file_put_contents($file_for_save, $new_data,LOCK_EX)) {
@@ -2694,7 +2694,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						$process['Process']['last_saved'] = date('Y-m-d H:i:s');
 						$process['Process']['version_keys'] = $process['Process']['version_keys'] . ', ' . $key;
 						$this->Process->create();
-						$this->Process->save($process['Process']);
+						$this->Process->save($process['Process'],false);
 					} else {						
 					}					
 				} 
@@ -2744,7 +2744,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					$qcdoc['File']['file_status'] = 1;
 					$qcdoc['File']['last_saved'] = $last_modified;
 					$this->File->create();
-					$this->File->save($qcdoc['file']);
+					$this->File->save($qcdoc['file'],false);
 				} else {
 				}
 			}
@@ -3302,7 +3302,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				$file['File']['last_modified'] = date('Y-m-d H:i:s');
 				$this->File->create();
 				try{
-					$this->File->save($file); 
+					$this->File->save($file,false); 
 				}catch (Exception $e){
 
 				}
@@ -3320,7 +3320,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 								$file['File']['last_modified'] = date('Y-m-d H:i:s');
 								$this->File->create();
 								try{
-									$this->File->save($file); 
+									$this->File->save($file,false); 
 								}catch (Exception $e){
 
 								}
@@ -4933,7 +4933,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 
 
-	public function fetch_last_value($field = null,$lp = null){
+public function fetch_last_value($field = null,$lp = null){
 		$this->autoRender = false;
 		$model = $this->modelClass;
 		$this->loadModel($model);
@@ -4954,7 +4954,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		return $lastvalue;	
 	}
 
-	public function _fetch_approval_steps($custom_table_id = null){
+public function _fetch_approval_steps($custom_table_id = null){
 		$this->loadModel('ApprovalProcess');
 
 		if($this->request->params['named']['custom_table_id']){
@@ -4967,7 +4967,10 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					// ),					
 					'ApprovalProcess.applicable_to LIKE '=>'%'.$this->request->params['named']['custom_table_id'].'%')
 				)
-			);			
+			);	
+			if(empty($approvalProcess)){
+				$approvalProcess = $this->ApprovalProcess->find('first',array('conditions'=>array('ApprovalProcess.sr_no'=>1)));
+			}			
 		}else if($this->request->controller == 'qc_documents'){
 			$approvalProcess = $this->ApprovalProcess->find('first',array('conditions'=>array('ApprovalProcess.applicable_to LIKE '=> '%'.'qc_documents' .'%')));
 		}
@@ -5097,6 +5100,73 @@ public function _sent_approval_email($to = null,$message = null,$response = null
             return false;
         }
         return base64_encode($decoded) === $str;
-    }	
+    }
 
+public function generate_dcn_number($model = null){
+		$this->autoRender = false;
+		$this->loadModel($model);
+		$rec = $this->$model->find('first',array('fields'=>array($model.'.sr_no',$model.'.change_control_no'), 'recursive'=>-1,'order'=>array($model.'.sr_no'=>'DESC')));
+		$dcnno = explode('-',$rec[$model]['change_control_no']);
+		$count = $dcnno[2];
+		$count = $count + 1;
+		$cnt = str_pad($count, 6, 0, STR_PAD_LEFT);
+		$dcnno = 'DCN-' . date('y').'-'.$cnt;
+		return $dcnno;
+		exit;
+	}
+
+	public function pull_signature_from_user_id($user_id = null){
+		$this->loadModel('User');
+		$user = $this->User->find('first', array(
+			'fields'=>array(
+				'User.id',
+				'User.password',
+				'User.employee_id',
+				'Employee.id',
+				'Employee.signature',
+				'Employee.name',
+			),
+			'conditions' => array('User.status' => 1, 'User.soft_delete' => 0, 'User.publish' => 1, 'User.id' => $user_id)));
+			$img = WWW_ROOT. DS. 'img'. DS . $this->Session->read('User.company_id'). DS .'signature'. DS. $user['Employee']['id']. DS. 'sign.png';
+			if(file_exists($img)){
+				$response = "<img src='".$img."' width=100><br />";
+			}else if($user['Employee']['signature']){
+				$response = "<img src='".$user['Employee']['signature']."' width=100><br />";
+			}else{
+				$response = 'Signature not available';
+			}					
+		return $response;
+	}
 }
+
+// ALTER TABLE `tbl_document_change_control_0_v1s` 
+// ADD `reviewed_by` VARCHAR(36) NULL AFTER `prepared_by`, 
+// ADD `review_date` DATE NULL AFTER `reviewed_by`, 
+// ADD `approval_date` DATE NULL AFTER `review_date`, 
+// ADD `published_by` VARCHAR(36) NULL AFTER `approval_date`, 
+// ADD `publish_date` DATE NULL AFTER `published_by`, 
+// ADD `comments` TEXT NULL AFTER `publish_date`;
+// ALTER TABLE `tbl_document_change_control_0_v1s` ADD `prepared_date` DATE NULL AFTER `prepared_by`;
+// ALTER TABLE `tbl_document_change_control_0_v1s` ADD `dcn_status` INT(1) NOT NULL DEFAULT '0' AFTER `created`;
+
+// ALTER TABLE `tbl_document_change_control_0_v1s` 
+// ADD `reviewed_by` VARCHAR(36) NULL AFTER `prepared_by`, 
+// ADD `reviewe_date` DATE NULL AFTER `reviewed_by`, 
+// ADD `approval_date` DATE NULL AFTER `reviewe_date`, 
+// ADD `published_by` VARCHAR(36) NULL AFTER `approval_date`, 
+// ADD `publish_date` DATE NULL AFTER `published_by`, 
+// ADD `comments` TEXT NULL AFTER `publish_date`;
+
+
+// ALTER TABLE `tbl_document_change_control_0_v1s` ADD `review_status` INT(1) NULL DEFAULT '0' AFTER `dcn_status`, ADD `approve_status` INT(1) NULL DEFAULT '0' AFTER `review_status`, ADD `publish_status` INT(1) NULL DEFAULT '0' AFTER `approve_status`;
+
+// ALTER TABLE `qc_documents` ADD `approval_date` DATE NULL AFTER `approved_by`;
+// ALTER TABLE `qc_documents` ADD `publish_date` DATE NULL AFTER `published_by`;
+// ALTER TABLE `tbl_document_change_control_0_v1s` CHANGE `status` `change_type` INT(1) NULL DEFAULT NULL;
+// ALTER TABLE `qc_documents` CHANGE `revision_number` `revision_number` VARCHAR(10) NULL DEFAULT NULL;
+
+
+// ALTER TABLE `approvals` ADD `approval_step_id` VARCHAR(36) NULL AFTER `comments`;
+// ALTER TABLE `approval_comments` ADD `approval_step_id` VARCHAR(36) NULL AFTER `approval_id`;
+// ALTER TABLE `approvals` ADD `approval_process_id` VARCHAR(36) NULL AFTER `approval_step_id`;
+// ALTER TABLE `approval_comments` ADD `approval_process_id` VARCHAR(36) NULL AFTER `approval_step_id`;

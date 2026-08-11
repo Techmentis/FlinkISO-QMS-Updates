@@ -27,10 +27,7 @@ class CustomTablesController extends AppController {
     public function _commons($creator = null) {
         if ($this->action == 'view' || $this->action == 'recreate') $this->set('approvals', $this->get_approvals());
 
-        $this->set('branches', $this->_get_branch_list());
-        $this->set('departments', $this->_get_department_list());
-        $this->set('designations', $this->_get_designation_list());
-        $this->set('usernames', $this->_get_usernames());
+        
 
         $preparedBies = $approvedBies = $this->CustomTable->PreparedBy->find('list', array('conditions' => array('PreparedBy.publish' => 1, 'PreparedBy.soft_delete' => 0)));
         $createdBies = $modifiedBies = $this->CustomTable->CreatedBy->find('list', array('conditions' => array('CreatedBy.publish' => 1, 'CreatedBy.soft_delete' => 0)));
@@ -73,12 +70,18 @@ class CustomTablesController extends AppController {
         $processes = $this->CustomTable->Process->find('list', array('recursive' => -1, 'conditions' => array()));
         $standards = $this->CustomTable->QcDocument->Standard->find('list', array('recursive' => -1, 'conditions' => array('Standard.publish'=>1)));
         $clauses = $this->CustomTable->QcDocument->Standard->Clause->find('list', array('recursive' => -1, 'conditions' => array()));
-        $departments = $this->CustomTable->QcDocument->CreatedBy->Department->find('list');
-        $branches = $this->CustomTable->QcDocument->CreatedBy->Branch->find('list');
+        $departments = $this->_get_department_list();
+        $branches = $this->_get_branch_list();
+        $usernames = $this->_get_usernames();
         $schedules = $this->CustomTable->QcDocument->Schedule->find('list');
         $approvalProcesses = $this->CustomTable->ApprovalProcess->find('list');
         $this->set(compact('processes','standards','clauses','departments','branches','schedules','approvalProcesses'));
         $reserved_fields = array("id", "name", "prepared_by", "approved_by", "created", "modified", "sr_no", "qd_document_id", "file_id", "file_key" ,"created_by" ,"modified_by" ,"status_user_id" ,"record_status" ,"branchid" ,"departmentid" ,"company_id" ,"soft_delete" ,"process_id");
+
+        $this->set('branches', $branches);
+        $this->set('departments', $departments);
+        $this->set('designations', $designations);
+        $this->set('usernames', $usernames);
 
     }
     /**
@@ -91,7 +94,18 @@ class CustomTablesController extends AppController {
             $accessConditions = array('CustomTable.qc_document_id'=>$this->request->params['named']['qc_document_id']);
         }else{
             $accessConditions = array();
-        }        
+        }
+
+        if ($this->request->is('post')) {
+            $tablesearch = array(
+                'OR'=>array(
+                    'CustomTable.table_name LIKE' => '%'.$this->request->data['search'].'%',
+                    'CustomTable.name LIKE' => '%'.$this->request->data['search'].'%')
+                );                
+        }else{
+            $tablesearch = array();
+        }
+
         $conditions = $this->_check_request();
         if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 1)$accessConditions[] = array('CustomTable.table_type'=>0,'QcDocument.parent_document_id'=>-1);
         else if($this->request->params['named']['table_type'] == 2)$accessConditions[] = array('CustomTable.table_type'=>1);
@@ -149,7 +163,8 @@ class CustomTablesController extends AppController {
         $this->paginate = array(
             'order' => array('CustomTable.name' => 'ASC'), 
             'conditions' => array(
-                $accessConditions,                
+                $accessConditions,
+                $tablesearch,            
                 'OR' => array('ltrim(rtrim(CustomTable.custom_table_id))' => "", 'CustomTable.custom_table_id' => null, 'CustomTable.linked >' => 0)));
         $this->CustomTable->recursive = 0;
         $customTables = $this->paginate();    
@@ -166,6 +181,10 @@ class CustomTablesController extends AppController {
             $cTableCount[$standard_id] = $this->CustomTable->find('count',array('conditions'=>array('QcDocument.standard_id'=>$standard_id)));
         }
         $this->set('cTableCount',$cTableCount);
+
+        if ($this->request->is('post')) {
+            $this->layout = "ajax";
+        }
     }
     
     public function child($custom_table_id = null) {
@@ -561,6 +580,9 @@ class CustomTablesController extends AppController {
             $file_name = $qcDoc['QcDocument']['title'];
             $document_number = $qcDoc['QcDocument']['document_number'];
             $document_version = $qcDoc['QcDocument']['revision_number'];
+            
+            // $file_name = $document_number . '-' . $file_name . '-' . $document_version . '.' . $file_type;
+
             $file_name = $document_number . '-' . $file_name . '-' . $document_version;
             $file_name = $this->_clean_table_names($file_name);
             $file_name = $file_name . '.' . $file_type;
@@ -3348,12 +3370,13 @@ class CustomTablesController extends AppController {
             }
         }
 
-        if($autoupdate == 1){
-            return true;
-        }else{
-            $this->Session->setFlash(__('Re-created all the forms.'));
-            $this->redirect(array('action' => 'index'));
-        }        
+        // if($autoupdate == 1){
+        //     return true;
+        // }else{
+        //     // exit;
+        //     // $this->Session->setFlash(__('Re-created all the forms.'));
+        //     // $this->redirect(array('action' => 'index'));
+        // }        
     }
 
     public function custom_table_list($user_id = null){
@@ -3373,5 +3396,5 @@ class CustomTablesController extends AppController {
         $customTables = $this->paginate();
         $this->set('customTables',$customTables);
 
-    }    
+    }
 }

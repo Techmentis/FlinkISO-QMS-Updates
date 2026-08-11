@@ -400,7 +400,9 @@ class QcDocumentsController extends AppController {
                 'application/vnd.ms-excel',
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 'application/pdf',
-                'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'application/ppt',
+                'application/pptx',
             );
             
             if($this->request->data['QcDocument']['file']['type']){
@@ -459,6 +461,9 @@ class QcDocumentsController extends AppController {
             }
 
             $this->request->data['QcDocument']['document_number'] = $new_document_number;
+            if(!$this->request->data['QcDocument']['date_created'])$this->request->data['QcDocument']['date_created']  = date('Y-m-d');
+
+
             if ($this->QcDocument->save($this->request->data)) {
                 if (!empty($this->request->data['QcDocument']['file']['name'])) $this->_step1($this->request->data, $this->QcDocument->id);
                 else{
@@ -508,7 +513,7 @@ class QcDocumentsController extends AppController {
                             $qcdoc['QcDocument']['file_type'] = $file_type;
                             $qcdoc['QcDocument']['file_key'] = $key;
                             $this->QcDocument->create();
-                            $this->QcDocument->save($qcdoc['QcDocument']);
+                            $this->QcDocument->save($qcdoc['QcDocument'],false);
 
                             $json = [
                                 "created" => date("Y-m-d H:i:s"),
@@ -582,7 +587,7 @@ class QcDocumentsController extends AppController {
             $data['QcDocument']['version'] = 1;
             $data['QcDocument']['versions'] = json_encode(array());
             $this->QcDocument->create();
-            $this->QcDocument->save($qcdoc['QcDocument']);
+            $this->QcDocument->save($qcdoc['QcDocument'],false);
 
             $json = [
                 "created" => date("Y-m-d H:i:s"),
@@ -640,7 +645,10 @@ class QcDocumentsController extends AppController {
                 'text/plain',
                 'application/vnd.ms-excel',
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'application/pdf'
+                'application/pdf',
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'application/ppt',
+                'application/pptx',
             );
             
             if($this->request->data['QcDocument']['file']['type']){
@@ -1786,5 +1794,6 @@ class QcDocumentsController extends AppController {
         );
         $qcDocuments = $this->paginate();
         $this->set('qcDocuments',$qcDocuments);
+
     }
 }

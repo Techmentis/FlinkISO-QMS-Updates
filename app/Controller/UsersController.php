@@ -973,8 +973,11 @@ class UsersController extends AppController {
                 'QcDocument.add_records' => 1, 
                 'CustomTable.table_locked' => 0, 
                 'CustomTable.table_name NOT LIKE' => '%_child_%', 
-                'QcDocument.schedule_id != '=>'56d1564b-0acc-48f6-9beb-03a7db1e6cf9',
-                'CustomTable.creators LIKE ' => '%'.$this->Session->read('User.id').'%'                
+                'OR' => array(
+                    'QcDocument.departments LIKE ' => '%' . $this->Session->read('User.department_id') . '%', 
+                    'QcDocument.branches LIKE ' => '%' . $this->Session->read('User.branch_id') . '%', 
+                    'QcDocument.user_id LIKE ' => '%' . $this->Session->read('User.id') . '%',
+                    )
                 )
             )
         );

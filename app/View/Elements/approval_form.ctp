@@ -1,5 +1,4 @@
 <?php 
-
 if(!$currentStep['ApprovalStep']['id']){ ?>
 	<div class="box box-warning">
 		<div class="box-header with-border data-header" data-widget="collapse">
@@ -250,14 +249,14 @@ if(!$currentStep['ApprovalStep']['id']){ ?>
 	<script type="text/javascript">
 		$().ready(function(){
 
-			$("#Approval<?php echo Inflector::Classify($this->request->controller);?>UserId").chosen({
-			    max_selected_options: 1
-			});
+			// $("#Approval<?php echo Inflector::Classify($this->request->controller);?>UserId").chosen({
+			//     max_selected_options: 1
+			// });
 
 
-			$("#ApprovalQcDocumentUserId").chosen({
-			    max_selected_options: 1
-			});
+			// $("#ApprovalQcDocumentUserId").chosen({
+			//     max_selected_options: 1
+			// });
 
 			$("#Approval<?php echo Inflector::Classify($this->request->controller);?>Comments").prop('required',false);
 

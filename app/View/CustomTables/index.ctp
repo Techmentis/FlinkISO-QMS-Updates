@@ -3,8 +3,13 @@ $docarray = array('doc','docx');
 $sheetarray = array('xls','xlsx');
 $pdfarray = array('pdf');
 $pptarray = array('ppt','pptx');
+
+if (!$this->request->is('post')) {
+	echo $this->Form->input('form_search',array('class'=>'form-control pull-right'));
+}
 ?>
-<div  id="main">	
+
+<div  id="main">
 		<?php echo $this->Session->flash();?>	
 		<div class="customTables ">
 			<h4>Forms</h4>
@@ -55,7 +60,8 @@ $pptarray = array('ppt','pptx');
 					}					
 				}
 			?>
-		</div>
+		</div>		
+<div id="searchResults">		
 <?php if($customTables){ ?>
 	<?php echo $this->element('checkbox-script'); ?>	
 		<?php echo $this->Form->create(array('class'=>'no-padding no-margin no-background'));?>
@@ -63,7 +69,7 @@ $pptarray = array('ppt','pptx');
 			$tblcount = 0; ?>
 			<div class="row">
 				<div class="col-md-12">
-					<h4>HTML Forms Shared With You</h4>
+					<h4>HTML Forms Shared With You</h4>					
 					<table cellpadding="0" cellspacing="0" class="table table-striped table-hover index" id="customTablesTable">					
 						<thead>
 							<tr>
@@ -141,8 +147,8 @@ $pptarray = array('ppt','pptx');
 			echo "<li>".$this->Paginator->numbers(array('separator' => ''))."</li>";
 			echo "<li class='next'>".$this->Paginator->next(__('next') . ' >', array(), null, array('class' => 'next disabled'))."</li>";
 			?>
-		</ul>
-	</div>
+		</ul>	
+</div>
 </div>
 </div>	
 </div>
@@ -176,4 +182,35 @@ $pptarray = array('ppt','pptx');
 		</div>		
 	</div>
 <?php } ?>
+</div>
+<script>
+	var searchTimer;
+	$('#form_search').on('input', function () {
+    var search = $(this).val();
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function () {
+        if (search.length < 2) {
+            $('#main').html('');
+            return;
+        }
 
+        $.ajax({
+            url: '<?php echo Router::url('/', true); ?>/custom_tables/index/',
+            type: 'POST',
+            data: {
+                search: search
+            },
+            beforeSend: function () {
+                $('#main').html('Searching...');
+            },
+            success: function (response) {
+                $('#main').html(response);
+            },
+            error: function () {
+                $('#main').html('Error while searching.');
+            }
+        });
+
+    }, 300); // wait 300ms after user stops typing
+});
+</script>

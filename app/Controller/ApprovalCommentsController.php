@@ -70,7 +70,7 @@ class ApprovalCommentsController extends AppController {
         if($approval_status == 1){
 
             // new steps
-            //check if there is a next step
+            // check if there is a next step
             // if not run the existing code
             // if yes, send email to preparer 
             // also update record and update current step with a new step id
@@ -79,6 +79,12 @@ class ApprovalCommentsController extends AppController {
             // preparer will then send the record to next step
             $this->loadModel('ApprovalStep');
             $currentStep = $this->ApprovalStep->find('first',array('recursive'=>-1, 'conditions'=>array('ApprovalStep.id'=>$approval_step_id)));
+            
+
+            // check all approvals for this record
+            $approval = $this->ApprovalComment->Approval->find('first',array('recursive'=>-1,'conditions'=>array('Approval.id'=>$approval_id)));
+
+
             if($currentStep){
                  // find if there is a next step
                 $next = $currentStep['ApprovalStep']['process_step'] + 1;
@@ -98,6 +104,17 @@ class ApprovalCommentsController extends AppController {
                     }
 
                     $approvalComment = $this->ApprovalComment->find('first',array('recursive'=>-1,'conditions'=>array('ApprovalComment.id'=>$id)));
+
+                    // check if there are other pending approvals for the same step
+                    $addtionalApprovals = $this->ApprovalComment->Approval->find('count',array(
+                        'conditions'=>array(
+                            'Approval.record'=>$approval['Approval']['record'],
+                            'Approval.approval_step_id'=>$approval['Approval']['approval_step_id'],
+                            'Approval.user_id != '=>$approval['Approval']['user_id'],
+                            'Approval.approval_status != ' => 1
+                        )
+                    ));
+                    
                     if($approvalComment){
                         $approvalComment['ApprovalComment']['response_status'] = 2;
                         $approvalComment['ApprovalComment']['response'] = $response;
@@ -110,6 +127,8 @@ class ApprovalCommentsController extends AppController {
                     $rec = $this->$model->find('first', array('conditions' => array($model . '.id' => $approval['Approval']['record']), 'recursive' => - 1));
                     if ($rec) {
 
+
+                        // somewhere here we need to check if all the current steps approvals are closed before moving on to the next step.
 
                         if($currentStep['ApprovalStep']['send_to_publishers'] == true){
                             $rec[$model]['publish'] = 1;
@@ -128,7 +147,12 @@ class ApprovalCommentsController extends AppController {
                         }
 
 
-                        $rec[$model]['approval_step_id'] = $nextStep['ApprovalStep']['id'];
+                        if($addtionalApprovals == 0){
+                            $rec[$model]['approval_step_id'] = $nextStep['ApprovalStep']['id'];    
+                        }else{
+                            $rec[$model]['approval_step_id'] = $currentStep['ApprovalStep']['id'];    
+                        }                    
+                        
                         $this->$model->create();
                         if($this->$model->save($rec,false)){
                             $this->set('responseresult','Comment added.');  
@@ -140,7 +164,10 @@ class ApprovalCommentsController extends AppController {
                                         
                 }else{
                     // next record not found
-                    // close approval                    
+                    // close approval     
+                    // somewhere here we need to check if all the current steps approvals are closed before moving on to the next step.
+
+
                     $approval = $this->ApprovalComment->Approval->find('first',array('recursive'=>-1,'conditions'=>array('Approval.id'=>$approval_id)));
                     if($approval){
                         $approval['Approval']['status'] = $approval['Approval']['approval_status'] = 1;
@@ -161,6 +188,17 @@ class ApprovalCommentsController extends AppController {
                         }
                     }
                     
+                    // check if there are other pending approvals for the same step
+                    // this needs testing
+                    $addtionalApprovals = $this->ApprovalComment->Approval->find('count',array(
+                        'conditions'=>array(
+                            'Approval.record'=>$approval['Approval']['record'],
+                            'Approval.approval_step_id'=>$approval['Approval']['approval_step_id'],
+                            'Approval.user_id != '=>$approval['Approval']['user_id'],
+                            'Approval.approval_status != ' => 1
+                        )
+                    ));
+
                     // update record
 
                     $model = $approval['Approval']['model_name'];
@@ -198,10 +236,12 @@ class ApprovalCommentsController extends AppController {
                                 $rec[$model]['reviewed_by'] = $this->Session->read('User.employee_id');
                             }
                         }
-
-                        $rec[$model]['record_status'] = 1;
-                        $rec[$model]['publish'] = 1;
-                        $rec[$model]['approval_step_id'] = null;
+                        // this needs testing
+                        if($addtionalApprovals == 0){
+                            $rec[$model]['record_status'] = 1;
+                            $rec[$model]['publish'] = 1;
+                            $rec[$model]['approval_step_id'] = null;
+                        }                        
 
                         $this->$model->create();
                         if($this->$model->save($rec,false)){
@@ -274,7 +314,8 @@ class ApprovalCommentsController extends AppController {
             }
         }
     }
-    
+
+
     public function _sent_approval_email($to = null,$message = null,$response = null,$model = null){
         $this->loadModel('User');
         $user = $this->User->find('first',array('conditions'=>array('User.id'=>$to)));
@@ -284,7 +325,8 @@ class ApprovalCommentsController extends AppController {
             } else if ($user['Employee']['personal_email'] != '') {
                 $email = $user['Employee']['personal_email'];
             }    
-        }        
+        }
+        
         if ($email) {
             if($message == 1)$subject = 'FlinkISO: Record Approved.';
             else $subject = 'FlinkISO: Approvals';

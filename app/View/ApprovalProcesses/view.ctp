@@ -56,7 +56,14 @@
 													echo $PublishedDesignationList[$approvalStep['send_to_designation']];	
 												}
 												?></td>
-												<td><?php echo $approvalStep['send_to_users'];?></td>	
+												<td><?php 
+													if($approvalStep['send_to_users']){
+														$users = json_decode($approvalStep['send_to_users'],true);
+														foreach($users as $user){
+															echo $PublishedUserList[$user].', ';
+														}
+													}
+												;?></td>	
 												<td><?php if($approvalStep['send_to_publishers'])echo '<i class="fa fa-check"></i>'; ?></td>
 												<td><?php echo $this->Form->postLink('<i class="fa fa-minus btn-remove-record"></i>',
 													array('controller'=>'approval_steps','action'=>'delete',$approvalStep['id']),

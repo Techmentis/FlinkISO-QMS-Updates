@@ -32,7 +32,12 @@
 						}?>
 						<td><?php echo $record['PreparedBy']['name'];?></td>
 						<td><?php echo $record['ApprovedBy']['name'];?></td>
-						<td><?php echo $this->Html->link('<i class="fa fa-television"></fa>',array('controller'=>$table_name,'action'=>'view',$record[$model]['id']),array('target'=>'_blank', 'escape'=>false));?></td>
+						<td><?php echo $this->Html->link('<i class="fa fa-television"></fa>',array(
+							'controller'=>$table_name,
+							'action'=>'view',$record[$model]['id'],
+							'custom_table_id'=>$record['CustomTable']['id'],
+							'qc_document_id'=>$record['QcDocument']['id'],
+							),array('target'=>'_blank', 'escape'=>false));?></td>
 						</tr>
 					<?php }?>				
 				</table>

@@ -15,7 +15,7 @@
                 ?>
                 <li class="list-group-item <?php echo $class;?>">
                     <strong><?php echo $approvalStep['title'];?></strong>
-                    <p class="text"><?php echo $approvalStep['comments'];?></p>                
+                    <p class="text" style="font-weight: 400"><?php echo nl2br($approvalStep['comments']);?></p>
                 </li>   
             <?php } ?>
             </ul>
