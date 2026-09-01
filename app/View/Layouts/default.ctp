@@ -247,6 +247,156 @@ if($this->action == 'index'){?>
 	}
 
 ?>
++<?php
+	$tabSettings = isset($customTable['CustomTable']['tab_settings']) ? json_decode($customTable['CustomTable']['tab_settings'], true) : array();
+	if(!is_array($tabSettings)) $tabSettings = array();
+	if(
+		$tabSettings &&
+		($this->action == 'add' || $this->action == 'edit') &&
+		!empty($this->request->params['named']['custom_table_id'])
+	){
+?>
+<script type="text/javascript">
+	$().ready(function(){
+		var savedTabSettings = <?php echo json_encode($tabSettings, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>;
+		var tabSettings = savedTabSettings.tabs || savedTabSettings;
+		var childFormSettings = savedTabSettings.child_forms || {};
+		var currentAction = <?php echo json_encode($this->action); ?>;
+		$('<style>.custom-form-tabs .custom-tab-visibility-hidden,.custom-form-tabs .custom-tab-empty-hidden{display:none!important}</style>').appendTo('head');
+
+		function fieldValues(fieldName){
+			var suffix = '[' + fieldName + ']';
+			var values = [];
+			$('.custom_form :input').filter(function(){
+				return this.name && this.name.slice(-suffix.length) === suffix && !$(this).closest('.linked-child-form').length;
+			}).each(function(){
+				var input = $(this);
+				if((input.is(':radio') || input.is(':checkbox')) && !input.is(':checked')) return;
+				if(input.is('select')){
+					input.find('option:selected').each(function(){
+						values.push(String($(this).val()));
+						values.push($.trim($(this).text()));
+					});
+				}else{
+					values.push(String(input.val()));
+					var label = input.attr('id') ? $('label[for="' + input.attr('id') + '"]') : $();
+					if(label.length) values.push($.trim(label.text()));
+				}
+			});
+			return values;
+		}
+
+		function setPanelInputsDisabled(panel, disabled){
+			panel.find(':input').each(function(){
+				var input = $(this);
+				if(disabled){
+					if(!input.prop('disabled')) input.data('tabVisibilityDisabled', true).prop('disabled', true);
+				}else if(input.data('tabVisibilityDisabled')){
+					input.prop('disabled', false).removeData('tabVisibilityDisabled');
+				}
+				if(input.is('select')) input.trigger('chosen:updated');
+			});
+		}
+
+		function shouldHide(setting){
+			setting = setting || {};
+			var hide = (setting.action_visibility === 'hide_both') ||
+				(setting.action_visibility === 'hide_add' && currentAction === 'add') ||
+				(setting.action_visibility === 'hide_edit' && currentAction === 'edit');
+			var requiredValues = $.isArray(setting.visible_when) ? setting.visible_when : [];
+
+			if(!hide && setting.visibility_field && requiredValues.length){
+				var currentValues = fieldValues(setting.visibility_field);
+				hide = !currentValues.some(function(value){ return requiredValues.indexOf(value) !== -1; });
+			}
+			return hide;
+		}
+
+		function applyTabVisibility(){
+			$('.custom-form-tabs').each(function(){
+				var tabs = $(this);
+				var firstVisibleLink = null;
+				tabs.children('ul').children('li').each(function(){
+					var tabLink = $(this).children('a').first();
+					var tabName = $.trim(tabLink.text());
+					var hide = shouldHide(tabSettings[tabName]);
+
+					var panel = $(tabLink.attr('href'));
+					$(this).toggleClass('custom-tab-visibility-hidden', hide);
+					panel.toggleClass('custom-tab-visibility-hidden', hide);
+					setPanelInputsDisabled(panel, hide);
+					if(!hide && !firstVisibleLink) firstVisibleLink = tabLink;
+				});
+
+				var activeLink = tabs.children('ul').children('li.ui-tabs-active').not('.custom-tab-visibility-hidden, .custom-tab-empty-hidden').children('a').first();
+				if(!activeLink.length && firstVisibleLink) firstVisibleLink.trigger('click');
+			});
+		}
+
+		function applyChildFormVisibility(){
+			$('.linked-child-form').each(function(){
+				var childForm = $(this);
+				var hide = shouldHide(childFormSettings[childForm.attr('data-child-table')]);
+				var childId = childForm.attr('id');
+				var childLink = childId ? $('a[href="#' + childId + '"]').first() : $();
+
+				childForm.toggleClass('custom-tab-visibility-hidden', hide);
+				childLink.parent('li').toggleClass('custom-tab-visibility-hidden', hide);
+				setPanelInputsDisabled(childForm, hide);
+			});
+
+			// A parent tab containing only child forms follows them: keep it when at
+			// least one child form is available, otherwise hide the empty parent tab.
+			$('.custom-form-tabs').each(function(){
+				var outerTabs = $(this);
+				outerTabs.children('div[id^="custom-form-tab-"]').each(function(){
+					var outerPanel = $(this);
+					var childForms = outerPanel.find('.linked-child-form');
+					if(!childForms.length) return;
+					var visibleChildren = childForms.not('.custom-tab-visibility-hidden');
+					var nonChildInputs = outerPanel.find(':input').filter(function(){
+						return !$(this).closest('.linked-child-form').length;
+					});
+					var hideOuter = visibleChildren.length === 0 && nonChildInputs.length === 0;
+					var outerLink = $('a[href="#' + outerPanel.attr('id') + '"]').first();
+					outerPanel.toggleClass('custom-tab-empty-hidden', hideOuter);
+					outerLink.parent('li').toggleClass('custom-tab-empty-hidden', hideOuter);
+				});
+				var activeOuterLink = outerTabs.children('ul').children('li.ui-tabs-active').not('.custom-tab-visibility-hidden, .custom-tab-empty-hidden').children('a').first();
+				if(!activeOuterLink.length){
+					outerTabs.children('ul').children('li').not('.custom-tab-visibility-hidden, .custom-tab-empty-hidden').children('a').first().trigger('click');
+				}
+			});
+		}
+
+		function disableHiddenTabInputs(){
+			$('.custom-tab-visibility-hidden, .custom-tab-empty-hidden').find(':input').each(function(){
+				var input = $(this);
+				if(!input.prop('disabled')) input.data('tabVisibilityDisabled', true).prop('disabled', true);
+				if(input.is('select')) input.trigger('chosen:updated');
+			});
+		}
+
+		$(document).off('change.tabVisibility', '.custom_form :input').on('change.tabVisibility', '.custom_form :input', function(){
+			applyTabVisibility();
+			applyChildFormVisibility();
+		});
+		applyTabVisibility();
+		applyChildFormVisibility();
+		disableHiddenTabInputs();
+		$(document).off('ajaxComplete.tabVisibility').on('ajaxComplete.tabVisibility', function(){
+			applyChildFormVisibility();
+			disableHiddenTabInputs();
+		});
+		// Run before jQuery Validate's normal submit handler. This is needed for
+		// validators created by generated forms with ignore:null.
+		document.addEventListener('submit', function(){ disableHiddenTabInputs(); }, true);
+		$(document).off('click.tabVisibility', 'form :submit').on('click.tabVisibility', 'form :submit', function(){
+			disableHiddenTabInputs();
+		});
+	});
+</script>
+<?php } ?>
 <div id="ad_src_result"></div>
 <?php if($this->request->params['named']['custom_table_id']){ ?>
 <script type="text/javascript">

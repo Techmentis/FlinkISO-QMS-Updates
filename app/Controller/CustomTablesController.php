@@ -581,7 +581,7 @@ class CustomTablesController extends AppController {
 
         if($chkd['mandetory'] == 1)$m = ' NOT ';
         else $m = '';
-        if($chkd['display_type'] != 7 && $chkd['display_type'] != 5){
+        if($chkd['display_type'] != 7 && $chkd['display_type'] != 5 && $chkd['display_type'] != 10){
             if(!in_array($chkd['field_name'],$this->reserved_fields)){
                 $addsqls[] =  'ALTER TABLE `'.$this->request->data['CustomTable']['table_name'].'` ADD `'.$chkd['field_name'].'` '.$type.' '. $m .' NULL AFTER `sr_no`;';
             }
@@ -1479,6 +1479,7 @@ class CustomTablesController extends AppController {
                 }else{
                     if($fields['who_can_edit'])$fields['who_can_edit'] = json_encode($fields['who_can_edit']);
                     if($fields['show_comments'])$fields['show_comments'] = base64_encode($fields['show_comments']);
+                    if(isset($fields['child_tables']) && is_array($fields['child_tables'])) $fields['child_tables'] = json_encode($fields['child_tables']);
                     $fields['field_name'] = $this->_clean_table_names($fields['field_name']);
                     // $fields['field_label'] = Inflector::humanize($this->_clean_table_names($fields['field_label']));
                     if($fields['field_label'])$fields['field_label'] = base64_encode($fields['field_label']);
