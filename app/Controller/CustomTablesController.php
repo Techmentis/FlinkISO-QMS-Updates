@@ -285,6 +285,15 @@ class CustomTablesController extends AppController {
         // get child 
         $childs = $this->CustomTable->find('all',array('conditions'=>array('CustomTable.custom_table_id'=>$id)));
         $this->set('childs',$childs);
+        $childDocumentForms = $this->CustomTable->find('all', array(
+            'recursive' => 0,
+            'conditions' => array(
+                'QcDocument.parent_document_id' => $customTable['CustomTable']['qc_document_id'],
+                'CustomTable.table_type !=' => 2
+            ),
+            'order' => array('QcDocument.title' => 'ASC', 'CustomTable.name' => 'ASC')
+        ));
+        $this->set('childDocumentForms', $childDocumentForms);
         $customTriggers = $this->CustomTable->CustomTrigger->find('all',array('conditions'=>array('CustomTrigger.custom_table_id'=>$customTable['CustomTable']['id'])));
         $this->set('customTriggers',$customTriggers);
         $key = $this->_generate_onlyoffice_key($customTable['CustomTable']['id'] . date('Ymdhis'));
@@ -305,7 +314,7 @@ class CustomTablesController extends AppController {
             throw new NotFoundException(__('Invalid request'));
         }
 
-        $allowedTabs = array('main', 'tab_configuration', 'child_tables', 'rebuild_module', 'linked_processes', 'data_entry', 'permissions', 'charts_panels', 'email_triggers', 'create_tasks', 'javascript');
+        $allowedTabs = array('main', 'tab_configuration', 'child_tables', 'child_document_forms', 'rebuild_module', 'data_entry', 'permissions', 'charts_panels', 'email_triggers', 'create_tasks', 'javascript');
         if (!in_array($tab, $allowedTabs, true)) {
             throw new NotFoundException(__('Invalid tab'));
         }

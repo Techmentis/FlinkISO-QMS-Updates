@@ -5,7 +5,7 @@ $isMr = (bool)$this->Session->read('User.is_mr');
 ?>
 <?php if($selectedTab === 'main'){ ?>
 	<div class="box box-default">
-		<div class="box-header with-border"><h3 class="box-title">Main Table <small><?php echo h($table['table_name']); ?></small></h3></div>
+		<div class="box-header with-border"><h3 class="box-title">Main Form <small><?php echo h($table['table_name']); ?></small></h3></div>
 		<div class="box-body">
 			<table class="table table-bordered">
 				<tr><th width="180">Name</th><td><?php echo h($table['name']); ?></td></tr>
@@ -50,7 +50,7 @@ $isMr = (bool)$this->Session->read('User.is_mr');
 
 <?php }elseif($selectedTab === 'child_tables'){ ?>
 	<div class="box box-default">
-		<div class="box-header with-border"><h3 class="box-title">Child Tables</h3></div>
+		<div class="box-header with-border"><h3 class="box-title">Child Forms</h3></div>
 		<div class="box-body table-responsive">
 			<table class="table table-bordered table-hover">
 				<thead><tr><th>Name</th><th>Table Name</th><th>Version</th><th>Description</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
@@ -106,8 +106,23 @@ $isMr = (bool)$this->Session->read('User.is_mr');
 	})();
 	</script>
 
-<?php }elseif($selectedTab === 'linked_processes'){ ?>
-	<div class="configuration-plain-panel ajax-tab-content" data-load-url="<?php echo Router::url('/', true); ?>custom_tables/link_processes/<?php echo h($table['id']); ?>"><i class="fa fa-refresh fa-spin"></i> Loading linked processes...</div>
+<?php }elseif($selectedTab === 'child_document_forms'){ ?>
+	<div class="box box-default">
+		<div class="box-header with-border"><h3 class="box-title">Child Document Forms</h3></div>
+		<div class="box-body table-responsive">
+			<table class="table table-bordered table-hover">
+				<thead><tr><th>Name</th><th>Table Name</th><th>Version</th><th>Description</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
+				<tbody><?php foreach((array)$childDocumentForms as $childDocumentForm){ $childDocumentTable = $childDocumentForm['CustomTable']; ?>
+					<tr>
+						<td><?php echo h($childDocumentTable['name']); ?></td><td><?php echo h($childDocumentTable['table_name']); ?></td><td><?php echo h($childDocumentTable['table_version']); ?></td><td><?php echo h($childDocumentTable['description']); ?></td><td><?php echo $childDocumentTable['publish'] ? 'Published' : 'Unpublished'; ?></td>
+						<td class="text-right">
+							<?php echo $this->Html->link('<i class="fa fa-cogs text-warning"></i>', array('action' => 'view', $childDocumentTable['id'], 'timestamp' => date('ymdhis')), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => 'Open child document form')); ?>
+						</td>
+					</tr>
+				<?php } ?></tbody>
+			</table>
+		</div>
+	</div>
 
 <?php }elseif($selectedTab === 'tab_configuration'){ ?>
 	<div class="box box-primary" id="tab-configuration-panel">

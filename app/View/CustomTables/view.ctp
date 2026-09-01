@@ -209,11 +209,11 @@ foreach ((array)$childs as $child) {
 	<div class="col-md-12">
 		<div id="custom-table-configuration-tabs" class="custom-table-configuration-tabs">
 			<ul>
-				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'main')); ?>">Main Table</a></li>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'main')); ?>">Main Form</a></li>
 				<?php if($formTabs || $childs){ ?><li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'tab_configuration')); ?>">Tab Configuration</a></li><?php } ?>
-				<?php if($childs){ ?><li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'child_tables')); ?>">Child Tables</a></li><?php } ?>
+				<?php if($childs){ ?><li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'child_tables')); ?>">Child Forms</a></li><?php } ?>
+				<?php if($childDocumentForms){ ?><li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'child_document_forms')); ?>">Child Document Forms</a></li><?php } ?>
 				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'rebuild_module')); ?>">Rebuild Module</a></li>
-				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'linked_processes')); ?>">Linked Processes</a></li>
 				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'data_entry')); ?>">Data Entry</a></li>
 				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'permissions')); ?>">Table Permissions</a></li>
 				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'charts_panels')); ?>">Charts and Panels</a></li>
