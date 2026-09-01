@@ -14,6 +14,68 @@ echo $this->Html->script(array(
 	'code-input-main/plugins/indent',
 ));
 echo $this->fetch('script');
+
+/*
+ * Tab settings belong to the form as a whole, while the field JSON remains the
+ * source of truth for which tabs already exist.  This panel is deliberately a
+ * front-end preview for now; persistence and generated-form behaviour will be
+ * added after the workflow is approved.
+ */
+$customTableFields = json_decode($customTable['CustomTable']['fields'], true);
+if (!is_array($customTableFields)) $customTableFields = array();
+$savedTabSettings = isset($customTable['CustomTable']['tab_settings']) ? json_decode($customTable['CustomTable']['tab_settings'], true) : array();
+if (!is_array($savedTabSettings)) $savedTabSettings = array();
+// Older saved records used the tab name directly as the key. Preserve them
+// while allowing child-form tab rules to live alongside ordinary form tabs.
+$tabSettings = isset($savedTabSettings['tabs']) && is_array($savedTabSettings['tabs']) ? $savedTabSettings['tabs'] : $savedTabSettings;
+$childFormSettings = isset($savedTabSettings['child_forms']) && is_array($savedTabSettings['child_forms']) ? $savedTabSettings['child_forms'] : array();
+
+$formTabs = array();
+$visibilityFields = array();
+foreach ($customTableFields as $customTableField) {
+	$tabName = isset($customTableField['tab_name']) ? trim($customTableField['tab_name']) : '';
+	if ($tabName !== '' && $tabName !== '-1' && !isset($formTabs[$tabName])) {
+		$formTabs[$tabName] = array(
+			'name' => $tabName,
+			'group' => isset($customTableField['tab_group']) ? $customTableField['tab_group'] : '',
+			'sequence' => isset($customTableField['tab_sequence']) ? $customTableField['tab_sequence'] : '',
+		);
+	}
+
+	if (
+		!empty($customTableField['field_name']) &&
+		in_array(isset($customTableField['data_type']) ? $customTableField['data_type'] : '', array('radio', 'dropdown-s'))
+	) {
+		$options = array();
+		if (!empty($customTableField['csvoptions'])) {
+			$options = array_values(array_filter(array_map('trim', explode(',', $customTableField['csvoptions']))));
+		}
+		$visibilityFields[] = array(
+			'name' => $customTableField['field_name'],
+			'label' => Inflector::humanize($customTableField['field_name']),
+			'options' => $options,
+		);
+	}
+}
+
+$tabConfigurationRows = array();
+foreach ($formTabs as $formTab) {
+	$tabConfigurationRows[] = array(
+		'type' => 'tab',
+		'key' => $formTab['name'],
+		'name' => $formTab['name'],
+		'position' => 'Group '.($formTab['group'] !== '' ? $formTab['group'] : '-').' / #'.($formTab['sequence'] !== '' ? $formTab['sequence'] : '-'),
+	);
+}
+foreach ((array)$childs as $child) {
+	if (empty($child['CustomTable']['table_name'])) continue;
+	$tabConfigurationRows[] = array(
+		'type' => 'child_form',
+		'key' => $child['CustomTable']['table_name'],
+		'name' => $child['CustomTable']['name'],
+		'position' => 'Child form tab',
+	);
+}
 ?>
 <script>
 	$().ready(function(){
@@ -32,7 +94,7 @@ echo $this->fetch('script');
 		z-index: 2;
 	}
 	.btn:hover{
-	/*	mrgin-right: -1px;
+	/*	margin-right: -1px;
 		margin-left: -1px !important;
 		border: 1px solid transparent;*/
 	}
@@ -42,8 +104,159 @@ echo $this->fetch('script');
 	.error, .error .chosen-container{
 			border: 1px dotted red;
 		}
+	.tab-configuration-table th, .tab-configuration-table td{
+		vertical-align: middle !important;
+		color: #3c3c3c !important;
+		font-size: 13px !important;
+		line-height: 1.4 !important;
+	}
+	.tab-configuration-table th{
+		font-weight: 700 !important;
+		background: #f7f7f7 !important;
+	}
+	.tab-configuration-table .tab-name,
+	.tab-configuration-table .tab-position{
+		color: #3c3c3c !important;
+		display: inline !important;
+	}
+	.tab-configuration-table .form-group{
+		margin-bottom: 0;
+	}
+	.tab-configuration-rule{
+		display: none;
+	}
+	.tab-configuration-note{
+		color: #777;
+		font-size: 12px;
+	}
+	/* Tab labels already identify each panel; do not repeat the old collapsible
+	 * box/accordion chrome inside the new configuration tabs. */
+	.custom-table-configuration-tabs .ui-tabs-panel > .box,
+	.configuration-plain-panel .box{
+		border: 0;
+		box-shadow: none;
+		margin: 0;
+	}
+	.custom-table-configuration-tabs .ui-tabs-panel > .box > .box-header,
+	.configuration-plain-panel .box > .box-header{
+		display: none;
+	}
+	.custom-table-configuration-tabs .ui-tabs-panel > .box > .box-body,
+	.configuration-plain-panel .box > .box-body{
+		padding: 15px 0;
+	}
+	.configuration-plain-panel .box.collapsed-box > .box-body{
+		display: block !important;
+	}
+	/* Chosen option lists must escape the jQuery UI tab panel and sit above
+	 * adjacent fields/footers. */
+	.custom-table-configuration-tabs,
+	.custom-table-configuration-tabs .ui-tabs-panel{
+		overflow: visible !important;
+	}
+	.custom-table-configuration-tabs .chosen-container.chosen-with-drop,
+	.custom-table-configuration-tabs .chosen-container .chosen-drop{
+		z-index: 1060 !important;
+	}
+	.custom-table-configuration-tabs .ui-tabs-panel > .box > .box-footer,
+	.configuration-plain-panel .box > .box-footer{
+		border-left: 0;
+		border-right: 0;
+		border-bottom: 0;
+		padding-right: 0;
+	}
 </style>
 <?php echo $this->Session->flash();?>
+<div class="row">
+	<div class="col-md-12">
+		<?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => 'Custom Tables', 'modelClass' => 'CustomTable', 'options' => array(), 'pluralVar' => 'customTables'))); ?>
+	</div>
+</div>
+<?php if($qcDocument){
+	$fileType = $qcDocument['QcDocument']['file_type'];
+	$documentType = in_array($fileType, array('doc', 'docx')) ? 'word' : (in_array($fileType, array('xls', 'xlsx')) ? 'cell' : 'pdf');
+	$documentFile = $qcDocument['QcDocument']['document_number'].'-'.$qcDocument['QcDocument']['title'].'-'.$qcDocument['QcDocument']['revision_number'];
+	$documentFile = $this->requestAction(array('action' => 'clean_table_names', $documentFile)).'.'.$fileType;
+	$documentRecordId = $customTable['CustomTable']['custom_table_id'] ? $customTable['CustomTable']['custom_table_id'] : $customTable['CustomTable']['id'];
+?>
+	<div class="row">
+		<div class="col-md-12"><?php echo $this->element('qc_doc_header', array('document' => $qcDocument)); ?></div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<?php echo $this->element('onlyoffice', array(
+				'url' => $url,
+				'placeholderid' => $placeholderid,
+				'panel_title' => 'Document: '.$qcDocument['QcDocument']['title'],
+				'mode' => 'view',
+				'path' => $customTable['CustomTable']['id'],
+				'file' => $documentFile,
+				'filetype' => $fileType,
+				'documentType' => $documentType,
+				'userid' => $this->Session->read('User.id'),
+				'username' => $this->Session->read('User.username'),
+				'preparedby' => $this->Session->read('User.name'),
+				'filekey' => $filekey,
+				'record_id' => $documentRecordId,
+				'company_id' => $this->Session->read('User.company_id'),
+				'controller' => 'custom_tables',
+				'version_keys' => $customTable['CustomTable']['version_keys'],
+			)); ?>
+		</div>
+	</div>
+<?php } ?>
+<div class="row">
+	<div class="col-md-12">
+		<div id="custom-table-configuration-tabs" class="custom-table-configuration-tabs">
+			<ul>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'main')); ?>">Main Table</a></li>
+				<?php if($formTabs || $childs){ ?><li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'tab_configuration')); ?>">Tab Configuration</a></li><?php } ?>
+				<?php if($childs){ ?><li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'child_tables')); ?>">Child Tables</a></li><?php } ?>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'linked_processes')); ?>">Linked Processes</a></li>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'data_entry')); ?>">Data Entry</a></li>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'permissions')); ?>">Table Permissions</a></li>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'charts_panels')); ?>">Charts and Panels</a></li>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'email_triggers')); ?>">Email Triggers</a></li>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'create_tasks')); ?>">Create Tasks</a></li>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'javascript')); ?>">Add JavaScript</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	$().ready(function(){
+		function initialiseChosen(panel){
+			panel.find('select').each(function(){
+				var select = $(this);
+				if(select.data('chosen')) select.trigger('chosen:updated');
+				else select.chosen({width: '100%'});
+			});
+			panel.find('.tooltip1').tooltip();
+		}
+		function loadNestedTabContent(panel){
+			panel.find('.ajax-tab-content[data-load-url]').each(function(){
+				var target = $(this);
+				if(target.data('nested-loaded')) return;
+				target.data('nested-loaded', true).load(target.attr('data-load-url'), function(response, status){
+					if(status === 'error') target.html('<div class="alert alert-danger">Unable to load this panel. Please refresh the page and try again.</div>');
+					else initialiseChosen(target);
+				});
+			});
+		}
+		$('#custom-table-configuration-tabs').tabs({
+			beforeLoad: function(event, ui){
+				ui.jqXHR.fail(function(){
+					ui.panel.html('<div class="alert alert-danger">Unable to load this configuration panel. Please refresh the page and try again.</div>');
+				});
+			},
+			load: function(event, ui){
+				initialiseChosen(ui.panel);
+				loadNestedTabContent(ui.panel);
+			}
+		});
+	});
+</script>
+<?php return; ?>
 <div class="row">
 	<div class="col-md-12">
 		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Custom Tables','modelClass'=>'CustomTable','options'=>array(),'pluralVar'=>'customTables'))); ?>
@@ -82,9 +295,7 @@ echo $this->fetch('script');
 					$mode = 'view';
 
 					$file_path = $customTable['CustomTable']['id'];
-
-
-	        // $file = $document_number.'-'.$file_name.'-'.$document_version.'.'.$file_type;
+	        
 					$file = $document_number.'-'.$file_name.'-'.$document_version;
 					$file = ltrim(rtrim($file));
 					$file = str_replace('-', '_', $file);
@@ -284,6 +495,94 @@ echo $this->fetch('script');
 				</div>
 			</div>
 			<div class="col-md-6 no-margin-bottom">
+				<div class="box box-primary" id="tab-configuration-panel">
+					<div class="box-header with-border">
+						<h3 class="box-title" style="width:100%">Tab Configuration <span class="pull-right"><i class="fa fa-folder-o"></i></span></h3>
+					</div>
+					<div class="box-body">
+						<p class="tab-configuration-note">Define when each form tab is available. Leave the visibility rule as <strong>Always visible</strong>, or leave its values unselected, to apply no field-value restriction.</p>
+						<?php echo $this->Form->create('CustomTable', array('url' => array('action' => 'update_tab_settings', $customTable['CustomTable']['id']), 'id' => 'update-tab-settings', 'class' => 'form')); ?>
+						<?php echo $this->Form->hidden('tab_settings', array('id' => 'CustomTableTabSettings')); ?>
+						<?php if($tabConfigurationRows){ ?>
+							<div class="table-responsive">
+								<table class="table table-bordered tab-configuration-table" id="tab-configuration-table">
+									<thead>
+										<tr>
+											<th>Tab</th>
+											<th>Position</th>
+											<th>Action visibility</th>
+											<th>Visibility rule</th>
+										</tr>
+										</thead>
+									<tbody>
+										<?php foreach($tabConfigurationRows as $formTab){
+											$settingsForRow = $formTab['type'] === 'child_form' ? $childFormSettings : $tabSettings;
+											$formTabSetting = isset($settingsForRow[$formTab['key']]) && is_array($settingsForRow[$formTab['key']]) ? $settingsForRow[$formTab['key']] : array();
+											$actionVisibility = isset($formTabSetting['action_visibility']) ? $formTabSetting['action_visibility'] : 'always';
+											$visibilityFieldName = isset($formTabSetting['visibility_field']) ? $formTabSetting['visibility_field'] : '';
+											$visibilityValues = isset($formTabSetting['visible_when']) && is_array($formTabSetting['visible_when']) ? $formTabSetting['visible_when'] : array();
+											$visibilityMode = ($visibilityFieldName !== '' && $visibilityValues) ? 'field' : 'always';
+											$visibilityOptions = array();
+											foreach($visibilityFields as $visibilityFieldOption){
+												if($visibilityFieldOption['name'] === $visibilityFieldName){
+													$visibilityOptions = $visibilityFieldOption['options'];
+													break;
+												}
+											}
+										?>
+											<tr class="tab-configuration-row" data-tab-name="<?php echo h($formTab['key']); ?>" data-tab-type="<?php echo h($formTab['type']); ?>">
+												<td><strong class="tab-name"><?php echo h($formTab['name']); ?><?php echo $formTab['type'] === 'child_form' ? ' <small>(Child form)</small>' : ''; ?></strong></td>
+												<td><small class="tab-position"><?php echo h($formTab['position']); ?></small></td>
+												<td>
+													<select class="form-control input-sm tab-action-visibility">
+														<option value="always"<?php echo $actionVisibility === 'always' ? ' selected' : ''; ?>>Always visible</option>
+														<option value="hide_add"<?php echo $actionVisibility === 'hide_add' ? ' selected' : ''; ?>>Hide on Add</option>
+														<option value="hide_edit"<?php echo $actionVisibility === 'hide_edit' ? ' selected' : ''; ?>>Hide on Edit</option>
+														<option value="hide_both"<?php echo $actionVisibility === 'hide_both' ? ' selected' : ''; ?>>Hide on Add &amp; Edit</option>
+													</select>
+												</td>
+												<td>
+													<div class="form-group">
+														<select class="form-control input-sm tab-visibility-mode">
+															<option value="always"<?php echo $visibilityMode === 'always' ? ' selected' : ''; ?>>Always visible</option>
+															<option value="field"<?php echo $visibilityMode === 'field' ? ' selected' : ''; ?>>Only for a field value</option>
+														</select>
+													</div>
+													<div class="tab-configuration-rule row" style="margin-top:8px;<?php echo $visibilityMode === 'field' ? 'display:block' : ''; ?>">
+														<div class="col-xs-6">
+															<select class="form-control input-sm tab-visibility-field">
+																<option value="">Choose field</option>
+																<?php foreach($visibilityFields as $visibilityField){ ?>
+																	<option value="<?php echo h($visibilityField['name']); ?>" data-options="<?php echo h(json_encode($visibilityField['options'])); ?>"<?php echo $visibilityFieldName === $visibilityField['name'] ? ' selected' : ''; ?>><?php echo h($visibilityField['label']); ?></option>
+																<?php } ?>
+															</select>
+														</div>
+														<div class="col-xs-6">
+															<select class="form-control input-sm tab-visibility-values" multiple<?php echo $visibilityOptions ? '' : ' disabled'; ?>>
+																<?php foreach($visibilityOptions as $visibilityOption){ ?>
+																	<option value="<?php echo h($visibilityOption); ?>"<?php echo in_array($visibilityOption, $visibilityValues) ? ' selected' : ''; ?>><?php echo h($visibilityOption); ?></option>
+																<?php } ?>
+															</select>
+														</div>
+													</div>
+												</td>
+											</tr>
+										<?php } ?>
+									</tbody>
+								</table>
+							</div>
+							<?php if(!$visibilityFields){ ?>
+								<p class="help-block">Add a radio or single-select field, such as Audit Status, before configuring a field-value rule.</p>
+							<?php } ?>
+						<?php }else{ ?>
+							<div class="alert alert-info" style="margin-bottom:0">No tabs or child forms have been defined. Assign a Tab Name to fields or link a child form first.</div>
+						<?php } ?>
+					</div>
+					<div class="box-footer text-right">
+						<?php echo $this->Form->submit('Save Tab Configuration', array('class' => 'btn btn-sm btn-success', 'id' => 'save-tab-settings')); ?>
+						<?php echo $this->Form->end(); ?>
+					</div>
+				</div>
 				<div id="processpanel"><i class="fa fa-refresh fa-spin"></i></div>
 				<script type="text/javascript">
 					$("#processpanel").load("<?php echo Router::url('/', true); ?>/custom_tables/link_processes/<?php echo $customTable['CustomTable']['id'];?>");
@@ -434,6 +733,52 @@ echo $this->fetch('script');
 <script type="text/javascript">
 	$().ready(function(){
 		$(".table-body-div").width($("#table-body-div").width()-20).css('overflow-y','scroll');
+
+		$('#tab-configuration-panel').on('change', '.tab-visibility-mode', function(){
+			var rule = $(this).closest('.tab-configuration-row').find('.tab-configuration-rule');
+			rule.toggle($(this).val() === 'field');
+		});
+
+		$('#tab-configuration-panel').on('change', '.tab-visibility-field', function(){
+			var values = $(this).closest('.tab-configuration-row').find('.tab-visibility-values');
+			var selected = $(this).find('option:selected');
+			var options = [];
+
+			try {
+				options = JSON.parse(selected.attr('data-options') || '[]');
+			} catch (error) {
+				options = [];
+			}
+
+			values.empty();
+			$.each(options, function(index, option){
+				$('<option/>', { value: option, text: option }).appendTo(values);
+			});
+			values.prop('disabled', options.length === 0);
+			values.trigger('chosen:updated');
+		});
+
+		$('#update-tab-settings').on('submit', function(){
+			var settings = {tabs: {}, child_forms: {}};
+
+			$('#tab-configuration-table .tab-configuration-row').each(function(){
+				var row = $(this);
+				var tabName = row.attr('data-tab-name');
+				var visibilityMode = row.find('.tab-visibility-mode').val();
+				var visibilityField = visibilityMode === 'field' ? row.find('.tab-visibility-field').val() : '';
+				var visibleWhen = visibilityMode === 'field' ? (row.find('.tab-visibility-values').val() || []) : [];
+
+				var setting = {
+					action_visibility: row.find('.tab-action-visibility').val(),
+					visibility_field: visibilityField || '',
+					visible_when: visibleWhen
+				};
+				if(row.attr('data-tab-type') === 'child_form') settings.child_forms[tabName] = setting;
+				else settings.tabs[tabName] = setting;
+			});
+
+			$('#CustomTableTabSettings').val(JSON.stringify(settings));
+		});
 	})
 </script>
 <?php
@@ -594,3 +939,4 @@ echo $this->fetch('script');
 		echo $this->Form->end();?>
 		<?php } ?>
 </div>
+
