@@ -39,6 +39,7 @@
 			}
 		});
 		$().ready(function() {
+			var triggerForm = $('#CustomTriggerAddForm');
 
 			$(".admin").on('change',function(){
 				var admin = $("#CustomTriggerNotifyAdmins").prop('checked');			
@@ -59,7 +60,11 @@
 				}
 			});
 
-			$('select').chosen();
+			triggerForm.find('select').each(function(){
+				var select = $(this);
+				if(select.data('chosen')) select.trigger('chosen:updated');
+				else select.chosen({width: '100%'});
+			});
 			$("#triggertask").tabs({
 				activate: function (event, ui) {
 					var ops = $("#op2").attr('aria-hidden')
@@ -83,7 +88,7 @@
 
 						$('#CustomTriggerAddForm').validate();
 
-						$('select').each(function() {	
+						triggerForm.find('select').each(function() {	
 							if($(this).prop('required') == true){
 								$(this).rules('add', {
 									greaterThanZero: true
@@ -140,15 +145,16 @@
 				return this.optional(element) || (parseFloat(value) != -1);
 			}, "Please select the value");
 
-			$('#CustomTriggerAddForm').validate();
-			$('select').each(function() {	
-				if($(this).prop('required') == true){
-					$(this).rules('add', {
-						greaterThanZero: true
-					});	
-				}
-				
-			});
+			if(triggerForm.length){
+				triggerForm.validate();
+				triggerForm.find('select').each(function() {	
+					if($(this).prop('required') == true){
+						$(this).rules('add', {
+							greaterThanZero: true
+						});	
+					}
+				});
+			}
 			$("#trigger_submit_indicator").hide();
 			$("#trigger_submit_id").click(function(){
 				if($('#CustomTriggerAddForm').valid()){

@@ -48,23 +48,29 @@
 		
 		$().ready(function() {
 
-			$('select').chosen();
+			var taskForm = $('#CustomTableTaskAddForm');
+			taskForm.find('select').each(function(){
+				var select = $(this);
+				if(select.data('chosen')) select.trigger('chosen:updated');
+				else select.chosen({width: '100%'});
+			});
 
 			jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 				return this.optional(element) || (parseFloat(value) != -1);
 			}, "Please select the value");
 
 
-			$('#CustomTableTaskAddForm').validate();
+			if(taskForm.length){
+				taskForm.validate();
 
-			$('select').each(function() {	
-				if($(this).prop('required') == true){
-					$(this).rules('add', {
+				taskForm.find('select').each(function() {	
+					if($(this).prop('required') == true){
+						$(this).rules('add', {
 						greaterThanZero: true
-					});	
-				}
-				
-			});
+						});	
+					}
+				});
+			}
 			
 			$("#task_submit_indicator").hide();
 			$("#task_submit_id").click(function(){
