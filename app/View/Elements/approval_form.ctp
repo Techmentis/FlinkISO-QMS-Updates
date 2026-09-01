@@ -1,3 +1,4 @@
+<div class="approval-action-form">
 <?php 
 if(!$currentStep['ApprovalStep']['id']){ ?>
 	<div class="box box-warning">
@@ -321,3 +322,25 @@ if(!$currentStep['ApprovalStep']['id']){ ?>
 	</script>
 
 <?php } ?>
+</div>
+<script type="text/javascript">
+	(function($){
+		function showActiveApprovalActionForm(activePanel){
+			var forms = $('.approval-action-form'), candidates = $();
+			if(activePanel && activePanel.length) candidates = activePanel.find('.approval-action-form');
+			if(!candidates.length) candidates = $('.ui-tabs-panel:visible').find('.approval-action-form');
+			if(!candidates.length) candidates = forms.filter(':visible');
+			if(!candidates.length) candidates = forms;
+			var activeForm = candidates.last();
+			// Histories are outside this wrapper and remain visible. Disable hidden
+			// actions so only the visible form can contribute approval fields.
+			forms.each(function(){
+				var form = $(this), visible = form.is(activeForm);
+				form.toggle(visible).find(':input').prop('disabled', !visible);
+			});
+		}
+		$(document).on('tabsactivate', function(event, ui){ showActiveApprovalActionForm(ui.newPanel); });
+		if(document.readyState === 'loading') $(function(){ showActiveApprovalActionForm(); });
+		else showActiveApprovalActionForm();
+	})(jQuery);
+</script>

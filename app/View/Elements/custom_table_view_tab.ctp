@@ -67,6 +67,45 @@ $isMr = (bool)$this->Session->read('User.is_mr');
 		</div>
 	</div>
 
+<?php }elseif($selectedTab === 'rebuild_module'){ ?>
+	<div class="box box-default" id="rebuild-module-panel">
+		<div class="box-header with-border"><h3 class="box-title">Rebuild Module</h3></div>
+		<div class="box-body">
+			<p class="text-muted">Rebuilds the generated controller, model and views from the saved JSON. It does not change fields, table settings or existing records.</p>
+			<table class="table table-bordered">
+				<thead><tr><th>Type</th><th>Name</th><th>Table name</th></tr></thead>
+				<tbody>
+					<tr><td>Main table</td><td><?php echo h($table['name']); ?></td><td><?php echo h($table['table_name']); ?></td></tr>
+					<?php foreach((array)$childs as $childForm){ ?><tr><td>Child form</td><td><?php echo h($childForm['CustomTable']['name']); ?></td><td><?php echo h($childForm['CustomTable']['table_name']); ?></td></tr><?php } ?>
+					<?php foreach((array)$childDocumentForms as $childDocumentForm){ ?><tr><td>Child document form</td><td><?php echo h($childDocumentForm['CustomTable']['name']); ?></td><td><?php echo h($childDocumentForm['CustomTable']['table_name']); ?></td></tr><?php } ?>
+				</tbody>
+			</table>
+		</div>
+		<div class="box-footer text-right">
+			<?php echo $this->Form->create('CustomTable', array('url' => array('action' => 'rebuild_module', $table['id']), 'id' => 'rebuild-module-form', 'class' => 'form-inline')); ?>
+			<?php echo $this->Form->submit('Rebuild Module', array('class' => 'btn btn-sm btn-success', 'id' => 'rebuild-module-submit')); ?>
+			<?php echo $this->Form->end(); ?>
+			<div id="rebuild-module-result" class="text-right" style="margin-top:8px"></div>
+		</div>
+	</div>
+	<script type="text/javascript">
+	(function(){
+		$('#rebuild-module-form').on('submit', function(event){
+			event.preventDefault();
+			var form = $(this), button = $('#rebuild-module-submit'), result = $('#rebuild-module-result');
+			button.prop('disabled', true).text('Rebuilding...');
+			result.html('<p class="text-muted"><i class="fa fa-refresh fa-spin"></i> Rebuilding generated files...</p>');
+			$.ajax({url: form.attr('action'), type: 'POST', data: form.serialize(), dataType: 'json'})
+				.done(function(response){
+					if(response.success){ result.html('<span class="text-success">' + $('<div>').text(response.message).html() + ' ' + (response.rebuilt || []).length + ' form(s) rebuilt.</span>'); }
+					else result.html('<div class="alert alert-danger">' + $('<div>').text(response.message || 'Module rebuild failed.').html() + '</div>');
+				})
+				.fail(function(){ result.html('<div class="alert alert-danger">Module rebuild failed. Please check the API connection and try again.</div>'); })
+				.always(function(){ button.prop('disabled', false).text('Rebuild Module'); });
+		});
+	})();
+	</script>
+
 <?php }elseif($selectedTab === 'linked_processes'){ ?>
 	<div class="configuration-plain-panel ajax-tab-content" data-load-url="<?php echo Router::url('/', true); ?>custom_tables/link_processes/<?php echo h($table['id']); ?>"><i class="fa fa-refresh fa-spin"></i> Loading linked processes...</div>
 
@@ -127,4 +166,3 @@ $isMr = (bool)$this->Session->read('User.is_mr');
 <?php }elseif($selectedTab === 'javascript'){ ?>
 	<div class="configuration-plain-panel ajax-tab-content" data-load-url="<?php echo Router::url('/', true); ?>custom_tables/code_input_main/<?php echo h($table['id']); ?>"><i class="fa fa-refresh fa-spin"></i> Loading JavaScript settings...</div>
 <?php } ?>
-

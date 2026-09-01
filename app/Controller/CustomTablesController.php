@@ -305,7 +305,7 @@ class CustomTablesController extends AppController {
             throw new NotFoundException(__('Invalid request'));
         }
 
-        $allowedTabs = array('main', 'tab_configuration', 'child_tables', 'linked_processes', 'data_entry', 'permissions', 'charts_panels', 'email_triggers', 'create_tasks', 'javascript');
+        $allowedTabs = array('main', 'tab_configuration', 'child_tables', 'rebuild_module', 'linked_processes', 'data_entry', 'permissions', 'charts_panels', 'email_triggers', 'create_tasks', 'javascript');
         if (!in_array($tab, $allowedTabs, true)) {
             throw new NotFoundException(__('Invalid tab'));
         }
@@ -323,6 +323,16 @@ class CustomTablesController extends AppController {
 
         $childs = $this->CustomTable->find('all', array('conditions' => array('CustomTable.custom_table_id' => $id)));
         $this->set('childs', $childs);
+
+        $childDocumentForms = $this->CustomTable->find('all', array(
+            'recursive' => 0,
+            'conditions' => array(
+                'QcDocument.parent_document_id' => $customTable['CustomTable']['qc_document_id'],
+                'CustomTable.table_type !=' => 2
+            ),
+            'order' => array('QcDocument.title' => 'ASC', 'CustomTable.name' => 'ASC')
+        ));
+        $this->set('childDocumentForms', $childDocumentForms);
 
         $customTableFields = json_decode($customTable['CustomTable']['fields'], true);
         if (!is_array($customTableFields)) $customTableFields = array();
@@ -365,6 +375,106 @@ class CustomTablesController extends AppController {
         }
         $this->layout = 'ajax';
         $this->render('/Elements/custom_table_view_tab');
+    }
+
+    /**
+     * Rebuild one main table and every form that belongs to its module, using
+     * each CustomTable record's already saved JSON definition.
+     */
+    public function rebuild_module($id = null) {
+        $this->autoRender = false;
+        $this->response->type('json');
+
+        if (!$this->request->is('post')) {
+            throw new MethodNotAllowedException(__('Invalid request'));
+        }
+        if ($this->Session->read('User.is_mr') == false) {
+            $this->response->statusCode(403);
+            echo json_encode(array('success' => false, 'message' => __('You are not authorized to rebuild this module.')));
+            return;
+        }
+
+        $mainTable = $this->CustomTable->find('first', array(
+            'recursive' => -1,
+            'conditions' => array('CustomTable.id' => $id, 'OR' => array('CustomTable.custom_table_id' => null, 'CustomTable.custom_table_id' => ''))
+        ));
+        if (empty($mainTable)) {
+            $this->response->statusCode(404);
+            echo json_encode(array('success' => false, 'message' => __('Main table not found.')));
+            return;
+        }
+
+        $childForms = $this->CustomTable->find('all', array(
+            'recursive' => -1,
+            'conditions' => array('CustomTable.custom_table_id' => $mainTable['CustomTable']['id']),
+            'order' => array('CustomTable.table_version' => 'ASC', 'CustomTable.name' => 'ASC')
+        ));
+        $childDocumentForms = $this->CustomTable->find('all', array(
+            'recursive' => 0,
+            'conditions' => array(
+                'QcDocument.parent_document_id' => $mainTable['CustomTable']['qc_document_id'],
+                'CustomTable.table_type !=' => 2
+            ),
+            'order' => array('QcDocument.title' => 'ASC', 'CustomTable.name' => 'ASC')
+        ));
+
+        $rebuilt = array();
+        $this->_rebuild_saved_table($mainTable, false);
+        $rebuilt[] = array('type' => 'Main table', 'name' => $mainTable['CustomTable']['name']);
+
+        foreach ($childForms as $childForm) {
+            $this->_rebuild_saved_table($childForm, true);
+            $rebuilt[] = array('type' => 'Child form', 'name' => $childForm['CustomTable']['name']);
+        }
+        foreach ($childDocumentForms as $childDocumentForm) {
+            $this->_rebuild_saved_table($childDocumentForm, false);
+            $rebuilt[] = array('type' => 'Child document form', 'name' => $childDocumentForm['CustomTable']['name']);
+        }
+
+        $this->_clear_cake_cache();
+        echo json_encode(array('success' => true, 'message' => __('Module rebuilt successfully.'), 'rebuilt' => $rebuilt));
+    }
+
+    private function _rebuild_saved_table($customTable, $isChildForm = false) {
+        $table = $customTable['CustomTable'];
+        $fields = json_decode($table['fields'], true);
+        if (!is_array($fields)) $fields = array();
+
+        // Start with the complete saved row so rebuilding cannot discard newer
+        // configuration columns such as tab_settings.
+        $payload = array('CustomTable' => $table, 'CustomTableFields' => array());
+        if (!isset($payload['CustomTable']['re-password'])) $payload['CustomTable']['re-password'] = '';
+
+        foreach ($fields as $field) {
+            if (!empty($field['field_label'])) $field['field_label'] = base64_decode($field['field_label']);
+            if (isset($field['data_type']) && $field['data_type'] === 'comments' && !empty($field['show_comments'])) {
+                $field['show_comments'] = base64_decode($field['show_comments']);
+                if ($this->_isBase64Encoded($field['show_comments'])) $field['show_comments'] = base64_decode($field['show_comments']);
+            }
+            $payload['CustomTableFields'][] = $field;
+        }
+        $payload['linkedTos'] = json_encode($this->_rebuild_linked_tos());
+        $payload['linkedTosWithDisplay'] = json_encode($this->_returnDetaultField($fields));
+
+        if ($isChildForm) $this->recreate_child($table['id'], true, $payload);
+        else $this->recreate($table['id'], true, $payload);
+    }
+
+    private function _rebuild_linked_tos() {
+        $linkedTos = array();
+        $skip = array('AppController', 'ApprovalsController', 'ApprovalCommentsController', 'CustomTablesController', 'FilesController', 'RecordsController', 'UserSessionsController');
+        foreach (App::objects('controller') as $controller) {
+            if (in_array($controller, $skip)) continue;
+            $controller = str_replace('Controller', '', $controller);
+            $table = $this->CustomTable->find('first', array(
+                'recursive' => -1,
+                'conditions' => array('CustomTable.table_name LIKE' => '%' . Inflector::underscore($controller)),
+                'fields' => array('CustomTable.name', 'CustomTable.table_version')
+            ));
+            $className = Inflector::classify($controller);
+            $linkedTos[$className] = $table ? $table['CustomTable']['name'] . ' ver ' . $table['CustomTable']['table_version'] : $className;
+        }
+        return $linkedTos;
     }
     
 

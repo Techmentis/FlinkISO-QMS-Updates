@@ -3126,6 +3126,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 
 	public function _json(){
+		$load = array();
 		$linkedTables = $this->CustomTable->find('all',array(
 			'recursive'=>0,
 			'fields'=>array(
