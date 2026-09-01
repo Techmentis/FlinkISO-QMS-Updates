@@ -300,6 +300,74 @@ class CustomTablesController extends AppController {
         }
     }
     
++    public function view_tab($id = null, $tab = 'main') {
+        if (!$this->request->is('ajax')) {
+            throw new NotFoundException(__('Invalid request'));
+        }
+
+        $allowedTabs = array('main', 'tab_configuration', 'child_tables', 'linked_processes', 'data_entry', 'permissions', 'charts_panels', 'email_triggers', 'create_tasks', 'javascript');
+        if (!in_array($tab, $allowedTabs, true)) {
+            throw new NotFoundException(__('Invalid tab'));
+        }
+
+        // Reuse the existing access checks and view-data preparation. Calling
+        // an action directly does not render it; this action renders only the
+        // selected element below.
+        $this->view($id);
+
+        $customTable = $this->CustomTable->find('first', array(
+            'recursive' => 0,
+            'conditions' => array('CustomTable.id' => $id)
+        ));
+        $this->set('customTable', $customTable);
+
+        $childs = $this->CustomTable->find('all', array('conditions' => array('CustomTable.custom_table_id' => $id)));
+        $this->set('childs', $childs);
+
+        $customTableFields = json_decode($customTable['CustomTable']['fields'], true);
+        if (!is_array($customTableFields)) $customTableFields = array();
+        $savedTabSettings = !empty($customTable['CustomTable']['tab_settings']) ? json_decode($customTable['CustomTable']['tab_settings'], true) : array();
+        if (!is_array($savedTabSettings)) $savedTabSettings = array();
+        $tabSettings = isset($savedTabSettings['tabs']) && is_array($savedTabSettings['tabs']) ? $savedTabSettings['tabs'] : $savedTabSettings;
+        $childFormSettings = isset($savedTabSettings['child_forms']) && is_array($savedTabSettings['child_forms']) ? $savedTabSettings['child_forms'] : array();
+        $formTabs = array();
+        $visibilityFields = array();
+        foreach ($customTableFields as $field) {
+            $tabName = isset($field['tab_name']) ? trim($field['tab_name']) : '';
+            if ($tabName !== '' && $tabName !== '-1' && !isset($formTabs[$tabName])) {
+                $formTabs[$tabName] = array('name' => $tabName, 'group' => isset($field['tab_group']) ? $field['tab_group'] : '', 'sequence' => isset($field['tab_sequence']) ? $field['tab_sequence'] : '');
+            }
+            if (!empty($field['field_name']) && in_array(isset($field['data_type']) ? $field['data_type'] : '', array('radio', 'dropdown-s'))) {
+                $options = !empty($field['csvoptions']) ? array_values(array_filter(array_map('trim', explode(',', $field['csvoptions'])))) : array();
+                $visibilityFields[] = array('name' => $field['field_name'], 'label' => Inflector::humanize($field['field_name']), 'options' => $options);
+            }
+        }
+        $tabConfigurationRows = array();
+        foreach ($formTabs as $formTab) {
+            $tabConfigurationRows[] = array('type' => 'tab', 'key' => $formTab['name'], 'name' => $formTab['name'], 'position' => 'Group '.($formTab['group'] !== '' ? $formTab['group'] : '-').' / #'.($formTab['sequence'] !== '' ? $formTab['sequence'] : '-'));
+        }
+        foreach ($childs as $child) {
+            if (empty($child['CustomTable']['table_name'])) continue;
+            $tabConfigurationRows[] = array('type' => 'child_form', 'key' => $child['CustomTable']['table_name'], 'name' => $child['CustomTable']['name'], 'position' => 'Child form tab');
+        }
+        $this->set(compact('tabSettings', 'childFormSettings', 'visibilityFields', 'tabConfigurationRows'));
+        $this->set('schedules', $this->CustomTable->QcDocument->Schedule->find('list'));
+        $this->set('customArray', $this->CustomTable->customArray);
+        $this->loadModel('User');
+        $users = $this->User->find('list', array('conditions' => array('User.publish' => 1, 'User.soft_delete' => 0), 'order' => array('User.name' => 'ASC')));
+        $this->set('users', $users);
+
+        $documentDefaults = !empty($customTable['QcDocument']) ? $customTable['QcDocument'] : array();
+        foreach (array('creators', 'viewers', 'editors', 'approvers') as $accessField) {
+            $fallback = $accessField === 'viewers' ? (isset($documentDefaults['user_id']) ? $documentDefaults['user_id'] : '[]') : (isset($documentDefaults['editors']) ? $documentDefaults['editors'] : '[]');
+            $value = !empty($customTable['CustomTable'][$accessField]) ? $customTable['CustomTable'][$accessField] : $fallback;
+            $this->set($accessField, json_decode($value, true));
+        }
+        $this->layout = 'ajax';
+        $this->render('/Elements/custom_table_view_tab');
+    }
+    
+
     public function edit($id = null) {
         if($this->Session->read('User.is_mr') == false){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
@@ -3102,6 +3170,123 @@ class CustomTablesController extends AppController {
             }
         }
     }
+
++    public function update_tab_settings($id = null){
+        if (!$this->request->is('post')) {
+            $this->redirect(array('action' => 'view', $id, 'timestamp' => date('ymdhis')));
+        }
+
+        if ($this->Session->read('User.is_mr') != true) {
+            $this->Session->setFlash(__('Invalid access.'), 'default', array('class' => 'alert alert-danger'));
+            $this->redirect(array('action' => 'view', $id, 'timestamp' => date('ymdhis')));
+        }
+
+        $customTable = $this->CustomTable->find('first', array(
+            'recursive' => -1,
+            'conditions' => array('CustomTable.id' => $id)
+        ));
+
+        if (!$customTable || $customTable['CustomTable']['created_by'] != $this->Session->read('User.id')) {
+            $this->Session->setFlash(__('Invalid table access.'), 'default', array('class' => 'alert alert-danger'));
+            $this->redirect(array('action' => 'view', $id, 'timestamp' => date('ymdhis')));
+        }
+
+        $submittedSettings = isset($this->request->data['CustomTable']['tab_settings']) ? json_decode($this->request->data['CustomTable']['tab_settings'], true) : array();
+        if (!is_array($submittedSettings)) {
+            $this->Session->setFlash(__('Invalid tab configuration.'), 'default', array('class' => 'alert alert-danger'));
+            $this->redirect(array('action' => 'view', $id, 'timestamp' => date('ymdhis')));
+        }
+
+        $submittedTabSettings = isset($submittedSettings['tabs']) && is_array($submittedSettings['tabs']) ? $submittedSettings['tabs'] : $submittedSettings;
+        $submittedChildFormSettings = isset($submittedSettings['child_forms']) && is_array($submittedSettings['child_forms']) ? $submittedSettings['child_forms'] : array();
+
+        $fields = json_decode($customTable['CustomTable']['fields'], true);
+        if (!is_array($fields)) $fields = array();
+
+        $allowedTabs = array();
+        $allowedVisibilityFields = array();
+        foreach ($fields as $field) {
+            $tabName = isset($field['tab_name']) ? trim($field['tab_name']) : '';
+            if ($tabName !== '' && $tabName !== '-1') $allowedTabs[$tabName] = true;
+
+            if (
+                !empty($field['field_name']) &&
+                in_array(isset($field['data_type']) ? $field['data_type'] : '', array('radio', 'dropdown-s'))
+            ) {
+                $allowedVisibilityFields[$field['field_name']] = !empty($field['csvoptions'])
+                    ? array_values(array_filter(array_map('trim', explode(',', $field['csvoptions']))))
+                    : array();
+            }
+        }
+
+        $allowedActionVisibility = array('always', 'hide_add', 'hide_edit', 'hide_both');
+        $cleanSettings = array();
+        foreach ($submittedTabSettings as $tabName => $setting) {
+            if (!isset($allowedTabs[$tabName]) || !is_array($setting)) continue;
+
+            $actionVisibility = isset($setting['action_visibility']) ? $setting['action_visibility'] : 'always';
+            if (!in_array($actionVisibility, $allowedActionVisibility)) $actionVisibility = 'always';
+
+            $visibilityField = isset($setting['visibility_field']) ? $setting['visibility_field'] : '';
+            $visibleWhen = isset($setting['visible_when']) && is_array($setting['visible_when']) ? $setting['visible_when'] : array();
+            if (!isset($allowedVisibilityFields[$visibilityField])) {
+                $visibilityField = '';
+                $visibleWhen = array();
+            } else {
+                $visibleWhen = array_values(array_intersect($allowedVisibilityFields[$visibilityField], $visibleWhen));
+                if (!$visibleWhen) $visibilityField = '';
+            }
+
+            $cleanSettings[$tabName] = array(
+                'action_visibility' => $actionVisibility,
+                'visibility_field' => $visibilityField,
+                'visible_when' => $visibleWhen,
+            );
+        }
+
+        $childTables = $this->CustomTable->find('list', array(
+            'recursive' => -1,
+            'fields' => array('CustomTable.table_name', 'CustomTable.id'),
+            'conditions' => array('CustomTable.custom_table_id' => $id)
+        ));
+        $cleanChildFormSettings = array();
+        foreach ($submittedChildFormSettings as $tableName => $setting) {
+            if (!isset($childTables[$tableName]) || !is_array($setting)) continue;
+
+            $actionVisibility = isset($setting['action_visibility']) ? $setting['action_visibility'] : 'always';
+            if (!in_array($actionVisibility, $allowedActionVisibility)) $actionVisibility = 'always';
+
+            $visibilityField = isset($setting['visibility_field']) ? $setting['visibility_field'] : '';
+            $visibleWhen = isset($setting['visible_when']) && is_array($setting['visible_when']) ? $setting['visible_when'] : array();
+            if (!isset($allowedVisibilityFields[$visibilityField])) {
+                $visibilityField = '';
+                $visibleWhen = array();
+            } else {
+                $visibleWhen = array_values(array_intersect($allowedVisibilityFields[$visibilityField], $visibleWhen));
+                if (!$visibleWhen) $visibilityField = '';
+            }
+
+            $cleanChildFormSettings[$tableName] = array(
+                'action_visibility' => $actionVisibility,
+                'visibility_field' => $visibilityField,
+                'visible_when' => $visibleWhen,
+            );
+        }
+
+        // updateAll intentionally avoids a stale Cake schema cache after the
+        // tab_settings column is introduced on an already-running MAMP site.
+        $dataSource = $this->CustomTable->getDataSource();
+        if ($this->CustomTable->updateAll(
+            array('CustomTable.tab_settings' => $dataSource->value(json_encode(array('tabs' => $cleanSettings, 'child_forms' => $cleanChildFormSettings)))),
+            array('CustomTable.id' => $id)
+        )) {
+            $this->Session->setFlash(__('Tab configuration saved.'), 'default', array('class' => 'alert alert-success'));
+        } else {
+            $this->Session->setFlash(__('Tab configuration could not be saved.'), 'default', array('class' => 'alert alert-danger'));
+        }
+        $this->redirect(array('action' => 'view', $id, 'timestamp' => date('ymdhis')));
+    }
+
 
     public function updatedataentry($qc_document_id = null, $custom_table_id = null){
         if ($this->request->is('post')) {
