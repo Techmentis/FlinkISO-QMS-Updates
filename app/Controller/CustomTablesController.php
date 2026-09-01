@@ -1480,6 +1480,7 @@ class CustomTablesController extends AppController {
                     if($fields['who_can_edit'])$fields['who_can_edit'] = json_encode($fields['who_can_edit']);
                     if($fields['show_comments'])$fields['show_comments'] = base64_encode($fields['show_comments']);
                     if(isset($fields['child_tables']) && is_array($fields['child_tables'])) $fields['child_tables'] = json_encode($fields['child_tables']);
+                    if(isset($fields['child_tables']) && is_array($fields['child_tables'])) $fields['child_tables'] = json_encode($fields['child_tables']);
                     $fields['field_name'] = $this->_clean_table_names($fields['field_name']);
                     // $fields['field_label'] = Inflector::humanize($this->_clean_table_names($fields['field_label']));
                     if($fields['field_label'])$fields['field_label'] = base64_encode($fields['field_label']);
