@@ -2074,9 +2074,23 @@ class CustomTablesController extends AppController {
         }
 
         $fields = json_decode($customTable['CustomTable']['fields'],true);
-        foreach($fields as $field){
+        foreach($fields as &$field){
+            // Older rebuilds could JSON-encode this value more than once. The
+            // remote editor requires FlinkISO's JSON-string representation.
+            $whoCanEdit = isset($field['who_can_edit']) ? $field['who_can_edit'] : array();
+            for($decodePass = 0; $decodePass < 3 && is_string($whoCanEdit); $decodePass++){
+                $decodedWhoCanEdit = json_decode($whoCanEdit, true);
+                if(json_last_error() !== JSON_ERROR_NONE) break;
+                $whoCanEdit = $decodedWhoCanEdit;
+            }
+            if(!is_array($whoCanEdit)) $whoCanEdit = array();
+            $field['who_can_edit'] = empty($whoCanEdit) ? json_encode('') : json_encode($whoCanEdit);
             $fieldDetails[] = $field;
         }
+        unset($field);
+        $customTable['CustomTable']['fields'] = json_encode($fields);
+        $this->request->data['CustomTable']['fields'] = $customTable['CustomTable']['fields'];
+        $this->set('fieldDetails', $fieldDetails);
         $this->set('linkedTosWithDisplay',$this->_returnDetaultField($fields));
         $qcDocument = $this->CustomTable->QcDocument->find('first', array('recursive' => 0, 'conditions' => array('QcDocument.id' => $customTable['CustomTable']['qc_document_id']),));
         $this->set('qcDocument', $qcDocument);

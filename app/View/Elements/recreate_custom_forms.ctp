@@ -2,16 +2,21 @@
 <style>#checkout-button{display: none;}</style>
 <?php 
 $str = 'company_id:'.$this->Session->read('User.company_id');
-$response =  $this->requestAction(array('action'=>'curl','post','custom_forms','recreate',
-  'data'=>json_encode(array(
+$recreatePayload = json_encode(array(
     $existingFields,
     $fieldDetails,
     $childTables,
     $thisTable,
     $linkedTosWithDisplay,
     $hasMany
-  )),
-  'linkedTosWithDisplay'=>json_encode($linkedTosWithDisplay)));
+  ));
+$response = $this->requestAction(
+  array('action'=>'curl','post','custom_forms','recreate'),
+  array('data'=>array(
+    'payload'=>$recreatePayload,
+    'linkedTosWithDisplay'=>json_encode($linkedTosWithDisplay)
+  ))
+);
 $result = json_decode($response,true);
 if($result['error']==1 or $response == null){ 
   if($result['message'] == 'Incorrect credentials'){ ?>

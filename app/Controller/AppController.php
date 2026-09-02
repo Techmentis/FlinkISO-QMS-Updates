@@ -2754,10 +2754,15 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 
 	public function curl($type = null, $api_controller = null, $path = null,$data = null,$linkedTosWithDisplay = null){
 		if(empty($type))$type = $this->request->params['named']['type'];
-		$linkedTosWithDisplay = json_decode($this->request->params['named']['linkedTosWithDisplay']);
+		if(isset($this->request->data['linkedTosWithDisplay'])) $linkedTosWithDisplay = json_decode($this->request->data['linkedTosWithDisplay']);
+		else $linkedTosWithDisplay = isset($this->request->params['named']['linkedTosWithDisplay']) ? json_decode($this->request->params['named']['linkedTosWithDisplay']) : null;
 		if(empty($api_controller))$api_controller = $this->request->params['named']['api_controller'];		
 		if($type == 'post'){ 
-			if(empty($data))$data = $this->request->params['named']['data'];
+			if(empty($data)){
+				if(isset($this->request->data['payload'])) $data = $this->request->data['payload'];
+				else if(isset($this->request->params['named']['payload'])) $data = $this->request->params['named']['payload'];
+				else $data = isset($this->request->params['named']['data']) ? $this->request->params['named']['data'] : null;
+			}
 			$controllers = array();
 			$aCtrlClasses = App::objects('controller');
 			$skip = array('AppController', 'ApprovalsController', 'ApprovalCommentsController', 'CustomTablesController', 'FilesController', 'RecordsController', 'UserSessionsController');
