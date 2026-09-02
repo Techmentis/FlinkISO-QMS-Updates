@@ -39,10 +39,10 @@
 					?>
 					<hr />
 					<div class="btn btn-success btn-sm" id="update_btn">Install</div>
-					<small class="text-danger"><br />Update & Install action is not reversible. We strongly recomend to take backup of your existing installed application before updating it.</small>					
+					<small class="text-danger"><br />Update & Install action is not reversible. We strongly recommend to take backup of your existing installed application before updating it.</small>					
 				</div>
 				<div class="panel-footer">
-					<p><strong>Note:</strong> Do not uddate your application unless you receive email to update the application.</p> 					
+					<p><strong>Note:</strong> Do not update your application unless you receive email to update the application.</p> 					
 				</div>
 			</div>
 		</div>
