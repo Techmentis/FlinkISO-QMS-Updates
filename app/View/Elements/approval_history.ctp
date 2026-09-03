@@ -20,7 +20,7 @@ else if($this->request->params['named']['prepared_by'])$prepared_by = $this->req
 		.font-weight-bold{font-weight: 600;color: #3566b1 !important;}.table-border-dark{border: 1px solid #000;}.btn .badge{position: absolute;top: -10px;}
 	</style>
 	<?php
-	$approvalStatuses = array(0=>'Pending...',1=>'Approved',2=>'Not Approved');
+	$approvalStatuses = array(0=>'Pending...',1=>'Approved',2=>'Not Approved',3=>'Returned to Previous Step');
 	?>
 	<div class="row">
 		<div class="col-md-12">
@@ -63,10 +63,12 @@ else if($this->request->params['named']['prepared_by'])$prepared_by = $this->req
 							if($approval['Approval']['id'] == $current_approval)$class = ' font-weight-bold';
 							else $class = '';
 
-							if($approval['Approval']['status'] == 1)$appClass = ' text-success';
+							if($approval['Approval']['approval_status'] == 3)$appClass = ' text-warning';
+							elseif($approval['Approval']['status'] == 1)$appClass = ' text-success';
 							elseif($approval['Approval']['status'] == 2)$appClass = ' text-danger';
 
-							if($approval['Approval']['status'] == 1)$badgeClass = ' btn-success';
+							if($approval['Approval']['approval_status'] == 3)$badgeClass = ' btn-warning';
+							elseif($approval['Approval']['status'] == 1)$badgeClass = ' btn-success';
 							elseif($approval['Approval']['status'] == 2)$badgeClass = ' btn-danger';
 							else $badgeClass = ' bg-red';
 
@@ -88,7 +90,10 @@ else if($this->request->params['named']['prepared_by'])$prepared_by = $this->req
 								<td><?php echo h($approval['Approval']['created']); ?>&nbsp;</td>
 								<td><?php echo h($approval['From']['name']); ?>&nbsp;</td>
 								<td><?php echo h($approval['Employee']['name']); ?><?php echo h($approval['User']['name']); ?></td>
-								<td><?php echo h($approval['Approval']['comments']);?></td>
+								<td>
+									<?php echo h($approval['Approval']['comments']);?>
+									<?php if($approval['Approval']['approval_status'] == 3){ ?><span class="label label-warning">Returned to Previous Step</span><?php } ?>
+								</td>
 								<td>
 									<?php if($approval['Approval']['user_id'] == $this->Session->read('User.id') && $approval['Approval']['status'] != 1){ ?>
 										<div class="btn-group pull-right">
@@ -163,5 +168,3 @@ $approval = array();?>
 <?php 
 	if($lastapproval['Approval']['approval_step_id'] != $currentStep['ApprovalStep']['id'] || $showpanel == true)echo $this->element('approval_form',array('approval'=>$approval,'showpanel'=>$showpanel));	
 ?>
-
-

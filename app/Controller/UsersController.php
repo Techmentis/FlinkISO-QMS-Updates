@@ -936,6 +936,8 @@ class UsersController extends AppController {
         
         $this->loadModel('Approval');
         $this->loadModel('CustomTable');
+        $this->loadModel('QcDocument');
+        $this->loadModel('Schedule');
         $this->CustomTable->virtualFields = array(
             'qc_parent' => 'select `qc_documents`.`parent_document_id` from `   qc_documents` where `qc_documents`.`id` LIKE CustomTable.qc_document_id  LIMIT 1'
         );
@@ -983,7 +985,7 @@ class UsersController extends AppController {
         );
         
         $this->set('customTables', $customTables);
-        $schedules = $this->CustomTable->QcDocument->Schedule->find('list');
+        $schedules = $this->Schedule->find('list');
         $this->set(compact('schedules'));
 
         $this->Approval->virtualFields = array(

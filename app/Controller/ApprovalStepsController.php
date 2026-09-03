@@ -168,8 +168,19 @@ public function edit($id = null) {
 	public function delete($id = null){
 		$step =  $this->ApprovalStep->find('first',array('conditions'=>array('ApprovalStep.id'=>$id)));
 		if($step){
-			$this->ApprovalStep->delete($id);
-			$this->Session->setFlash(__('The approval step deleted.'));
+			$fieldDependencies = $this->ApprovalStep->customFieldDependencies($id);
+			if($fieldDependencies){
+				$formNames = array();
+				foreach($fieldDependencies as $dependency) $formNames[$dependency['custom_table_id']] = $dependency['form_name'];
+				$message = __('This approval step cannot be deleted because it controls %d custom form field(s) in: %s. Remove those field rules first.', count($fieldDependencies), implode(', ', array_values($formNames)));
+				$this->Session->setFlash($message, 'default', array('class' => 'alert alert-danger'));
+				$this->redirect($this->referer());
+			}
+			if($this->ApprovalStep->delete($id)){
+				$this->Session->setFlash(__('The approval step deleted.'));
+			}else{
+				$this->Session->setFlash(__('The approval step could not be deleted. Please, try again.'), 'default', array('class' => 'alert alert-danger'));
+			}
 			// $this->redirect(array('controller'=>'approval_processes', 'action' => 'view', $step['ApprovalStep']['approval_process_id'],'timestamp'=>date('Ymdhis'))); 
 			$this->redirect($this->referer());
 		}else{

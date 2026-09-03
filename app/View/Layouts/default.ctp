@@ -106,7 +106,16 @@ echo $this->fetch('script');
 		$('#'+this.id+':not(:checked)').attr('disabled', true);
 	});
 	$('select[readonly]').each(function(){
-		$("#"+this.id).prop('disabled',true).trigger('chosen:updated').prop('disabled',false)
+		var select = $(this);
+		select.trigger('chosen:updated');
+		select.next('.chosen-container')
+			.addClass('chosen-readonly')
+			.attr('aria-disabled', 'true')
+			.css({'pointer-events':'none', 'opacity':'0.65'})
+			.on('mousedown.chosenReadonly keydown.chosenReadonly', function(event){
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			});
 	});
 
 <?php if($this->request->params['named']['custom_table_id'] && ($this->action == 'add')){ ?>

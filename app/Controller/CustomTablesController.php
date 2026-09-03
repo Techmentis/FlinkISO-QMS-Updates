@@ -16,13 +16,60 @@ class CustomTablesController extends AppController {
      */
     public $components = array('Paginator','AvailableForms','CreateModel', 'CreateView', 'CreateChildModel');
 
-    public $reserved_fields = array("id", "prepared_by", "approved_by", "created", "modified", "sr_no", "qc_document_id", "file_id", "file_key" ,"created_by" ,"modified_by" ,"status_user_id" ,"record_status" ,"branchid" ,"departmentid" ,"company_id" ,"soft_delete" ,"process_id","publish","custom_table_id");     
+    public $reserved_fields = array("id", "prepared_by", "approved_by", "created", "modified", "sr_no", "qc_document_id", "file_id", "file_key", "parent_id", "additional_files", "approval_step_id", "created_by", "modified_by", "status_user_id", "record_status", "branchid", "departmentid", "company_id", "soft_delete", "process_id", "publish", "custom_table_id");
     
     public function _get_system_table_id() {
         $this->loadModel('SystemTable');
         $this->SystemTable->recursive = - 1;
         $systemTableId = $this->SystemTable->find('first', array('conditions' => array('SystemTable.system_name' => $this->request->params['controller'])));
         return $systemTableId['SystemTable']['id'];
+    }
+
+    private function _approval_steps_for_table($customTable) {
+        $approvalProcessId = isset($customTable['CustomTable']['approval_process_id']) ? $customTable['CustomTable']['approval_process_id'] : null;
+        if(empty($approvalProcessId)) return array();
+
+        $this->loadModel('ApprovalStep');
+        return $this->ApprovalStep->find('all', array(
+            'recursive' => -1,
+            'conditions' => array(
+                'ApprovalStep.approval_process_id' => $approvalProcessId,
+                'ApprovalStep.publish' => 1,
+                'ApprovalStep.soft_delete' => 0
+            ),
+            'fields' => array('ApprovalStep.id', 'ApprovalStep.title', 'ApprovalStep.process_step'),
+            'order' => array('ApprovalStep.process_step' => 'ASC')
+        ));
+    }
+
+    private function _encode_field_approval_step_rules($rules) {
+        for($decodePass = 0; $decodePass < 3 && is_string($rules); $decodePass++){
+            $decodedRules = json_decode($rules, true);
+            if(json_last_error() !== JSON_ERROR_NONE) break;
+            $rules = $decodedRules;
+        }
+        if(!is_array($rules)) return json_encode(array());
+
+        $clean = array();
+        foreach($rules as $stepId => $access){
+            if($stepId !== '' && in_array($access, array('editable', 'readonly', 'hidden'), true)){
+                $clean[$stepId] = $access;
+            }
+        }
+        return json_encode($clean);
+    }
+
+    private function _encode_field_editors($editors) {
+        for($decodePass = 0; $decodePass < 3 && is_string($editors); $decodePass++){
+            $decodedEditors = json_decode($editors, true);
+            if(json_last_error() !== JSON_ERROR_NONE) break;
+            $editors = $decodedEditors;
+        }
+        if(!is_array($editors)) $editors = array();
+        $editors = array_values(array_filter($editors, function($editor){
+            return $editor !== '' && $editor !== 0 && $editor !== '0';
+        }));
+        return json_encode($editors);
     }
     public function _commons($creator = null) {
         if ($this->action == 'view' || $this->action == 'recreate') $this->set('approvals', $this->get_approvals());
@@ -48,11 +95,13 @@ class CustomTablesController extends AppController {
             if (!in_array($controller, $skip)) {
                 $controller = str_replace('Controller', '', $controller);
                 $name = $this->CustomTable->find('first', array('recursive' => 1, 'conditions' => array('CustomTable.table_name LIKE' => "%" . Inflector::underscore($controller)), 'fields' => array('CustomTable.id', 'CustomTable.name', 'CustomTable.table_version')));
+                // App::objects('controller') returns plural controller names, while
+                // CustomTableFields.linked_to stores singular CakePHP model names.
+                $modelName = Inflector::classify(Inflector::singularize($controller));
                 if ($name) {
-                    $controller = Inflector::classify($controller);
-                    $linkedTos[$controller] = $name['CustomTable']['name'] . " ver " . $name['CustomTable']['table_version'];
+                    $linkedTos[$modelName] = $name['CustomTable']['name'] . " ver " . $name['CustomTable']['table_version'];
                 } else {
-                    $linkedTos[$controller] = $controller;
+                    $linkedTos[$modelName] = $modelName;
                 }
             }
         }
@@ -405,7 +454,13 @@ class CustomTablesController extends AppController {
 
         $mainTable = $this->CustomTable->find('first', array(
             'recursive' => -1,
-            'conditions' => array('CustomTable.id' => $id, 'OR' => array('CustomTable.custom_table_id' => null, 'CustomTable.custom_table_id' => ''))
+            'conditions' => array(
+                'CustomTable.id' => $id,
+                'OR' => array(
+                    array('CustomTable.custom_table_id' => null),
+                    array('CustomTable.custom_table_id' => '')
+                )
+            )
         ));
         if (empty($mainTable)) {
             $this->response->statusCode(404);
@@ -456,13 +511,28 @@ class CustomTablesController extends AppController {
 
         foreach ($fields as $field) {
             if (!empty($field['field_label'])) $field['field_label'] = base64_decode($field['field_label']);
+            $field['who_can_edit'] = json_decode($this->_encode_field_editors(isset($field['who_can_edit']) ? $field['who_can_edit'] : array()), true);
+            if(isset($field['approval_step_rules'])) $field['approval_step_rules'] = json_decode($this->_encode_field_approval_step_rules($field['approval_step_rules']), true);
+            if(isset($field['child_tables']) && is_string($field['child_tables'])){
+                $decodedChildTables = json_decode($field['child_tables'], true);
+                if(is_array($decodedChildTables)) $field['child_tables'] = $decodedChildTables;
+            }
             if (isset($field['data_type']) && $field['data_type'] === 'comments' && !empty($field['show_comments'])) {
                 $field['show_comments'] = base64_decode($field['show_comments']);
                 if ($this->_isBase64Encoded($field['show_comments'])) $field['show_comments'] = base64_decode($field['show_comments']);
             }
             $payload['CustomTableFields'][] = $field;
         }
-        $payload['linkedTos'] = json_encode($this->_rebuild_linked_tos());
+        $linkedTos = $this->_rebuild_linked_tos();
+        // Preserve every saved relationship even when its controller is supplied
+        // by a plugin or is otherwise absent from App::objects('controller').
+        foreach ($fields as $field) {
+            if (!empty($field['linked_to']) && $field['linked_to'] !== '-1' && $field['linked_to'] !== -1) {
+                $modelName = Inflector::classify(Inflector::singularize($field['linked_to']));
+                if (!isset($linkedTos[$modelName])) $linkedTos[$modelName] = $modelName;
+            }
+        }
+        $payload['linkedTos'] = json_encode($linkedTos);
         $payload['linkedTosWithDisplay'] = json_encode($this->_returnDetaultField($fields));
 
         if ($isChildForm) $this->recreate_child($table['id'], true, $payload);
@@ -480,10 +550,44 @@ class CustomTablesController extends AppController {
                 'conditions' => array('CustomTable.table_name LIKE' => '%' . Inflector::underscore($controller)),
                 'fields' => array('CustomTable.name', 'CustomTable.table_version')
             ));
-            $className = Inflector::classify($controller);
+            $className = Inflector::classify(Inflector::singularize($controller));
             $linkedTos[$className] = $table ? $table['CustomTable']['name'] . ' ver ' . $table['CustomTable']['table_version'] : $className;
         }
         return $linkedTos;
+    }
+
+    /**
+     * Never replace working MVC files with a malformed API response.
+     * `$--` is emitted when the API receives an unresolved linked-model display
+     * mapping and produces PHP that cannot be parsed.
+     */
+    private function _generated_code_is_safe($value) {
+        if (is_array($value)) {
+            foreach ($value as $child) {
+                if (!$this->_generated_code_is_safe($child)) return false;
+            }
+            return true;
+        }
+        return !is_string($value) || strpos($value, '$--') === false;
+    }
+
+    private function _ensure_generated_child_tabs($code) {
+        if (!is_string($code) || strpos($code, "id='linked-child-forms-source'") === false) return $code;
+        if (strpos($code, 'change-request-child-tabs') !== false) return $code;
+        $marker = "\t\t// Remove the staging area only after every linked child was placed.";
+        if (strpos($code, $marker) === false) return $code;
+        $tabs = "\t\tif(\$('#linked-child-forms-source .linked-child-form').length > 0){\n"
+            . "\t\t\tvar childTabs = \$('<div id=\"change-request-child-tabs\"><ul></ul></div>');\n"
+            . "\t\t\t\$('#linked-child-forms-source').before(childTabs);\n"
+            . "\t\t\t\$('#linked-child-forms-source .linked-child-form').each(function(index){\n"
+            . "\t\t\t\tvar panelId = 'change-request-child-tab-' + index;\n"
+            . "\t\t\t\t\$(this).attr('id', panelId).appendTo(childTabs);\n"
+            . "\t\t\t\t\$('<li></li>').append(\$('<a></a>', {href:'#' + panelId, text:\$(this).attr('data-child-name')})).appendTo(childTabs.children('ul'));\n"
+            . "\t\t\t});\n"
+            . "\t\t\t\$('#linked-child-forms-source').remove();\n"
+            . "\t\t\tchildTabs.tabs();\n"
+            . "\t\t}\n";
+        return str_replace($marker, $tabs . $marker, $code);
     }
     
 
@@ -584,7 +688,18 @@ class CustomTablesController extends AppController {
     }
 
     // 1st step add new table
-    public function _add_new_table($table_name = null,$defaultfield = null,$sqld = null,$fields = null){
+    public function _add_new_table($table_name = null,$defaultfield = null,$sqld = null,$fields = null,$reconcileDeletedFields = false){
+        // A child rebuild must never apply its field list to the parent table.
+        // Fail closed if a reconcile call targets a different table than the
+        // form currently being rebuilt.
+        $requestTableName = !empty($this->request->data['CustomTable']['table_name']) ? $this->request->data['CustomTable']['table_name'] : null;
+        if($reconcileDeletedFields && $requestTableName && $requestTableName !== $table_name){
+            CakeLog::write('error', 'Refusing mismatched custom-table schema update. Requested: '.$requestTableName.' Target: '.$table_name);
+            return false;
+        }
+        $updatesqls = array();
+        $addsqls = array();
+        $dropsqls = array();
         foreach($fields as $field){
             $newFields[] = $field;
         }
@@ -592,7 +707,7 @@ class CustomTablesController extends AppController {
         $sql = "CREATE TABLE IF NOT EXISTS `" . $table_name . "` ( ";
         $sql .= "`id` varchar(36) NOT NULL ,";
         $sql .= "`sr_no` int(11) NOT NULL AUTO_INCREMENT,";
-        $sql .= "`".$defaultfield."` varchar(255) NOT NULL,";
+        if(!empty($defaultfield)) $sql .= "`".$defaultfield."` varchar(255) NOT NULL,";
         $sql .= $sqld;
         $sql .= "
         `file_id` varchar(36) NULL,
@@ -624,9 +739,23 @@ class CustomTablesController extends AppController {
             $this->Session->setFlash(__('Something went wrong'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect($this->referer());
         }
+        // Rebuilds commonly receive saved fields with new=0. If an older table
+        // is missing one of those columns, treating it as already present makes
+        // the generated model invalid and every recursive find() returns false.
+        $existingColumns = array();
+        try{
+            $columnRows = $this->CustomTable->query('SHOW COLUMNS FROM `'.$table_name.'`');
+            foreach((array)$columnRows as $columnRow){
+                foreach((array)$columnRow as $columnDetails){
+                    if(is_array($columnDetails) && isset($columnDetails['Field'])) $existingColumns[$columnDetails['Field']] = $columnDetails;
+                }
+            }
+        }catch(Exception $e){
+            $existingColumns = array();
+        }
         // run above sql first and then add alter table commands one by one
         foreach ($fields as $chkd) {            
-            if($chkd['new'] == 0 && $chkd['field_name'] != $chkd['old_field_name']){
+            if($chkd['new'] == 0 && !empty($chkd['field_name']) && !empty($chkd['old_field_name'])){
                 switch ($chkd['field_type']) {
                     case 0: // varchar
                     $type = 'varchar('.$chkd['length'].')';
@@ -649,25 +778,27 @@ class CustomTablesController extends AppController {
                     case 6: // datetime
                     $type = 'datetime';
                     break;
-                    case 7: // datetime
-                    $type = 'varchar('.$chkd['length'].')';
+                    case 7: // file/upload metadata
+                    $type = 'varchar('.max(255, (int)$chkd['length']).')';
                     break;
                 default: // text
                 $type = 'text';
                 break;
             }
 
-            if($chkd['mandetory'] == 1)$m = ' NOT ';
+            $isMandatory = isset($chkd['mandatory']) ? $chkd['mandatory'] : (isset($chkd['mandetory']) ? $chkd['mandetory'] : 0);
+            if($isMandatory == 1)$m = ' NOT ';
             else $m = '';
 
-            if(!in_array($chkd['field_name'],$this->reserved_fields))$updatesql .= 'ALTER TABLE `'.$this->request->data['CustomTable']['table_name'].'` CHANGE `'.$chkd['old_field_name'].'` `'.$chkd['field_name'].'` '.$type. ' '. $m.' NULL;';
+            if(!in_array($chkd['field_name'],$this->reserved_fields))$updatesqls[] = 'ALTER TABLE `'.$table_name.'` CHANGE `'.$chkd['old_field_name'].'` `'.$chkd['field_name'].'` '.$type. ' '. $m.' NULL;';
         }
 
         if($chkd['drop'] == 1){
-            if(!in_array($chkd['field_name'],$this->reserved_fields))$dropsql .= 'ALTER TABLE `'.$this->request->data['CustomTable']['table_name'].'` DROP `'.$chkd['field_name'].'`;';
+            if(!in_array($chkd['field_name'],$this->reserved_fields))$dropsqls[] = 'ALTER TABLE `'.$table_name.'` DROP `'.$chkd['field_name'].'`;';
         }
 
-        if($chkd['new'] == 1){
+        $columnMissing = !empty($existingColumns) && !isset($existingColumns[$chkd['field_name']]);
+        if($chkd['new'] == 1 || $columnMissing){
             switch ($chkd['field_type']) {
             case 0: // varchar
             $type = 'varchar('.$chkd['length'].')';
@@ -693,34 +824,52 @@ class CustomTablesController extends AppController {
             default: // text
             $type = 'text';
             break;
-            case 7: // datetime
-            $type = 'varchar('.$chkd['length'].')';
+            case 7: // file/upload metadata
+            $type = 'varchar('.max(255, (int)$chkd['length']).')';
             break;
         }
 
-        if($chkd['mandetory'] == 1)$m = ' NOT ';
+        $isMandatory = isset($chkd['mandatory']) ? $chkd['mandatory'] : (isset($chkd['mandetory']) ? $chkd['mandetory'] : 0);
+        if($isMandatory == 1)$m = ' NOT ';
         else $m = '';
         if($chkd['display_type'] != 7 && $chkd['display_type'] != 5 && $chkd['display_type'] != 10){
             if(!in_array($chkd['field_name'],$this->reserved_fields)){
-                $addsqls[] =  'ALTER TABLE `'.$this->request->data['CustomTable']['table_name'].'` ADD `'.$chkd['field_name'].'` '.$type.' '. $m .' NULL AFTER `sr_no`;';
+                $addsqls[] =  'ALTER TABLE `'.$table_name.'` ADD `'.$chkd['field_name'].'` '.$type.' '. $m .' NULL AFTER `sr_no`;';
+                $existingColumns[$chkd['field_name']] = array('Field' => $chkd['field_name']);
             }
         }
     }
 }
 
-    if($updatesql){
-        try{
-            $this->CustomTable->query($updatesql);
-        }catch(Exception $e){
-            
+    if($updatesqls){
+        foreach($updatesqls as $updatesql){
+            try{
+                $this->CustomTable->query($updatesql);
+            }catch(Exception $e){
+                CakeLog::write('error', 'Custom table column update failed: '.$e->getMessage().' SQL: '.$updatesql);
+            }
         }
     }
 
-    if($dropsql){
+    // Any non-system column absent from the saved field JSON is a deleted
+    // custom field. Remove it from the physical table as part of rebuilding.
+    if($reconcileDeletedFields){
+        $configuredColumns = array();
+        foreach((array)$fields as $configuredField){
+            if(!empty($configuredField['field_name'])) $configuredColumns[$configuredField['field_name']] = true;
+            if(!empty($configuredField['old_field_name'])) $configuredColumns[$configuredField['old_field_name']] = true;
+        }
+        foreach($existingColumns as $existingColumn => $columnDetails){
+            if(in_array($existingColumn, $this->reserved_fields) || isset($configuredColumns[$existingColumn])) continue;
+            $dropsqls[] = 'ALTER TABLE `'.$table_name.'` DROP `'.$existingColumn.'`;';
+        }
+    }
+
+    foreach(array_unique($dropsqls) as $dropsql){
         try{
             $this->CustomTable->query($dropsql);
         }catch(Exception $e){
-            
+            CakeLog::write('error', 'Custom table column drop failed: '.$e->getMessage().' SQL: '.$dropsql);
         }
     }
 
@@ -862,7 +1011,7 @@ class CustomTablesController extends AppController {
                 if($fields['drop'] == 1){
                     unset($fields);
                 }else{
-                    $fields['who_can_edit'] = json_encode($fields['who_can_edit']);
+                    $fields['who_can_edit'] = $this->_encode_field_editors(isset($fields['who_can_edit']) ? $fields['who_can_edit'] : array());
                     if($fields['display_type'] == 7)$fields['show_comments'] = base64_encode($fields['show_comments']);
                     // $fields['field_label'] = Inflector::humanize($this->_clean_table_names($fields['field_label']));
                     $fields['field_label'] = base64_encode($fields['field_label']);
@@ -889,8 +1038,10 @@ class CustomTablesController extends AppController {
                 $apprpvalProcess = $this->ApprovalProcess->find('first',array('conditions'=>array('ApprovalProcess.id'=>$this->request->data['CustomTable']['approval_process_id'])));
                 if($apprpvalProcess){
                     $applicableTos = json_decode($apprpvalProcess['ApprovalProcess']['applicable_to'],true);
-                    if(!in_array($this->request->data['CustomTable']['id'], $applicableTos)){
-                        $applicableTos[] = $this->request->data['CustomTable']['id'];
+                    if(!is_array($applicableTos)) $applicableTos = array();
+                    $customTableId = $this->CustomTable->id;
+                    if(!in_array($customTableId, $applicableTos)){
+                        $applicableTos[] = $customTableId;
                         $apprpvalProcess['ApprovalProcess']['applicable_to'] = json_encode($applicableTos);
                         $this->ApprovalProcess->create();
                         $this->ApprovalProcess->save($apprpvalProcess,false);
@@ -996,7 +1147,7 @@ class CustomTablesController extends AppController {
                             }
                         }
 
-                        $sqlresult = $this->_add_new_table($table_name,$defaultfield,$sqld,$this->request->data['CustomTableFields']);
+                        $sqlresult = $this->_add_new_table($table_name,$defaultfield,$sqld,$this->request->data['CustomTableFields'],true);
                         // $this->_clear_cake_cache();
                         // everything run properly -- now create table
                         if ($this->_show_approvals()) $this->_save_approvals($this->CustomTable->id);
@@ -1165,21 +1316,45 @@ class CustomTablesController extends AppController {
         );
 
         $customTable = $this->CustomTable->find('first', array('conditions' => array('CustomTable.id' => $this->request->params['named']['custom_table_id'])));
+        // Recover a recent failed draft for this user and parent form. History
+        // already contains the submitted builder payload, so field rows should
+        // not disappear merely because the CustomTable insert failed.
+        if(!$this->request->is('post')){
+            $this->loadModel('History');
+            $draftHistory = $this->History->find('first', array(
+                'recursive' => -1,
+                'conditions' => array(
+                    'History.controller_name' => 'custom_tables',
+                    'History.action' => 'add_child',
+                    'History.created_by' => $this->Session->read('User.id'),
+                    'History.created >=' => date('Y-m-d H:i:s', strtotime('-30 minutes')),
+                    'History.post_values LIKE' => '%CustomTableFields%'
+                ),
+                'order' => array('History.created' => 'DESC')
+            ));
+            $draftEnvelope = !empty($draftHistory['History']['post_values']) ? json_decode($draftHistory['History']['post_values'], true) : array();
+            $draft = isset($draftEnvelope[0]) && is_array($draftEnvelope[0]) ? $draftEnvelope[0] : array();
+            if(
+                !empty($draft['CustomTableFields']) &&
+                !empty($draft['CustomTable']['custom_table_id']) &&
+                $draft['CustomTable']['custom_table_id'] === $customTable['CustomTable']['id']
+            ){
+                unset($draft['CustomTable']['password'], $draft['CustomTable']['re-password'], $draft['CustomTable']['table_name'], $draft['CustomTable']['fields']);
+                $this->request->data['CustomTable'] = $draft['CustomTable'];
+                $this->request->data['CustomTableFields'] = array_values($draft['CustomTableFields']);
+                $this->set('fieldDetails', $this->request->data['CustomTableFields']);
+            }
+        }
         // afert form submit
         if ($this->request->is('post')) {            
 
             $this->request->data['CustomTable']['password'] = Security::hash($this->request->data['CustomTable']['password'], 'md5', true);
 
+            $defaultfield = null;
             foreach($this->request->data['CustomTableFields'] as $fields){
                 if($fields['default_field'] == 1){
                     $defaultfield = $this->_clean_table_names($fields['field_name']);
                 }
-            }
-
-            if ($defaultfield == '') {
-                $this->Session->setFlash(__('Default field missing'));
-                $this->redirect(array('action' => 'add_child', $id,'custom_table_id'=>$this->request->params['named']['custom_table_id'],  'qc_document_id' => $this->request->params['named']['qc_document_id']));
-
             }
 
             $fieldTypes = $this->CustomTable->customArray['fieldTypes'];
@@ -1204,19 +1379,30 @@ class CustomTablesController extends AppController {
             $this->request->data['CustomTable']['fields'] = json_encode($this->request->data['CustomTableFields']);
             $this->request->data['CustomTable']['system_table_id'] = $this->_get_system_table_id();
             
-            $this->CustomTable->create();            
-            $hasMany = json_decode($customTable['CustomTable']['has_many'], true);
+            // Build the relationship list from child records that actually exist.
+            // Never trust stale has_many JSON left by an earlier failed attempt.
+            $existingChildren = $this->CustomTable->find('all', array(
+                'recursive' => -1,
+                'conditions' => array('CustomTable.custom_table_id' => $customTable['CustomTable']['id']),
+                'fields' => array('CustomTable.table_name', 'CustomTable.name', 'CustomTable.table_version')
+            ));
+            $hasMany = array();
+            foreach($existingChildren as $existingChild){
+                $hasMany[] = array(
+                    'table_name' => $existingChild['CustomTable']['table_name'],
+                    'friendly_name' => $existingChild['CustomTable']['name'],
+                    'table_version' => $existingChild['CustomTable']['table_version']
+                );
+            }
             $hasMany[] = array('table_name' => $this->request->data['CustomTable']['table_name'], 'friendly_name' => $this->request->data['CustomTable']['name'], 'table_version' => $this->request->data['CustomTable']['table_version']);
+            $hasMany = array_values(array_unique($hasMany, SORT_REGULAR));
             
-
-            $customTable['CustomTable']['has_many'] = json_encode($hasMany);            
-
             $newFields = array();
             foreach($this->request->data['CustomTableFields'] as $fields){
                 if($fields['drop'] == 1){
                     unset($fields);
                 }else{
-                    $fields['who_can_edit'] = json_encode($fields['who_can_edit']);
+                    $fields['who_can_edit'] = $this->_encode_field_editors(isset($fields['who_can_edit']) ? $fields['who_can_edit'] : array());
                     $fields['show_comments'] = base64_encode($fields['show_comments']);
                     $fields['field_label'] = Inflector::humanize($this->_clean_table_names($fields['field_label']));
                     $fields['field_label'] = base64_encode($fields['field_label']);
@@ -1231,7 +1417,18 @@ class CustomTablesController extends AppController {
             
             $customTable['CustomTable']['has_many_existing'] = json_encode($hasMany);
             
+            // The parent lookup/save above may leave Model::id populated. Always
+            // reset model state so this operation is an INSERT for the new child.
+            $this->CustomTable->create();
             if ($this->CustomTable->save($this->request->data)) {
+                $childTableId = $this->CustomTable->id;
+                $dataSource = $this->CustomTable->getDataSource();
+                $this->CustomTable->updateAll(
+                    array('CustomTable.has_many' => $dataSource->value(json_encode($hasMany))),
+                    array('CustomTable.id' => $customTable['CustomTable']['id'])
+                );
+                $customTable['CustomTable']['has_many'] = json_encode($hasMany);
+                $this->CustomTable->id = $childTableId;
                 
                 $customTable['CustomTable']['has_many_existing'] = json_encode($hasMany);
                 $data = array($this->request->data,$table_name,$friendlyName,$defaultfield,$customTable);
@@ -1303,12 +1500,14 @@ class CustomTablesController extends AppController {
                 
                 $sqld.= "`custom_table_id` varchar(36) NOT NULL DEFAULT '" . $this->CustomTable->id . "',";
 
-                $sqlresult = $this->_add_new_table($table_name,$defaultfield,$sqld,$this->request->data['CustomTableFields']);
+                $sqlresult = $this->_add_new_table($table_name,$defaultfield,$sqld,$this->request->data['CustomTableFields'],true);
 
                 if ($this->_show_approvals()) $this->_save_approvals($this->CustomTable->id);
                 $this->Session->setFlash(__('Form created'));
                 $this->redirect(array('action' => 'recreate_child',$this->CustomTable->id, 'qc_document_id' => $this->request->params['named']['qc_document_id']));
             } else {
+                $this->set('fieldDetails', $this->request->data['CustomTableFields']);
+                CakeLog::write('error', 'Child custom table definition save failed. Table: '.$this->request->data['CustomTable']['table_name'].' Validation: '.json_encode($this->CustomTable->validationErrors));
                 $this->Session->setFlash(__('The custom table '.$this->request->data['CustomTable']['table_name'].' could not be saved. Please, try again.'));
             }
         }
@@ -1596,10 +1795,11 @@ class CustomTablesController extends AppController {
                     $toDrop[] = $fields;                    
                     unset($fields);
                 }else{
-                    if($fields['who_can_edit'])$fields['who_can_edit'] = json_encode($fields['who_can_edit']);
+                    $fields['who_can_edit'] = $this->_encode_field_editors(isset($fields['who_can_edit']) ? $fields['who_can_edit'] : array());
+                    if(isset($fields['approval_step_rules'])) $fields['approval_step_rules'] = $this->_encode_field_approval_step_rules($fields['approval_step_rules']);
                     if($fields['show_comments'])$fields['show_comments'] = base64_encode($fields['show_comments']);
                     if(isset($fields['child_tables']) && is_array($fields['child_tables'])) $fields['child_tables'] = json_encode($fields['child_tables']);
-                    $fields['field_name'] = $this->_clean_table_names($fields['field_name']);
+                    $fields['field_name'] = $this->_clean_field_names($fields['field_name']);
                     // $fields['field_label'] = Inflector::humanize($this->_clean_table_names($fields['field_label']));
                     if($fields['field_label'])$fields['field_label'] = base64_encode($fields['field_label']);
                     $newFields[] = $fields;                    
@@ -1665,7 +1865,7 @@ class CustomTablesController extends AppController {
                 }
 
                 // run update quieries
-                $sqlresult = $this->_add_new_table($table_name,$defaultfield,null,$this->request->data['CustomTableFields']);
+                $sqlresult = $this->_add_new_table($table_name,$defaultfield,null,$this->request->data['CustomTableFields'],true);
                 $thisModel = Inflector::classify($table_name);
                 
                 $this->loadModel($thisModel);
@@ -1699,6 +1899,22 @@ class CustomTablesController extends AppController {
                     $this->redirect(array('action' => 'recreate',$this->request->data['CustomTable']['id']));
                 }else{
                     $result = json_decode($result['response']['finalResult'],true);
+                    if (!empty($result['formFile'])) {
+                        $generatedForms = json_decode($result['formFile'], true);
+                        if (is_array($generatedForms)) {
+                            foreach ($generatedForms as $generatedAction => $generatedCode) {
+                                $generatedForms[$generatedAction] = $this->_ensure_generated_child_tabs($generatedCode);
+                            }
+                            $result['formFile'] = json_encode($generatedForms);
+                        }
+                    }
+                    if (!$this->_generated_code_is_safe($result)) {
+                        $message = __('API returned invalid linked-field PHP. Existing MVC files were not overwritten.');
+                        CakeLog::write('error', $message . ' Table: ' . $table_name);
+                        if ($skip == true) throw new InternalErrorException($message);
+                        $this->Session->setFlash($message);
+                        $this->redirect(array('action' => 'recreate', $this->request->data['CustomTable']['id']));
+                    }
                     if($result['controller']){
                         $controller_file_name = Inflector::pluralize(Inflector::Classify($table_name)) . 'Controller.php';
                         $folder = APP . 'Controller';
@@ -1786,6 +2002,7 @@ class CustomTablesController extends AppController {
     );
         
         $this->set('customTable', $customTable);
+        $this->set('approvalSteps', $this->_approval_steps_for_table($customTable));
         $this->request->data = $customTable;
         
         $qcDocument = $this->CustomTable->QcDocument->find('first', array('recursive' => 0, 'conditions' => array('QcDocument.id' => $customTable['CustomTable']['qc_document_id']),));
@@ -1874,16 +2091,27 @@ class CustomTablesController extends AppController {
                 if ($chkd['field_name']) $chkarray[] = $chkd['field_name'];
             }
 
+			// A removed child field may no longer be present in CustomTableFields at
+			// all. Compare the submitted form with its pre-edit definition so the
+			// obsolete database column is dropped instead of silently blocking inserts.
+			$preFields = !empty($this->request->data['CustomTable']['pre_fields']) ? json_decode($this->request->data['CustomTable']['pre_fields'], true) : array();
+			$currentFieldNames = array();
+			foreach((array)$this->request->data['CustomTableFields'] as $currentField){
+				if(!empty($currentField['field_name'])) $currentFieldNames[$currentField['field_name']] = true;
+			}
+			foreach((array)$preFields as $preField){
+				$preFieldName = !empty($preField['field_name']) ? $preField['field_name'] : '';
+				if($preFieldName === '' || isset($currentFieldNames[$preFieldName]) || in_array($preFieldName, $this->reserved_fields)) continue;
+				$preField['drop'] = 1;
+				$toDrop[] = $preField;
+			}
+
+            $defaultfield = null;
             foreach($this->request->data['CustomTableFields'] as $fields){
                 if($fields['default_field'] == 1){
                     $defaultfield = $this->_clean_table_names($fields['field_name']);
                     // $sqld = "`".$defaultfield."` varchar(255) NOT NULL,";
                 }
-            }
-
-            if ($defaultfield == '') {
-                $this->Session->setFlash(__('Default field missing'));
-                $this->redirect(array('action' => 'recreate_child', $id, 'qc_document_id' => $this->request->params['named']['qc_document_id']));
             }
 
             $fieldTypes = $this->CustomTable->customArray['fieldTypes'];
@@ -1895,10 +2123,11 @@ class CustomTablesController extends AppController {
                     $toDrop[] = $fields;                    
                     unset($fields);
                 }else{
-                    if($fields['who_can_edit'])$fields['who_can_edit'] = json_encode($fields['who_can_edit']);
+                    $fields['who_can_edit'] = $this->_encode_field_editors(isset($fields['who_can_edit']) ? $fields['who_can_edit'] : array());
+                    if(isset($fields['approval_step_rules'])) $fields['approval_step_rules'] = $this->_encode_field_approval_step_rules($fields['approval_step_rules']);
                     if($fields['show_comments'])$fields['show_comments'] = base64_encode($fields['show_comments']);
                     if(isset($fields['child_tables']) && is_array($fields['child_tables'])) $fields['child_tables'] = json_encode($fields['child_tables']);
-                    $fields['field_name'] = $this->_clean_table_names($fields['field_name']);
+                    $fields['field_name'] = $this->_clean_field_names($fields['field_name']);
                     // $fields['field_label'] = Inflector::humanize($this->_clean_table_names($fields['field_label']));
                     if($fields['field_label'])$fields['field_label'] = base64_encode($fields['field_label']);
                     $newFields[] = $fields;
@@ -1979,6 +2208,13 @@ class CustomTablesController extends AppController {
                     echo "Something went wrong. Please try again";
                 }else{
                     $result = json_decode($result['response']['finalResult'],true);
+                    if (!$this->_generated_code_is_safe($result)) {
+                        $message = __('API returned invalid linked-field PHP. Existing MVC files were not overwritten.');
+                        CakeLog::write('error', $message . ' Table: ' . $table_name);
+                        if ($skip == true) throw new InternalErrorException($message);
+                        $this->Session->setFlash($message);
+                        $this->redirect(array('action' => 'recreate_child', $this->request->data['CustomTable']['id']));
+                    }
                     if($result['controller']){
                         $controller_file_name = Inflector::pluralize(Inflector::Classify($table_name)) . 'Controller.php';
                         $folder = APP . 'Controller';
@@ -2038,7 +2274,7 @@ class CustomTablesController extends AppController {
                 $this->CustomTable->create();
                 $this->CustomTable->save($customTable);
 
-                $sqlresult = $this->_add_new_table($customTable['CustomTable']['table_name'],$defaultfield,$sqld,$this->request->data['CustomTableFields']);
+                $sqlresult = $this->_add_new_table($table_name,$defaultfield,$sqld,$this->request->data['CustomTableFields'],true);
                 
                 if($skip == true){
 
@@ -2053,6 +2289,7 @@ class CustomTablesController extends AppController {
         }
         $customTable = $this->CustomTable->find('first', array('recursive' => 0, 'conditions' => array('CustomTable.id' => $id)));
         $this->set('customTable', $customTable);
+        $this->set('approvalSteps', $this->_approval_steps_for_table($customTable));
         $this->request->data = $customTable;
         
         if ($this->request->params['named']['qc_document_id'] || $this->request->params['named']['process_id']) {            
@@ -2076,7 +2313,7 @@ class CustomTablesController extends AppController {
         $fields = json_decode($customTable['CustomTable']['fields'],true);
         foreach($fields as &$field){
             // Older rebuilds could JSON-encode this value more than once. The
-            // remote editor requires FlinkISO's JSON-string representation.
+            // remote editor requires an array when rebuilding its field rows.
             $whoCanEdit = isset($field['who_can_edit']) ? $field['who_can_edit'] : array();
             for($decodePass = 0; $decodePass < 3 && is_string($whoCanEdit); $decodePass++){
                 $decodedWhoCanEdit = json_decode($whoCanEdit, true);
@@ -2084,7 +2321,7 @@ class CustomTablesController extends AppController {
                 $whoCanEdit = $decodedWhoCanEdit;
             }
             if(!is_array($whoCanEdit)) $whoCanEdit = array();
-            $field['who_can_edit'] = empty($whoCanEdit) ? json_encode('') : json_encode($whoCanEdit);
+            $field['who_can_edit'] = $this->_encode_field_editors($whoCanEdit);
             $fieldDetails[] = $field;
         }
         unset($field);
@@ -2296,9 +2533,10 @@ class CustomTablesController extends AppController {
 
     public function unlock($id = null) {
         if ($this->request->is('post') || $this->request->is('put')) {
+            $nextAction = !empty($this->request->data['CustomTable']['next_action']) ? $this->request->data['CustomTable']['next_action'] : '';
             if (empty($this->request->data['CustomTable']['password'])) {
                 $this->Session->setFlash(__('Enter password'));
-                $this->redirect(array('action' => 'index'));
+                $this->redirect(array('action' => 'unlock', $this->request->data['CustomTable']['id'], 'next_action' => $nextAction));
             } else {
                 $customTable = $this->CustomTable->find('first', array('conditions' => array('CustomTable.password' => trim(Security::hash($this->data['CustomTable']['password'], 'md5', true)), 'CustomTable.id' => $this->data['CustomTable']['id'])));
                 if ($customTable) {
@@ -2306,15 +2544,22 @@ class CustomTablesController extends AppController {
                     $this->CustomTable->set('table_locked', 1);
                     $this->CustomTable->save();
                     $this->Session->setFlash(__('Table unlocked'));
-                    if($this->data['CustomTable']['next_action'] == 'recreate'){
+                    if($nextAction === 'recreate'){
                         $this->redirect(array('action' => 'recreate',$this->data['CustomTable']['id']));    
+                    }elseif($nextAction === 'recreate_child'){
+                        $this->redirect(array(
+                            'action' => 'recreate_child',
+                            $this->data['CustomTable']['id'],
+                            'qc_document_id' => $customTable['CustomTable']['qc_document_id'],
+                            'process_id' => $customTable['CustomTable']['process_id']
+                        ));
                     }else{
                         $this->redirect(array('action' => 'view',$this->data['CustomTable']['id']));
                     }
                     
                 } else {
                     $this->Session->setFlash(__('Incorrect Password'));
-                    $this->redirect(array('action' => 'index'));
+                    $this->redirect(array('action' => 'unlock', $this->request->data['CustomTable']['id'], 'next_action' => $nextAction));
                 }
             }
         } else {

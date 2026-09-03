@@ -9,6 +9,50 @@ App::uses('AppModel', 'Model');
  */
 class ApprovalStep extends AppModel {
 
+	protected function _fieldRuleContainsStep($rules, $stepId) {
+		if(is_string($rules)) $rules = json_decode($rules, true);
+		if(!is_array($rules)) return false;
+		if(array_key_exists($stepId, $rules)) return true;
+		if(isset($rules['approval_step_id']) && (string)$rules['approval_step_id'] === (string)$stepId) return true;
+		foreach($rules as $value){
+			if(is_array($value) && $this->_fieldRuleContainsStep($value, $stepId)) return true;
+		}
+		return false;
+	}
+
+	public function customFieldDependencies($stepId) {
+		if(empty($stepId)) return array();
+		App::uses('ClassRegistry', 'Utility');
+		$CustomTable = ClassRegistry::init('CustomTable');
+		$tables = $CustomTable->find('all', array(
+			'recursive' => -1,
+			'conditions' => array('CustomTable.fields LIKE' => '%' . $stepId . '%'),
+			'fields' => array('CustomTable.id', 'CustomTable.name', 'CustomTable.table_name', 'CustomTable.fields')
+		));
+		$dependencies = array();
+		foreach($tables as $table){
+			$fields = json_decode($table['CustomTable']['fields'], true);
+			if(!is_array($fields)) continue;
+			foreach($fields as $field){
+				if(empty($field['approval_step_rules']) || !$this->_fieldRuleContainsStep($field['approval_step_rules'], $stepId)) continue;
+				$label = isset($field['field_label']) ? base64_decode($field['field_label'], true) : '';
+				$dependencies[] = array(
+					'custom_table_id' => $table['CustomTable']['id'],
+					'form_name' => $table['CustomTable']['name'],
+					'table_name' => $table['CustomTable']['table_name'],
+					'field_name' => isset($field['field_name']) ? $field['field_name'] : '',
+					'field_label' => $label !== false && $label !== '' ? $label : (isset($field['field_name']) ? Inflector::humanize($field['field_name']) : '')
+				);
+			}
+		}
+		return $dependencies;
+	}
+
+	public function beforeDelete($cascade = true) {
+		if(!empty($this->id) && $this->customFieldDependencies($this->id)) return false;
+		return parent::beforeDelete($cascade);
+	}
+
 /**
  * Validation rules
  *

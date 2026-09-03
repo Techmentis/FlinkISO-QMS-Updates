@@ -8,7 +8,9 @@ $recreatePayload = json_encode(array(
     $childTables,
     $thisTable,
     $linkedTosWithDisplay,
-    $hasMany
+    $hasMany,
+    array('has_type_ii_forms' => !empty($hasTypeIIForms)),
+    isset($approvalSteps) ? $approvalSteps : array()
   ));
 $response = $this->requestAction(
   array('action'=>'curl','post','custom_forms','recreate'),

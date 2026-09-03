@@ -25,6 +25,7 @@ App::uses('Controller', 'Controller');
 App::uses('Folder', 'Utility');
 App::uses('File', 'Utility');
 App::uses('Xml', 'Utility');
+App::uses('CakeText', 'Utility');
 App::uses('ConnectionManager', 'Model');
 /** adding new PDF plug in **/
 Configure::write('CakePdf', array(
@@ -2482,6 +2483,23 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		return $tableName;
 	}
 
+	/**
+	 * Clean a database field identifier without applying the legacy 25
+	 * character table-name limit. MySQL identifiers may be up to 64 chars.
+	 */
+	public function _clean_field_names($fieldName = null){
+		if(!$fieldName) return $fieldName;
+		$fieldName = ltrim(rtrim($fieldName));
+		$fieldName = preg_replace('/[\x00-\x1F\x7F]/u', '', $fieldName);
+		$fieldName = preg_replace('/[[:^print:]]/', '', $fieldName);
+		$fieldName = str_replace(array('/', '-', '&'), '_', $fieldName);
+		$fieldName = ltrim(rtrim(strtolower($fieldName)));
+		$fieldName = preg_replace('/[^a-z0-9_]+/', '_', $fieldName);
+		$fieldName = preg_replace('/_+/', '_', $fieldName);
+		$fieldName = preg_replace('/^[^a-z0-9]+/', '', $fieldName);
+		return substr(rtrim($fieldName, '_'), 0, 64);
+	}
+
 	public function _clean_table_names($tableName = null){
 		if($tableName){
 			$tableName = ltrim(rtrim($tableName));
@@ -2770,11 +2788,13 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				if (!in_array($controller, $skip)) {
 					$controller = str_replace('Controller', '', $controller);
 					$name = $this->CustomTable->find('first', array('recursive' => 1, 'conditions' => array('CustomTable.table_name LIKE' => "%" . Inflector::underscore($controller)), 'fields' => array('CustomTable.id', 'CustomTable.name', 'CustomTable.table_version')));
+					// Controller names are plural; custom form metadata and the API use
+					// singular CakePHP model names (QcDocument, User, Employee, ...).
+					$modelName = Inflector::classify(Inflector::singularize($controller));
 					if ($name) {
-						$controller = Inflector::classify($controller);
-						$linkedTos[$controller] = $name['CustomTable']['name'] . " ver " . $name['CustomTable']['table_version'];
+						$linkedTos[$modelName] = $name['CustomTable']['name'] . " ver " . $name['CustomTable']['table_version'];
 					} else {
-						$linkedTos[$controller] = $controller;
+						$linkedTos[$modelName] = $modelName;
 					}
 				}
 			}			
@@ -3131,6 +3151,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 
 	public function _json(){
+		$this->loadModel('CustomTable');
 		$load = array();
 		$linkedTables = $this->CustomTable->find('all',array(
 			'recursive'=>0,
@@ -3265,10 +3286,287 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 	}
 
+	private function _is_assigned_approval_user($modelName, $recordId, $stepId = null){
+		if(empty($recordId)) return false;
+		$this->loadModel('Approval');
+		$conditions = array(
+			'Approval.model_name' => $modelName,
+			'Approval.record' => $recordId,
+			'Approval.user_id' => array($this->Session->read('User.id'), $this->Session->read('User.employee_id')),
+			'OR' => array(
+				array('Approval.approval_status' => 0),
+				array('Approval.approval_status' => null)
+			)
+		);
+		if(!empty($stepId)) $conditions['Approval.approval_step_id'] = $stepId;
+
+		$approvalId = !empty($this->request->params['named']['approval_id']) ? $this->request->params['named']['approval_id'] : null;
+		if(empty($approvalId) && !empty($this->request->data['ApprovalComment']['approval_id'])) $approvalId = $this->request->data['ApprovalComment']['approval_id'];
+		if(empty($approvalId) && !empty($this->request->data['Approval'][$modelName]['approval_id'])) $approvalId = $this->request->data['Approval'][$modelName]['approval_id'];
+		if(empty($approvalId) && !empty($this->request->data['Approval'][$modelName][$modelName]['approval_id'])) $approvalId = $this->request->data['Approval'][$modelName][$modelName]['approval_id'];
+		if(!empty($approvalId)) $conditions['Approval.id'] = $approvalId;
+
+		return $this->Approval->find('count', array('recursive' => -1, 'conditions' => $conditions)) > 0;
+	}
+
+	private function _custom_field_editors($field){
+		$editors = isset($field['who_can_edit']) ? $field['who_can_edit'] : array();
+		for($decodePass = 0; $decodePass < 3 && is_string($editors); $decodePass++){
+			$decodedEditors = json_decode($editors, true);
+			if(json_last_error() !== JSON_ERROR_NONE) break;
+			$editors = $decodedEditors;
+		}
+		if(!is_array($editors)) return array();
+		return array_values(array_filter($editors, function($editor){ return $editor !== '' && $editor !== 0 && $editor !== '0'; }));
+	}
+
+	private function _current_user_can_edit_custom_field($field, $record){
+		$editors = $this->_custom_field_editors($field);
+		if(empty($editors)) return true;
+		$userId = $this->Session->read('User.id');
+		$employeeId = $this->Session->read('User.employee_id');
+		foreach($editors as $editor){
+			if($editor === 'created_by' && !empty($record['created_by']) && $record['created_by'] == $userId) return true;
+			if($editor === 'prepared_by' && !empty($record['prepared_by']) && in_array($record['prepared_by'], array($employeeId, $userId))) return true;
+			if($editor === 'approved_by' && !empty($record['approved_by']) && in_array($record['approved_by'], array($employeeId, $userId))) return true;
+			if(isset($record[$editor]) && in_array($record[$editor], array($employeeId, $userId))) return true;
+		}
+		return false;
+	}
+
+	private function _enforce_child_custom_field_editor_rules($modelName, &$submittedData, $existingData, $customTableId){
+		if(empty($existingData) || empty($customTableId)) return;
+		$this->loadModel('CustomTable');
+		$customTable = $this->CustomTable->find('first', array(
+			'recursive' => -1,
+			'fields' => array('CustomTable.fields'),
+			'conditions' => array('CustomTable.id' => $customTableId)
+		));
+		$fields = !empty($customTable['CustomTable']['fields']) ? json_decode($customTable['CustomTable']['fields'], true) : array();
+		if(!is_array($fields)) return;
+		foreach($fields as $field){
+			if(empty($field['field_name']) || $this->_current_user_can_edit_custom_field($field, $existingData)) continue;
+			$fieldName = $field['field_name'];
+			if(array_key_exists($fieldName, $existingData)) $submittedData[$fieldName] = $existingData[$fieldName];
+			else unset($submittedData[$fieldName]);
+		}
+	}
+
+	private function _child_row_has_user_data($row, $customTableId = null){
+		$ignored = array_flip(array(
+			'id', 'custom_table_id', 'parent_id', 'qc_document_id', 'process_id',
+			'file_id', 'file_key', 'additional_files', 'created', 'created_by',
+			'modified', 'modified_by', 'prepared_by', 'approved_by', 'branchid',
+			'departmentid', 'company_id', 'publish', 'record_status',
+			'status_user_id', 'approval_step_id', 'soft_delete'
+		));
+		$sessionFields = array();
+		if(!empty($customTableId)){
+			$this->loadModel('CustomTable');
+			$customTable = $this->CustomTable->find('first', array(
+				'recursive' => -1,
+				'fields' => array('CustomTable.fields'),
+				'conditions' => array('CustomTable.id' => $customTableId)
+			));
+			$fields = !empty($customTable['CustomTable']['fields']) ? json_decode($customTable['CustomTable']['fields'], true) : array();
+			foreach((array)$fields as $field){
+				if(!empty($field['session_value']) && !empty($field['field_name'])) $sessionFields[$field['field_name']] = true;
+			}
+		}
+		foreach((array)$row as $field => $value){
+			if(isset($ignored[$field]) || isset($sessionFields[$field])) continue;
+			if(is_array($value)){
+				if(array_key_exists('tmp_name', $value)){
+					if(!empty($value['tmp_name'])) return true;
+					continue;
+				}
+				foreach($value as $item){
+					if($item !== '' && $item !== null) return true;
+				}
+			}elseif($value !== '' && $value !== null){
+				return true; // Numeric/string zero is a valid radio or checkbox value.
+			}
+		}
+		return false;
+	}
+
+	private function _insert_generated_child_record($modelName, $data){
+		if(empty($this->$modelName) || !is_array($data)) return false;
+		$model = $this->$modelName;
+		$dataSource = $model->getDataSource();
+		$tableName = $dataSource->fullTableName($model);
+		$columnRows = $model->query('SHOW COLUMNS FROM '.$tableName);
+		$columns = array();
+		foreach((array)$columnRows as $columnRow){
+			foreach((array)$columnRow as $columnDetails){
+				if(is_array($columnDetails) && !empty($columnDetails['Field'])) $columns[$columnDetails['Field']] = $columnDetails;
+			}
+		}
+		if(empty($columns)){
+			CakeLog::write('error', 'Generated child fallback '.$modelName.' could not extract database columns. Database: '.$dataSource->lastError());
+			return false;
+		}
+
+		// Keep the live table synchronized with the saved child-field JSON. This
+		// also repairs older rebuilds that left removed/default fields behind.
+		$customTableId = !empty($data['custom_table_id']) ? $data['custom_table_id'] : null;
+		if($customTableId){
+			$this->loadModel('CustomTable');
+			$customTable = $this->CustomTable->find('first', array(
+				'recursive' => -1,
+				'fields' => array('CustomTable.fields'),
+				'conditions' => array('CustomTable.id' => $customTableId)
+			));
+			$configuredFields = !empty($customTable['CustomTable']['fields']) ? json_decode($customTable['CustomTable']['fields'], true) : array();
+			$configuredColumns = array();
+			foreach((array)$configuredFields as $configuredField){
+				if(!empty($configuredField['field_name'])) $configuredColumns[$configuredField['field_name']] = true;
+			}
+			$reservedColumns = array_flip(array(
+				'id','sr_no','qc_document_id','process_id','custom_table_id','file_id','file_key','parent_id',
+				'additional_files','publish','record_status','status_user_id','approval_step_id','created_by',
+				'created','modified_by','approved_by','prepared_by','modified','soft_delete','branchid',
+				'departmentid','company_id'
+			));
+			foreach(array_keys($columns) as $columnName){
+				if(isset($reservedColumns[$columnName]) || isset($configuredColumns[$columnName])) continue;
+				$model->query('ALTER TABLE '.$tableName.' DROP `'.$columnName.'`');
+				unset($columns[$columnName]);
+			}
+		}
+
+		$insertData = array_intersect_key($data, $columns);
+		if(isset($columns[$model->primaryKey]) && empty($insertData[$model->primaryKey])){
+			$insertData[$model->primaryKey] = CakeText::uuid();
+		}
+		if(empty($insertData)) return false;
+
+		$fields = array_keys($insertData);
+		$values = array_values($insertData);
+		$saved = $dataSource->create($model, $fields, $values);
+		if(!$saved) CakeLog::write('error', 'Generated child fallback '.$modelName.' insert failed. Insert fields='.implode(',', $fields).'. Database: '.$dataSource->lastError());
+		if($saved && !empty($insertData[$model->primaryKey])) $model->id = $insertData[$model->primaryKey];
+		return $saved;
+	}
+
+	private function _enforce_approval_step_field_rules($modelName, $existingRecord = array()){
+		$customTableId = null;
+		if(!empty($this->request->params['named']['custom_table_id'])) $customTableId = $this->request->params['named']['custom_table_id'];
+		if(empty($customTableId) && !empty($this->request->data[$modelName]['custom_table_id'])) $customTableId = $this->request->data[$modelName]['custom_table_id'];
+		if(empty($customTableId) || empty($this->request->data[$modelName])) return;
+
+		$this->loadModel('CustomTable');
+		$customTable = $this->CustomTable->find('first', array(
+			'recursive' => -1,
+			'fields' => array('CustomTable.fields'),
+			'conditions' => array('CustomTable.id' => $customTableId)
+		));
+		if(empty($customTable['CustomTable']['fields'])) return;
+
+		$stepId = '';
+		if(!empty($existingRecord[$modelName]['approval_step_id'])) $stepId = $existingRecord[$modelName]['approval_step_id'];
+		elseif(!empty($this->request->data[$modelName]['approval_step_id'])) $stepId = $this->request->data[$modelName]['approval_step_id'];
+		elseif(!empty($this->request->data['Approval'][$modelName]['approval_step_id'])) $stepId = $this->request->data['Approval'][$modelName]['approval_step_id'];
+
+		$fields = json_decode($customTable['CustomTable']['fields'], true);
+		if(!is_array($fields)) return;
+		$senderLockCanEdit = null;
+		foreach($fields as $field){
+			if(empty($field['field_name'])) continue;
+			$protectField = false;
+			if($this->action == 'edit' && !empty($existingRecord[$modelName]) && !$this->_current_user_can_edit_custom_field($field, $existingRecord[$modelName])) $protectField = true;
+			if(!empty($stepId) && !empty($field['approval_step_rules'])){
+				$rules = $field['approval_step_rules'];
+				for($decodePass = 0; $decodePass < 3 && is_string($rules); $decodePass++){
+					$decodedRules = json_decode($rules, true);
+					if(json_last_error() !== JSON_ERROR_NONE) break;
+					$rules = $decodedRules;
+				}
+				if(is_array($rules) && isset($rules[$stepId]) && in_array($rules[$stepId], array('readonly', 'hidden'), true)) $protectField = true;
+			}
+			if($this->action == 'edit' && !empty($field['lock_for_sender'])){
+				if($senderLockCanEdit === null){
+					$recordId = !empty($existingRecord[$modelName]['id']) ? $existingRecord[$modelName]['id'] : null;
+					$senderLockCanEdit = $this->_is_assigned_approval_user($modelName, $recordId, $stepId);
+				}
+				if(!$senderLockCanEdit) $protectField = true;
+			}
+			if(!$protectField) continue;
+
+			$fieldName = $field['field_name'];
+			if(isset($existingRecord[$modelName]) && array_key_exists($fieldName, $existingRecord[$modelName])){
+				$this->request->data[$modelName][$fieldName] = $existingRecord[$modelName][$fieldName];
+			}else{
+				// On add, a configured session value was populated server-side and is
+				// trusted even when the visible control is locked or hidden.
+				$sessionKeys = array('Employee'=>'employee_id', 'User'=>'id', 'Branch'=>'branch_id', 'Department'=>'department_id', 'Designation'=>'designation_id');
+				$linkedModel = !empty($field['linked_to']) ? Inflector::classify(Inflector::singularize(trim($field['linked_to']))) : '';
+				$sessionValue = ($this->action == 'add' && !empty($field['session_value']) && !empty($sessionKeys[$linkedModel])) ? $this->Session->read('User.'.$sessionKeys[$linkedModel]) : null;
+				if($sessionValue !== null && $sessionValue !== '') $this->request->data[$modelName][$fieldName] = $sessionValue;
+				else unset($this->request->data[$modelName][$fieldName]);
+			}
+		}
+	}
+
+	private function _apply_session_field_defaults($modelName){
+		if($this->action != 'add' || empty($this->request->data[$modelName])) return;
+		$customTableId = !empty($this->request->params['named']['custom_table_id']) ? $this->request->params['named']['custom_table_id'] : null;
+		if(empty($customTableId) && !empty($this->request->data[$modelName]['custom_table_id'])) $customTableId = $this->request->data[$modelName]['custom_table_id'];
+		if(empty($customTableId)) return;
+
+		$this->loadModel('CustomTable');
+		$customTable = $this->CustomTable->find('first', array(
+			'recursive' => -1,
+			'fields' => array('CustomTable.fields'),
+			'conditions' => array('CustomTable.id' => $customTableId)
+		));
+		$fields = !empty($customTable['CustomTable']['fields']) ? json_decode($customTable['CustomTable']['fields'], true) : array();
+		if(!is_array($fields)) return;
+
+		$sessionKeys = array(
+			'Employee' => 'employee_id',
+			'User' => 'id',
+			'Branch' => 'branch_id',
+			'Department' => 'department_id',
+			'Designation' => 'designation_id'
+		);
+		foreach($fields as $field){
+			if(empty($field['session_value']) || empty($field['field_name']) || empty($field['linked_to'])) continue;
+			$linkedModel = Inflector::classify(Inflector::singularize(trim($field['linked_to'])));
+			if(empty($sessionKeys[$linkedModel])) continue;
+			$sessionValue = $this->Session->read('User.'.$sessionKeys[$linkedModel]);
+			if($sessionValue !== null && $sessionValue !== '') $this->request->data[$modelName][$field['field_name']] = $sessionValue;
+		}
+
+		// Child forms are submitted as hasMany row arrays inside the main form.
+		// Apply the same trusted defaults server-side so the value is retained even
+		// when a browser widget does not submit its visually selected option.
+		foreach((array)$this->$modelName->hasMany as $childModel => $association){
+			if(empty($this->request->data[$childModel]) || !is_array($this->request->data[$childModel])) continue;
+			foreach($this->request->data[$childModel] as $rowIndex => $childRow){
+				if(!is_array($childRow) || empty($childRow['custom_table_id'])) continue;
+				$childTable = $this->CustomTable->find('first', array(
+					'recursive' => -1,
+					'fields' => array('CustomTable.fields'),
+					'conditions' => array('CustomTable.id' => $childRow['custom_table_id'])
+				));
+				$childFields = !empty($childTable['CustomTable']['fields']) ? json_decode($childTable['CustomTable']['fields'], true) : array();
+				if(!is_array($childFields)) continue;
+				foreach($childFields as $childField){
+					if(empty($childField['session_value']) || empty($childField['field_name']) || empty($childField['linked_to'])) continue;
+					$linkedModel = Inflector::classify(Inflector::singularize(trim($childField['linked_to'])));
+					if(empty($sessionKeys[$linkedModel])) continue;
+					$sessionValue = $this->Session->read('User.'.$sessionKeys[$linkedModel]);
+					if($sessionValue !== null && $sessionValue !== '') $this->request->data[$childModel][$rowIndex][$childField['field_name']] = $sessionValue;
+				}
+			}
+		}
+	}
+
 	public function _add(){
 		$modelName = $this->modelClass;
 		$this->loadModel($modelName);
-		
+		$this->_apply_session_field_defaults($modelName);
 		foreach($this->request->data[$modelName] as $key => $value){
 			if(is_array($value)){
 				if($this->request->data[$modelName][$key]['name']){
@@ -3295,6 +3593,8 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$existingRecord = $this->$modelName->find('first',array('conditions'=>array($modelName.'.id'=>$this->request->data[$modelName]['id']),'recursive'=>-1));
 			$this->request->data[$modelName]['prepared_by'] = $existingRecord[$modelName]['prepared_by'];
 		}
+
+		$this->_enforce_approval_step_field_rules($modelName, isset($existingRecord) ? $existingRecord : array());
 
 		if ($this->$modelName->save($this->request->data,false)) {
 			$new_record_id = $this->$modelName->id;			
@@ -3339,15 +3639,27 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			
 			// get hasMany
 			$hasManies = $this->$modelName->hasMany;
+			$childSaveFailures = array();
 			foreach($hasManies as $model => $fields){
 				
 				if($this->request->data[$model]){
 					$this->loadModel($model);
+					// Generated child tables can be altered during Rebuild Module while
+					// Cake still has their previous column list cached. A stale/empty
+					// schema makes Model::save() return false before issuing any SQL.
+					$childDataSource = $this->$model->getDataSource();
+					$previousCacheSources = $childDataSource->cacheSources;
+					$childDataSource->cacheSources = false;
+					$this->$model->schema(true);
+					$childDataSource->cacheSources = $previousCacheSources;
 					unset($this->request->data[$model]['count']);
 					unset($this->request->data[$model]['file_id']);
 					unset($this->request->data[$model]['file_key']);
 					foreach($this->request->data[$model] as $cdata_old){
+						$submittedChildCustomTableId = !empty($cdata_old['custom_table_id']) ? $cdata_old['custom_table_id'] : null;
+						if(empty($cdata_old['id']) && !$this->_child_row_has_user_data($cdata_old, $submittedChildCustomTableId)) continue;
 						$cdata = array();
+						$file = null;
 						foreach($cdata_old as $key => $value){
 							if(is_array($value)){
 								$cdata[$key] = json_encode($value);
@@ -3360,28 +3672,71 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 						}						
 						$this->$model->create();
 						$cdata['parent_id'] = $this->$modelName->id;
-						$cdata['created'] = date('Y-m-d H:i:s');
+						$existingChildRecord = array();
+						if(!empty($cdata['id'])){
+							$existingChild = $this->$model->find('first',array('recursive'=>-1,'conditions'=>array($model.'.id'=>$cdata['id'])));
+							if(!empty($existingChild[$model])) $existingChildRecord = $existingChild[$model];
+						}
+						if(!empty($existingChildRecord)){
+							$childCustomTableId = !empty($cdata['custom_table_id']) ? $cdata['custom_table_id'] : (!empty($existingChildRecord['custom_table_id']) ? $existingChildRecord['custom_table_id'] : null);
+							$this->_enforce_child_custom_field_editor_rules($model, $cdata, $existingChildRecord, $childCustomTableId);
+							$cdata['created'] = !empty($existingChildRecord['created']) ? $existingChildRecord['created'] : date('Y-m-d H:i:s');
+							$cdata['prepared_by'] = !empty($existingChildRecord['prepared_by']) ? $existingChildRecord['prepared_by'] : $this->Session->read('User.employee_id');
+							$cdata['created_by'] = !empty($existingChildRecord['created_by']) ? $existingChildRecord['created_by'] : $this->Session->read('User.id');
+						}else{
+							$cdata['created'] = date('Y-m-d H:i:s');
+							$cdata['prepared_by'] = $this->Session->read('User.employee_id');
+							$cdata['created_by'] = $this->Session->read('User.id');
+						}
 						$cdata['modified'] = date('Y-m-d H:i:s');
-						$cdata['prepared_by'] = $this->Session->read('User.employee_id');
-						$cdata['created_by'] = $this->Session->read('User.id');
+						$cdata['modified_by'] = $this->Session->read('User.id');
 						$cdata['branchid'] = $this->Session->read('User.branch_id');
 						$cdata['departmentid'] = $this->Session->read('User.department_id');
+						$cdata['company_id'] = $this->Session->read('User.company_id');
 						$cdata['qc_document_id'] = $this->request->data[$modelName]['qc_document_id'];		
 						try{
-							$this->$model->save($cdata,false);
-							$path = WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . 'record_files' . DS . $cdata['custom_table_id'] . DS . $this->$model->id ;
-							$recordfilesfolder = new Folder($path);
-							$recordfilesfolder->create($path,0777);
-							$move = move_uploaded_file($file['tmp_name'], $path . DS . $file['name']);
+							$childSaved = $this->$model->save($cdata,false);
+							if(!$childSaved && empty($this->$model->validationErrors) && !$this->$model->getDataSource()->lastError()){
+								// Some rebuilt generated models can have a stale behavior/callback
+								// state that cancels save before SQL without reporting an error.
+								// Required audit values are populated above, so retrying without
+								// callbacks is equivalent to the intended generated-model save.
+								$this->$model->create();
+								$childSaved = $this->$model->save($cdata, array(
+									'validate' => false,
+									'callbacks' => false
+								));
+							}
+							if(!$childSaved && empty($cdata['id']) && empty($this->$model->validationErrors) && !$this->$model->getDataSource()->lastError()){
+								$childSaved = $this->_insert_generated_child_record($model, $cdata);
+							}
+							if(!$childSaved){
+								$childSaveFailures[] = $model;
+								$lastError = $this->$model->getDataSource()->lastError();
+								CakeLog::write('error', 'Child record save failed for '.$model.'. Fields: '.implode(',', array_keys($cdata)).'. Errors: '.json_encode($this->$model->validationErrors).'. Database: '.$lastError);
+								continue;
+							}
+							if (!empty($file['tmp_name']) && !empty($file['name'])) {
+								$childCustomTableId = !empty($cdata['custom_table_id']) ? $cdata['custom_table_id'] : $this->$model->field('custom_table_id', array($model . '.id' => $this->$model->id));
+								$path = WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . 'record_files' . DS . $childCustomTableId . DS . $this->$model->id;
+								$recordfilesfolder = new Folder($path);
+								$recordfilesfolder->create($path,0777);
+								move_uploaded_file($file['tmp_name'], $path . DS . $file['name']);
+							}
 						}catch(Exception $e) {
-					 		$this->Session->setFlash(__('Child record not added/ Updated.'), 'default', array('class' => 'alert alert-danger'));
+							$childSaveFailures[] = $model;
+							CakeLog::write('error', 'Child record save exception for '.$model.': '.$e->getMessage());
 						}
 					}
 				}
 			}
 			
 			if ($this->_show_approvals()) $this->_save_approvals($this->$modelName->id);
-			$this->Session->setFlash(__('Record has been saved'));
+			if(!empty($childSaveFailures)){
+				$this->Session->setFlash(__('The main record was saved, but one or more child rows could not be saved. Please correct the child form and try again.'), 'default', array('class' => 'alert alert-danger'));
+			}else{
+				$this->Session->setFlash(__('Record has been saved'));
+			}
 			try{
 				// trigger email here
 				$this->_trigger_email($existingRecord); 
@@ -4115,9 +4470,11 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 	}
 
 	public function _returnDetaultField($allFields = null){
+		$linkedTosWithDisplay = array();
+		if (!is_array($allFields)) return $linkedTosWithDisplay;
 		foreach($allFields as $field){
-			if($field['linked_to'] != -1){
-				$model = Inflector::classify($field['linked_to']);
+			if(isset($field['linked_to']) && $field['linked_to'] != -1){
+				$model = Inflector::classify(Inflector::singularize($field['linked_to']));
 				try{
 					$this->loadModel($model);
 					$linkedTosWithDisplay[Inflector::classify($field['field_name'])] = $this->$model->displayField;
@@ -5046,6 +5403,7 @@ public function _fetch_approval_steps($custom_table_id = null){
 	}
 
 	public function _get_approver_lists($creator = null,$approvalSteps = null) {
+		$ucon = null;
 		if($approvalSteps['send_to_reviwers'] == 1){ // reviewer
 			$ucon = array(
 				'User.is_view_all'=>1,								
@@ -5064,9 +5422,26 @@ public function _fetch_approval_steps($custom_table_id = null){
 			);
 		}else if($approvalSteps['send_to_admins'] == 1){
 			$ucon = array('User.is_mr'=>1); // admin
-		}else if($approvalSteps['send_to_users'] == 1){ // users
-			$ucon = array('User.id'=>json_decode($autoApprovals['ApprovalStep']['send_to_users'],true));
+		}else if(!empty($approvalSteps['send_to_designation']) && $approvalSteps['send_to_designation'] != -1){
+			$this->loadModel('Employee');
+			$designationEmployees = $this->Employee->find('list',array(
+				'recursive'=>-1,
+				'fields'=>array('Employee.id','Employee.name'),
+				'conditions'=>array(
+					'Employee.designation_id'=>$approvalSteps['send_to_designation'],
+					'Employee.publish'=>1,
+					'Employee.soft_delete'=>0
+				)
+			));
+			if(empty($designationEmployees)) return array();
+			$ucon = array('User.employee_id'=>array_keys($designationEmployees));
+		}else if(!empty($approvalSteps['send_to_users']) && $approvalSteps['send_to_users'] != -1){ // explicitly selected users
+			$selectedUsers = json_decode($approvalSteps['send_to_users'],true);
+			if(!is_array($selectedUsers)) $selectedUsers = array_filter(array($approvalSteps['send_to_users']));
+			$ucon = array('User.id'=>$selectedUsers);
 		}
+
+		if(empty($ucon)) return array();
 
 		if($approvalSteps['ignore_department'] == 1){
 			$deptCon = array('User.department_id'=>$this->Session->read('User.department_id'));
@@ -5092,6 +5467,8 @@ public function _fetch_approval_steps($custom_table_id = null){
 				$ucon,
 				$deptCon,
 				$bCon,
+				'User.publish'=>1,
+				'User.soft_delete'=>0,
 				'User.id !=' => $creator			
 		)));		
 		return $approversList;	

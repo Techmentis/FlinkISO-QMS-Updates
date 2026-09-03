@@ -32,7 +32,8 @@ public function _commons(){
 	$tables = array();
 	foreach($appApprovals as $appApproval){
 		if($appApproval['ApprovalProcess']['applicable_to'] != null && $appApproval['ApprovalProcess']['applicable_to'] != 'null'){
-			$tables = array_merge($tables,json_decode($appApproval['ApprovalProcess']['applicable_to'])) ;
+			$applicableTables = json_decode($appApproval['ApprovalProcess']['applicable_to'], true);
+			if(is_array($applicableTables)) $tables = array_merge($tables,$applicableTables);
 		}
 	}
 
@@ -121,9 +122,13 @@ public function add() {
 		$this->ApprovalProcess->create();
 		
 		$this->loadModel('ApprovalStep');
-		$this->request->data['ApprovalProcess']['applicable_to'] = json_encode($this->request->data['ApprovalProcess']['applicable_to']);
+		$applicableTo = isset($this->request->data['ApprovalProcess']['applicable_to']) && is_array($this->request->data['ApprovalProcess']['applicable_to']) ? $this->request->data['ApprovalProcess']['applicable_to'] : array();
+		$this->request->data['ApprovalProcess']['applicable_to'] = json_encode($applicableTo);
 		if ($this->ApprovalProcess->save($this->request->data)) {
 			foreach($this->request->data['ApprovalStep']['steps'] as $approvalStep){
+				if(isset($approvalStep['send_to_users']) && is_array($approvalStep['send_to_users'])) $approvalStep['send_to_users'] = json_encode(array_values(array_filter($approvalStep['send_to_users'])));
+				else $approvalStep['send_to_users'] = null;
+				if(empty($approvalStep['send_to_designation'])) $approvalStep['send_to_designation'] = '-1';
 				$approvalStep['approval_process_id'] = $this->ApprovalProcess->id;			
 				$this->ApprovalStep->create();
 				$this->ApprovalStep->save($approvalStep,false);
@@ -187,14 +192,15 @@ public function edit($id = null) {
 		// }
 
 		$this->request->data['ApprovalProcess']['system_table_id'] = $this->_get_system_table_id();
-		$addedTables = $this->request->data['ApprovalProcess']['applicable_to'];
-		$this->request->data['ApprovalProcess']['applicable_to'] = json_encode($this->request->data['ApprovalProcess']['applicable_to']);
+		$addedTables = isset($this->request->data['ApprovalProcess']['applicable_to']) && is_array($this->request->data['ApprovalProcess']['applicable_to']) ? $this->request->data['ApprovalProcess']['applicable_to'] : array();
+		$this->request->data['ApprovalProcess']['applicable_to'] = json_encode($addedTables);
 		
 		// check if table has alredy process
 		$allProcesses = $this->ApprovalProcess->find('all',array('recursive'=>-1, 'conditions'=>array('ApprovalProcess.id != '=>$id), 'fields'=>array('ApprovalProcess.id','ApprovalProcess.applicable_to')));
 		$tables = array();
 		foreach($allProcesses as $allProcess){
-			$tables = array_merge($tables,json_decode($allProcess['ApprovalProcess']['applicable_to'],true)) ;
+			$applicableTables = json_decode($allProcess['ApprovalProcess']['applicable_to'],true);
+			if(is_array($applicableTables)) $tables = array_merge($tables,$applicableTables);
 		}
 		$this->_commons();
 		
@@ -208,10 +214,9 @@ public function edit($id = null) {
 		if ($this->ApprovalProcess->save($this->request->data)) {
 			$this->loadModel('ApprovalStep');
 			foreach($this->request->data['ApprovalStep']['steps'] as $approvalStep){
-				if(is_array( $approvalStep['send_to_users'])){
-					$approvalStep['send_to_users'] = json_encode($approvalStep['send_to_users']);
-				}
-				if(!isset($approvalStep['send_to_designation']))$approvalStep['send_to_designation'] = '-1';
+				if(isset($approvalStep['send_to_users']) && is_array($approvalStep['send_to_users'])) $approvalStep['send_to_users'] = json_encode(array_values(array_filter($approvalStep['send_to_users'])));
+				else $approvalStep['send_to_users'] = null;
+				if(empty($approvalStep['send_to_designation'])) $approvalStep['send_to_designation'] = '-1';
 				$approvalStep['approval_process_id'] = $this->ApprovalProcess->id;			
 				$this->ApprovalStep->create();
 				$this->ApprovalStep->save($approvalStep,false);

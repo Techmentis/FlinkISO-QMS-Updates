@@ -178,20 +178,6 @@ public $belongsTo = array(
 		'fields' => array('id', 'name'),
 		'order' => ''
 	),
-	'Cr' => array(
-		'className' => 'DocumentChangeRequest',
-		'foreignKey' => 'cr_id',
-		'conditions' => '',
-		'fields' => array('id', 'name'),
-		'order' => ''
-	),
-	'OldCr' => array(
-		'className' => 'DocumentChangeRequest',
-		'foreignKey' => 'old_cr_id',
-		'conditions' => '',
-		'fields' => array('id', 'name'),
-		'order' => ''
-	),
 	'ParentQcDocument' => array(
 		'className' => 'QcDocument',
 		'foreignKey' => 'parent_id',

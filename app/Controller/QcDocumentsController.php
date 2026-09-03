@@ -70,8 +70,6 @@ class QcDocumentsController extends AppController {
         
         $standards = $this->QcDocument->Standard->find('list', array('conditions' => array('Standard.publish' => 1, 'Standard.soft_delete' => 0)));
         $approvedBies = $preparedBies = $issuedBies = $issuingAuthorities = $this->QcDocument->IssuingAuthority->find('list', array('conditions' => array('IssuingAuthority.publish' => 1, 'IssuingAuthority.soft_delete' => 0)));
-        $crs = $this->QcDocument->Cr->find('list', array('conditions' => array('Cr.publish' => 1, 'Cr.soft_delete' => 0)));
-        $oldCrs = $this->QcDocument->OldCr->find('list', array('conditions' => array('OldCr.publish' => 1, 'OldCr.soft_delete' => 0)));
         $parentQcDocuments = $this->QcDocument->ParentQcDocument->find('list', array('conditions' => array('ParentQcDocument.soft_delete' => 0,'ParentQcDocument.archived'=>0)));
         $parentDocuments = $this->QcDocument->ParentDocument->find('list', array('conditions' => array('ParentDocument.soft_delete' => 0,'ParentDocument.archived'=>0)));
         $users = $this->QcDocument->User->find('list', array('conditions' => array('User.publish' => 1, 'User.soft_delete' => 0)));
@@ -80,7 +78,7 @@ class QcDocumentsController extends AppController {
         $companies = $this->QcDocument->Company->find('list', array('conditions' => array('Company.publish' => 1, 'Company.soft_delete' => 0)));
         $schedules = $this->QcDocument->Schedule->find('list', array('conditions' => array('Schedule.publish' => 1, 'Schedule.soft_delete' => 0)));
         $createdBies = $this->_get_user_list();
-        $this->set(compact('qcDocumentCategories', 'clauses', 'standards', 'issuingAuthorities', 'crs', 'oldCrs', 'parentQcDocuments', 'parentDocuments', 'users', 'systemTables', 'userSessions', 'companies', 'preparedBies', 'approvedBies', 'issuedBies', 'schedules', 'approvals','createdBies'));
+        $this->set(compact('qcDocumentCategories', 'clauses', 'standards', 'issuingAuthorities', 'parentQcDocuments', 'parentDocuments', 'users', 'systemTables', 'userSessions', 'companies', 'preparedBies', 'approvedBies', 'issuedBies', 'schedules', 'approvals','createdBies'));
         $count = $this->QcDocument->find('count');
         $published = $this->QcDocument->find('count', array('conditions' => array('QcDocument.publish' => 1)));
         $unpublished = $this->QcDocument->find('count', array('conditions' => array('QcDocument.publish' => 0)));

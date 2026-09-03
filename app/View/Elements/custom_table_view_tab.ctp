@@ -59,6 +59,7 @@ $isMr = (bool)$this->Session->read('User.is_mr');
 						<td><?php echo h($childTable['name']); ?></td><td><?php echo h($childTable['table_name']); ?></td><td><?php echo h($childTable['table_version']); ?></td><td><?php echo h($childTable['description']); ?></td><td><?php echo $childTable['publish'] ? 'Published' : 'Unpublished'; ?></td>
 						<td class="text-right">
 							<?php echo $this->Html->link('<i class="fa fa-cogs text-warning"></i>', array('action' => 'view', $childTable['id'], 'timestamp' => date('ymdhis')), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => 'Open child table')); ?>
+							<?php echo $this->Html->link('<i class="fa fa-refresh text-warning"></i>', array('action' => 'unlock', $childTable['id'], 'next_action' => 'recreate_child', 'timestamp' => date('ymdhis')), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => 'Recreate child form')); ?>
 							<?php if($childTable['table_locked']) echo $this->Html->link('<i class="fa fa-trash-o text-danger"></i>', array('action' => 'delete_child', $childTable['id']), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => 'Delete child table')); ?>
 						</td>
 					</tr>
@@ -117,6 +118,7 @@ $isMr = (bool)$this->Session->read('User.is_mr');
 						<td><?php echo h($childDocumentTable['name']); ?></td><td><?php echo h($childDocumentTable['table_name']); ?></td><td><?php echo h($childDocumentTable['table_version']); ?></td><td><?php echo h($childDocumentTable['description']); ?></td><td><?php echo $childDocumentTable['publish'] ? 'Published' : 'Unpublished'; ?></td>
 						<td class="text-right">
 							<?php echo $this->Html->link('<i class="fa fa-cogs text-warning"></i>', array('action' => 'view', $childDocumentTable['id'], 'timestamp' => date('ymdhis')), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => 'Open child document form')); ?>
+							<?php echo $this->Html->link('<i class="fa fa-refresh text-warning"></i>', array('action' => 'unlock', $childDocumentTable['id'], 'next_action' => 'recreate_child', 'timestamp' => date('ymdhis')), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => 'Recreate child document form')); ?>
 						</td>
 					</tr>
 				<?php } ?></tbody>

@@ -71,7 +71,7 @@
 								
 								<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.send_to_designation',array('class'=>'form-control', 'options'=>$PublishedDesignationList, 'default'=>$approvalStep['send_to_designation'], 'label'=>false,
 								'onchange'=>'udpatecheck('.$i.',"designation",this);')) ?></td>	
-								<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.send_to_users[]',array('name'=>'data[ApprovalStep][steps]['.$i.'][send_to_users][]', 'class'=>'form-control', 'multiple', 'options'=>$PublishedUserList, 'label'=>false,'onchange'=>'udpatecheck('.$i.',"users",this);')) ?></td>	
+								<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.send_to_users[]',array('name'=>'data[ApprovalStep][steps]['.$i.'][send_to_users][]', 'class'=>'form-control', 'multiple', 'selected'=>json_decode($approvalStep['send_to_users'],true), 'options'=>$PublishedUserList, 'label'=>false,'onchange'=>'udpatecheck('.$i.',"users",this);')) ?></td>	
 
 								<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.send_to_publishers',array('checkbox'=>'checkbox','default'=>$approvalStep['send_to_publishers'], 'label'=>false,
 								'onchange'=>'udpatecheck('.$i.',"publisher",this);')) ?></td>

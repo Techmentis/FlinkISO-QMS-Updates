@@ -191,7 +191,7 @@
 						<?php			
 						$existingFields = json_decode($this->request->data['CustomTable']['fields'],true);			
 						?>
-						<?php echo $this->element('recreate_custom_forms',array('existingFields'=>$existingFields,'fieldDetails'=>$fieldDetails,'childTables'=>$this->request->data['ChildTables'],'thisTable'=>Inflector::Classify($this->request->data['CustomTable']['table_name'])));?>
+						<?php echo $this->element('recreate_custom_forms',array('existingFields'=>$existingFields,'fieldDetails'=>$fieldDetails,'childTables'=>$this->request->data['ChildTables'],'thisTable'=>Inflector::Classify($this->request->data['CustomTable']['table_name']),'approvalSteps'=>$approvalSteps));?>
 					</div>
 				
 				</div>

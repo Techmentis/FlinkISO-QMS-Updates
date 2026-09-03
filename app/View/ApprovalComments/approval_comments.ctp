@@ -4,7 +4,7 @@ if(!$currentStep['ApprovalStep']['id'])$approval_step_id = $this->request->param
 else $approval_step_id = $currentStep['ApprovalStep']['id'];
 ?>
 <div class="row">
-	<?php $approvalStatuses = array(0=>'Pending',1=>'Approved',2=>'Not Approved'); ?>
+	<?php $approvalStatuses = array(0=>'Pending',1=>'Approved',2=>'Not Approved'); if(!empty($previousApprovalStep['ApprovalStep'])) $approvalStatuses[3] = 'Return to Previous Step'; ?>
 	<?php if($approvalComments){ ?>
 	<div class="col-md-12">
 		<ul class="timeline">
@@ -90,10 +90,10 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 															unset($approvalStatuses[1]);														
 														}														
 														if($approvalStatuses){
-															echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
-																'type'=>'radio',
-																'options'=>$approvalStatuses,
-																'default'=>$approvalComment['Approval']['approval_status']															
+													echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
+															'type'=>'radio',
+															'options'=>$approvalStatuses,
+															'default'=>$approvalComment['Approval']['approval_status']
 															));
 														}														
 													}else{														
@@ -101,10 +101,10 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 															unset($approvalStatuses[1]);		
 														}
 														if($approvalStatuses){
-															echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
-																'type'=>'radio',
-																'options'=>$approvalStatuses,
-																'default'=>$approvalComment['Approval']['approval_status']
+													echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
+															'type'=>'radio',
+															'options'=>$approvalStatuses,
+															'default'=>$approvalComment['Approval']['approval_status']
 															));
 														}														
 													}
@@ -116,16 +116,26 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 													}
 
 													if($approvalStatuses){
-														echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
-														// 'id'=>$approvalComment['ApprovalComment']['id'].'ResponseTxt',
+													echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
+													// 'id'=>$approvalComment['ApprovalComment']['id'].'ResponseTxt',
 															'type'=>'radio',
 															'options'=>$approvalStatuses,
-															'default'=>$approvalComment['Approval']['approval_status']
-														));
-													}													
-												}else{
-													echo "<br />";
+																'default'=>$approvalComment['Approval']['approval_status']
+															));
+														}											
+													}else{
+														echo "<br />";
+													}
 												}
+											if(!empty($nextApproverRequired)){
+												echo '<div id="'.$approvalComment['ApprovalComment']['id'].'NextApproverWrap" style="display:none">';
+												echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.next_approver_ids',array(
+													'id'=>$approvalComment['ApprovalComment']['id'].'NextApproverId',
+													'type'=>'select','multiple'=>true,'options'=>$nextApproversList,'data-placeholder'=>'Select next approvers',
+													'label'=>'Next Approvers — '.$nextApprovalStep['ApprovalStep']['title'],'class'=>'form-control'
+												));
+												if(empty($nextApproversList)) echo '<small class="text-danger">No eligible users are configured for the next step.</small>';
+												echo '</div>';
 											}?>
 									</div>
 								<?php } ?>
@@ -159,11 +169,25 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 									}?>&nbsp;
 								</div>								
 								<script type="text/javascript">											
+									var approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?> = "input[name='data[ApprovalComment][<?php echo $approvalComment['ApprovalComment']['id'];?>][approval_status]']";
+									$(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>).on('change',function(){
+										var approved = $(this).val() == '1';
+										$("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverWrap").toggle(approved);
+										if(!approved) $("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverId").val('').trigger('chosen:updated');
+									});
+									$(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>+":checked").trigger('change');
 									$("#<?php echo $approvalComment['ApprovalComment']['id'];?>_link").on('click',function(){
 										if($("#<?php echo $approvalComment['ApprovalComment']['id']?>ResponseTxt").val() ==''){
 											alert('Add Response');
 											return false;
 										}
+										<?php if(!empty($nextApproverRequired)){ ?>
+										if($("input[name='data[ApprovalComment][<?php echo $approvalComment['ApprovalComment']['id'];?>][approval_status]']:checked").val() == '1' && !$("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverId").val()){
+											alert('Select one or more next approvers.');
+											return false;
+										}
+										<?php } ?>
+										if($(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>+":checked").val() == '3' && !confirm('Return this record to the previous approval step?')) return false;
 
 										$.ajax({
 											url: "<?php echo Router::url('/', true); ?>approval_comments/add_response/id:<?php echo $approvalComment['ApprovalComment']['id']?>/response:" + $("#<?php echo $approvalComment['ApprovalComment']['id'];?>ResponseTxt").val()+"/to:" + $("#<?php echo $approvalComment['ApprovalComment']['id'];?>UserTo").val(),
@@ -174,7 +198,8 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 												'to':$("#<?php echo $approvalComment['ApprovalComment']['id'];?>UserTo").val(),
 												'approval_id':'<?php echo h($approvalComment['ApprovalComment']['approval_id']); ?>',
 												'approval_status':$("input[name='data[ApprovalComment][<?php echo $approvalComment['ApprovalComment']['id'] ;?>][approval_status]']:checked").val(),
-												'approval_step_id':'<?php echo $approval_step_id;?>'
+															'approval_step_id':'<?php echo $approval_step_id;?>',
+															'next_approver_ids':$("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverId").val()
 											},
 											beforeSend: function( xhr ) {
 												$("#<?php echo $approvalComment['ApprovalComment']['id'];?>_link").remove();
@@ -183,10 +208,11 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 											error: function (err) {
 												
 											},
-											success: function(data, result) {
-												$('[id*="submit_id"]').show();
-												$("#<?php echo $approvalComment['ApprovalComment']['id']?>_td_to_update").html(data);
-												$("#<?php echo $approvalComment['ApprovalComment']['id'];?>_link").removeClass('fa fa-refresh fa-spin');
+										success: function(data, result) {
+											$('[id*="submit_id"]').show();
+											$("#<?php echo $approvalComment['ApprovalComment']['id']?>_td_to_update").html(data);
+											$("#<?php echo $approvalComment['ApprovalComment']['id'];?>_link").removeClass('fa fa-refresh fa-spin');
+											if($(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>+":checked").val() == '3') setTimeout(function(){ window.location.reload(); }, 800);
 
 											},						        
 										});	
@@ -251,10 +277,10 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 													}
 
 													if($approvalStatuses){
-														echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
-															'type'=>'radio',
-															'options'=>$approvalStatuses,
-															'default'=>0
+												echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.approval_status',array(
+													'type'=>'radio',
+													'options'=>$approvalStatuses,
+													'default'=>0
 														));
 													}													
 												}else{
@@ -264,10 +290,10 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 													}
 
 													if($approvalStatuses){
-														echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
-															'type'=>'radio',
-															'options'=>$approvalStatuses,
-															'default'=>0
+												echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.approval_status',array(
+													'type'=>'radio',
+													'options'=>$approvalStatuses,
+													'default'=>0
 														));
 													}													
 												}
@@ -280,8 +306,8 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 												}
 
 												if($approvalStatuses){
-													echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
-													// 'id'=>$approvalComment['ApprovalComment']['id'].'ResponseTxt',
+												echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.approval_status',array(
+												// 'id'=>$approval['Approval']['id'].'ResponseTxt',
 														'type'=>'radio',
 														'options'=>$approvalStatuses,
 														'default'=>0
@@ -290,7 +316,17 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 											}else{
 												echo "<br />";
 											}
-										}?>
+										}
+									if(!empty($nextApproverRequired) && ($approval['Approval']['user_id'] == $this->Session->read('User.id') || $approval['Approval']['user_id'] == $this->Session->read('User.employee_id'))){
+										echo '<div id="'.$approval['Approval']['id'].'NextApproverWrap" style="display:none">';
+										echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.next_approver_ids',array(
+											'id'=>$approval['Approval']['id'].'NextApproverId',
+											'type'=>'select','multiple'=>true,'options'=>$nextApproversList,'data-placeholder'=>'Select next approvers',
+											'label'=>'Next Approvers — '.$nextApprovalStep['ApprovalStep']['title'],'class'=>'form-control'
+										));
+										if(empty($nextApproversList)) echo '<small class="text-danger">No eligible users are configured for the next step.</small>';
+										echo '</div>';
+									}?>
 									</div>
 									<div class="col-md-12">
 										<div id="<?php echo $approval['Approval']['id']?>_td_to_update"><?php 
@@ -305,11 +341,25 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 									</div>
 									<!-- need to pass comment id, to and response only  -->
 									<script type="text/javascript">										
+										var approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?> = "input[name='data[ApprovalComment][<?php echo $approval['Approval']['id'];?>][approval_status]']";
+										$(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>).on('change',function(){
+											var approved = $(this).val() == '1';
+											$("#<?php echo $approval['Approval']['id'];?>NextApproverWrap").toggle(approved);
+											if(!approved) $("#<?php echo $approval['Approval']['id'];?>NextApproverId").val('').trigger('chosen:updated');
+										});
+										$(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>+":checked").trigger('change');
 										$("#<?php echo $approval['Approval']['id'];?>_link_new").on('click',function(){
-											if($("#<?php echo $approval['Approval']['id']?>ResponseTxt").val() ==''){
-												alert('Add Response');
-												return false;
-											}
+										if($("#<?php echo $approval['Approval']['id']?>ResponseTxt").val() ==''){
+											alert('Add Response');
+											return false;
+										}
+										<?php if(!empty($nextApproverRequired)){ ?>
+										if($("input[name='data[ApprovalComment][<?php echo $approval['Approval']['id'];?>][approval_status]']:checked").val() == '1' && !$("#<?php echo $approval['Approval']['id'];?>NextApproverId").val()){
+											alert('Select one or more next approvers.');
+											return false;
+										}
+										<?php } ?>
+										if($(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>+":checked").val() == '3' && !confirm('Return this record to the previous approval step?')) return false;
 
 											$.ajax({
 												url: "<?php echo Router::url('/', true); ?>approval_comments/add_response/approval_id:<?php echo $approval['Approval']['id']?>/response:" + $("#<?php echo $approval['Approval']['id'];?>ResponseTxt").val()+"/to:" + $("#<?php echo $approval['Approval']['id'];?>UserTo").val(),
@@ -318,8 +368,9 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 													'response': $("#<?php echo $approval['Approval']['id'];?>ResponseTxt").val(),
 													'to':$("#<?php echo $approval['Approval']['id'];?>UserTo").val(),
 													'approval_id':'<?php echo $approval['Approval']['id']?>',
-													'approval_status':$("input[name='data[ApprovalComment][<?php echo $approvalComment['ApprovalComment']['id'] ;?>][approval_status]']:checked").val(),
-													'approval_step_id':'<?php echo $approval_step_id;?>'
+													'approval_status':$("input[name='data[ApprovalComment][<?php echo $approval['Approval']['id'];?>][approval_status]']:checked").val(),
+													'approval_step_id':'<?php echo $approval_step_id;?>',
+															'next_approver_ids':$("#<?php echo $approval['Approval']['id'];?>NextApproverId").val()
 												},
 												beforeSend: function( xhr ) {
 													$("#<?php echo $approval['Approval']['id']?>_link_new").remove();
@@ -328,10 +379,11 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 												error: function (err) {
 													
 												},
-												success: function(data, result) {
-													$('[id*="submit_id"]').show();
-													$("#<?php echo $approval['Approval']['id']?>_td_to_update").html(data);													
-												},						        
+											success: function(data, result) {
+												$('[id*="submit_id"]').show();
+												$("#<?php echo $approval['Approval']['id']?>_td_to_update").html(data);											
+												if($(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>+":checked").val() == '3') setTimeout(function(){ window.location.reload(); }, 800);
+											},					        
 											});	
 										})
 									</script>
