@@ -18,7 +18,7 @@
     <div class="panel-body">
         <p>Download and install the latest application updates from your configured GitHub repository.</p>
         <p>A dated application backup is created first. Configuration and uploaded files are preserved. Please run during a maintenance window with other users signed out.</p>
-        <p class="text-muted">SQL runs before files are published. If SQL fails, application files remain unchanged; database changes already committed may need manual recovery.</p>
+        <p class="text-muted">SQL runs before files are published. Failed SQL statements are logged and skipped; installation continues. Review the warnings for database changes that were not applied.</p>
         <button type="button" class="btn btn-success" id="updater-start">Back up and update</button>
         <div id="updater-working" style="display:none" role="status"><span class="updater-spinner" aria-hidden="true"></span>Updater is working. Please keep this page open.</div>
         <div id="updater-status" role="status" aria-live="polite" style="margin:15px 0"></div>
