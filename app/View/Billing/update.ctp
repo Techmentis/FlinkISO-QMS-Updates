@@ -16,6 +16,7 @@
 <div class="panel panel-default">
     <div class="panel-heading"><h3 class="panel-title">FlinkISO Updater</h3></div>
     <div class="panel-body">
+        <div class="col-md-6">
         <p>Download and install the latest application updates from your configured GitHub repository.</p>
         <p>A dated application backup is created first. Configuration and uploaded files are preserved. Please run during a maintenance window with other users signed out.</p>
         <p class="text-muted">SQL runs before files are published. Failed SQL statements are logged and skipped; installation continues. Review the warnings for database changes that were not applied.</p>
@@ -31,8 +32,11 @@
             </div>
         <?php endforeach; ?>
         </div>
+        </div>
+        <div class="col-md-6">
         <h4>Update log</h4>
         <pre id="updater-log" style="max-height:360px;overflow:auto;white-space:pre-wrap" aria-label="Update log"></pre>
+        </div>
     </div>
 </div>
 <script>
