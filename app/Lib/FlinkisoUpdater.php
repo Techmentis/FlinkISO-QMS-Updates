@@ -202,7 +202,10 @@ class FlinkisoUpdater {
             $sqlPath = $source . '/webroot/updates/updates.sql';
             if (!is_readable($sqlPath)) $errors[] = 'SQL file is missing or unreadable: ' . $sqlPath;
             $this->failErrors($errors);
-            $statements = self::splitSql(file_get_contents($sqlPath));
+            $statements = array();
+            foreach (self::splitSql(file_get_contents($sqlPath)) as $sql) {
+                $statements = array_merge($statements, self::splitColumnAdditions($sql));
+            }
             // Prepare all source files and rollback copies outside the application first.
             foreach ($incoming as $rel => $path) {
                 $this->copyChecked($path, $this->work . '/new/' . $rel);
@@ -219,6 +222,10 @@ class FlinkisoUpdater {
                 try {
                     if (call_user_func($executeSql, $statement) === false) throw new RuntimeException('Database rejected statement.');
                 } catch (Throwable $e) {
+                    if ($e instanceof PDOException && isset($e->errorInfo[1]) && (int)$e->errorInfo[1] === 1060) {
+                        $this->event($step, (int)(($index + 1) * 100 / max(1, count($statements))), 'Warning: SQL statement ' . ($index + 1) . ' skipped: column already exists (MySQL 1060).');
+                        continue;
+                    }
                     throw new RuntimeException('SQL statement ' . ($index + 1) . ' failed: ' . $e->getMessage() . "\nApplication files were not changed. Earlier SQL statements may have committed; review the database before retrying.");
                 }
                 $this->event($step, (int)(($index + 1) * 100 / max(1, count($statements))), 'SQL statement ' . ($index + 1) . ' / ' . count($statements) . ' completed.');
@@ -344,6 +351,37 @@ class FlinkisoUpdater {
             }
             throw new RuntimeException(implode("\n", $errors) . "\nFile rollback attempted. SQL has already run; review recovery log.");
         }
+    }
+
+    /** Split pure ADD-column lists so one existing column cannot hide other missing columns. */
+    public static function splitColumnAdditions($sql) {
+        $identifier = '(?:`(?:[^`]|``)+`|[A-Za-z_][A-Za-z0-9_$]*)';
+        if (!preg_match('/^(ALTER\s+TABLE\s+' . $identifier . '(?:\s*\.\s*' . $identifier . ')?\s+)(.*)$/is', $sql, $match)) return array($sql);
+        $parts = array(); $part = ''; $quote = null; $depth = 0; $body = $match[2]; $n = strlen($body);
+        for ($i = 0; $i < $n; $i++) {
+            $c = $body[$i]; $next = $i + 1 < $n ? $body[$i + 1] : '';
+            if ($quote !== null) {
+                $part .= $c;
+                if ($c === '\\' && $next !== '') { $part .= $next; $i++; }
+                elseif ($c === $quote) {
+                    if ($next === $quote) { $part .= $next; $i++; } else $quote = null;
+                }
+                continue;
+            }
+            if ($c === "'" || $c === '"' || $c === '`') $quote = $c;
+            elseif ($c === '(') $depth++;
+            elseif ($c === ')') $depth--;
+            elseif ($c === ',' && $depth === 0) { $parts[] = trim($part); $part = ''; continue; }
+            $part .= $c;
+        }
+        $parts[] = trim($part);
+        if (count($parts) < 2) return array($sql);
+        foreach ($parts as $part) {
+            if (!preg_match('/^ADD\s+(?:COLUMN\s+)?(?!(?:PRIMARY|UNIQUE|INDEX|KEY|CONSTRAINT|FOREIGN|CHECK|PARTITION)\b)' . $identifier . '\s+/i', $part)) return array($sql);
+        }
+        $out = array();
+        foreach ($parts as $part) $out[] = $match[1] . $part;
+        return $out;
     }
 
     /** SQL lexer: semicolons inside strings/comments do not terminate statements. */

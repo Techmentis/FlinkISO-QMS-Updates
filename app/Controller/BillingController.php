@@ -106,7 +106,9 @@ class BillingController extends AppController {
             $statement = $db->prepare($sql);
             if (!$statement || !$statement->execute()) {
                 $error = $statement ? $statement->errorInfo() : $db->errorInfo();
-                throw new RuntimeException(isset($error[2]) ? $error[2] : 'SQL execution failed.');
+                $exception = new PDOException(isset($error[2]) ? $error[2] : 'SQL execution failed.');
+                $exception->errorInfo = $error;
+                throw $exception;
             }
             $statement->closeCursor();
             return true;
