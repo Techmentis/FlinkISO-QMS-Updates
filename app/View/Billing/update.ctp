@@ -63,7 +63,8 @@
         }
         message(item.message, item.error);
         if (item.error || item.step === 'complete') working(false);
-        if (item.step === 'complete') status.className = 'alert alert-success';
+        if (item.warning) status.className = 'alert alert-warning';
+        if (item.step === 'complete') status.className = item.warning ? 'alert alert-warning' : 'alert alert-success';
     }
     function run(repeat, date) {
         var xhr = new XMLHttpRequest(), offset = 0, pending = '', terminal = false;

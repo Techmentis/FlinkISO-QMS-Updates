@@ -48,8 +48,9 @@ class FlinkisoUpdater {
         return array('date' => date('Y-m-d'), 'exists' => is_dir($this->root . '/backup/' . date('Y-m-d')));
     }
 
-    private function event($step, $percent, $message, $error = false) {
-        $row = array('step' => $step, 'percent' => $percent, 'message' => $message, 'error' => $error);
+    private function event($step, $percent, $message, $error = false, $warning = false) {
+        if (!empty($this->config['pat'])) $message = str_replace($this->config['pat'], '[REDACTED]', $message);
+        $row = array('step' => $step, 'percent' => $percent, 'message' => $message, 'error' => $error, 'warning' => $warning);
         if ($this->log && file_put_contents($this->log, json_encode($row) . "\n", FILE_APPEND | LOCK_EX) === false) {
             throw new RuntimeException('Cannot write updater log: ' . $this->log);
         }
@@ -218,25 +219,30 @@ class FlinkisoUpdater {
             $this->event($step, 0, 'Applying SQL before publishing application files.');
             $marker = $this->root . '/backup/.updater/needs-review';
             if (file_put_contents($marker, 'Run: ' . $this->work . "\nBackup: " . $backup . "\nSQL may be partially committed. Inspect run.jsonl before retrying.\n") === false) throw new RuntimeException('Cannot create recovery marker.');
+            $sqlWarnings = 0;
             foreach ($statements as $index => $statement) {
                 try {
                     if (call_user_func($executeSql, $statement) === false) throw new RuntimeException('Database rejected statement.');
                 } catch (Throwable $e) {
-                    if ($e instanceof PDOException && isset($e->errorInfo[1]) && (int)$e->errorInfo[1] === 1060) {
-                        $this->event($step, (int)(($index + 1) * 100 / max(1, count($statements))), 'Warning: SQL statement ' . ($index + 1) . ' skipped: column already exists (MySQL 1060).');
+                    $driverCode = $e instanceof PDOException && isset($e->errorInfo[1]) ? (int)$e->errorInfo[1] : null;
+                    $alterTable = preg_match('/^ALTER\s+TABLE\b/i', ltrim($statement));
+                    $existingTable = $driverCode === 1050 && preg_match('/^CREATE\s+(?:TEMPORARY\s+)?TABLE\b/i', ltrim($statement));
+                    if ($e instanceof PDOException && ($alterTable || $existingTable || $driverCode === 1060)) {
+                        $sqlWarnings++;
+                        $this->event($step, (int)(($index + 1) * 100 / max(1, count($statements))), 'Warning: SQL statement ' . ($index + 1) . ' skipped: ' . $e->getMessage(), false, true);
                         continue;
                     }
                     throw new RuntimeException('SQL statement ' . ($index + 1) . ' failed: ' . $e->getMessage() . "\nApplication files were not changed. Earlier SQL statements may have committed; review the database before retrying.");
                 }
                 $this->event($step, (int)(($index + 1) * 100 / max(1, count($statements))), 'SQL statement ' . ($index + 1) . ' / ' . count($statements) . ' completed.');
             }
-            $this->event($step, 100, 'SQL completed successfully.');
+            $this->event($step, 100, $sqlWarnings ? 'SQL finished with ' . $sqlWarnings . ' skipped statement(s). Review the warnings for unapplied schema changes.' : 'SQL completed successfully.', false, $sqlWarnings > 0);
             $step = 'install';
             $this->event($step, 0, 'Publishing application files...');
             $this->publish($incoming);
             if (!unlink($marker)) throw new RuntimeException('Installed, but cannot clear recovery marker: ' . $marker);
             $this->event($step, 100, 'Application files installed.');
-            $this->event('complete', 100, 'Update completed successfully. Backup: ' . $backup);
+            $this->event('complete', 100, ($sqlWarnings ? 'Update installed with ' . $sqlWarnings . ' SQL warning(s). Review skipped schema changes. Backup: ' : 'Update completed successfully. Backup: ') . $backup, false, $sqlWarnings > 0);
         } catch (Throwable $e) {
             $message = $e->getMessage();
             if (!empty($this->config['pat'])) $message = str_replace($this->config['pat'], '[REDACTED]', $message);
