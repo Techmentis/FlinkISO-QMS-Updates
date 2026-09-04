@@ -221,3 +221,28 @@
       margin-top: 35px;
       border-top: 1px solid #666;
     }
+
+/* Keep canvas field labels within their own list item. */
+#sortable > li {
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+#sortable > li label {
+  display: inline;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#sortable > li .checkbox label {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#sortable > li .checkbox input {
+  flex: 0 0 auto;
+}

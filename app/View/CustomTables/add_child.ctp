@@ -69,124 +69,24 @@
 				<?php echo "<div class='col-md-2'>".$this->Form->input('password',array('type'=>'password', 'class'=>'form-control',)) . '</div>'; ?>
 				<?php echo "<div class='col-md-2'>".$this->Form->input('re-password',array('type'=>'password', 'class'=>'form-control',)) . '</div>'; ?>	
 
-				<?php echo "<div class='col-md-12'>".$this->Form->input('description',array('class'=>'form-control',)) . '</div>'; ?>	
+				<?php echo "<div class='col-md-12 hide'>".$this->Form->input('description',array('class'=>'form-control',)) . '</div>'; ?>	
 				<?php 
 				if(!empty($this->request->params['named']['qc_document_id'])){
-					echo "<div class='col-md-12'>".$this->Form->input('qc_document_id',array('class'=>'form-control','default'=> $this->request->params['named']['qc_document_id'])) . '</div>';					
+					echo "<div class='col-md-12 hide'>".$this->Form->input('qc_document_id',array('class'=>'form-control','default'=> $this->request->params['named']['qc_document_id'])) . '</div>';					
 				}
 				if(!empty($this->request->params['named']['process_id'])){
-					echo "<div class='col-md-12'>".$this->Form->input('process_id',array('class'=>'form-control','default'=>$process['Process']['id'])) . '</div>';					
+					echo "<div class='col-md-12 hide'>".$this->Form->input('process_id',array('class'=>'form-control','default'=>$process['Process']['id'])) . '</div>';					
 				}
 				?>
-			</div>
-			<div class="row">
-				<div class="col-md-12">
-					<?php
-					if($this->request->params['named']['qc_document_id'] != ''){
-						$key = $key;
-						$file_type = $qcDocument['QcDocument']['file_type'];
-						$file_name = $qcDocument['QcDocument']['title'];
-						$document_number = $qcDocument['QcDocument']['document_number'];
-						$document_version = $qcDocument['QcDocument']['revision_number'];
-
-						$file_type = $qcDocument['QcDocument']['file_type'];
-						
-						if($file_type == 'doc' || $file_type == 'docx'){
-							$documentType = 'word';
-						}
-
-						if($file_type == 'xls' || $file_type == 'xlsx'){
-							$documentType = 'cell';
-						}
-
-						$mode = 'edit';
-
-						$file_path = $qcDocument['QcDocument']['id'];
-
-
-
-	        			$file = $document_number.'-'.$file_name.'-'.$document_version;
-						$file = ltrim(rtrim($file));
-						$file = str_replace('-', '_', $file);
-						$file = ltrim(rtrim(strtolower($file)));
-						$file = preg_replace('/[\@\.\;\" "-]+/', '_', $file);
-						$file = preg_replace('/  */', '_', $file);
-						$file = preg_replace('/\\s+/', '_', $file);        
-						$file = preg_replace('/-*-/', '_', $file);
-						$file = preg_replace('/_*_/', '_', $file);
-						$file = $this->requestAction(array('action'=>'clean_table_names',$file));
-						$file = $file .'.'.$file_type;
-
-						echo $this->element('onlyoffice',array(
-							'url'=>$url,
-							'placeholderid'=>$placeholderid,
-							'panel_title'=>'Document Viewer',
-							'mode'=>$mode,
-							'path'=>$file_path,
-							'file'=>$file,
-							'filetype'=>$file_type,
-							'documentType'=>$documentType,
-							'userid'=>$this->Session->read('User.id'),
-							'username'=>$this->Session->read('User.username'),
-							'preparedby'=>$this->Session->read('User.name'),
-							'filekey'=>$key.'1',            
-							'record_id'=>$qcDocument['QcDocument']['id'],
-							'company_id'=>$this->Session->read('User.company_id'),
-							'controller'=>'custom_tables'
-						));
-					}else if($this->request->params['named']['process_id'] != ''){
-						$key = $key;
-						$file_type = $process['Process']['file_type'];
-						$file_name = $process['Process']['file_name'];
-						
-	        // $file_type = $qcDocument['QcDocument']['file_type'];
-						
-						if($file_type == 'doc' || $file_type == 'docx'){
-							$documentType = 'word';
-						}
-
-						if($file_type == 'xls' || $file_type == 'xlsx'){
-							$documentType = 'cell';
-						}
-
-						$mode = 'edit';
-
-						$file_path = $process['Process']['id'];
-
-
-						$file = $file_name.'.'.$file_type;
-
-						echo $this->element('onlyoffice',array(
-							'url'=>$url,
-							'placeholderid'=>$placeholderid,
-							'panel_title'=>'Document Viewer',
-							'mode'=>$mode,
-							'path'=>$file_path,
-							'file'=>$file,
-							'filetype'=>$file_type,
-							'documentType'=>$documentType,
-							'userid'=>$this->Session->read('User.id'),
-							'username'=>$this->Session->read('User.username'),
-							'preparedby'=>$this->Session->read('User.name'),
-							'filekey'=>$key.'1',            
-							'record_id'=>$process['Process']['id'],
-							'company_id'=>$this->Session->read('User.company_id'),
-							'controller'=>'custom_tables'
-						));
-					}	
-					?>
-				</div>
-				<div class="">
+			</div>			
+				<div class="hide">
 					<div class="col-md-12">
 						<?php echo $this->element('available_forms',array('availableForms'=>$availableForms,'type'=>'child')); ?>
 					</div>
 				</div>
 				<div class="">
-					<div class="col-md-12">
-						<?php echo $this->Form->input('form_layout',array('type'=>'radio','options'=>array(1=>'Regular',2=>'Table'),'default'=>2));?>
-						<h3>Build Custom Form <small>Drag & drop type of fields you want from the left side of the panel to right side. Add field name.</small><?php echo $this->Html->link('<i class="fa fa fa-server fa-sm"></i>','javascript:void(0);',array('onclick'=>'open_master()','escape'=>false,'class'=>'pull-right'));?></h3>
-						<?php // echo $this->element('fieldshelp');?>			
-						<?php echo $this->element('custom_forms');?>
+					<div class="col-md-12">						
+						<?php echo $this->element('custom_forms');?>						
 					</div>
 				</div>
 			</div>
@@ -210,11 +110,14 @@
 			?>
 
 
-			<div class="row">
-				<div class="col-md-12 text-right">
+			<div class="">
+				<div class="col-md-4">
+					<?php echo $this->Form->input('form_layout',array('type'=>'radio','options'=>array(1=>'Regular',2=>'Table'),'default'=>2));?>
+				</div>
+				<div class="col-md-4">
 					<?php echo $this->Form->input('publish', array('label' => __('Publish')));?>
 				</div>
-				<div class="col-md-12">
+				<div class="col-md-4">
 					<div class=""><?php echo $this->Form->submit(__('Submit'), array('div' => false, 'class' => 'btn btn-primary btn-success pull-right','id'=>'submit_id')); ?></div>
 				</div>
 				<?php echo $this->Html->image('indicator.gif', array('id' => 'submit-indicator')); ?>
