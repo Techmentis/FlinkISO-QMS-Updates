@@ -5423,12 +5423,22 @@ public function _fetch_approval_steps($custom_table_id = null){
 		}else if($approvalSteps['send_to_admins'] == 1){
 			$ucon = array('User.is_mr'=>1); // admin
 		}else if(!empty($approvalSteps['send_to_designation']) && $approvalSteps['send_to_designation'] != -1){
+			$selectedDesignations = json_decode($approvalSteps['send_to_designation'], true);
+			if(!is_array($selectedDesignations)) $selectedDesignations = array($approvalSteps['send_to_designation']);
+			$flattenedDesignations = array();
+			array_walk_recursive($selectedDesignations, function($designation) use (&$flattenedDesignations) {
+				$flattenedDesignations[] = $designation;
+			});
+			$selectedDesignations = array_values(array_unique(array_filter($flattenedDesignations, function($designation){
+				return $designation !== null && $designation !== '' && (string)$designation !== '-1';
+			})));
+			if(empty($selectedDesignations)) return array();
 			$this->loadModel('Employee');
 			$designationEmployees = $this->Employee->find('list',array(
 				'recursive'=>-1,
 				'fields'=>array('Employee.id','Employee.name'),
 				'conditions'=>array(
-					'Employee.designation_id'=>$approvalSteps['send_to_designation'],
+					'Employee.designation_id'=>$selectedDesignations,
 					'Employee.publish'=>1,
 					'Employee.soft_delete'=>0
 				)

@@ -35,8 +35,8 @@
 							echo "<div class='col-md-12'>".$this->element('process_doc_header',array('document'=>$process))."</div>"; 
 						?>	
 						
-						<?php echo "<div class='col-md-4'>".$this->Form->input('name',array('class'=>'form-control','required')) . '</div>'; ?>
-						<?php echo "<div class='col-md-3'>".$this->Form->input('table_name',array('class'=>'form-control', 'readonly', 'default'=>$table_name)) . '</div>'; ?>
+						<?php echo "<div class='col-md-4'>".$this->Form->input('name',array('class'=>'form-control','required')) . '</div>'; ?>						
+						<?php echo "<div class='col-md-3 hide'>".$this->Form->input('table_name',array('class'=>'form-control', 'readonly', 'default'=>$table_name)) . '</div>'; ?>
 						<?php echo "<div class='col-md-1'>".$this->Form->input('table_version',array('label'=>'Version', 'class'=>'form-control', 'readonly', 'default'=>$table_version)) . '</div>'; ?>
 						
 						<?php unset($this->request->data['CustomTable']['password']);?>
@@ -44,10 +44,9 @@
 						<?php echo "<div class='col-md-2'>".$this->Form->input('re-password',array('type'=>'password', 'class'=>'form-control','default'=>false)) . '</div>'; ?>
 
 						<?php echo "<div class='hide'>".$this->Form->hidden('fields',array('class'=>'form-control',)) . '</div>'; ?>
+						<?php echo "<div class='col-md-3'>".$this->Form->input('approval_process_id',array( 'class'=>'form-control',)) . '</div>'; ?>
 						
 						
-						<?php echo "<div class='col-md-12'>".$this->Form->input('description',array('class'=>'form-control',)) . '</div>'; ?>	
-						<?php echo "<div class='col-md-12'>".$this->Form->input('approval_process_id',array( 'class'=>'form-control',)) . '</div>'; ?>
 						<?php 
 						if(!empty($this->request->data['CustomTable']['qc_document_id'])){
 							echo "<div class='col-md-12 hide'>".$this->Form->hidden('qc_document_id',array('class'=>'form-control',)) . '</div>';					

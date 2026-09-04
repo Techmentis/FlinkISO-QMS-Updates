@@ -52,9 +52,15 @@
 												<td><?php if($approvalStep['send_to_admins'])echo '<i class="fa fa-check"></i>'; ?></td>
 												
 												<td><?php 
-												if($approvalStep['send_to_designation']){
-													echo $PublishedDesignationList[$approvalStep['send_to_designation']];	
-												}
+											if($approvalStep['send_to_designation']){
+												$designations = json_decode($approvalStep['send_to_designation'], true);
+												if(!is_array($designations)) $designations = array($approvalStep['send_to_designation']);
+												$flatDesignations = array();
+												array_walk_recursive($designations, function($designation) use (&$flatDesignations){ $flatDesignations[] = $designation; });
+												$designationNames = array();
+												foreach($flatDesignations as $designationId) if(isset($PublishedDesignationList[$designationId])) $designationNames[] = $PublishedDesignationList[$designationId];
+												echo implode(', ', $designationNames);
+											}
 												?></td>
 												<td><?php 
 													if($approvalStep['send_to_users']){

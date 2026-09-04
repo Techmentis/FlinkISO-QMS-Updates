@@ -17,7 +17,7 @@
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <?php
   echo $this->Html->meta('icon');
-  echo $this->Html->css(array('font-awesome.min','icons','allcss'));
+  echo $this->Html->css(array('font-awesome.min','icons','allcss','api'));
   echo $this->fetch('css');
 
   echo $this->Html->script(array(    

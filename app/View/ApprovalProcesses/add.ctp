@@ -62,7 +62,7 @@
 										<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.send_to_admins',array('checkbox'=>'checkbox','label'=>false,
 										'onchange'=>'udpatecheck('.$i.',"admins",this);')) ?></td>
 										
-										<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.send_to_designation',array('class'=>'form-control', 'options'=>$PublishedDesignationList,  'label'=>false,
+										<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.send_to_designation',array('name'=>'data[ApprovalStep][steps]['.$i.'][send_to_designation][]', 'class'=>'form-control', 'multiple'=>true, 'options'=>$PublishedDesignationList,  'label'=>false,
 										'onchange'=>'udpatecheck('.$i.',"designation",this);')) ?></td>										
 										<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.send_to_users[]',array('name'=>'data[ApprovalStep][steps]['.$i.'][send_to_users][]', 'class'=>'form-control', 'multiple', 'options'=>$PublishedUserList, 'label'=>false,'onchange'=>'udpatecheck('.$i.',"users",this);')) ?></td>	
 

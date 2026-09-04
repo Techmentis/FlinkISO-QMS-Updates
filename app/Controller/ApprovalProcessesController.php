@@ -15,6 +15,21 @@ class ApprovalProcessesController extends AppController {
  */
 public $components = array('Paginator');
 
+protected function _encodeStepDesignations($designations = array()) {
+	if(!is_array($designations)) {
+		$decoded = json_decode($designations, true);
+		$designations = is_array($decoded) ? $decoded : array($designations);
+	}
+	$flattened = array();
+	array_walk_recursive($designations, function($designation) use (&$flattened) {
+		$flattened[] = $designation;
+	});
+	$designations = array_values(array_unique(array_filter($flattened, function($designation) {
+		return $designation !== null && $designation !== '' && (string)$designation !== '-1';
+	})));
+	return empty($designations) ? null : json_encode($designations);
+}
+
 public function _get_system_table_id() {
 	$this->loadModel('SystemTable');
 	$this->SystemTable->recursive = -1;
@@ -128,7 +143,7 @@ public function add() {
 			foreach($this->request->data['ApprovalStep']['steps'] as $approvalStep){
 				if(isset($approvalStep['send_to_users']) && is_array($approvalStep['send_to_users'])) $approvalStep['send_to_users'] = json_encode(array_values(array_filter($approvalStep['send_to_users'])));
 				else $approvalStep['send_to_users'] = null;
-				if(empty($approvalStep['send_to_designation'])) $approvalStep['send_to_designation'] = '-1';
+				$approvalStep['send_to_designation'] = $this->_encodeStepDesignations(isset($approvalStep['send_to_designation']) ? $approvalStep['send_to_designation'] : array());
 				$approvalStep['approval_process_id'] = $this->ApprovalProcess->id;			
 				$this->ApprovalStep->create();
 				$this->ApprovalStep->save($approvalStep,false);
@@ -216,7 +231,7 @@ public function edit($id = null) {
 			foreach($this->request->data['ApprovalStep']['steps'] as $approvalStep){
 				if(isset($approvalStep['send_to_users']) && is_array($approvalStep['send_to_users'])) $approvalStep['send_to_users'] = json_encode(array_values(array_filter($approvalStep['send_to_users'])));
 				else $approvalStep['send_to_users'] = null;
-				if(empty($approvalStep['send_to_designation'])) $approvalStep['send_to_designation'] = '-1';
+				$approvalStep['send_to_designation'] = $this->_encodeStepDesignations(isset($approvalStep['send_to_designation']) ? $approvalStep['send_to_designation'] : array());
 				$approvalStep['approval_process_id'] = $this->ApprovalProcess->id;			
 				$this->ApprovalStep->create();
 				$this->ApprovalStep->save($approvalStep,false);

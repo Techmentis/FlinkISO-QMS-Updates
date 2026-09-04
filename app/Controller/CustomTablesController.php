@@ -924,10 +924,9 @@ class CustomTablesController extends AppController {
             $file_name = $file_name . '.' . $file_type;
 
             $qcpfile = WWW_ROOT .  'files' . DS . $this->Session->read('User.company_id') . DS . 'qc_documents' . DS . $this->request->params['named']['qc_document_id'] . DS . $file_name;
-            
             if (!file_exists($qcpfile)) {
                 $this->Session->setFlash(__('You are creating HTML form without any document.'));                
-            }    
+            }                
         }else{
             $this->Session->setFlash(__('You are creating HTML form without any document.'));            
         }        

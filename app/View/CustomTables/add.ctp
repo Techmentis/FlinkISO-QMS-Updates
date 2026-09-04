@@ -26,12 +26,12 @@
 					?>	
 					
 					<?php echo "<div class='col-md-4'>".$this->Form->input('name',array('class'=>'form-control','required','default'=> Inflector::Humanize($qcDocument['QcDocument']['name']))) . '</div>'; ?>
-					<?php echo "<div class='col-md-3'>".$this->Form->input('table_name',array('class'=>'form-control', 'readonly', 'default'=>$table_name)) . '</div>'; ?>
+					<?php echo "<div class='col-md-3 hide'>".$this->Form->input('table_name',array('class'=>'form-control', 'readonly', 'default'=>$table_name)) . '</div>'; ?>
 					<?php echo "<div class='col-md-1'>".$this->Form->input('table_version',array('class'=>'form-control','label'=>'Version',  'readonly', 'default'=>$table_version)) . '</div>'; ?>
 					<?php echo "<div class='col-md-12 hide'>".$this->Form->hidden('fields',array('class'=>'form-control',)) . '</div>'; ?>
 					<?php echo "<div class='col-md-2'>".$this->Form->input('password',array('type'=>'password', 'class'=>'form-control',)) . '</div>'; ?>
 					<?php echo "<div class='col-md-2'>".$this->Form->input('re-password',array('type'=>'password', 'class'=>'form-control',)) . '</div>'; ?>				
-					<?php echo "<div class='col-md-12'>".$this->Form->input('approval_process_id',array( 'class'=>'form-control',)) . '</div>'; ?>
+					<?php echo "<div class='col-md-3'>".$this->Form->input('approval_process_id',array( 'class'=>'form-control',)) . '</div>'; ?>
 					<?php 
 					if(!empty($this->request->params['named']['qc_document_id'])){						
 						echo "<div class='col-md-12 hide'>".$this->Form->hidden('qc_document_id',array('class'=>'form-control','default'=>$this->request->params['named']['qc_document_id'])) . '</div>';					
@@ -156,7 +156,7 @@
 					?>
 				</div>
 
-				<div class="">
+				<div class="hide">
 					<div class="col-md-12">
 						<?php echo $this->element('available_forms',array('availableForms'=>$availableForms,'type'=>'parent')); ?>
 					</div>

@@ -22,3 +22,4 @@ ALTER TABLE `approvals` ADD `approval_process_id` VARCHAR(36) NULL AFTER `approv
 ALTER TABLE `approval_comments` ADD `approval_process_id` VARCHAR(36) NULL AFTER `approval_step_id`;
 ALTER TABLE `approval_comments` ADD `approval_cycle` INT(11) NULL DEFAULT '0' AFTER `approval_process_id`;
 ALTER TABLE custom_tables ADD tab_settings TEXT NULL;
+ALTER TABLE `approval_steps` MODIFY `send_to_designation` TEXT NULL;
