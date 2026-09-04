@@ -53,140 +53,78 @@ class BillingController extends AppController {
 
     }
 
-    public function update(){
-        if($this->Session->read('User.is_mr') == 0){
-            $this->Session->setFlash(__('Unauthorised Access'));
-            $this->redirect(array('controller'=>'users', 'action' => 'dashboard'));
+    public function update() {
+        if (!$this->Session->read('User.id') || (int)$this->Session->read('User.is_mr') !== 1) {
+            throw new ForbiddenException('Only an authenticated administrator can run updates.');
         }
-
-    }
-
-
-    public function back_up(){
-
-    }    
-
-
-    public function authentication(){
-
-        $result = $this->curl('get','users','authenticate');        
-        $result = json_decode($result,true);  
-        if($result['error']==0){
-            echo "<span class='text-success'><h4>Success</h4></span><br />";            
-        }else{
-            echo "Authentication Failed.";
+        App::uses('FlinkisoUpdater', 'Lib');
+        if (!$this->Session->read('Updater.token')) {
+            $this->Session->write('Updater.token', bin2hex(openssl_random_pseudo_bytes(32)));
         }
-        
-    }
-
-    public function backup(){
-        $backupFolder = new Folder();
-        $backuptime = date('H-i');
-        $folder = ROOT . DS . 'backup' . DS . date('Y-m-d') . DS .  $backuptime . DS . 'app';
-        
-        if($backupFolder->create($folder)){
-            
-            $folderToCopy = new Folder(APP);
-            $folderToCopy->copy(array(
-                'to' => $folder,
-                'from' => APP,
-                'recursive' => true
-            ));
-
-            $folder = ROOT . DS . 'backup' . DS . date('Y-m-d') . DS . $backuptime . DS . 'lib';
-            
-            $folderToCopy = new Folder(ROOT . DS . 'lib');
-            $folderToCopy->copy(array(
-                'to' => $folder,
-                'from' => ROOT . DS . 'lib',
-                'recursive' => true
-            ));
-            echo "<h4>Downloading Files...</h4><br />Backup created at <br /><strong>".$folder."/</strong></br>";
-        }else{
-            echo "<span class='text-danger'>Unable create <strong>" . $folder . "</strong>. Please create the folder manually will write permission for backup.</span>";            
+        $token = $this->Session->read('Updater.token');
+        if (!$this->request->is('post')) {
+            $this->set('updaterToken', $token);
+            return;
         }
-
-        $deteleFileFolder = new Folder();
-        $deteleFileFolder->delete($folder. DS . 'webroot');
-
-        $updateFolder = new Folder();
-        $updateFolder->delete(WWW_ROOT. 'updates');
-
-        $updateFolder = new Folder();
-        $updateFolder->create(WWW_ROOT. 'updates');
-    }
-
-    public function downloading_update(){    
-
-        if(!@copy('https://github.com/Techmentis/FlinkISO-QMS-Updates/archive/refs/heads/main.zip', WWW_ROOT. 'updates' . DS . 'update.zip'))
-        {
-            $errors = error_get_last();
-            echo "<span class='text-danger'><strong>Failed error: ". json_encode($errors['message'].'</strong></span></br>');
-
-        } else {
-            try{
-                exec('unzip ' . WWW_ROOT . 'updates' . DS . 'update.zip -d ' . WWW_ROOT. 'updates');    
-            }catch(Exception $e){
-                
+        $this->autoRender = false;
+        $submitted = isset($this->request->data['token']) ? $this->request->data['token'] : '';
+        if (!is_string($submitted) || !hash_equals($token, $submitted)) {
+            throw new ForbiddenException('Invalid updater token. Reload the page.');
+        }
+        $service = new FlinkisoUpdater(ROOT, Configure::read('FlinkisoUpdater'));
+        $operation = isset($this->request->data['operation']) ? $this->request->data['operation'] : '';
+        if ($operation === 'check') {
+            $this->response->type('json');
+            $this->response->header('Cache-Control', 'no-store');
+            try { $data = $service->check(); }
+            catch (Exception $e) { $data = array('error' => $e->getMessage()); }
+            $this->response->body(json_encode($data));
+            return $this->response;
+        }
+        if ($operation !== 'run') throw new BadRequestException('Unknown updater operation.');
+        $repeat = isset($this->request->data['repeat']) && $this->request->data['repeat'] === '1';
+        $date = isset($this->request->data['date']) ? $this->request->data['date'] : '';
+        $db = $this->Billing->getDataSource()->getConnection();
+        if (!($db instanceof PDO)) throw new RuntimeException('Updater requires a PDO database connection.');
+        // Use one request/lock for the complete run; disconnecting the browser must not interrupt publication.
+        ignore_user_abort(true);
+        set_time_limit(0);
+        if (session_id()) session_write_close();
+        while (ob_get_level() > 0) ob_end_clean();
+        header('Content-Type: application/x-ndjson; charset=utf-8');
+        header('Cache-Control: no-store, no-transform');
+        header('X-Accel-Buffering: no');
+        $emit = function ($row) { echo json_encode($row) . "\n"; flush(); };
+        $service = new FlinkisoUpdater(ROOT, Configure::read('FlinkisoUpdater'), $emit);
+        // Convert filesystem warnings into visible, fail-closed errors, without emitting broken JSON.
+        set_error_handler(function ($severity, $message, $file, $line) {
+            if (error_reporting() & $severity) throw new ErrorException($message, 0, $severity, $file, $line);
+            return false;
+        });
+        $service->run($repeat, $date, function ($sql) use ($db) {
+            // Execute the lexer's single statement directly; the legacy Cake datasource re-splits DDL on semicolons.
+            $statement = $db->prepare($sql);
+            if (!$statement || !$statement->execute()) {
+                $error = $statement ? $statement->errorInfo() : $db->errorInfo();
+                throw new RuntimeException(isset($error[2]) ? $error[2] : 'SQL execution failed.');
             }
-            try{
-                exec('powershell -Command "Expand-Archive -Path '.$from.' -DestinationPath '.$to.'"');
-            }catch(Exception $e){
-                
-            }
-            
-            exec('rm -rf ' . WWW_ROOT . 'updates' . DS . '__MACOSX');
-            exec('rm -rf ' . WWW_ROOT . 'updates' . DS . 'update.zip');
-
-            echo "<h4>Download Complete</h4><span class='text-success'><strong>Files/ Folders copied...</strong></span><hr /></br>";           
-        }        
+            $statement->closeCursor();
+            return true;
+        });
+        restore_error_handler();
+        exit;
     }
 
-    public function updating_sql(){
+    // Old URLs cannot bypass the new ordered, authenticated workflow.
+    public function back_up() { return $this->_retiredUpdater(); }
+    public function authentication() { return $this->_retiredUpdater(); }
+    public function backup() { return $this->_retiredUpdater(); }
+    public function downloading_update() { return $this->_retiredUpdater(); }
+    public function updating_sql() { return $this->_retiredUpdater(); }
+    public function copy_files() { return $this->_retiredUpdater(); }
+    public function install_updates() { return $this->_retiredUpdater(); }
 
-        echo "<span class='text-info'><h4>Downloading sql updates....</span></h4><hr /></br>";
-        $copyfrom = WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'app' . DS . 'webroot' . DS. 'updates' . DS . 'updates.sql';
-        if(!file_exists($copyfrom))
-        {
-            $errors= error_get_last();
-            $updatestr .= "<span class='text-danger'><strong>Sql failed error ". json_encode($errors['message'].'</strong></span></br>');
-        } else {
-            $sql = fopen($copyfrom, "r");
-            $contents = fread($sql,filesize($copyfrom));
-            $contents = explode(PHP_EOL,$contents);
-            foreach($contents as $sql){
-                if($sql && $sql != ''){
-                    try{
-                        $this->Billing->query($sql);
-                    }catch (Exception $e) {
-                       echo "<span class='text-danger'>SQL Failed: " . $sql .'</span></br>';
-                   }
-               }                
-           }
-
-       }    
-   }
-
- public function copy_files(){
-        $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'app');
-        if($foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'app')){            
-        }else{
-            CakeLog::write('debug','App folder copy failed');
-        }
-        
-        $downloadedFolder = new Folder(WWW_ROOT . DS . 'updates' . DS . 'FlinkISO-QMS-Updates-main' . DS . 'lib');
-        if($foldersTocopy = $downloadedFolder->copy(ROOT . DS . 'lib')){
-            
-        }else{
-            CakeLog::write('debug','Lib folder copy failed');
-        }
-
-        try{
-            $this->requestAction(array('controller'=>'custom_tables','action'=>'recreate_all_forms',1));
-        }catch(Exception $e){
-                
-        }        
-        echo "<span class='text-success'><h4>Update Complete!</span></h4></br>";
+    protected function _retiredUpdater() {
+        throw new MethodNotAllowedException('Use Billing > Update to run the complete updater.');
     }
-
 }
