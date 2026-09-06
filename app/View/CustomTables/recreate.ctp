@@ -241,6 +241,7 @@
 			</div>
 			<?php echo $this->Html->image('indicator.gif', array('id' => 'submit-indicator')); ?>
 			<?php echo $this->Form->end(); ?>
+			<?php echo $this->element('custom_form_generation_modal'); ?>
 
 			<?php echo $this->Js->writeBuffer();?>
 		</div>
@@ -647,20 +648,10 @@
 
 		
 		$("#submit-indicator").hide();
-		$("#submit_id").click(function(e){
-			var result;
-			result = check_multiple_defaults();
-			if(result == false){
-				return false;
-				e.preventDefault();
-			}
-			
-			if($('#CustomTableRecreateForm').valid()){
-				$("#submit_id").prop("disabled",true);
-				$("#submit-indicator").show();
-				$('#CustomTableRecreateForm').submit();
-			}
-
+		$('#CustomTableRecreateForm').on('submit', function(e){
+			e.preventDefault();
+			if(check_multiple_defaults() === false) return;
+			if($(this).valid()) generateCustomFormInBackground(this);
 		});
 		
 

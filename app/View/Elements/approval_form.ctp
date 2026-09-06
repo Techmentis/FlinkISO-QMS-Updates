@@ -1,5 +1,10 @@
 <div class="approval-action-form">
 <?php 
+$approvalStepTitle = !empty($currentStep['ApprovalStep']['title'])
+	? trim($currentStep['ApprovalStep']['title'])
+	: '';
+$approvalUserLabel = !empty($approvalUserLabel) ? $approvalUserLabel : 'Select user';
+
 if(!$currentStep['ApprovalStep']['id']){ ?>
 	<div class="box box-warning">
 		<div class="box-header with-border data-header" data-widget="collapse">
@@ -75,8 +80,7 @@ if(!$currentStep['ApprovalStep']['id']){ ?>
 				if(isset($customTable))$approvalPanelTitle = $customTable['CustomTable']['name'];
 				else $approvalPanelTitle = Inflector::humanize($this->request->controller);
 				?>
-				<div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title"><span class="text-black"><?php echo $approvalPanelTitle;?></span><span class="text-gray-dark"> Approvals/ Sharing/ Collaboration
-				<?php if($currentStep) echo '<br /><small>'.$currentStep['ApprovalStep']['title'].'</small>'; ?>
+				<div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title"><span class="text-black"><?php echo h($approvalStepTitle !== '' ? $approvalStepTitle : $approvalPanelTitle);?></span><?php if($approvalStepTitle === ''){ ?><span class="text-gray-dark"> Approvals/ Sharing/ Collaboration</span><?php } ?>
 				</h3>
 					<div class="box-tools pull-right"><button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button></div>
 				</div>
@@ -84,7 +88,7 @@ if(!$currentStep['ApprovalStep']['id']){ ?>
 					<div class="row">
 						<div class="col-md-10">
 							<?php 
-							echo $this->Form->input('Approval.'.$approvalModel.'.'.$approvalModel.'.user_id', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'UserId', 'label'=>'Select user you want to send this record for approval',
+							echo $this->Form->input('Approval.'.$approvalModel.'.'.$approvalModel.'.user_id', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'UserId', 'label'=>$approvalUserLabel,
 								'name'=>'data[Approval]['.$approvalModel.'][user_id][]', 'options' => $approversList,'multiple'));
 							echo $this->Form->hidden('Approval.'.$approvalModel.'.'.$approvalModel.'.from', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'From', 'default'=>$this->Session->read('User.id')));
 							echo $this->Form->hidden('Approval.'.$approvalModel.'.record', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Record','default'=>$this->request->params['pass'][0]));
@@ -120,8 +124,7 @@ if(!$currentStep['ApprovalStep']['id']){ ?>
 		else $approvalPanelTitle = Inflector::humanize($this->request->controller);
 		echo $this->Form->create('Approval',array('role'=>'form','class'=>'form')); ?>
 		<div class="box box-warning">
-			<div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title"><span class="text-black"><?php echo $approvalPanelTitle;?></span><span class="text-gray-dark"> Approvals/ Sharing/ Collaboration
-				<?php if($currentStep) echo '<br /><small>'.$currentStep['ApprovalStep']['title'].'</small>'; ?>
+			<div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title"><span class="text-black"><?php echo h($approvalStepTitle !== '' ? $approvalStepTitle : $approvalPanelTitle);?></span><?php if($approvalStepTitle === ''){ ?><span class="text-gray-dark"> Approvals/ Sharing/ Collaboration</span><?php } ?>
 				</h3>
 				<div class="box-tools pull-right"><button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button></div>
 			</div>
@@ -156,7 +159,7 @@ if(!$currentStep['ApprovalStep']['id']){ ?>
 						<div class="row">
 							<div class="col-md-10">
 								<?php 
-								echo $this->Form->input('Approval.'.$approvalModel.'.user_id', array('class'=>'',$approvalFieldsDispabed, 'id'=>'Approval'.Inflector::Classify($this->request->controller).'UserId','label'=>'Select user you want to send this record for approval',
+								echo $this->Form->input('Approval.'.$approvalModel.'.user_id', array('class'=>'',$approvalFieldsDispabed, 'id'=>'Approval'.Inflector::Classify($this->request->controller).'UserId','label'=>$approvalUserLabel,
 									'name'=>'data[Approval]['.$approvalModel.'][user_id][]', 'options' => $approversList,'multiple'));
 								echo $this->Form->hidden('Approval.'.$approvalModel.'.from', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'From','default'=>$this->Session->read('User.id')));
 								echo $this->Form->hidden('Approval.'.$approvalModel.'.record', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Record','default'=>$this->request->params['pass'][0]));

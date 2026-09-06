@@ -628,6 +628,9 @@ class AppController extends Controller {
 		$modelName = $this->modelClass;
 		$deptCon = array();
 		$pubCon = array();
+		$indexSearchConditions = array();
+		$indexFilterConditions = array();
+		$hasIndexSearch = false;
 		
 		// check if user/employee is involved departmentwise
 		// and if the user is HoD
@@ -688,9 +691,49 @@ class AppController extends Controller {
 		if(isset($this->request->params['named']['published']))$conditions=array($onlyBranch,$onlyOwn,$con1);
 		else $conditions=array($onlyBranch,$onlyOwn,$con1);
 	}else{
-		$conditions=array($onlyBranch,$onlyOwn,null,$pubCon,$modelName.'.soft_delete'=>0); 
+		$conditions=array($onlyBranch,$onlyOwn,null,$pubCon,$modelName.'.soft_delete'=>0);
 	}
-	return array_filter($conditions);	
+
+		if(isset($this->request->params['named']) && is_array($this->request->params['named'])){
+			$namedParams = $this->request->params['named'];
+			$modelFields = array_keys($this->$modelName->schema());
+			$searchFields = array('name','title','document_number','clause','sub-clause','employee_number');
+			$displayField = $this->$modelName->displayField;
+			if($displayField && !in_array($displayField, $searchFields)) $searchFields[] = $displayField;
+			$hasIndexSearch = array_key_exists('search', $namedParams);
+
+			if($hasIndexSearch && trim($namedParams['search']) !== ''){
+				$search = strtolower(str_replace(' ', '', trim($namedParams['search'])));
+				foreach($searchFields as $field){
+					if(in_array($field, $modelFields)){
+						$indexSearchConditions[] = array(
+							'LOWER(REPLACE('.$modelName.'.'.$field.', " ", "")) LIKE' => '%'.$search.'%'
+						);
+					}
+				}
+			}
+
+			$ignoredParams = array('search','strict','published','sort','page','direction','limit','timestamp');
+			foreach($namedParams as $field => $value){
+				if(!in_array($field, $ignoredParams) && in_array($field, $modelFields) && $value !== '' && $value != -1){
+					$indexFilterConditions[] = array($modelName.'.'.$field => $value);
+				}
+			}
+
+			if($hasIndexSearch || !empty($indexFilterConditions)){
+				if(!isset($namedParams['published'])) $conditions[] = $pubCon;
+				$conditions[] = array($modelName.'.soft_delete' => 0);
+
+				if(isset($namedParams['strict']) && $namedParams['strict'] == 1){
+					$orConditions = array_merge($indexSearchConditions, $indexFilterConditions);
+					if(!empty($orConditions)) $conditions[] = array('OR' => $orConditions);
+				}else{
+					if(!empty($indexSearchConditions)) $conditions[] = array('OR' => $indexSearchConditions);
+					foreach($indexFilterConditions as $filterCondition) $conditions[] = $filterCondition;
+				}
+			}
+		}
+	return array_filter($conditions);
 
 }
 public function _get_count() {
@@ -3320,11 +3363,27 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		return array_values(array_filter($editors, function($editor){ return $editor !== '' && $editor !== 0 && $editor !== '0'; }));
 	}
 
+	private function _custom_field_editor_designations($field){
+		$designations = isset($field['who_can_edit_designations']) ? $field['who_can_edit_designations'] : array();
+		for($decodePass = 0; $decodePass < 3 && is_string($designations); $decodePass++){
+			$decodedDesignations = json_decode($designations, true);
+			if(json_last_error() !== JSON_ERROR_NONE) break;
+			$designations = $decodedDesignations;
+		}
+		if(!is_array($designations)) return array();
+		return array_values(array_filter($designations, function($designation){
+			return $designation !== '' && $designation !== 0 && $designation !== '0' && $designation !== -1 && $designation !== '-1';
+		}));
+	}
+
 	private function _current_user_can_edit_custom_field($field, $record){
 		$editors = $this->_custom_field_editors($field);
-		if(empty($editors)) return true;
+		$designations = $this->_custom_field_editor_designations($field);
+		if(empty($editors) && empty($designations)) return true;
 		$userId = $this->Session->read('User.id');
 		$employeeId = $this->Session->read('User.employee_id');
+		$designationId = $this->Session->read('User.designation_id');
+		if(!empty($designationId) && in_array($designationId, $designations)) return true;
 		foreach($editors as $editor){
 			if($editor === 'created_by' && !empty($record['created_by']) && $record['created_by'] == $userId) return true;
 			if($editor === 'prepared_by' && !empty($record['prepared_by']) && in_array($record['prepared_by'], array($employeeId, $userId))) return true;
@@ -4938,6 +4997,34 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		}
 	}
 
+	public function _fetch_signature($employee_id = null){
+		if (empty($employee_id)) return '';
+		$this->loadModel('Employee');
+		$conditions = array(
+			'Employee.id' => $employee_id,
+			'Employee.publish' => 1,
+			'Employee.soft_delete' => 0,
+		);
+		$companyId = $this->Session->read('User.company_id');
+		if (!empty($companyId)) $conditions['Employee.company_id'] = $companyId;
+		$employee = $this->Employee->find('first', array(
+			'recursive' => -1,
+			'fields' => array('Employee.id', 'Employee.signature'),
+			'conditions' => $conditions,
+		));
+		if (empty($employee['Employee']['id'])) return 'Signature not available';
+
+		$imagePath = WWW_ROOT . 'img' . DS . $companyId . DS . 'signature' . DS . $employee['Employee']['id'] . DS . 'sign.png';
+		if (file_exists($imagePath)) {
+			$imageUrl = Router::url('/', true) . 'img/' . rawurlencode($companyId) . '/signature/' . rawurlencode($employee['Employee']['id']) . '/sign.png';
+			return '<img src="' . htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8') . '" width="100"><br />';
+		}
+		if (!empty($employee['Employee']['signature'])) {
+			return '<img src="' . htmlspecialchars($employee['Employee']['signature'], ENT_QUOTES, 'UTF-8') . '" width="100"><br />';
+		}
+		return 'Signature not available';
+	}
+
 	public function load_process($custom_table_id = null){
 		$this->loadModel('CustomTableProcess');
 		$processes = $this->CustomTableProcess->find('all',array(
@@ -5397,9 +5484,48 @@ public function _fetch_approval_steps($custom_table_id = null){
 		}else{
 			
 		}	
+		$this->set('approvalUserLabel', $this->_approval_step_selector_label(
+			!empty($currentStep['ApprovalStep']) ? $currentStep['ApprovalStep'] : array()
+		));
 
 		return array($currentStep,$approversList);
 		
+	}
+
+	public function _approval_step_selector_label($approvalStep = null) {
+		if(empty($approvalStep) || !is_array($approvalStep)) return 'Select user';
+
+		if(!empty($approvalStep['send_to_reviwers'])) return 'Select reviewer for approval';
+		if(!empty($approvalStep['send_to_publishers'])) return 'Select publisher for approval';
+		if(!empty($approvalStep['send_to_department_hod'])) return 'Select HOD for approval';
+		if(!empty($approvalStep['send_to_approvers'])) return 'Select approver for approval';
+		if(!empty($approvalStep['send_to_admins'])) return 'Select administrator for approval';
+
+		if(!empty($approvalStep['send_to_designation']) && $approvalStep['send_to_designation'] != -1){
+			$selectedDesignations = json_decode($approvalStep['send_to_designation'], true);
+			if(!is_array($selectedDesignations)) $selectedDesignations = array($approvalStep['send_to_designation']);
+			$designationIds = array();
+			array_walk_recursive($selectedDesignations, function($designationId) use (&$designationIds) {
+				if($designationId !== null && $designationId !== '' && (string)$designationId !== '-1') $designationIds[] = $designationId;
+			});
+			$designationIds = array_values(array_unique($designationIds));
+
+			if(!empty($designationIds)){
+				$this->loadModel('Designation');
+				$designationList = $this->Designation->find('list', array(
+					'recursive' => -1,
+					'fields' => array('Designation.id', 'Designation.name'),
+					'conditions' => array('Designation.id' => $designationIds)
+				));
+				$designationNames = array();
+				foreach($designationIds as $designationId){
+					if(!empty($designationList[$designationId])) $designationNames[] = $designationList[$designationId];
+				}
+				if(!empty($designationNames)) return 'Select '.implode(' / ', $designationNames).' for approval';
+			}
+		}
+
+		return 'Select user';
 	}
 
 	public function _get_approver_lists($creator = null,$approvalSteps = null) {
@@ -5532,34 +5658,3 @@ public function generate_dcn_number($model = null){
 	}
 }
 
-// ALTER TABLE `tbl_document_change_control_0_v1s` 
-// ADD `reviewed_by` VARCHAR(36) NULL AFTER `prepared_by`, 
-// ADD `review_date` DATE NULL AFTER `reviewed_by`, 
-// ADD `approval_date` DATE NULL AFTER `review_date`, 
-// ADD `published_by` VARCHAR(36) NULL AFTER `approval_date`, 
-// ADD `publish_date` DATE NULL AFTER `published_by`, 
-// ADD `comments` TEXT NULL AFTER `publish_date`;
-// ALTER TABLE `tbl_document_change_control_0_v1s` ADD `prepared_date` DATE NULL AFTER `prepared_by`;
-// ALTER TABLE `tbl_document_change_control_0_v1s` ADD `dcn_status` INT(1) NOT NULL DEFAULT '0' AFTER `created`;
-
-// ALTER TABLE `tbl_document_change_control_0_v1s` 
-// ADD `reviewed_by` VARCHAR(36) NULL AFTER `prepared_by`, 
-// ADD `reviewe_date` DATE NULL AFTER `reviewed_by`, 
-// ADD `approval_date` DATE NULL AFTER `reviewe_date`, 
-// ADD `published_by` VARCHAR(36) NULL AFTER `approval_date`, 
-// ADD `publish_date` DATE NULL AFTER `published_by`, 
-// ADD `comments` TEXT NULL AFTER `publish_date`;
-
-
-// ALTER TABLE `tbl_document_change_control_0_v1s` ADD `review_status` INT(1) NULL DEFAULT '0' AFTER `dcn_status`, ADD `approve_status` INT(1) NULL DEFAULT '0' AFTER `review_status`, ADD `publish_status` INT(1) NULL DEFAULT '0' AFTER `approve_status`;
-
-// ALTER TABLE `qc_documents` ADD `approval_date` DATE NULL AFTER `approved_by`;
-// ALTER TABLE `qc_documents` ADD `publish_date` DATE NULL AFTER `published_by`;
-// ALTER TABLE `tbl_document_change_control_0_v1s` CHANGE `status` `change_type` INT(1) NULL DEFAULT NULL;
-// ALTER TABLE `qc_documents` CHANGE `revision_number` `revision_number` VARCHAR(10) NULL DEFAULT NULL;
-
-
-// ALTER TABLE `approvals` ADD `approval_step_id` VARCHAR(36) NULL AFTER `comments`;
-// ALTER TABLE `approval_comments` ADD `approval_step_id` VARCHAR(36) NULL AFTER `approval_id`;
-// ALTER TABLE `approvals` ADD `approval_process_id` VARCHAR(36) NULL AFTER `approval_step_id`;
-// ALTER TABLE `approval_comments` ADD `approval_process_id` VARCHAR(36) NULL AFTER `approval_step_id`;

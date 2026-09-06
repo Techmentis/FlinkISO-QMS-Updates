@@ -2,7 +2,12 @@
 <style>#checkout-button{display: none;}</style>
 <?php 
 $str = 'company_id:'.$this->Session->read('User.company_id');
-$response =  $this->requestAction(array('action'=>'curl','post','custom_forms','elements','data'=>json_encode(array($existingFields,$fieldDetails))));
+$response =  $this->requestAction(array('action'=>'curl','post','custom_forms','elements','data'=>json_encode(array(
+  $existingFields,
+  $fieldDetails,
+  array('has_type_ii_forms'=>!empty($hasTypeIIForms)),
+  isset($designations) ? $designations : array()
+))));
 $result = json_decode($response,true);
 if($result['error']==1 or $response == null){ ?>
   <div class="row">

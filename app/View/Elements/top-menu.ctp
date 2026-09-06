@@ -28,7 +28,16 @@
        <p>
         <?php echo $this->Session->read('User.name');?>
         <small><?php echo $this->Session->read('User.department');?> | <?php echo $this->Session->read('User.branch');?></small>
-      </p>
+        <div class="flinkiso-theme-picker" id="flinkisoThemePicker" aria-label="Application theme">
+          <button type="button" class="theme-swatch theme-azure" data-theme="azure" title="Modern Azure" aria-label="Modern Azure"></button>
+          <button type="button" class="theme-swatch theme-corporate" data-theme="corporate" title="Corporate Blue" aria-label="Corporate Blue"></button>
+          <button type="button" class="theme-swatch theme-steel" data-theme="steel" title="Steel Blue" aria-label="Steel Blue"></button>
+          <button type="button" class="theme-swatch theme-indigo" data-theme="indigo" title="Indigo" aria-label="Indigo"></button>
+          <button type="button" class="theme-swatch theme-teal" data-theme="teal" title="Teal" aria-label="Teal"></button>
+          <button type="button" class="theme-swatch theme-navy" data-theme="navy" title="Navy" aria-label="Navy"></button>
+          <button type="button" class="theme-swatch theme-graphite" data-theme="graphite" title="Graphite" aria-label="Graphite"></button>
+          </div>
+        </p>
     </li>    
     <li class="user-footer">
       <div class="pull-left">

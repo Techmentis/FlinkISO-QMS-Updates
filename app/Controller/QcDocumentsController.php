@@ -1320,6 +1320,21 @@ class QcDocumentsController extends AppController {
         }
     }
 
+    private function _change_history_document_field($customTable, $model){
+        $configuredFields = !empty($customTable['CustomTable']['fields']) ? json_decode($customTable['CustomTable']['fields'], true) : array();
+        if(is_array($configuredFields)){
+            foreach($configuredFields as $field){
+                if(empty($field['field_name']) || empty($field['linked_to'])) continue;
+                $linkedModel = Inflector::classify(Inflector::singularize(trim($field['linked_to'])));
+                if($linkedModel === 'QcDocument' && $model->hasField($field['field_name'])) return $field['field_name'];
+            }
+        }
+        foreach(array('document_for_change', 'controlled_document') as $fieldName){
+            if($model->hasField($fieldName)) return $fieldName;
+        }
+        return null;
+    }
+
     public function change_history($id = null){
         if(!$id)$id = $this->request->params['named']['id'];
         else $this->request->params['named']['id'] = $id;
@@ -1344,7 +1359,16 @@ class QcDocumentsController extends AppController {
                 // load model
                 $model = Inflector::Classify($customTable['CustomTable']['table_name']);
                 $this->loadModel($model);
-                $records = $this->$model->find('all',array('conditions'=>array($model.'.document_for_change'=>$this->request->params['named']['id'])));
+                $documentField = $this->_change_history_document_field($customTable, $this->$model);
+                $records = $documentField ? $this->$model->find('all',array(
+                    'recursive'=>-1,
+                    'conditions'=>array($model.'.'.$documentField=>$this->request->params['named']['id'])
+                )) : false;
+                if(!is_array($records)){
+                    $dataSource = $this->$model->getDataSource();
+                    CakeLog::write('error', 'Unable to load change history from '.$customTable['CustomTable']['table_name'].($documentField ? ': '.$dataSource->lastError() : ': no QcDocument-linked field is configured.'));
+                    $records = array();
+                }
                 $this->set('records',$records);
                 $this->set('table',$customTable['CustomTable']['name']);
                 $this->set('table_name',$customTable['CustomTable']['table_name']);
@@ -1485,10 +1509,12 @@ class QcDocumentsController extends AppController {
                     // load model
                     $model = Inflector::Classify($customTable['CustomTable']['table_name']);
                     $this->loadModel($model);
-                    $records = $this->$model->find('all',array(
+                    $documentField = $this->_change_history_document_field($customTable, $this->$model);
+                    $records = $documentField ? $this->$model->find('all',array(
+                        'recursive'=>-1,
                         'limit'=>1,
                         'order'=>array($model.'.sr_no'=>'DESC'),
-                        'conditions'=>array($model.'.document_for_change'=>$id)));
+                        'conditions'=>array($model.'.'.$documentField=>$id))) : array();
                     $this->set('records',$records);
                     $this->set('table',$customTable['CustomTable']['name']);
                     $this->set('table_name',$customTable['CustomTable']['table_name']);

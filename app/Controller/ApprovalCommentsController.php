@@ -49,6 +49,7 @@ class ApprovalCommentsController extends AppController {
 		$previousApprovalStep = array();
 		$nextApproversList = array();
 		$nextApproverRequired = false;
+		$nextApprovalUserLabel = 'Select user';
 		if(!empty($currentStep['ApprovalStep'])){
 			$previousApprovalStep = $this->ApprovalStep->find('first',array(
 				'recursive'=>-1,
@@ -71,6 +72,7 @@ class ApprovalCommentsController extends AppController {
 				'order'=>array('ApprovalStep.process_step'=>'ASC')
 			));
 			if(!empty($nextApprovalStep['ApprovalStep'])){
+				$nextApprovalUserLabel = $this->_approval_step_selector_label($nextApprovalStep['ApprovalStep']);
 				$nextApproversList = $this->_get_approver_lists($approval['Approval']['from'], $nextApprovalStep['ApprovalStep']);
 				$otherPendingApprovals = $this->ApprovalComment->Approval->find('count',array('conditions'=>array(
 					'Approval.record'=>$approval['Approval']['record'],
@@ -82,7 +84,7 @@ class ApprovalCommentsController extends AppController {
 				$nextApproverRequired = (isset($approval['Approval']['approval_type']) && (int)$approval['Approval']['approval_type'] === 1) || $otherPendingApprovals == 0;
 			}
 		}
-		$this->set(compact('nextApprovalStep','previousApprovalStep','nextApproversList','nextApproverRequired'));
+		$this->set(compact('nextApprovalStep','previousApprovalStep','nextApproversList','nextApproverRequired','nextApprovalUserLabel'));
         $this->set('prepared_by',$this->request->params['named']['prepared_by']);
         $this->set('approval_step_id',$approval_step_id);
     }

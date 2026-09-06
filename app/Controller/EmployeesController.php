@@ -47,7 +47,7 @@ class EmployeesController extends AppController {
     public function index() {
         $conditions = $this->_check_request();
         $this->Employee->virtualFields = array(
-            'user'=>'select count(*) from `users` where `users`.`employee_id` LIKE Employee.id'
+            'user'=>'select `users`.`id` from `users` where `users`.`employee_id` = Employee.id and `users`.`soft_delete` = 0 limit 1'
         );
         $this->paginate = array('order' => array('Employee.sr_no' => 'DESC'), 'conditions' => array($conditions));
         $this->Employee->recursive = 0;

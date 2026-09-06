@@ -185,7 +185,7 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
     <?php if(($this->action == 'index' || $this->action == 'quick_search' ) && $this->request->controller != 'usage_details'  && $this->request->controller != 'invoices') { ?>
         <div class=" btn-group" style="width:100%;">
             <?php 
-            echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_src_button', 'autocomplete'=>'off',  'label'=>false,'placeholder'=>'Quick search with sorting.','style'=>'margin-top: -12px'));                        
+            echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_src_button', 'autocomplete'=>'off',  'label'=>false,'placeholder'=>'Quick search...','style'=>'margin-top: -12px'));
             ?>
         </div>
     <?php } } ?>
@@ -206,13 +206,11 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
                                 'class'=>'form-control no-margin no-padding','div'=>false, 'id'=>false, 'label'=>array('class'=>'no-margin no-padding')))."</div>";
                     }
                 }
-                if($this->request->params['named']['strict'] == null){
-                    echo "<div class='col-md-3' >".$this->Form->input('strict',array('class'=>'', 'type'=>'radio', 'value'=>0,'options'=>array(0=>'Yes',1=>'No')))."</div>";    
-                }
-                    echo "<div class='col-md-3' ><div class='pull-left'>".$this->Form->input('strict',array('class'=>'', 'type'=>'radio', 'default'=>$this->request->params['named']['strict'],'options'=>array(0=>'Yes',1=>'No'))). "</div><div class='pull-right'><br />". $this->Form->submit('Go',array('class'=>'btn btn-sm btn-info','style'=>'margin-top:8px'))."</div></div>";
+                $strict = isset($this->request->params['named']['strict']) ? $this->request->params['named']['strict'] : 0;
+                echo "<div class='col-md-3' ><div class='pull-left'>".$this->Form->input('strict',array('class'=>'', 'type'=>'radio', 'default'=>$strict,'options'=>array(0=>'Yes',1=>'No'))). "</div><div class='pull-right'><br />". $this->Form->submit('Go',array('class'=>'btn btn-sm btn-info','style'=>'margin-top:8px'))."</div></div>";
                 
-                echo $this->Form->end();
             }
+            echo $this->Form->end();
         }    
         ?>
         <div class="col-md-12"><hr /></div>
@@ -220,9 +218,12 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
 </div>
 <?php 
 
-$named = $this->request->params['named']['search'];
-foreach($named as $name => $name_value){
-    $str .= $name .':' . trim($name_value) .'/';
+$str = '';
+$named = isset($this->request->params['named']['search']) ? $this->request->params['named']['search'] : array();
+if(is_array($named)){
+    foreach($named as $name => $name_value){
+        $str .= $name .':' . trim($name_value) .'/';
+    }
 }
 $str .= 'timestamp:'.date('ymdhis');    
 ?>
@@ -252,33 +253,126 @@ $str .= 'timestamp:'.date('ymdhis');
     <?php } ?>
     
     $().ready(function(){
-        <?php if($this->action == 'index' || $this->action == 'quick_search' || $this->action == 'advance_search'  ){ ?>
-            $(document).on('keypress', function(e) {
-                if (e.which === 13 && $("#quick_src_button").val() != '') {
-                    event.preventDefault();
-                    $("#indexsort").submit();                
+        var quickSearchContext = [];
+        <?php if(isset($this->request->params['named']['custom_table_id'])) { ?>
+            quickSearchContext.push('custom_table_id:<?php echo rawurlencode($this->request->params['named']['custom_table_id']); ?>');
+        <?php } ?>
+        <?php if(isset($this->request->params['named']['qc_document_id'])) { ?>
+            quickSearchContext.push('qc_document_id:<?php echo rawurlencode($this->request->params['named']['qc_document_id']); ?>');
+        <?php } ?>
+        <?php if(isset($this->request->params['named']['process_id'])) { ?>
+            quickSearchContext.push('process_id:<?php echo rawurlencode($this->request->params['named']['process_id']); ?>');
+        <?php } ?>
+
+        function selectedQuickSearchOptions(){
+            var options = [];
+            $('#indexsort').serializeArray().forEach(function(field){
+                if(field.value !== '' && field.value !== '-1'){
+                    options.push({name: field.name, value: field.value});
                 }
             });
-        <?php } ?>
-        
-        $("#quick_src_button").on('focus',function(){
-            $("#srcdivhideshow").removeClass('hidden', 200, null, function() {});
-        });
-        
-        $("#indexsort").submit(function(event) {
-            var searchstring = "";
-            event.preventDefault();        
-            let form_data = $(this).serializeArray();
-            $.each(form_data, function(i, field) {
-                searchstring += field.name+":"+field.value+"/";
+            return options;
+        }
+
+        function quickSearchUrl(search, options){
+            var action = $('#indexsort').attr('action').replace(/\/$/, '');
+            if(!/\/index$/.test(action)) action += '/index';
+            var hasDropdownOption = options.some(function(field){
+                return field.name !== 'strict';
             });
-            <?php
-            if(isset($this->request->params['named']['custom_table_id']))$str .= "/custom_table_id:".$this->request->params['named']['custom_table_id'];
-            if(isset($this->request->params['named']['qc_document_id']))$str .= "/qc_document_id:".$this->request->params['named']['qc_document_id'];
-            ?>
-            let post_url = $(this).attr("action")+"/quick_search/<?php echo $str;?>/"+searchstring + "/search:"+$("#quick_src_button").val();
-            window.location.href = post_url;             
-        });
+            if(search === '' && !hasDropdownOption){
+                return action + '/timestamp:' + new Date().getTime();
+            }
+
+            var segments = quickSearchContext.slice(0);
+            options.forEach(function(field){
+                segments.push(encodeURIComponent(field.name) + ':' + encodeURIComponent(field.value));
+            });
+            segments.push('search:' + encodeURIComponent(search));
+            segments.push('timestamp:' + new Date().getTime());
+            return action + '/' + segments.join('/');
+        }
+
+        function loadQuickSearchResults(requestUrl){
+            var searchInput = $('#quick_src_button');
+            var search = $.trim(searchInput.val());
+            var options = selectedQuickSearchOptions();
+            var keepFocus = searchInput.is(':focus');
+
+            if(search.length === 1) return;
+
+            if(window.navHeaderSearchRequest){
+                window.navHeaderSearchRequest.abort();
+            }
+            $('#busy-indicator').show();
+            window.navHeaderSearchRequest = $.ajax({
+                url: requestUrl || quickSearchUrl(search, options),
+                type: 'GET',
+                success: function(response){
+                    var responseMain = $('<div>').append($.parseHTML(response, document, false)).find('#main').first();
+                    if(!responseMain.length) return;
+
+                    $('#main').html(responseMain.html());
+                    $('#quick_src_button').val(search);
+                    options.forEach(function(field){
+                        $('#indexsort [name="' + field.name + '"]').val(field.value);
+                    });
+
+                    if($.fn.chosen){
+                        $('#indexsort select').chosen();
+                    }
+                    if(options.some(function(field){ return field.name !== 'strict'; })){
+                        $('#srcdivhideshow').removeClass('hidden');
+                    }
+                    if(keepFocus){
+                        var refreshedInput = $('#quick_src_button').focus().get(0);
+                        if(refreshedInput && refreshedInput.setSelectionRange){
+                            refreshedInput.setSelectionRange(search.length, search.length);
+                        }
+                    }
+                },
+                complete: function(){
+                    $('#busy-indicator').hide();
+                    window.navHeaderSearchRequest = null;
+                }
+            });
+        }
+
+        $(document)
+            .off('focus.navHeaderQuickSearch', '#quick_src_button')
+            .on('focus.navHeaderQuickSearch', '#quick_src_button', function(){
+                $('#srcdivhideshow').removeClass('hidden', 200);
+            })
+            .off('input.navHeaderQuickSearch', '#quick_src_button')
+            .on('input.navHeaderQuickSearch', '#quick_src_button', function(){
+                clearTimeout(window.navHeaderSearchTimer);
+                window.navHeaderSearchTimer = setTimeout(loadQuickSearchResults, 300);
+            })
+            .off('change.navHeaderQuickSearch', '#indexsort select, #indexsort input[type="radio"]')
+            .on('change.navHeaderQuickSearch', '#indexsort select, #indexsort input[type="radio"]', function(){
+                clearTimeout(window.navHeaderSearchTimer);
+                window.navHeaderSearchTimer = setTimeout(loadQuickSearchResults, 100);
+            })
+            .off('submit.navHeaderQuickSearch', '#indexsort')
+            .on('submit.navHeaderQuickSearch', '#indexsort', function(event){
+                event.preventDefault();
+                clearTimeout(window.navHeaderSearchTimer);
+                loadQuickSearchResults();
+            })
+            .off('click.navHeaderQuickSearch', '#main table.index th a, #main .pagination a')
+            .on('click.navHeaderQuickSearch', '#main table.index th a, #main .pagination a', function(event){
+                var search = $.trim($('#quick_src_button').val());
+                var options = selectedQuickSearchOptions();
+                var hasDropdownOption = options.some(function(field){ return field.name !== 'strict'; });
+                if(search === '' && !hasDropdownOption) return;
+
+                event.preventDefault();
+                var url = $(this).attr('href').replace(/\/$/, '');
+                if(search !== '' && url.indexOf('/search:') === -1){
+                    url += '/search:' + encodeURIComponent(search);
+                }
+                loadQuickSearchResults(url);
+            });
     }) ;      
 
     function openpdf(){

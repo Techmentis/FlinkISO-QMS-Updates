@@ -88,7 +88,7 @@ public function add() {
 	
 	if ($this->request->is('post')) {
 		$this->request->data['QcDocumentCategory']['system_table_id'] = $this->_get_system_table_id();
-		$this->request->data[$this->modelClass]['publish'] = $this->request->data['Approval']['QcDocumentCategory']['publish'];
+		// $this->request->data[$this->modelClass]['publish'] = $this->request->data['Approval']['QcDocumentCategory']['publish'];
 		$this->QcDocumentCategory->create();
 		if ($this->QcDocumentCategory->save($this->request->data)) {
 
@@ -198,13 +198,7 @@ public function edit($id = null) {
 		throw new NotFoundException(__('Invalid qc document category'));
 	}
 	
-	if ($this->_show_approvals()) {
-		$this->set(array('showApprovals' => $this->_show_approvals()));
-	}
-	
 	if ($this->request->is('post') || $this->request->is('put')) {
-		
-		$this->request->data[$this->modelClass]['publish'] = $this->request->data['Approval']['QcDocumentCategory']['publish'];
 		
 		$this->request->data['QcDocumentCategory']['system_table_id'] = $this->_get_system_table_id();
 		if ($this->QcDocumentCategory->save($this->request->data)) {

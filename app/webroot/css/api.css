@@ -6,7 +6,7 @@
 	.field-settings{display:none;}
 	.field-settings-accordion{margin:0 -12px;}
 	.field-settings-header{padding:2px 10px;border-bottom:1px dashed #999;}
-	.field-settings-accordion-section{border-bottom:1px solid #e5e5e5;}
+	/*.field-settings-accordion-section{border-bottom:1px solid #e5e5e5;}*/
 	.field-settings-accordion-toggle{display:block;width:100%;padding:8px 10px;border:1px solid #d9d9d9;background-image:linear-gradient(to bottom,#fff 0,#eee 100%);color:#333;text-align:left;font-weight:600;font-size:14px;line-height:1.2;box-shadow:0 1px 3px rgba(0,0,0,.12);}
 	.field-settings-accordion-toggle:after{content:'+';float:right;font-size:18px;line-height:18px;color:#555;}
 	.field-settings-accordion-toggle[aria-expanded="true"]:after{content:'−';}
@@ -24,7 +24,7 @@
 	.field-settings{display:none;}
 	.field-settings-accordion{margin:0 -12px;}
 	.field-settings-header{padding:2px 10px;border-bottom:1px dashed #999;}
-	.field-settings-accordion-section{border-bottom:1px solid #e5e5e5;}
+	/*.field-settings-accordion-section{border-bottom:1px solid #e5e5e5;}*/
 	.field-settings-accordion-toggle{display:block;width:100%;padding:8px 10px;border:1px solid #d9d9d9;background-image:linear-gradient(to bottom,#fff 0,#eee 100%);color:#333;text-align:left;font-weight:600;font-size:14px;line-height:1.2;box-shadow:0 1px 3px rgba(0,0,0,.12);}
 	.field-settings-accordion-toggle:after{content:'+';float:right;font-size:18px;line-height:18px;color:#555;}
 	.field-settings-accordion-toggle[aria-expanded="true"]:after{content:'−';}
@@ -71,7 +71,7 @@
 	.field-settings{display:none;}
 	.field-settings-accordion{margin:0 -12px;}
 	.field-settings-header{padding:2px 10px;border-bottom:1px dashed #999;}
-	.field-settings-accordion-section{border-bottom:1px solid #e5e5e5;}
+	/*.field-settings-accordion-section{border-bottom:1px solid #e5e5e5;}*/
 	.field-settings-accordion-toggle{display:block;width:100%;padding:8px 10px;border:1px solid #d9d9d9;background-image:linear-gradient(to bottom,#fff 0,#eee 100%);color:#333;text-align:left;font-weight:600;font-size:14px;line-height:1.2;box-shadow:0 1px 3px rgba(0,0,0,.12);}
 	.field-settings-accordion-toggle:after{content:'+';float:right;font-size:18px;line-height:18px;color:#555;}
 	.field-settings-accordion-toggle[aria-expanded="true"]:after{content:'−';}

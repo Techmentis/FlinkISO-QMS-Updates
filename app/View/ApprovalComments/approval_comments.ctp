@@ -132,7 +132,7 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 												echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.next_approver_ids',array(
 													'id'=>$approvalComment['ApprovalComment']['id'].'NextApproverId',
 													'type'=>'select','multiple'=>true,'options'=>$nextApproversList,'data-placeholder'=>'Select next approvers',
-													'label'=>'Next Approvers — '.$nextApprovalStep['ApprovalStep']['title'],'class'=>'form-control'
+													'label'=>$nextApprovalUserLabel,'class'=>'form-control'
 												));
 												if(empty($nextApproversList)) echo '<small class="text-danger">No eligible users are configured for the next step.</small>';
 												echo '</div>';
@@ -322,7 +322,7 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 										echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.next_approver_ids',array(
 											'id'=>$approval['Approval']['id'].'NextApproverId',
 											'type'=>'select','multiple'=>true,'options'=>$nextApproversList,'data-placeholder'=>'Select next approvers',
-											'label'=>'Next Approvers — '.$nextApprovalStep['ApprovalStep']['title'],'class'=>'form-control'
+											'label'=>$nextApprovalUserLabel,'class'=>'form-control'
 										));
 										if(empty($nextApproversList)) echo '<small class="text-danger">No eligible users are configured for the next step.</small>';
 										echo '</div>';

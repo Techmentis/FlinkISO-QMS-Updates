@@ -27,13 +27,7 @@ if (!$this->request->is('post')) {
 			</style>
 			<div class="btn-group">
 			<?php 
-				if($this->request->params['named']['table_type'] == 4 && !isset($this->request->params['named']['standard_id'])){
-					echo $this->Html->link('All',array('action'=>'index','table_type'=>4),array('class'=>'btn btn-sm btn-bold  btn-info'));
-				}else{
-					echo $this->Html->link('All',array('action'=>'index','table_type'=>4),array('class'=>'btn btn-sm btn-bold  btn-default'));
-				}
-
-				if($this->request->params['named']['table_type'] == 1){
+				if($this->request->params['named']['table_type'] == 1 || !isset($this->request->params['named']['table_type'])){
 					echo $this->Html->link('Documents',array('action'=>'index','table_type'=>1),array('class'=>'btn btn-sm btn-bold  btn-info'));
 				}else{
 					echo $this->Html->link('Documents',array('action'=>'index','table_type'=>1),array('class'=>'btn btn-sm btn-bold  btn-default'));
@@ -50,7 +44,11 @@ if (!$this->request->is('post')) {
 				}else{
 					echo $this->Html->link('Masters',array('action'=>'index','table_type'=>3),array('class'=>'btn btn-sm btn-bold  btn-default'));
 				}
-
+				if($this->request->params['named']['table_type'] == 4 && !isset($this->request->params['named']['standard_id'])){
+					echo $this->Html->link('All',array('action'=>'index','table_type'=>4),array('class'=>'btn btn-sm btn-bold  btn-info'));
+				}else{
+					echo $this->Html->link('All',array('action'=>'index','table_type'=>4),array('class'=>'btn btn-sm btn-bold  btn-default'));
+				}				
 				foreach($standards as $standard_id => $standard){
 					$standardTitle = $standard .'&nbsp;&nbsp;<div class="badge">'.$cTableCount[$standard_id].'</div>';
 					if(isset($this->request->params['named']['standard_id']) && $this->request->params['named']['standard_id'] == $standard_id){

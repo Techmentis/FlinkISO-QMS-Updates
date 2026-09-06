@@ -257,7 +257,7 @@ class StandardsController extends AppController {
         if ($this->request->is('post') || $this->request->is('put')) {
             // 
             $this->request->data['Standard']['system_table_id'] = $this->_get_system_table_id();
-            $this->request->data[$this->modelClass]['publish'] = $this->request->data['Approval']['Standard']['publish'];
+            // $this->request->data[$this->modelClass]['publish'] = $this->request->data['Approval']['Standard']['publish'];
             if($this->request->data[$this->modelClass]['publish'] == 1)$this->request->data[$this->modelClass]['soft_delete'] = 0;
             
             if ($this->Standard->save($this->request->data)) {

@@ -40,9 +40,9 @@
 										echo '<center><img src="'.$imgURL.'" width="100"></center>';
 									}else if($employee['Employee']['signature']){
 										echo '<img src="' .$employee['Employee']['signature'].'" width="100">';
-									}else{
-										"Signature not availavle";
-									}
+					}else{
+							echo "Signature not available";
+						}
 								?>
 							<br />
 							<br />

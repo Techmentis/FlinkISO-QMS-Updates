@@ -32,8 +32,7 @@
 				?>
 			</div>
 			<div class="">
-				<?php echo $this->element('approval_form',array('approval'=>$approval));?>
-				<?php echo $this->element('approval_history',array('approval'=>$approval,'approvals'=>$approvals,'current_approval'=>$this->request->params['named']['approval_id'],'approvalComments',$approvalComments));?>
+				<?php echo $this->Form->input('publish',array('class'=>'', 'style'=>'')); ?>
 				<?php echo $this->Form->submit(__('Submit'), array('div' => false, 'class' => 'btn btn-primary btn-success','id'=>'submit_id')); ?>
 				<?php echo $this->Html->image('indicator.gif', array('id' => 'submit-indicator')); ?>
 				<?php echo $this->Form->end(); ?>

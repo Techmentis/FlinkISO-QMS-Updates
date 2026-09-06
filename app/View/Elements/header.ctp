@@ -43,7 +43,7 @@
             array('class'=>'tooltip1 btn','escape'=>false,
               'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Processes'
             )).'</li>';
-          echo '<li>'. $this->Html->link('<i class="fa fa-gears"></i>',array('controller'=>'custom_tables', 'action'=>'index','timestamp'=>date('ymdhis')),
+          echo '<li>'. $this->Html->link('<i class="fa fa-gears"></i>',array('controller'=>'custom_tables', 'action'=>'index','table_type'=>1, 'timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn','escape'=>false,
               'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Forms'
             )).'</li>';
@@ -64,9 +64,25 @@
                         <li><?php echo $this->Html->link('Departments',array('controller'=>'departments','action'=>'index'))?></li>
                         <li><?php echo $this->Html->link('Designations',array('controller'=>'designations','action'=>'index'))?></li>
                         <li><?php echo $this->Html->link('Employees',array('controller'=>'employees','action'=>'index'))?></li>
+                        <li><?php echo $this->Html->link('Employee Org Chart',array('controller'=>'employees','action'=>'org_chart','render'=>'h','timestamp'=>date('ymdhis')))?></li>
+                        <li><?php echo $this->Html->link('Designation Org Chart',array('controller'=>'designations','action'=>'org_chart','render'=>'h','timestamp'=>date('ymdhis')))?></li>
                         <li><?php echo $this->Html->link('Users',array('controller'=>'users','action'=>'index'))?></li>
                       </ul>
                     </li>
+                  </ul>
+                </li>                
+                <li class="sub-li"><div class="header-li">Setting</div>
+                    <ul class="">
+                      <li class="" ><a href="#" class="header-li-sub"><span></span></a>
+                        <ul class="no-margin no-padding">
+                          <li><?php echo $this->Html->link(__('Add Logo'),array('controller'=>'settings','action'=>'edit',$this->Session->read('User.company_id'),'timestamp'=>date('ymdhis'))); ?></li>
+                          <li><?php echo $this->Html->link(__('Add SMTP Email'),array('controller'=>'settings','action'=>'smtp_details',$this->Session->read('User.company_id'),'timestamp'=>date('ymdhis'))); ?></li>
+                          <li><?php echo $this->Html->link(__('Add Password Policy'),array('controller'=>'settings','action'=>'password_setting',$this->Session->read('User.company_id'),'timestamp'=>date('ymdhis'))); ?></li>
+                          <li><?php echo $this->Html->link(__('Two Way Authentication'),array('controller'=>'users','action'=>'two_way_authentication',$this->Session->read('User.company_id'),'timestamp'=>date('ymdhis'))); ?></li>
+                          <li><?php echo $this->Html->link(__('Define Change History Table'),array('controller'=>'qc_documents','action'=>'define_change_history_table','timestamp'=>date('ymdhis'))); ?></li>
+                          <li><?php echo $this->Html->link(__('Graphs And panels'),array('controller'=>'graph_panels','action'=>'graphs','timestamp'=>date('ymdhis'))); ?></li>
+                        </ul>
+                      </li>
                   </ul>
                 </li>
                 <?php foreach($menus as $standard => $types){  ?>     

@@ -20,23 +20,23 @@ $pptarray = array('ppt','pptx');
         <div class="col-md-7 text-left">
           <?php
           echo $this->Html->link('<i class="fa fa-sitemap"></i>',array('controller'=>'branches', 'action'=>'index','timestamp'=>date('ymdhis')),
-            array('class'=>'tooltip1 btn btn btn-app btn-sm btn-info','escape'=>false,
+            array('class'=>'tooltip1 btn btn btn-app btn-sm btn-default','escape'=>false,
               'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'List of Branches'
             ));
           echo $this->Html->link('<i class="fa fa-industry"></i>',array('controller'=>'departments', 'action'=>'index','timestamp'=>date('ymdhis')),
-            array('class'=>'tooltip1 btn btn btn-app btn-sm btn-info','escape'=>false ,
+            array('class'=>'tooltip1 btn btn btn-app btn-sm btn-default','escape'=>false ,
               'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'List of Departments'
             ));
           echo $this->Html->link('<i class="fa fa-users"></i>',array('controller'=>'employees', 'action'=>'index','timestamp'=>date('ymdhis')),
-            array('class'=>'tooltip1 btn btn btn-app btn-sm btn-info','escape'=>false,'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 
+            array('class'=>'tooltip1 btn btn btn-app btn-sm btn-default','escape'=>false,'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 
               'data-placement'=>'bottom', 'title'=> 'List of Employees'
             ));
           echo $this->Html->link('<i class="fa fa-user"></i>',array('controller'=>'users', 'action'=>'index','timestamp'=>date('ymdhis')),
-            array('class'=>'tooltip1 btn btn btn-app btn-sm btn-info','escape'=>false,
+            array('class'=>'tooltip1 btn btn btn-app btn-sm btn-default','escape'=>false,
               'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'List of Users'
             ));
           echo $this->Html->link('<i class="fa fa-user-secret"></i>',array('controller'=>'user_sessions', 'action'=>'index','timestamp'=>date('ymdhis')),
-            array('class'=>'tooltip1 btn btn btn-app btn-sm btn-info','escape'=>false,
+            array('class'=>'tooltip1 btn btn btn-app btn-sm btn-default','escape'=>false,
               'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'System User Audit Trail'
             ));
           ?>
