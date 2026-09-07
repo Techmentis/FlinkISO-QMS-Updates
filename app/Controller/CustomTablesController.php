@@ -157,41 +157,17 @@ class CustomTablesController extends AppController {
         }
 
         $conditions = $this->_check_request();
-        $accessConditions[] = array('CustomTable.table_type'=>0,'QcDocument.parent_document_id'=>-1);
-        if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 1)$accessConditions[] = array('CustomTable.table_type'=>0,'QcDocument.parent_document_id'=>-1);
-        else if($this->request->params['named']['table_type'] == 2)$accessConditions[] = array('CustomTable.table_type'=>1);
-        else if($this->request->params['named']['table_type'] == 3)$accessConditions[] = array('CustomTable.table_type'=>2);
-        else if($this->request->params['named']['table_type'] == 5)$accessConditions[] = array('QcDocument.parent_document_id !='=>-1);
+        // $accessConditions = array('CustomTable.table_type'=>0);
+        if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 1)$accessConditions[] = array('CustomTable.table_type'=>1,'QcDocument.parent_document_id'=>-1);
+        else if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 2)$accessConditions[] = array('CustomTable.table_type'=>2);
+        else if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 3)$accessConditions[] = array('CustomTable.table_type'=>3);
+        else if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 4)$accessConditions[] = array();
         else {$accessConditions[] = array('CustomTable.table_type'=>array(0,1));$this->request->params['named']['table_type'] = 4;}
         
         $this->CustomTable->virtualFields = array(
             'linked' => 'select count(*) from `custom_tables` where `custom_tables`.`custom_table_id` LIKE CustomTable.id ',
             'childDoc' => 'select count(*) from `qc_documents` where QcDocument.parent_document_id LIKE `qc_documents`.id ',
-            'srct' => '
-                   CASE
-                    WHEN QcDocument.and_or_condition = true THEN                             
-                        (select count(*) from qc_documents WHERE 
-                            qc_documents.id = QcDocument.id AND
-                            qc_documents.user_id LIKE "%'.$this->Session->read('User.id').'%" OR
-                            qc_documents.editors LIKE "%'.$this->Session->read('User.id').'%"
-                            AND
-                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null" ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
-                                IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
-                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "")                 
-                        )
-                    WHEN QcDocument.and_or_condition = false THEN 
-                        (select count(*) from qc_documents WHERE 
-                            qc_documents.id = QcDocument.id AND
-                            qc_documents.user_id LIKE "%'.$this->Session->read('User.id').'%" OR
-                            qc_documents.editors LIKE "%'.$this->Session->read('User.id').'%"
-                            AND
-                            IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
-                            IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
-                            IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
-                        )
-                    ELSE "Un"
-                END
-            '
+            'srct' => $this->_qc_document_access_virtual_field()
         );
 
         if($this->Session->read('User.is_mr') == false){
@@ -211,6 +187,7 @@ class CustomTablesController extends AppController {
                 'QcDocument.standard_id'=>$this->request->params['named']['standard_id']
             );
         }
+        
         $this->paginate = array(
             'order' => array('CustomTable.name' => 'ASC'), 
             'conditions' => array(

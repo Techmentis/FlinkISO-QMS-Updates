@@ -390,6 +390,55 @@ class AppController extends Controller {
 			}
 		}
 	}
+
+	protected function _qc_document_json_member_sql($field, $value) {
+		if($value === null || $value === '') return '0 = 1';
+
+		$dataSource = ConnectionManager::getDataSource('default');
+		$jsonNeedle = $dataSource->value('%"'.$value.'"%', 'string');
+		$legacyValue = $dataSource->value($value, 'string');
+
+		// Sharing values are JSON arrays. The equality fallback supports old
+		// records that stored a single id before these fields became arrays.
+		return "(COALESCE(".$field.", '') LIKE ".$jsonNeedle.' OR '.$field.' = '.$legacyValue.')';
+	}
+
+	protected function _qc_document_share_is_configured_sql($field) {
+		return "COALESCE(".$field.", '') NOT IN ('', 'null', '[]')";
+	}
+
+	protected function _qc_document_access_virtual_field() {
+		$userMatch = $this->_qc_document_json_member_sql('QcDocument.user_id', $this->Session->read('User.id'));
+		$editorMatch = $this->_qc_document_json_member_sql('QcDocument.editors', $this->Session->read('User.id'));
+		$shareDimensions = array(
+			'QcDocument.branches' => $this->Session->read('User.branch_id'),
+			'QcDocument.designations' => $this->Session->read('User.designation_id'),
+			'QcDocument.departments' => $this->Session->read('User.department_id')
+		);
+		$configuredDimensions = array();
+		$strictDimensionMatches = array();
+		$anyDimensionMatches = array();
+		foreach($shareDimensions as $field => $value){
+			$configured = $this->_qc_document_share_is_configured_sql($field);
+			$matches = $this->_qc_document_json_member_sql($field, $value);
+			$configuredDimensions[] = '('.$configured.')';
+			$strictDimensionMatches[] = '((NOT ('.$configured.')) OR '.$matches.')';
+			$anyDimensionMatches[] = '(('.$configured.') AND '.$matches.')';
+		}
+
+		$directUserAccess = '(('.$userMatch.') OR ('.$editorMatch.'))';
+		$strictShareAccess = '(('.implode(' OR ', $configuredDimensions).') AND ('.implode(' AND ', $strictDimensionMatches).'))';
+		$anyShareAccess = '('.implode(' OR ', $anyDimensionMatches).')';
+
+		return '
+			CASE
+				WHEN '.$directUserAccess.' THEN 1
+				WHEN COALESCE(QcDocument.and_or_condition, 0) = 1 AND '.$strictShareAccess.' THEN 1
+				WHEN COALESCE(QcDocument.and_or_condition, 0) = 0 AND '.$anyShareAccess.' THEN 1
+				ELSE 0
+			END';
+	}
+
 	public function _check_access() {
 		$this->_customtableacces();
 		// if user is not admin
@@ -398,33 +447,11 @@ class AppController extends Controller {
 			if(strpos($this->request->controller,"child") === false){ 
 				if(isset($this->request->params['named']['qc_document_id'])){
 					$this->loadModel('QcDocument');
-					$existChek = $this->QcDocument->exists($this->request->params['pass'][0]);
+					$qcDocumentId = $this->request->params['named']['qc_document_id'];
+					$existChek = $this->QcDocument->exists($qcDocumentId);
 					if($existChek){
 						$this->QcDocument->virtualFields = array(
-							'srct' => '
-			                    CASE
-				                    WHEN QcDocument.and_or_condition = true THEN                             
-				                        (select count(*) from qc_documents WHERE 
-				                            qc_documents.id = QcDocument.id AND
-				                            qc_documents.user_id LIKE "%'.$this->Session->read('User.id').'%" OR
-				                            qc_documents.editors LIKE "%'.$this->Session->read('User.id').'%"
-				                            AND
-				                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null" ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
-				                                IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
-				                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "")                 
-				                        )
-				                    WHEN QcDocument.and_or_condition = false THEN 
-				                        (select count(*) from qc_documents WHERE 
-				                            qc_documents.id = QcDocument.id AND
-				                            qc_documents.user_id LIKE "%'.$this->Session->read('User.id').'%" OR
-				                            qc_documents.editors LIKE "%'.$this->Session->read('User.id').'%"
-				                            AND
-				                            IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
-				                            IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
-				                            IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
-				                        )
-				                    ELSE "Un"
-				                END'			            
+							'srct' => $this->_qc_document_access_virtual_field()
 						);
 						// $conditions = $this->_check_request();
 				        if($this->Session->read('User.is_mr') == false){
@@ -446,7 +473,7 @@ class AppController extends Controller {
 						
 						$sharing = $this->QcDocument->find('count',array(					
 							'conditions'=>array(
-								'QcDocument.id'=>$this->request->params['named']['qc_document_id'],
+									'QcDocument.id'=>$qcDocumentId,
 								$accessConditions
 							)
 						));
@@ -463,31 +490,8 @@ class AppController extends Controller {
 						
 						if($existChek){
 							$this->QcDocument->virtualFields = array(
-							'srct' => '
-			                   CASE
-			                    WHEN QcDocument.and_or_condition = true THEN                             
-			                        (select count(*) from qc_documents WHERE 
-			                            qc_documents.id = QcDocument.id AND
-			                            qc_documents.user_id LIKE "%'.$this->Session->read('User.id').'%" OR
-			                            qc_documents.editors LIKE "%'.$this->Session->read('User.id').'%"
-			                            AND
-			                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null" ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
-			                                IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
-			                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "")                 
-			                        )
-			                    WHEN QcDocument.and_or_condition = false THEN 
-			                        (select count(*) from qc_documents WHERE 
-			                            qc_documents.id = QcDocument.id AND
-			                            qc_documents.user_id LIKE "%'.$this->Session->read('User.id').'%" OR
-			                            qc_documents.editors LIKE "%'.$this->Session->read('User.id').'%"
-			                            AND
-			                            IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
-			                            IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
-			                            IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
-			                        )
-			                    ELSE "Un"
-			                END
-			            	');
+								'srct' => $this->_qc_document_access_virtual_field()
+							);
 							
 						// $conditions = $this->_check_request();
 				        if($this->Session->read('User.is_mr') == false){
@@ -2458,25 +2462,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 		foreach($standards as $key => $value){
 			foreach($documentTypes as $dkey => $documentType){
 				$this->CustomTable->virtualFields = array(
-					'srct' => '
-	                    CASE
-	                        WHEN QcDocument.and_or_condition = true THEN                             
-	                            (select count(*) from qc_documents WHERE 
-	                                qc_documents.id = QcDocument.id AND
-	                                    IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") AND
-	                                    IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") AND 
-	                                    IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
-	                            )
-	                        WHEN QcDocument.and_or_condition = false THEN 
-	                            (select count(*) from qc_documents WHERE 
-	                                qc_documents.id = QcDocument.id AND
-	                                IF (qc_documents.branches IS NOT NULL OR qc_documents.branches != "null"  ,qc_documents.branches LIKE "%'.$this->Session->read('User.branch_id').'%", "") OR
-	                                IF (qc_documents.designations IS NOT NULL OR qc_documents.designations != "null" ,qc_documents.designations LIKE "%'.$this->Session->read('User.designation_id').'%", "") OR 
-	                                IF (qc_documents.departments IS NOT NULL  OR qc_documents.departments != "null" ,qc_documents.departments LIKE "%'.$this->Session->read('User.department_id').'%", "") 
-	                            )
-	                        ELSE "Un"
-	                    END
-	            '
+					'srct' => $this->_qc_document_access_virtual_field()
 				);
 				$conditions = $this->_check_request();
 				$accessConditions = array();
@@ -5657,4 +5643,3 @@ public function generate_dcn_number($model = null){
 		return $response;
 	}
 }
-

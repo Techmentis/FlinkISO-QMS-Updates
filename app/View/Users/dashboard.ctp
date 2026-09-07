@@ -203,9 +203,18 @@ $pptarray = array('ppt','pptx');
                       <tr>
                         <td><?php echo h($approval['Approval']['model_name']); ?>&nbsp;</td>
                         <td><?php echo h($approval['Approval']['created']); ?>&nbsp;</td>
-                        <td><?php echo h($approval['Approval']['title']); ?>&nbsp;</td>
+                        <td>
+                          <?php if(!empty($approval['Approval']['record_details'])){ ?>
+                            <?php foreach($approval['Approval']['record_details'] as $recordDetail){ ?>
+                              <strong><?php echo h($recordDetail['label']); ?>:</strong>
+                              <?php echo h($recordDetail['value']); ?><br />
+                            <?php } ?>
+                          <?php }else{ ?>
+                            <?php echo h($approval['Approval']['title']); ?>&nbsp;
+                          <?php } ?>
+                        </td>
                         <td><?php echo h($approval['From']['name']); ?>&nbsp;</td>
-                        <td><?php echo h($approval['Approval']['comments']); ?>&nbsp;</td>
+                        <td><?php echo h($approval['Approval']['display_comments']); ?>&nbsp;</td>
                         <td class="text-right">
                           <?php
                           if($approval['Approval']['approval_mode'] == 1 ){$action = 'edit';$aClass = "success";}

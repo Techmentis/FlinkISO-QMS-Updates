@@ -25,7 +25,12 @@
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <?php
   echo $this->Html->meta('icon');
-  echo $this->Html->css(array('font-awesome.min','icons','allcss','api'));
+  echo $this->Html->css(array('font-awesome.min','icons','allcss'));
+  $apiCssPath = $this->webroot . 'css/api.css';
+  if (Configure::read('Asset.timestamp') && file_exists(WWW_ROOT . 'css' . DS . 'api.css')) {
+    $apiCssPath .= '?' . filemtime(WWW_ROOT . 'css' . DS . 'api.css');
+  }
+  echo '<link rel="stylesheet" type="text/css" href="' . h($apiCssPath) . '" />';
   echo $this->fetch('css');
 
   echo $this->Html->script(array(    

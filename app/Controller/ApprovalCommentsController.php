@@ -81,12 +81,77 @@ class ApprovalCommentsController extends AppController {
 					'Approval.soft_delete'=>0,
 					'OR'=>array('Approval.approval_status !='=>1,'Approval.approval_status'=>null)
 				)));
-				$nextApproverRequired = (isset($approval['Approval']['approval_type']) && (int)$approval['Approval']['approval_type'] === 1) || $otherPendingApprovals == 0;
+				$nextApproverRequired = (isset($currentStep['ApprovalStep']['approval_type']) && (int)$currentStep['ApprovalStep']['approval_type'] === 1) || $otherPendingApprovals == 0;
 			}
 		}
 		$this->set(compact('nextApprovalStep','previousApprovalStep','nextApproversList','nextApproverRequired','nextApprovalUserLabel'));
         $this->set('prepared_by',$this->request->params['named']['prepared_by']);
         $this->set('approval_step_id',$approval_step_id);
+    }
+
+    public function next_step_status($approvalId = null) {
+        $this->autoRender = false;
+        $this->response->type('json');
+
+        if(isset($this->request->params['named']['approval_id'])){
+            $approvalId = $this->request->params['named']['approval_id'];
+        }
+
+        $approval = $this->ApprovalComment->Approval->find('first', array(
+            'recursive' => -1,
+            'conditions' => array('Approval.id' => $approvalId)
+        ));
+        $currentUserIds = array_filter(array(
+            $this->Session->read('User.id'),
+            $this->Session->read('User.employee_id')
+        ));
+
+        if(empty($approval['Approval']) || !in_array($approval['Approval']['user_id'], $currentUserIds)){
+            $this->response->statusCode(403);
+            $this->response->body(json_encode(array('next_approver_required' => false)));
+            return $this->response;
+        }
+
+        $this->loadModel('ApprovalStep');
+        $currentStep = $this->ApprovalStep->find('first', array(
+            'recursive' => -1,
+            'conditions' => array('ApprovalStep.id' => $approval['Approval']['approval_step_id'])
+        ));
+        if(empty($currentStep['ApprovalStep'])){
+            $this->response->body(json_encode(array('next_approver_required' => false)));
+            return $this->response;
+        }
+
+        $nextStepCount = $this->ApprovalStep->find('count', array(
+            'conditions' => array(
+                'ApprovalStep.approval_process_id' => $currentStep['ApprovalStep']['approval_process_id'],
+                'ApprovalStep.process_step >' => $currentStep['ApprovalStep']['process_step'],
+                'ApprovalStep.publish' => 1,
+                'ApprovalStep.soft_delete' => 0
+            )
+        ));
+        $otherPendingApprovals = $this->ApprovalComment->Approval->find('count', array(
+            'conditions' => array(
+                'Approval.record' => $approval['Approval']['record'],
+                'Approval.model_name' => $approval['Approval']['model_name'],
+                'Approval.approval_step_id' => $approval['Approval']['approval_step_id'],
+                'Approval.id !=' => $approval['Approval']['id'],
+                'Approval.soft_delete' => 0,
+                'OR' => array(
+                    'Approval.approval_status !=' => 1,
+                    'Approval.approval_status' => null
+                )
+            )
+        ));
+        $nextApproverRequired = $nextStepCount > 0 && (
+            (int)$currentStep['ApprovalStep']['approval_type'] === 1 || (int)$otherPendingApprovals === 0
+        );
+
+        $this->response->body(json_encode(array(
+            'next_approver_required' => $nextApproverRequired,
+            'pending_approvals' => $otherPendingApprovals
+        )));
+        return $this->response;
     }
 
 
@@ -165,7 +230,7 @@ class ApprovalCommentsController extends AppController {
 							)
 						)
 					));
-					if($pendingBeforeApproval == 0 || (isset($approval['Approval']['approval_type']) && (int)$approval['Approval']['approval_type'] === 1)){
+					if($pendingBeforeApproval == 0 || (isset($currentStep['ApprovalStep']['approval_type']) && (int)$currentStep['ApprovalStep']['approval_type'] === 1)){
 						$allowedNextApprovers = $this->_get_approver_lists($approval['Approval']['from'], $nextStep['ApprovalStep']);
 						if(empty($nextApproverIds) || array_diff($nextApproverIds, array_keys($allowedNextApprovers))){
 							$this->set('responseresult',__('Select one or more valid next approvers before approving this step.'));
@@ -194,7 +259,7 @@ class ApprovalCommentsController extends AppController {
 							)
                         )
                     ));
-					if(isset($approval['Approval']['approval_type']) && (int)$approval['Approval']['approval_type'] === 1){
+					if(isset($currentStep['ApprovalStep']['approval_type']) && (int)$currentStep['ApprovalStep']['approval_type'] === 1){
 						$this->_close_remaining_any_mode_approvals($approval);
 						$addtionalApprovals = 0;
 					}
@@ -246,7 +311,7 @@ class ApprovalCommentsController extends AppController {
                         if($this->$model->save($rec,false)){
                             $nextApprovalCount = 0;
 							if($addtionalApprovals == 0 && $hasNextApprovers){
-								$nextApprovalCount = $this->_create_next_step_approvals($approval, $nextStep, $nextApproverIds);
+									$nextApprovalCount = $this->_create_next_step_approvals($approval, $nextStep, $nextApproverIds, $response);
                             }
                             $this->_sent_approval_email($approval['Approval']['from'],1,$response,$model);
                             if($addtionalApprovals == 0 && $nextApprovalCount > 0){
@@ -301,7 +366,7 @@ class ApprovalCommentsController extends AppController {
 							)
                         )
                     ));
-					if(isset($approval['Approval']['approval_type']) && (int)$approval['Approval']['approval_type'] === 1){
+					if(isset($currentStep['ApprovalStep']['approval_type']) && (int)$currentStep['ApprovalStep']['approval_type'] === 1){
 						$this->_close_remaining_any_mode_approvals($approval);
 						$addtionalApprovals = 0;
 					}
@@ -612,7 +677,7 @@ class ApprovalCommentsController extends AppController {
 		return true;
 	}
 
-    protected function _create_next_step_approvals($currentApproval = null, $nextStep = null, $nextApproverIds = array()){
+    protected function _create_next_step_approvals($currentApproval = null, $nextStep = null, $nextApproverIds = array(), $forwardedComment = null){
         if(empty($currentApproval['Approval']) || empty($nextStep['ApprovalStep'])) return 0;
 
         $approval = $currentApproval['Approval'];
@@ -647,7 +712,7 @@ class ApprovalCommentsController extends AppController {
                 'approval_status'=>0,
                 'approval_mode'=>isset($step['approval_mode']) ? $step['approval_mode'] : 1,
                 'approval_type'=>isset($step['approval_type']) ? $step['approval_type'] : 0,
-                'comments'=>isset($step['comments']) ? $step['comments'] : '',
+                'comments'=>strlen(trim((string)$forwardedComment)) ? $forwardedComment : (isset($step['comments']) ? $step['comments'] : ''),
                 'approval_step_id'=>$step['id'],
                 'approval_process_id'=>$step['approval_process_id'],
                 'approval_cycle'=>isset($approval['approval_cycle']) ? $approval['approval_cycle'] : 1

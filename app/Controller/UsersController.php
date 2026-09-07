@@ -1011,6 +1011,7 @@ class UsersController extends AppController {
         if(is_array($approvalusers))$approvals = $approvalusers;
         else if(is_array($approvalemployees))$approvals = $approvalemployees;
 
+        $approvals = $this->_dashboard_approval_details($approvals);
         $this->set('approvals', $approvals);
         $this->loadModel('ApprovalComment');
         
@@ -1046,6 +1047,159 @@ class UsersController extends AppController {
         $size = ($folder->dirsize() / 1000000);
         $this->set('totalFileSize',round($size));
 
+    }
+
+    protected function _dashboard_approval_details($approvals = array()) {
+        if(empty($approvals) || !is_array($approvals)) return array();
+
+        $tableNames = array();
+        foreach($approvals as $approval){
+            if(!empty($approval['Approval']['controller_name'])) $tableNames[] = $approval['Approval']['controller_name'];
+        }
+        $tableNames = array_values(array_unique($tableNames));
+        $customTableMap = array();
+        if(!empty($tableNames)){
+            $customTables = $this->CustomTable->find('all', array(
+                'recursive' => -1,
+                'fields' => array('CustomTable.id', 'CustomTable.name', 'CustomTable.table_name', 'CustomTable.fields'),
+                'conditions' => array('CustomTable.table_name' => $tableNames)
+            ));
+            foreach($customTables as $customTable){
+                $customTableMap[$customTable['CustomTable']['table_name']] = $customTable['CustomTable'];
+            }
+        }
+
+        $this->loadModel('ApprovalStep');
+        $previousStepCache = array();
+        foreach($approvals as &$approval){
+            $approval['Approval']['record_details'] = array();
+            $approval['Approval']['display_comments'] = $this->_dashboard_approval_comment($approval, $previousStepCache);
+
+            $controllerName = $approval['Approval']['controller_name'];
+            $modelName = $approval['Approval']['model_name'];
+            if(empty($customTableMap[$controllerName]) || empty($modelName) || empty($approval['Approval']['record'])) continue;
+
+            try {
+                $configuredFields = json_decode($customTableMap[$controllerName]['fields'], true);
+                if(!is_array($configuredFields)) continue;
+
+                $this->loadModel($modelName);
+                $schema = $this->$modelName->schema();
+                $defaultFields = array();
+                foreach($configuredFields as $field){
+                    if(!empty($field['default_field']) && !empty($field['field_name']) && isset($schema[$field['field_name']])){
+                        $defaultFields[$field['field_name']] = $field;
+                    }
+                }
+                if(empty($defaultFields)) continue;
+
+                $record = $this->$modelName->find('first', array(
+                    'recursive' => -1,
+                    'fields' => array_merge(array($modelName.'.id'), array_map(function($fieldName) use ($modelName){
+                        return $modelName.'.'.$fieldName;
+                    }, array_keys($defaultFields))),
+                    'conditions' => array($modelName.'.id' => $approval['Approval']['record'])
+                ));
+                if(empty($record[$modelName])) continue;
+
+                foreach($defaultFields as $fieldName => $field){
+                    if(!array_key_exists($fieldName, $record[$modelName])) continue;
+                    $value = $this->_dashboard_record_value($record[$modelName][$fieldName], $field);
+                    if($value === '') continue;
+                    $label = $this->_dashboard_field_label($field, $fieldName);
+                    $approval['Approval']['record_details'][] = array('label' => $label, 'value' => $value);
+                }
+            } catch(Exception $e) {
+                $approval['Approval']['record_details'] = array();
+            }
+        }
+        unset($approval);
+
+        return $approvals;
+    }
+
+    protected function _dashboard_approval_comment($approval = array(), &$previousStepCache = array()) {
+        $fallback = isset($approval['Approval']['comments']) ? $approval['Approval']['comments'] : '';
+        if(empty($approval['Approval']['approval_step_id'])) return $fallback;
+
+        try {
+            $stepId = $approval['Approval']['approval_step_id'];
+            if(!array_key_exists($stepId, $previousStepCache)){
+                $currentStep = $this->ApprovalStep->find('first', array(
+                    'recursive' => -1,
+                    'conditions' => array('ApprovalStep.id' => $stepId)
+                ));
+                $previousStepCache[$stepId] = null;
+                if(!empty($currentStep['ApprovalStep'])){
+                    $previousStep = $this->ApprovalStep->find('first', array(
+                        'recursive' => -1,
+                        'fields' => array('ApprovalStep.id'),
+                        'conditions' => array(
+                            'ApprovalStep.approval_process_id' => $currentStep['ApprovalStep']['approval_process_id'],
+                            'ApprovalStep.process_step <' => $currentStep['ApprovalStep']['process_step'],
+                            'ApprovalStep.publish' => 1,
+                            'ApprovalStep.soft_delete' => 0
+                        ),
+                        'order' => array('ApprovalStep.process_step' => 'DESC')
+                    ));
+                    if(!empty($previousStep['ApprovalStep']['id'])) $previousStepCache[$stepId] = $previousStep['ApprovalStep']['id'];
+                }
+            }
+            if(empty($previousStepCache[$stepId])) return $fallback;
+
+            $conditions = array(
+                'Approval.record' => $approval['Approval']['record'],
+                'Approval.model_name' => $approval['Approval']['model_name'],
+                'Approval.approval_step_id' => $previousStepCache[$stepId],
+                'Approval.approval_status' => 1,
+                'Approval.approver_comments !=' => null,
+                'Approval.approver_comments != ' => ''
+            );
+            if(isset($approval['Approval']['approval_cycle'])){
+                $conditions['Approval.approval_cycle'] = $approval['Approval']['approval_cycle'];
+            }
+            $previousApproval = $this->Approval->find('first', array(
+                'recursive' => -1,
+                'fields' => array('Approval.approver_comments'),
+                'conditions' => $conditions,
+                'order' => array('Approval.modified' => 'DESC')
+            ));
+            if(!empty($previousApproval['Approval']['approver_comments'])) return $previousApproval['Approval']['approver_comments'];
+        } catch(Exception $e) {
+        }
+
+        return $fallback;
+    }
+
+    protected function _dashboard_record_value($value, $field = array()) {
+        if($value === null || $value === '') return '';
+        $decoded = is_string($value) ? json_decode($value, true) : null;
+        if(is_array($decoded)){
+            $values = array();
+            array_walk_recursive($decoded, function($item) use (&$values){
+                if($item !== null && $item !== '') $values[] = $item;
+            });
+            $value = implode(', ', $values);
+        }
+        if(isset($field['csvoptions']) && $field['csvoptions'] !== '' && is_numeric($value)){
+            $options = array_map('trim', explode(',', $field['csvoptions']));
+            if(isset($options[(int)$value])) $value = $options[(int)$value];
+        }
+        $value = trim(strip_tags((string)$value));
+        if(function_exists('mb_strlen') && mb_strlen($value) > 180) return mb_substr($value, 0, 177).'...';
+        if(strlen($value) > 180) return substr($value, 0, 177).'...';
+        return $value;
+    }
+
+    protected function _dashboard_field_label($field = array(), $fieldName = '') {
+        if(empty($field['field_label'])) return Inflector::humanize($fieldName);
+
+        $storedLabel = $field['field_label'];
+        $decodedLabel = base64_decode($storedLabel, true);
+        if($decodedLabel !== false && $decodedLabel !== '' && preg_match('//u', $decodedLabel)){
+            return $decodedLabel;
+        }
+        return $storedLabel;
     }
 
     public function _qc_doc_co_edit(){
@@ -1252,47 +1406,9 @@ class UsersController extends AppController {
                     }
                 }
 
-                if ($branchId != null) {
-                    
-                    $department['Department']['name']         = 'Quality Management';
-                    $department['Department']['publish']      = 1;
-                    $department['Department']['soft_delete']  = 0;
-                    $department['Department']['branchid']     = '0';
-                    $department['Department']['departmentid'] = '0';
-                    $department['Department']['created_by']   = '0';
-                    $department['Department']['modified_by']  = '0';
-                    $department['Department']['created']      = date('Y-m-d h:i:s');
-                    $department['Department']['created']      = date('Y-m-d h:i:s');
-                    $this->loadModel('Department');
-                    $this->Department->create();
-                    if ($this->Department->save($department, false)) {
-                        $departmentId = $this->Department->id;
-                    }else{
-                        $this->Session->setFlash(__('Department could not be saved.'));
-                        $this->redirect(array('controller'=>'users', 'action' => 'register'));
-                    }
-                    
-                    
-                    $designation['Designation']['name']         = 'QA Manager';
-                    $designation['Designation']['level']        = 0;
-                    $designation['Designation']['publish']      = 1;
-                    $designation['Designation']['soft_delete']  = 0;
-                    $designation['Designation']['branchid']     = '0';
-                    $designation['Designation']['departmentid'] = '0';
-                    $designation['Designation']['created_by']   = '0';
-                    $designation['Designation']['modified_by']  = '0';
-                    $designation['Designation']['created']      = date('Y-m-d h:i:s');
-                    $designation['Designation']['created']      = date('Y-m-d h:i:s');
-                    $this->loadModel('Designation');
-                    
-                    
-                    $this->Designation->create();
-                    if ($this->Designation->save($designation, false)) {
-                        $designationId = $this->Designation->id;
-                    }else{
-                        $this->Session->setFlash(__('Designation could not be saved.'));
-                        $this->redirect(array('controller'=>'users', 'action' => 'register'));
-                    }
+                if ($branchId != null) {                    
+                    $departmentId = "40b70fe1-16c9-46b1-b74b-2581c08f2541";
+                    $designationId = "3c69efec-678e-4998-a8f3-18aaffed2be9";
                     
                     $this->loadModel('Employee');
                     $employeeCount = $this->Employee->find('count', array(
@@ -1418,6 +1534,18 @@ class UsersController extends AppController {
                             $this->Session->setFlash(__('Account created successfully. Your email address is your username and password.'));
                             file_put_contents(APP . 'Config/installed.txt', date('Y-m-d, H:i:s'));
                             unlink(APP . 'Config/installed_db.txt');
+
+
+                            // reset all custom table ownership to new user
+                            $this->loadModel('CustomTable');
+                            $customTables = $this->CustomTable->find('all',array('recursive'=>-1));
+                            foreach($customTables as $customTable ){
+                                $customTable['CustomTable']['created_by'] = $this->User->id;
+                                $customTable['CustomTable']['password'] = Security::hash($this->request->data['User']['OnPremiseUser']['email'], 'md5', true);
+                                $this->CustomTable->create();
+                                $this->CustomTable->save($customTable,false);
+                            }
+
                             // $this->set('url',$this->request->data['User']['dir_name']);     
                             $this->_rewrite_permissions($this->User->id,$this->Employee->id,$companyId,$branchId,$departmentId,$designationId);
                             $this->redirect(array('action' => 'login'));

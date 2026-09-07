@@ -88,7 +88,7 @@
 									if($approvalStep['approval_type'] == 0)$val = $approvalStep['approval_type'];
 									else $val = 1;
 								?>
-								<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.approval_type',array('class'=>'','readonly', 'type'=>'radio', 'legend'=>false, 'options'=>array(0=>'All',1=>'Any'),'default'=>$val));?></td>
+								<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.approval_type',array('class'=>'', 'type'=>'radio', 'legend'=>false, 'options'=>array(0=>'All',1=>'Any'),'default'=>$val));?></td>
 
 								<?php 
 									if($approvalStep['ignore_department'] == 0)$val = $approvalStep['ignore_department'];

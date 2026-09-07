@@ -127,8 +127,8 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 														echo "<br />";
 													}
 												}
-											if(!empty($nextApproverRequired)){
-												echo '<div id="'.$approvalComment['ApprovalComment']['id'].'NextApproverWrap" style="display:none">';
+											if(!empty($nextApprovalStep['ApprovalStep'])){
+												echo '<div id="'.$approvalComment['ApprovalComment']['id'].'NextApproverWrap" style="display:'.(!empty($nextApproverRequired) ? 'block' : 'none').'">';
 												echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.next_approver_ids',array(
 													'id'=>$approvalComment['ApprovalComment']['id'].'NextApproverId',
 													'type'=>'select','multiple'=>true,'options'=>$nextApproversList,'data-placeholder'=>'Select next approvers',
@@ -172,8 +172,18 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 									var approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?> = "input[name='data[ApprovalComment][<?php echo $approvalComment['ApprovalComment']['id'];?>][approval_status]']";
 									$(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>).on('change',function(){
 										var approved = $(this).val() == '1';
-										$("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverWrap").toggle(approved);
-										if(!approved) $("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverId").val('').trigger('chosen:updated');
+										var nextApproverWrap = $("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverWrap");
+										var nextApprover = $("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverId");
+										if(!approved){
+											nextApproverWrap.hide();
+											nextApprover.val('').trigger('chosen:updated');
+											return;
+										}
+										$.getJSON("<?php echo Router::url('/', true); ?>approval_comments/next_step_status/approval_id:<?php echo h($approvalComment['ApprovalComment']['approval_id']); ?>", function(data){
+											var required = data.next_approver_required === true;
+											nextApproverWrap.toggle(required);
+											if(!required) nextApprover.val('').trigger('chosen:updated');
+										});
 									});
 									$(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>+":checked").trigger('change');
 									$("#<?php echo $approvalComment['ApprovalComment']['id'];?>_link").on('click',function(){
@@ -181,12 +191,10 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 											alert('Add Response');
 											return false;
 										}
-										<?php if(!empty($nextApproverRequired)){ ?>
-										if($("input[name='data[ApprovalComment][<?php echo $approvalComment['ApprovalComment']['id'];?>][approval_status]']:checked").val() == '1' && !$("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverId").val()){
+										if($("input[name='data[ApprovalComment][<?php echo $approvalComment['ApprovalComment']['id'];?>][approval_status]']:checked").val() == '1' && $("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverWrap").is(':visible') && !$("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverId").val()){
 											alert('Select one or more next approvers.');
 											return false;
 										}
-										<?php } ?>
 										if($(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>+":checked").val() == '3' && !confirm('Return this record to the previous approval step?')) return false;
 
 										$.ajax({
@@ -317,8 +325,8 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 												echo "<br />";
 											}
 										}
-									if(!empty($nextApproverRequired) && ($approval['Approval']['user_id'] == $this->Session->read('User.id') || $approval['Approval']['user_id'] == $this->Session->read('User.employee_id'))){
-										echo '<div id="'.$approval['Approval']['id'].'NextApproverWrap" style="display:none">';
+									if(!empty($nextApprovalStep['ApprovalStep']) && ($approval['Approval']['user_id'] == $this->Session->read('User.id') || $approval['Approval']['user_id'] == $this->Session->read('User.employee_id'))){
+										echo '<div id="'.$approval['Approval']['id'].'NextApproverWrap" style="display:'.(!empty($nextApproverRequired) ? 'block' : 'none').'">';
 										echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.next_approver_ids',array(
 											'id'=>$approval['Approval']['id'].'NextApproverId',
 											'type'=>'select','multiple'=>true,'options'=>$nextApproversList,'data-placeholder'=>'Select next approvers',
@@ -344,8 +352,18 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 										var approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?> = "input[name='data[ApprovalComment][<?php echo $approval['Approval']['id'];?>][approval_status]']";
 										$(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>).on('change',function(){
 											var approved = $(this).val() == '1';
-											$("#<?php echo $approval['Approval']['id'];?>NextApproverWrap").toggle(approved);
-											if(!approved) $("#<?php echo $approval['Approval']['id'];?>NextApproverId").val('').trigger('chosen:updated');
+											var nextApproverWrap = $("#<?php echo $approval['Approval']['id'];?>NextApproverWrap");
+											var nextApprover = $("#<?php echo $approval['Approval']['id'];?>NextApproverId");
+											if(!approved){
+												nextApproverWrap.hide();
+												nextApprover.val('').trigger('chosen:updated');
+												return;
+											}
+											$.getJSON("<?php echo Router::url('/', true); ?>approval_comments/next_step_status/approval_id:<?php echo h($approval['Approval']['id']); ?>", function(data){
+												var required = data.next_approver_required === true;
+												nextApproverWrap.toggle(required);
+												if(!required) nextApprover.val('').trigger('chosen:updated');
+											});
 										});
 										$(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>+":checked").trigger('change');
 										$("#<?php echo $approval['Approval']['id'];?>_link_new").on('click',function(){
@@ -353,12 +371,10 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 											alert('Add Response');
 											return false;
 										}
-										<?php if(!empty($nextApproverRequired)){ ?>
-										if($("input[name='data[ApprovalComment][<?php echo $approval['Approval']['id'];?>][approval_status]']:checked").val() == '1' && !$("#<?php echo $approval['Approval']['id'];?>NextApproverId").val()){
+										if($("input[name='data[ApprovalComment][<?php echo $approval['Approval']['id'];?>][approval_status]']:checked").val() == '1' && $("#<?php echo $approval['Approval']['id'];?>NextApproverWrap").is(':visible') && !$("#<?php echo $approval['Approval']['id'];?>NextApproverId").val()){
 											alert('Select one or more next approvers.');
 											return false;
 										}
-										<?php } ?>
 										if($(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>+":checked").val() == '3' && !confirm('Return this record to the previous approval step?')) return false;
 
 											$.ajax({
