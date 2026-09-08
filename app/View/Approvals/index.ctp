@@ -87,7 +87,7 @@
 										echo $this->Html->link($approval['Approval']['model_name']." (".$approval['Approval']['title'].")",array('controller'=>$approval['Approval']['controller_name'],'action'=>'view',$approval['Approval']['record']),array('target'=>'_blank')) ; ?>&nbsp;</td>
 										<td><?php echo $approval['Approval']['created'];?>&nbsp;</td>
 										<td><?php echo $froms[$approval['Approval']['from']]; ?>&nbsp;</td>
-										<td><?php echo $froms[$approval['Approval']['user_id']]; ?>&nbsp;</td>										
+										<td><?php echo $tos[$approval['Approval']['user_id']]; ?>&nbsp;</td>										
 										<td><?php echo $approval['Approval']['comments']; ?>&nbsp;</td>
 										<td><?php 						
 										echo $approval['Approval']['record_status']?'Locked':'Unlocked'; ?>&nbsp;</td>
@@ -110,7 +110,7 @@
 														<li><?php echo $this->Html->link("view", array('controller' => $approval['Approval']['controller_name'], 'action' => 'view', $approval['Approval']['record']), array('target'=>'_blank')); ?></li>
 														<li><?php echo $this->Html->Link('Send Reminder to ' . $froms[$approval['Approval']['user_id']],array('controller'=>'approvals','action'=>'send_reminder',$approval['Approval']['id']), array('target'=>'_blank')); ?></li>
 														<li><?php echo $this->Html->Link('Unlock Record',array('controller'=>'approvals','action'=>'unlock_record',$approval['Approval']['id']), array('target'=>'_blank')); ?></li>
-														<li><?php echo $this->Html->Link('Assign to Another User',array('controller'=>'approvals','action'=>'change_user',$approval['Approval']['id']), array('target'=>'_blank')); ?></li>
+														<li><?php echo $this->Html->Link('Assign to Another User',array('controller'=>'approvals','action'=>'change_user',$approval['Approval']['id'],'modal'=>1), array('class'=>'approval-modal-link', 'data-modal-title'=>__('Change Approver'))); ?></li>
 														<li><?php echo $this->Html->Link('Delete Record',array('controller'=>'approvals','action'=>'delete_approval',$approval['Approval']['id']), array('target'=>'_blank')); ?></li>
 													</ul>	
 													
@@ -162,6 +162,7 @@
 	<?php echo $this->Form->end(); ?> </div>	
 	</div>
 </div>
+<?php echo $this->element('approvals_modal'); ?>
 <?php echo $this->Js->writeBuffer(); ?> 
 	<script>
 		$.ajaxSetup({beforeSend: function() {

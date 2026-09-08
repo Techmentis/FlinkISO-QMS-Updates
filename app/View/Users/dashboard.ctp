@@ -353,9 +353,19 @@ $pptarray = array('ppt','pptx');
     </div>
     <?php } ?>
     <?php if($this->Session->read('User.is_mr') == 1){ ?>
+      <?php if(!empty($lockedUsers)){ 
+          echo '<div class="row"><div class="col-md-12"><h4>Locked Users <small>Click on user to unlock.</small></h4><ul>';
+          foreach($lockedUsers as $lockedUser => $name){
+            echo '<li>'.$this->Html->link('Uplock ' .$name,  array('action'=>'locked_users',$lockedUser)).'</li>';
+          }
+          echo '</ul></div></div>';
+      }?>          
+
       <div class="row"><div class="col-md-12">
         <?php echo $this->element('miles',array('masters'=>$masters));?>
       </div>
     <?php } ?>    
   </div>
 <?php echo $this->element('custom_triggers',array('customTrigers'=>$customTrigers));?>
+  
+</div>

@@ -81,6 +81,7 @@
                           <li><?php echo $this->Html->link(__('Two Way Authentication'),array('controller'=>'users','action'=>'two_way_authentication',$this->Session->read('User.company_id'),'timestamp'=>date('ymdhis'))); ?></li>
                           <li><?php echo $this->Html->link(__('Define Change History Table'),array('controller'=>'qc_documents','action'=>'define_change_history_table','timestamp'=>date('ymdhis'))); ?></li>
                           <li><?php echo $this->Html->link(__('Graphs And panels'),array('controller'=>'graph_panels','action'=>'graphs','timestamp'=>date('ymdhis'))); ?></li>
+                          <li><?php echo $this->Html->link(__('Approvals'),array('controller'=>'approvals','action'=>'index','timestamp'=>date('ymdhis'))); ?></li>
                         </ul>
                       </li>
                   </ul>

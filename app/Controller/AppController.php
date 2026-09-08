@@ -949,20 +949,20 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 			$approvaldata['ApprovalComment']['response_status'] = 0;
 			$this->loadModel('ApprovalComment');
 			$this->ApprovalComment->create();
-			$this->ApprovalComment->save($approvaldata);			
+			$this->ApprovalComment->save($approvaldata,false);
 			if ($this->request->data['ApprovalComment']['status'] == 1) {
 				// update approval record
 				$app = $this->ApprovalComment->Approval->find('first', array('recursive' => - 1, 'conditions' => array('Approval.id' => $this->request->data['ApprovalComment']['approval_id'])));
 				$app['Approval']['status'] = 1;
 				$this->ApprovalComment->Approval->create();
-				$this->ApprovalComment->Approval->save($app);
+				$this->ApprovalComment->Approval->save($app,false);
 			}
 			if ($this->request->data['ApprovalComment']['status'] == 2) {
 				// update approval record
 				$app = $this->ApprovalComment->Approval->find('first', array('recursive' => - 1, 'conditions' => array('Approval.id' => $this->request->data['ApprovalComment']['approval_id'])));
 				$app['Approval']['status'] = 1;
 				$this->ApprovalComment->Approval->create();
-				$this->ApprovalComment->Approval->save($app);
+				$this->ApprovalComment->Approval->save($app,false);
 			}
 			if (1 < 0) {
 				// lock record
@@ -971,7 +971,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 				$rec = $this->$model->find('first', array('conditions' => array($model . '.id' => $this->request->data['ApprovalComment']['record']), 'recursive' => - 1));
 				$rec[$model]['record_status'] = 1;				
 				$this->$model->create();
-				$this->$model->save($rec);
+				$this->$model->save($rec,false);
 			}			
 			
 		} else if ($this->request->data['ApprovalComment']['user_id'] == - 1 && $this->request->data['ApprovalComment']['stauts'] == 1) {
@@ -1024,7 +1024,7 @@ public function _sent_approval_email($to = null,$message = null,$response = null
 					$rec[$model]['approval_step_id'] = null;
 					// $rec[$this->modelClass]['record_status'] = 1;
 					$this->$model->create();
-					$this->$model->save($rec);
+					$this->$model->save($rec,false);
 				} else {
 				}
 			}

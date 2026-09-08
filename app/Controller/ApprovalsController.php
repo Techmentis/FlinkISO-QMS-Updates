@@ -143,6 +143,9 @@ class ApprovalsController extends AppController {
     }
 
     public function change_user(){
+        if (!empty($this->request->params['named']['modal'])) {
+            $this->layout = 'modal';
+        }
         if ($this->request->is('post')) {
             
             
@@ -160,21 +163,25 @@ class ApprovalsController extends AppController {
                     
                     $this->Approval->save($app['Approval']);
 
-                    $this->_send_approval_reminder($this->request->data['Approval']['approver_id'],date('Y-m-d'),$this->Session->read('User.name'),'FlinkISO: New approval is assigned to you from.');
-                    $this->Session->setFlash('Recored saved. Please try again');
-                    $this->redirect(array('action' => 'index'));
+                    $this->_sent_approval_email($this->request->data['Approval']['approver_id'],date('Y-m-d'),$this->Session->read('User.name'),'FlinkISO: New approval is assigned to you from.');
+                    echo "Record saved";
+                    exit;                    
                 }else{
-                    $this->Session->setFlash('Recored could not be saved. Please try again');
-                    $this->redirect(array('action' => 'index'));
+                    echo "Record could not be saved";
+                    exit;
+
                 }
             }else{
-                $this->Session->setFlash('Recored could not be saved. Please try again');
-                $this->redirect(array('action' => 'index'));
+                echo "Recored could not be saved. Please try again";
+                exit;
             }
 
         }
+        $this->loadModel('User');
+        $approversList = $this->User->find('list');
         $approval  = $this->Approval->find('first',array('conditions'=>array('Approval.id'=>$this->request->params['pass'][0])));
         $this->set('approval',$approval);
+        $this->set('approversList',$approversList);
         
     }
 
