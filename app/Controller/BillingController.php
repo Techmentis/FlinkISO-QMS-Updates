@@ -8,6 +8,13 @@ App::uses('AppController', 'Controller');
  */
 class BillingController extends AppController {
 
+    public function beforeRender() {
+        // The updater view does not use the global table menu. Building it can fail
+        // when an optional/generated model has no schema, preventing this page from loading.
+        if ($this->action === 'update') return;
+        return parent::beforeRender();
+    }
+
 
     public function index(){
         exit;

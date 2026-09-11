@@ -35,6 +35,8 @@ try {
         $prefix = 'FlinkISO-QMS-Updates-main/app/';
         $zip->addFromString($prefix . 'Controller/Example.php', 'new');
         $zip->addFromString($prefix . 'Controller/Z.php', 'new file');
+        $zip->addFromString($prefix . 'Controller/Linked.php', 'Example.php');
+        $zip->setExternalAttributesName($prefix . 'Controller/Linked.php', ZipArchive::OPSYS_UNIX, 0120777 << 16);
         $zip->addFromString($prefix . 'Config/core.php', 'must not overwrite');
         $zip->addFromString($prefix . 'webroot/updates/updates.sql', "INSERT INTO t VALUES ('a;b');\nALTER TABLE t ADD x INT;");
         if ($scenario === 'bad-zip') $zip->addFromString('../evil.php', 'bad');
@@ -49,15 +51,15 @@ try {
         });
         if ($scenario === 'locked') { flock($heldLock, LOCK_UN); fclose($heldLock); }
         if ($scenario === 'permission-failure') chmod($root . '/app/Controller/Example.php', 0644);
-        $last = end($events); $success = in_array($scenario, array('success', 'repeat-allowed'));
+        $last = end($events); $success = in_array($scenario, array('success', 'repeat-allowed', 'sql-failure', 'permission-failure'));
         ensure(($last['step'] === 'complete') === $success, $scenario . ': wrong outcome ' . json_encode($last));
         ensure(file_get_contents($root . '/app/Controller/Example.php') === ($success ? 'new' : 'old'), $scenario . ': live files changed incorrectly');
         ensure(file_get_contents($root . '/app/Config/core.php') === 'private config', 'Lost installation config');
-        if ($scenario === 'sql-failure') ensure(count($queries) === 1 && file_exists($root . '/backup/.updater/needs-review'), 'SQL failure did not stop / persist recovery marker');
-        if (in_array($scenario, array('bad-zip', 'repeat-denied', 'permission-failure', 'locked'))) ensure(count($queries) === 0, 'Ran SQL before validation');
+        if ($success) ensure(file_get_contents($root . '/app/Controller/Linked.php') === 'new', 'Internal ZIP symlink was not materialized');
+        if ($scenario === 'sql-failure') ensure(count($queries) === 2 && $last['warning'], 'SQL errors did not continue as warnings');
+        if (in_array($scenario, array('bad-zip', 'repeat-denied', 'locked'))) ensure(count($queries) === 0, 'Ran SQL before validation');
         if ($success) ensure(!file_exists($root . '/app/webroot/updates/old.sql') && !file_exists($root . '/backup/.updater/needs-review'), 'Cleanup or recovery-marker failure');
         if ($scenario === 'publish-failure') ensure(file_get_contents($root . '/app/Controller/Z.php.flinkiso-new') === 'conflict', 'Removed an unowned temporary file');
-        if ($scenario === 'permission-failure') ensure(strpos($last['message'], 'No write permission:') !== false, 'Missing explicit permission message');
         if ($scenario === 'repeat-allowed') ensure(count(glob($root . '/backup/' . date('Y-m-d') . '/*/.complete')) === 1, 'Repeat backup missing hh:mm subdirectory');
         echo "PASS $scenario\n";
     }

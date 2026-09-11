@@ -519,6 +519,28 @@ class CustomTablesController extends AppController {
         else $this->recreate($table['id'], true, $payload);
     }
 
+    private function _resolve_child_default_field(&$fields) {
+        $active = array();
+        foreach((array)$fields as $index => $field){
+            if(empty($field['field_name']) || !empty($field['drop']) || in_array((int)$field['display_type'], array(5, 7, 8, 9, 10), true)) continue;
+            $active[$field['field_name']] = $index;
+            if(!empty($field['default_field'])) return $this->_clean_table_names($field['field_name']);
+        }
+
+        $defaultfield = null;
+        foreach(array('text', 'date') as $preferredType){
+            foreach($active as $fieldName => $index){
+                if(isset($fields[$index]['data_type']) && $fields[$index]['data_type'] === $preferredType){
+                    $defaultfield = $fieldName;
+                    break 2;
+                }
+            }
+        }
+        if(!$defaultfield && $active) $defaultfield = key($active);
+        if($defaultfield) $fields[$active[$defaultfield]]['default_field'] = 1;
+        return $defaultfield ? $this->_clean_table_names($defaultfield) : null;
+    }
+
     private function _rebuild_linked_tos() {
         $linkedTos = array();
         $skip = array('AppController', 'ApprovalsController', 'ApprovalCommentsController', 'CustomTablesController', 'FilesController', 'RecordsController', 'UserSessionsController');
@@ -580,6 +602,31 @@ class CustomTablesController extends AppController {
             . "\t\t\tchildTabs.tabs();\n"
             . "\t\t}\n";
         return str_replace($marker, $tabs . $marker, $code);
+    }
+
+    private function _remove_generated_child_tab_titles($code) {
+        if (!is_string($code) || strpos($code, "class='linked-child-form'") === false) return $code;
+        return preg_replace(
+            '~\s*<div><h4><\?php\s+echo\s+\$linkedTable\[\'CustomTable\'\]\[\'name\'\];\s*\?></h4></div>~',
+            '',
+            $code
+        );
+    }
+
+    private function _avoid_single_child_nested_tabs($code) {
+        if (!is_string($code) || strpos($code, "placement.prepend(tabs);") === false) return $code;
+        $old = "\t\t\tif(tabs.children().length > 0){\n"
+            . "\t\t\t\tplacement.prepend(tabs);\n"
+            . "\t\t\t\tactivateGeneratedChildTabs(placement);\n"
+            . "\t\t\t}";
+        $new = "\t\t\tif(tabs.children().length > 0){\n"
+            . "\t\t\t\t// The containing form tab already supplies the title when this\n"
+            . "\t\t\t\t// Child Table field has only one child. A second tab repeats it.\n"
+            . "\t\t\t\tif(placement.closest('.custom-form-tabs').length && tabs.children().length === 1) return;\n"
+            . "\t\t\t\tplacement.prepend(tabs);\n"
+            . "\t\t\t\tactivateGeneratedChildTabs(placement);\n"
+            . "\t\t\t}";
+        return str_replace($old, $new, $code);
     }
     
 
@@ -1928,7 +1975,9 @@ class CustomTablesController extends AppController {
                         $generatedForms = json_decode($result['formFile'], true);
                         if (is_array($generatedForms)) {
                             foreach ($generatedForms as $generatedAction => $generatedCode) {
-                                $generatedForms[$generatedAction] = $this->_ensure_generated_child_tabs($generatedCode);
+                                $generatedCode = $this->_ensure_generated_child_tabs($generatedCode);
+                                $generatedCode = $this->_remove_generated_child_tab_titles($generatedCode);
+                                $generatedForms[$generatedAction] = $this->_avoid_single_child_nested_tabs($generatedCode);
                             }
                             $result['formFile'] = json_encode($generatedForms);
                         }
@@ -2137,16 +2186,10 @@ class CustomTablesController extends AppController {
 				$toDrop[] = $preField;
 			}
 
-            $defaultfield = null;
-            foreach($this->request->data['CustomTableFields'] as $fields){
-                if($fields['default_field'] == 1){
-                    $defaultfield = $this->_clean_table_names($fields['field_name']);
-                    // $sqld = "`".$defaultfield."` varchar(255) NOT NULL,";
-                }
-            }
+            $defaultfield = $this->_resolve_child_default_field($this->request->data['CustomTableFields']);
 
             if (empty($defaultfield)) {
-                $message = __('Default field missing');
+                $message = __('Child form has no usable field for its default display value');
                 $this->Session->setFlash($message);
                 if ($this->_ajax_generation_response(false, $message, 422)) return $this->response;
                 $this->redirect(array('action' => 'recreate_child', $id));

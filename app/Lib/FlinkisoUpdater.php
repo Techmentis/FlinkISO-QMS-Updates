@@ -19,9 +19,16 @@ class FlinkisoUpdater {
         if (!$c) {
             return array('url' => self::DEFAULT_URL, 'folder' => 'FlinkISO-QMS-Updates-main', 'pat' => '');
         }
-        if (empty($c['url']) || empty($c['folder']) || empty($c['pat'])) {
-            throw new RuntimeException('Incomplete paid repository configuration: url, folder and pat are all required.');
+        $missing = array();
+        foreach (array('url', 'folder', 'pat') as $key) {
+            if (!isset($c[$key]) || !is_string($c[$key]) || trim($c[$key]) === '') $missing[] = $key;
         }
+        if ($missing) {
+            throw new RuntimeException('Incomplete paid repository configuration. Missing or empty: ' . implode(', ', $missing) . '.');
+        }
+        $c['url'] = trim($c['url']);
+        $c['folder'] = trim($c['folder']);
+        $c['pat'] = trim($c['pat']);
         $this->validateUrl($c['url']);
         if (!preg_match('/^[A-Za-z0-9_-][A-Za-z0-9_.-]*$/D', $c['folder']) || strpos($c['folder'], '..') !== false || preg_match('/[\r\n]/', $c['pat'])) {
             throw new RuntimeException('Invalid repository folder or PAT configuration.');
@@ -138,23 +145,34 @@ class FlinkisoUpdater {
             $this->event($step, 0, 'Checking backup permissions and reading the application...');
             $today = date('Y-m-d');
             $backup = $this->root . '/backup/' . $today;
+            $reuseBackup = false;
             if (is_dir($backup)) {
-                if (!$repeatBackup || $confirmedDate !== $today) throw new RuntimeException('A backup exists for today. Confirm another backup before restarting.');
-                $backup .= '/' . date(DIRECTORY_SEPARATOR === '\\' ? 'H-i' : 'H:i');
-                if (file_exists($backup)) $backup .= '-' . date('s') . '-' . bin2hex(openssl_random_pseudo_bytes(3));
+                if (!$repeatBackup) {
+                    if ($confirmedDate !== $today) throw new RuntimeException('The backup choice expired. Reload and try again.');
+                    $reuseBackup = $this->findCompletedBackup($backup);
+                    if (!$reuseBackup) throw new RuntimeException('Today has no completed backup to reuse. Choose another backup.');
+                    $backup = $reuseBackup;
+                } else {
+                    $backup .= '/' . date(DIRECTORY_SEPARATOR === '\\' ? 'H-i' : 'H:i');
+                    if (file_exists($backup)) $backup .= '-' . date('s') . '-' . bin2hex(openssl_random_pseudo_bytes(3));
+                }
             }
-            $errors = array();
-            $files = $this->inventory($this->root, '', array('backup', '.git', 'app/webroot/updates', 'app/tmp'), $errors);
-            foreach ($files as $rel => $path) $this->writableErrors($backup . '/' . $rel, $errors);
-            $this->failErrors($errors);
-            $this->mkdirChecked($backup);
-            $count = count($files); $i = 0;
-            foreach ($files as $rel => $path) {
-                $this->copyChecked($path, $backup . '/' . $rel);
-                if (++$i % 100 === 0) $this->event($step, (int)($i * 99 / max(1, $count)), 'Backed up ' . $i . ' / ' . $count . ' files.');
+            if ($reuseBackup) {
+                $this->event($step, 100, 'Reusing completed backup: ' . $backup);
+            } else {
+                $errors = array();
+                $files = $this->inventory($this->root, '', array('backup', '.git', 'app/webroot/updates', 'app/tmp'), $errors);
+                foreach ($files as $rel => $path) $this->writableErrors($backup . '/' . $rel, $errors);
+                $this->failErrors($errors);
+                $this->mkdirChecked($backup);
+                $count = count($files); $i = 0;
+                foreach ($files as $rel => $path) {
+                    $this->copyChecked($path, $backup . '/' . $rel);
+                    if (++$i % 100 === 0) $this->event($step, (int)($i * 99 / max(1, $count)), 'Backed up ' . $i . ' / ' . $count . ' files.');
+                }
+                if (file_put_contents($backup . '/.complete', date('c')) === false) throw new RuntimeException('Cannot record completed backup: ' . $backup);
+                $this->event($step, 100, 'Backup complete: ' . $backup);
             }
-            if (file_put_contents($backup . '/.complete', date('c')) === false) throw new RuntimeException('Cannot record completed backup: ' . $backup);
-            $this->event($step, 100, 'Backup complete: ' . $backup);
 
             $step = 'download';
             $updates = $this->root . '/app/webroot/updates';
@@ -187,26 +205,28 @@ class FlinkisoUpdater {
             $step = 'validate';
             $this->event($step, 0, 'Checking every destination before installing...');
             $errors = array();
-            // Installation-specific settings, data, and the updater itself must survive releases.
-            $skip = array('Config/core.php', 'Config/database.php', 'Config/installed.txt', 'tmp', 'webroot/files', 'webroot/updates', 'Controller/BillingController.php', 'Lib/FlinkisoUpdater.php', 'View/Billing');
+            // Preserve installation-specific settings and data. Updater code is intentionally
+            // installable so fixes in the update repository reach existing installations.
+            $skip = array('Config/core.php', 'Config/database.php', 'Config/installed.txt', 'tmp', 'webroot/files', 'webroot/updates');
             $incoming = $this->inventory($source, '', $skip, $errors);
             if (!$incoming) $errors[] = 'Archive contains no application update files.';
+            $checkedDirectories = array();
             foreach ($incoming as $rel => $path) {
                 $dest = $this->root . '/app/' . $rel;
-                $this->writableErrors($dest, $errors);
                 $parent = dirname($dest);
-                while (strlen($parent) >= strlen($this->root . '/app')) {
+                while (!is_dir($parent) && strlen($parent) >= strlen($this->root . '/app')) $parent = dirname($parent);
+                if (!isset($checkedDirectories[$parent])) {
                     $this->writableErrors($parent, $errors);
-                    $parent = dirname($parent);
+                    $checkedDirectories[$parent] = true;
                 }
                 if (is_dir($dest)) $errors[] = 'File/directory conflict: ' . $dest;
                 if (file_exists($dest . '.flinkiso-new') || is_link($dest . '.flinkiso-new')) $errors[] = 'Unexpected temporary file: ' . $dest . '.flinkiso-new';
             }
             $sqlPath = $source . '/webroot/updates/updates.sql';
-            if (!is_readable($sqlPath)) $errors[] = 'SQL file is missing or unreadable: ' . $sqlPath;
             $this->failErrors($errors);
             $statements = array();
-            foreach (self::splitSql(file_get_contents($sqlPath)) as $sql) {
+            $sqlMissing = !is_readable($sqlPath);
+            foreach ($sqlMissing ? array() : self::splitSql(file_get_contents($sqlPath)) as $sql) {
                 $statements = array_merge($statements, self::splitColumnAdditions($sql));
             }
             // Prepare all source files and rollback copies outside the application first.
@@ -221,7 +241,8 @@ class FlinkisoUpdater {
             $this->event($step, 0, 'Applying SQL before publishing application files.');
             $marker = $this->root . '/backup/.updater/needs-review';
             if (file_put_contents($marker, 'Run: ' . $this->work . "\nBackup: " . $backup . "\nSQL may be partially committed. Inspect run.jsonl before retrying.\n") === false) throw new RuntimeException('Cannot create recovery marker.');
-            $sqlWarnings = 0;
+            $sqlWarnings = $sqlMissing ? 1 : 0;
+            if ($sqlMissing) $this->event($step, 100, 'Warning: updates.sql is absent; continuing with application files.', false, true);
             foreach ($statements as $index => $statement) {
                 try {
                     if (call_user_func($executeSql, $statement) === false) throw new RuntimeException('Database rejected statement.');
@@ -273,6 +294,14 @@ class FlinkisoUpdater {
         return true;
     }
 
+    private function findCompletedBackup($directory) {
+        if (is_file($directory . '/.complete')) return $directory;
+        $matches = glob($directory . '/*/.complete');
+        if (!$matches) return false;
+        usort($matches, function ($a, $b) { return filemtime($b) - filemtime($a); });
+        return dirname($matches[0]);
+    }
+
     protected function download($repo, $path) {
         $url = $repo['url'];
         for ($redirect = 0; $redirect < 6; $redirect++) {
@@ -307,28 +336,67 @@ class FlinkisoUpdater {
     private function extract($archive, $stage, $repo) {
         $zip = new ZipArchive();
         if ($zip->open($archive, ZipArchive::CHECKCONS) !== true) throw new RuntimeException('Invalid or corrupt ZIP archive.');
-        $root = null; $size = 0; $seen = array();
+        $root = null; $size = 0; $seen = array(); $links = array(); $names = array();
         try {
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 $stat = $zip->statIndex($i); $name = $stat['name'];
                 if (!self::safeArchivePath($name)) throw new RuntimeException('Unsafe ZIP entry: ' . $name);
                 $key = strtolower(rtrim($name, '/'));
                 if (isset($seen[$key])) throw new RuntimeException('Duplicate ZIP entry: ' . $name);
-                $seen[$key] = true;
+                $seen[$key] = true; $names[$name] = $i;
                 $parts = explode('/', $name);
                 if ($root === null) $root = $parts[0];
                 if ($root !== $parts[0]) throw new RuntimeException('Archive must contain one repository root.');
                 $opsys = 0; $attr = 0;
-                if ($zip->getExternalAttributesIndex($i, $opsys, $attr) && (($attr >> 16) & 0170000) === 0120000) throw new RuntimeException('ZIP symbolic links are not supported: ' . $name);
-                $size += $stat['size'];
+                if ($zip->getExternalAttributesIndex($i, $opsys, $attr) && (($attr >> 16) & 0170000) === 0120000) {
+                    $target = $zip->getFromIndex($i);
+                    if (!is_string($target) || $target === '' || preg_match('~(^/|\\|:|[\x00-\x1f])~', $target)) throw new RuntimeException('Unsafe ZIP symbolic link: ' . $name);
+                    $links[$name] = $target;
+                } else {
+                    $size += $stat['size'];
+                }
                 if ($size > 2147483648 || $zip->numFiles > 100000) throw new RuntimeException('Archive exceeds the 2 GB / 100,000 entry limit.');
             }
             if (empty($repo['apiArchive']) && strpos($repo['url'], 'api.github.com/') === false && $root !== $repo['folder']) throw new RuntimeException('Repository folder does not match configuration.');
+            // Resolve every link before writing anything. Only links to regular files inside this ZIP are allowed.
+            $resolvedLinks = array();
+            foreach ($links as $name => $unused) {
+                $resolved = $this->resolveZipLink($name, $links, $names);
+                if ($resolved !== null) $resolvedLinks[$name] = $resolved;
+            }
             $this->mkdirChecked($stage);
             if (disk_free_space($stage) < $size * 3) throw new RuntimeException('Insufficient free space for extraction and rollback staging.');
-            if (!$zip->extractTo($stage)) throw new RuntimeException('Cannot extract archive; check write permissions and free space.');
+            // Extract manually so ZipArchive never creates operating-system symlinks.
+            foreach ($names as $name => $index) {
+                $output = $stage . '/' . $name;
+                if (substr($name, -1) === '/') { $this->mkdirChecked(rtrim($output, '/')); continue; }
+                $this->mkdirChecked(dirname($output));
+                $sourceIndex = isset($resolvedLinks[$name]) ? $names[$resolvedLinks[$name]] : $index;
+                $input = $zip->getStream($zip->getNameIndex($sourceIndex));
+                $destination = fopen($output, 'wb');
+                if (!$input || !$destination) throw new RuntimeException('Cannot extract ZIP entry: ' . $name);
+                $copied = stream_copy_to_stream($input, $destination);
+                fclose($input); fclose($destination);
+                if ($copied === false) throw new RuntimeException('Cannot extract ZIP entry: ' . $name);
+            }
             if ($root !== $repo['folder'] && !rename($stage . '/' . $root, $stage . '/' . $repo['folder'])) throw new RuntimeException('Cannot normalize GitHub archive folder.');
         } finally { $zip->close(); }
+    }
+
+    private function resolveZipLink($name, $links, $names, $trail = array()) {
+        if (isset($trail[$name])) return null;
+        $trail[$name] = true;
+        $parts = explode('/', dirname($name) . '/' . $links[$name]); $normal = array();
+        foreach ($parts as $part) {
+            if ($part === '' || $part === '.') continue;
+            if ($part === '..') {
+                if (!$normal) return null;
+                array_pop($normal);
+            } else $normal[] = $part;
+        }
+        $target = implode('/', $normal);
+        if (!isset($names[$target]) || substr($target, -1) === '/') return null;
+        return isset($links[$target]) ? $this->resolveZipLink($target, $links, $names, $trail) : $target;
     }
 
     public static function safeArchivePath($name) {

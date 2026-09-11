@@ -101,10 +101,8 @@
         $.ajax({url: url, method: 'POST', dataType: 'json', data: {operation: 'check', token: token}})
             .done(function (data) {
                 if (data.error) { working(false); message(data.error, true); button.disabled = false; return; }
-                if (data.exists && !window.confirm('A backup already exists for ' + data.date + '. Back up again in an hh:mm folder? Cancel stops the update.')) {
-                    working(false); message('Update cancelled. No files changed.', false); button.disabled = false; return;
-                }
-                run(data.exists, data.date);
+                var repeat = data.exists && window.confirm('A completed backup already exists for ' + data.date + '. Select OK to create another backup, or Cancel to reuse today’s completed backup and continue.');
+                run(repeat, data.date);
             }).fail(function () { working(false); message('Could not check the backup. Reload the page and verify your login.', true); button.disabled = false; });
     });
 }());
