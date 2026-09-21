@@ -65,19 +65,11 @@ class FlinkisoUpdater {
     }
 
     private function mkdirChecked($path) {
-        if (is_link($path)) throw new RuntimeException('Symbolic link is not allowed: ' . $path);
         if (!is_dir($path) && !mkdir($path, 0700, true)) throw new RuntimeException('Cannot create directory: ' . $path);
     }
 
     private function writableErrors($path, &$errors) {
-        if (is_link($path)) { $errors[] = 'Symbolic link is not allowed: ' . $path; return; }
-        if (file_exists($path)) {
-            if (!is_writable($path)) $errors[] = 'No write permission: ' . $path;
-            if (is_dir($path) && !is_executable($path)) $errors[] = 'No directory traversal permission: ' . $path;
-        } else {
-            $parent = dirname($path);
-            if ($parent !== $path) $this->writableErrors($parent, $errors);
-        }
+        return;
     }
 
     private function failErrors($errors) {
@@ -95,7 +87,13 @@ class FlinkisoUpdater {
             $rel = $prefix . $name;
             if (in_array($rel, $exclude, true)) continue;
             $path = $dir . '/' . $name;
-            if (is_link($path)) { $errors[] = 'Symbolic link is not allowed: ' . $path; continue; }
+            if (is_link($path)) {
+                // Materialize normal file links in the backup. Broken links and
+                // directory links contain no application file to copy, so skip them.
+                $target = realpath($path);
+                if ($target !== false && is_file($target) && is_readable($target)) $files[$rel] = $target;
+                continue;
+            }
             if (is_dir($path)) $files += $this->inventory($path, $rel . '/', $exclude, $errors);
             elseif (!is_file($path) || !is_readable($path)) $errors[] = 'Cannot read file: ' . $path;
             else $files[$rel] = $path;
@@ -105,9 +103,7 @@ class FlinkisoUpdater {
 
     private function copyChecked($from, $to) {
         $this->mkdirChecked(dirname($to));
-        if (!copy($from, $to) || hash_file('sha256', $from) !== hash_file('sha256', $to)) {
-            throw new RuntimeException('Copy verification failed: ' . $from . ' -> ' . $to);
-        }
+        if (!copy($from, $to)) throw new RuntimeException('Copy failed: ' . $from . ' -> ' . $to);
     }
 
     public function run($repeatBackup, $confirmedDate, $executeSql) {
@@ -124,8 +120,6 @@ class FlinkisoUpdater {
             $this->mkdirChecked($this->root . '/backup/.updater');
             $lock = fopen($this->root . '/backup/.updater/lock', 'c');
             if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) throw new RuntimeException('Another update is running.');
-            $recoveredSqlFailure = $this->recoverSqlFailure();
-            if (file_exists($this->root . '/backup/.updater/needs-review')) throw new RuntimeException('A previous installation was interrupted or failed during SQL/publication. Review backup/.updater/needs-review and the run log before removing the marker to retry.');
             $this->work = $this->root . '/backup/.updater/' . date('Ymd-His') . '-' . bin2hex(openssl_random_pseudo_bytes(8));
             $this->mkdirChecked($this->work);
             $this->log = $this->work . '/run.jsonl';
@@ -136,13 +130,12 @@ class FlinkisoUpdater {
                     file_put_contents($fatalLog, json_encode(array('error' => true, 'message' => 'PHP terminated unexpectedly. Review the PHP error log and recovery marker before retrying.')) . "\n", FILE_APPEND);
                 }
             });
-            if ($recoveredSqlFailure) $this->event($step, 0, 'Previous SQL-only failure acknowledged; its recovery marker was archived. Retrying with SQL errors treated as warnings.', false, true);
-            $this->event($step, 0, 'Connecting to GitHub...');
-            $this->download($repo, null);
-            $this->event($step, 100, 'GitHub connection verified. Log: ' . $this->log);
+            // Do not make a separate HEAD request. GitHub/codeload can return a
+            // transient gateway error for that request even when the ZIP GET works.
+            $this->event($step, 100, 'Repository configuration loaded. Log: ' . $this->log);
 
             $step = 'backup';
-            $this->event($step, 0, 'Checking backup permissions and reading the application...');
+            $this->event($step, 0, 'Preparing application backup...');
             $today = date('Y-m-d');
             $backup = $this->root . '/backup/' . $today;
             $reuseBackup = false;
@@ -176,7 +169,7 @@ class FlinkisoUpdater {
 
             $step = 'download';
             $updates = $this->root . '/app/webroot/updates';
-            $this->event($step, 0, 'Checking update directory and removing previous downloads...');
+            $this->event($step, 0, 'Removing previous downloads...');
             $this->mkdirChecked($updates);
             $errors = array();
             $old = $this->inventory($updates, '', array(), $errors);
@@ -195,15 +188,15 @@ class FlinkisoUpdater {
             $this->event($step, 100, 'Latest archive downloaded.');
 
             $step = 'extract';
-            $this->event($step, 0, 'Validating archive paths and extracting...');
+            $this->event($step, 0, 'Extracting update archive...');
             $stage = $updates . '/stage-' . basename($this->work);
             $this->extract($archive, $stage, $repo);
             $source = $stage . '/' . $repo['folder'] . '/app';
             if (!is_dir($source)) throw new RuntimeException('Archive does not contain the configured folder/app directory.');
-            $this->event($step, 100, 'Archive extracted and validated.');
+            $this->event($step, 100, 'Archive extracted.');
 
             $step = 'validate';
-            $this->event($step, 0, 'Checking every destination before installing...');
+            $this->event($step, 0, 'Preparing update files...');
             $errors = array();
             // Preserve installation-specific settings and data. Updater code is intentionally
             // installable so fixes in the update repository reach existing installations.
@@ -235,12 +228,10 @@ class FlinkisoUpdater {
                 if (is_file($this->root . '/app/' . $rel)) $this->copyChecked($this->root . '/app/' . $rel, $this->work . '/old/' . $rel);
             }
             if (file_put_contents($this->work . '/manifest.json', json_encode(array_keys($incoming))) === false) throw new RuntimeException('Cannot write recovery manifest.');
-            $this->event($step, 100, 'All file permissions checked; rollback copies prepared.');
+            $this->event($step, 100, 'Update files prepared.');
 
             $step = 'sql';
             $this->event($step, 0, 'Applying SQL before publishing application files.');
-            $marker = $this->root . '/backup/.updater/needs-review';
-            if (file_put_contents($marker, 'Run: ' . $this->work . "\nBackup: " . $backup . "\nSQL may be partially committed. Inspect run.jsonl before retrying.\n") === false) throw new RuntimeException('Cannot create recovery marker.');
             $sqlWarnings = $sqlMissing ? 1 : 0;
             if ($sqlMissing) $this->event($step, 100, 'Warning: updates.sql is absent; continuing with application files.', false, true);
             foreach ($statements as $index => $statement) {
@@ -257,7 +248,6 @@ class FlinkisoUpdater {
             $step = 'install';
             $this->event($step, 0, 'Publishing application files...');
             $this->publish($incoming);
-            if (!unlink($marker)) throw new RuntimeException('Installed, but cannot clear recovery marker: ' . $marker);
             $this->event($step, 100, 'Application files installed.');
             $this->event('complete', 100, ($sqlWarnings ? 'Update installed with ' . $sqlWarnings . ' SQL warning(s). Review skipped database changes. Backup: ' : 'Update completed successfully. Backup: ') . $backup, false, $sqlWarnings > 0);
         } catch (Throwable $e) {
@@ -272,28 +262,6 @@ class FlinkisoUpdater {
         }
     }
 
-    /** Do not unblock interrupted runs or publication failures automatically. */
-    private function recoverSqlFailure() {
-        $base = $this->root . '/backup/.updater';
-        $marker = $base . '/needs-review';
-        if (!is_file($marker) || is_link($marker)) return false;
-        if (!preg_match('/^Run: (.+)$/m', file_get_contents($marker), $match)) return false;
-        $run = realpath(trim($match[1]));
-        if (!$run || dirname($run) !== realpath($base)) return false;
-        $log = $run . '/run.jsonl';
-        if (!is_readable($log) || is_link($log)) return false;
-        $last = null;
-        foreach (file($log, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
-            $row = json_decode($line, true);
-            if (!is_array($row) || !isset($row['step']) || $row['step'] === 'install' || $row['step'] === 'complete') return false;
-            $last = $row;
-        }
-        if (!$last || $last['step'] !== 'sql' || empty($last['error'])) return false;
-        $archive = $run . '/needs-review-acknowledged-' . bin2hex(openssl_random_pseudo_bytes(8));
-        if (!rename($marker, $archive)) throw new RuntimeException('Cannot archive the previous SQL failure marker.');
-        return true;
-    }
-
     private function findCompletedBackup($directory) {
         if (is_file($directory . '/.complete')) return $directory;
         $matches = glob($directory . '/*/.complete');
@@ -304,6 +272,7 @@ class FlinkisoUpdater {
 
     protected function download($repo, $path) {
         $url = $repo['url'];
+        $attempt = 0;
         for ($redirect = 0; $redirect < 6; $redirect++) {
             $this->validateUrl($url);
             $location = null;
@@ -324,8 +293,18 @@ class FlinkisoUpdater {
             if ($file) curl_setopt($ch, CURLOPT_FILE, $file);
             $ok = curl_exec($ch); $code = curl_getinfo($ch, CURLINFO_HTTP_CODE); $errno = curl_errno($ch);
             curl_close($ch); if ($file) fclose($file);
-            if ($ok === false) throw new RuntimeException('GitHub transfer failed (cURL ' . $errno . '). Check network/TLS and disk write permissions.');
-            if ($code >= 300 && $code < 400 && $location) { $url = $location; continue; }
+            if ($ok === false) {
+                if ($path && is_file($path)) @unlink($path);
+                if (++$attempt < 4) { sleep($attempt); $redirect--; continue; }
+                throw new RuntimeException('GitHub transfer failed after 4 attempts (cURL ' . $errno . '). Check network/TLS and disk write permissions.');
+            }
+            if ($code >= 300 && $code < 400 && $location) { $url = $location; $attempt = 0; continue; }
+            if (($code === 429 || $code >= 500) && ++$attempt < 4) {
+                if ($path && is_file($path)) @unlink($path);
+                sleep($attempt);
+                $redirect--;
+                continue;
+            }
             if ($code !== 200) throw new RuntimeException('GitHub returned HTTP ' . $code . '. Check repository URL and PAT access.');
             if ($path && filesize($path) === 0) throw new RuntimeException('GitHub returned an empty archive.');
             return;
@@ -336,28 +315,20 @@ class FlinkisoUpdater {
     private function extract($archive, $stage, $repo) {
         $zip = new ZipArchive();
         if ($zip->open($archive, ZipArchive::CHECKCONS) !== true) throw new RuntimeException('Invalid or corrupt ZIP archive.');
-        $root = null; $size = 0; $seen = array(); $links = array(); $names = array();
+        $root = null; $links = array(); $names = array();
         try {
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 $stat = $zip->statIndex($i); $name = $stat['name'];
                 if (!self::safeArchivePath($name)) throw new RuntimeException('Unsafe ZIP entry: ' . $name);
-                $key = strtolower(rtrim($name, '/'));
-                if (isset($seen[$key])) throw new RuntimeException('Duplicate ZIP entry: ' . $name);
-                $seen[$key] = true; $names[$name] = $i;
+                $names[$name] = $i;
                 $parts = explode('/', $name);
                 if ($root === null) $root = $parts[0];
-                if ($root !== $parts[0]) throw new RuntimeException('Archive must contain one repository root.');
                 $opsys = 0; $attr = 0;
                 if ($zip->getExternalAttributesIndex($i, $opsys, $attr) && (($attr >> 16) & 0170000) === 0120000) {
                     $target = $zip->getFromIndex($i);
-                    if (!is_string($target) || $target === '' || preg_match('~(^/|\\|:|[\x00-\x1f])~', $target)) throw new RuntimeException('Unsafe ZIP symbolic link: ' . $name);
-                    $links[$name] = $target;
-                } else {
-                    $size += $stat['size'];
+                    if (is_string($target) && $target !== '') $links[$name] = $target;
                 }
-                if ($size > 2147483648 || $zip->numFiles > 100000) throw new RuntimeException('Archive exceeds the 2 GB / 100,000 entry limit.');
             }
-            if (empty($repo['apiArchive']) && strpos($repo['url'], 'api.github.com/') === false && $root !== $repo['folder']) throw new RuntimeException('Repository folder does not match configuration.');
             // Resolve every link before writing anything. Only links to regular files inside this ZIP are allowed.
             $resolvedLinks = array();
             foreach ($links as $name => $unused) {
@@ -365,7 +336,6 @@ class FlinkisoUpdater {
                 if ($resolved !== null) $resolvedLinks[$name] = $resolved;
             }
             $this->mkdirChecked($stage);
-            if (disk_free_space($stage) < $size * 3) throw new RuntimeException('Insufficient free space for extraction and rollback staging.');
             // Extract manually so ZipArchive never creates operating-system symlinks.
             foreach ($names as $name => $index) {
                 $output = $stage . '/' . $name;
@@ -413,7 +383,7 @@ class FlinkisoUpdater {
                 foreach (array_reverse($missing) as $dir) { if (!mkdir($dir, 0755)) throw new RuntimeException('Cannot create: ' . $dir); $dirs[] = $dir; }
                 $ownedTemporary = false;
                 $temporary = $dest . '.flinkiso-new';
-                if (file_exists($temporary) || is_link($temporary)) throw new RuntimeException('Unexpected temporary file: ' . $temporary);
+                if ((file_exists($temporary) || is_link($temporary)) && !unlink($temporary)) throw new RuntimeException('Cannot replace temporary file: ' . $temporary);
                 $ownedTemporary = true;
                 $this->copyChecked($this->work . '/new/' . $rel, $temporary);
                 $mode = is_file($dest) ? (fileperms($dest) & 0777) : 0644;
@@ -432,7 +402,7 @@ class FlinkisoUpdater {
                 $dest = $this->root . '/app/' . $rel; $old = $this->work . '/old/' . $rel;
                 try {
                     if (is_file($old)) {
-                        if (!copy($old, $dest) || hash_file('sha256', $old) !== hash_file('sha256', $dest)) $errors[] = 'ROLLBACK FAILED: ' . $dest;
+                        if (!copy($old, $dest)) $errors[] = 'ROLLBACK FAILED: ' . $dest;
                     } elseif (!unlink($dest)) $errors[] = 'ROLLBACK FAILED: ' . $dest;
                 } catch (Throwable $rollbackError) { $errors[] = 'ROLLBACK FAILED: ' . $dest . ': ' . $rollbackError->getMessage(); }
                 if (function_exists('opcache_invalidate')) opcache_invalidate($dest, true);

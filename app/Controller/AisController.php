@@ -115,7 +115,14 @@ class AisController extends AppController {
             if (!is_array($existingFields)) {
                 return $this->_jsonResponse(false, array('message' => __('The current form has an invalid saved field definition.')), 422);
             }
-            $formContext = $this->_formContext($customTable, $existingFields);
+            $existingChildTables = $this->CustomTable->find('all', array(
+                'recursive' => -1,
+                'conditions' => array(
+                    'CustomTable.custom_table_id' => $customTableId,
+                    'CustomTable.company_id' => $companyId
+                )
+            ));
+            $formContext = $this->_formContext($customTable, $existingFields, $existingChildTables);
             $guidedAction = isset($this->request->data['guided_action']) ? trim($this->request->data['guided_action']) : '';
             if ($guidedAction !== '') {
                 return $this->_handleGuidedFieldAction(
@@ -217,6 +224,22 @@ class AisController extends AppController {
                 'model' => '', 'duration_ms' => 0, 'read_only' => true, 'auto_apply' => false,
                 'apply_token' => '', 'apply_url' => ''
                 ));
+            }
+
+            // Generated forms retain the source Quality Document ID in their
+            // URL and CustomTable record. Allow that document to be supplied
+            // as reference material when reviewing or extending the form.
+            if ($sendCurrentDocument) {
+                $referenceDocument = $this->_prepareQcDocumentReference($qcDocumentId, $companyId);
+                if (!$referenceDocument['success']) {
+                    return $this->_jsonResponse(false, array(
+                        'message' => $referenceDocument['message']
+                    ), $referenceDocument['status']);
+                }
+                $qualityDocumentTitle = $referenceDocument['title'];
+                $documentContext = $referenceDocument['context'];
+                $documentText = $referenceDocument['text'];
+                $documentFileBase64 = $referenceDocument['file_base64'];
             }
         } elseif ($sourceController === 'qc_documents') {
             if ($qcDocumentId === '') {
@@ -650,9 +673,15 @@ class AisController extends AppController {
         $compiled = isset($apiV2Result['compiled']) && is_array($apiV2Result['compiled']) ? $apiV2Result['compiled'] : array('fields' => array(), 'errors' => array('The API did not return a compiled field definition.'));
         $compiledChildren = isset($apiV2Result['child_tables']) && is_array($apiV2Result['child_tables'])
         ? $apiV2Result['child_tables'] : array('tables' => array(), 'errors' => array());
+        $existingChildWarnings = array();
+        if ($isGeneratedForm && !empty($formContext['child_tables']) && !empty($compiledChildren['tables'])) {
+            $filteredChildren = $this->_removeExistingChildTablePlans($compiledChildren['tables'], $formContext['child_tables']);
+            $compiledChildren['tables'] = $filteredChildren['tables'];
+            $existingChildWarnings = $filteredChildren['warnings'];
+        }
         if (!empty($apiV2Result['model'])) $model = (string)$apiV2Result['model'];
         $warnings = isset($modelResponse['warnings']) && is_array($modelResponse['warnings']) ? $modelResponse['warnings'] : array();
-        $warnings = array_values(array_merge($warnings, $compiled['errors'], !empty($compiledChildren['errors']) ? $compiledChildren['errors'] : array()));
+        $warnings = array_values(array_merge($warnings, $compiled['errors'], !empty($compiledChildren['errors']) ? $compiledChildren['errors'] : array(), $existingChildWarnings));
         $intent = in_array($modelResponse['intent'], array('message', 'form_preview', 'clarification'), true) ? $modelResponse['intent'] : 'clarification';
         $message = trim($modelResponse['message']);
         $fieldDetails = $compiled['fields'];
@@ -1197,7 +1226,7 @@ class AisController extends AppController {
         return $expanded;
     }
 
-    private function _formContext($customTable, $fields) {
+    private function _formContext($customTable, $fields, $childTables = array()) {
         $contextFields = array();
         foreach ($fields as $field) {
             if (empty($field['field_name'])) continue;
@@ -1221,11 +1250,87 @@ class AisController extends AppController {
             'options' => $options
             );
         }
+        $contextChildren = array();
+        foreach ((array)$childTables as $childTable) {
+            if (empty($childTable['CustomTable'])) continue;
+            $child = $childTable['CustomTable'];
+            $childFields = json_decode(isset($child['fields']) ? $child['fields'] : '', true);
+            $contextChildFields = array();
+            foreach ((array)$childFields as $childField) {
+                if (empty($childField['field_name'])) continue;
+                $childLabel = isset($childField['field_label']) ? $this->_decodeFieldLabel($childField['field_label']) : '';
+                $contextChildFields[] = array(
+                    'field_name' => $childField['field_name'],
+                    'field_label' => $childLabel !== '' ? $childLabel : Inflector::humanize($childField['field_name']),
+                    'data_type' => isset($childField['data_type']) ? $childField['data_type'] : ''
+                );
+            }
+            $contextChildren[] = array(
+                'name' => isset($child['name']) ? $child['name'] : '',
+                'table_name' => isset($child['table_name']) ? $child['table_name'] : '',
+                'fields' => $contextChildFields
+            );
+        }
+
         return array(
         'form_name' => $customTable['CustomTable']['name'],
         'table_name' => $customTable['CustomTable']['table_name'],
-        'fields' => $contextFields
+        'fields' => $contextFields,
+        'child_tables' => $contextChildren
         );
+    }
+
+    private function _removeExistingChildTablePlans($plans, $existingChildren) {
+        $existingKeys = array();
+        $existingFieldSets = array();
+        foreach ((array)$existingChildren as $child) {
+            foreach (array('name', 'table_name') as $key) {
+                if (!empty($child[$key])) $existingKeys[$this->_childTableComparisonKey($child[$key])] = true;
+            }
+            $fieldSet = array();
+            foreach (!empty($child['fields']) ? (array)$child['fields'] : array() as $field) {
+                $fieldName = !empty($field['field_name']) ? $field['field_name'] : (!empty($field['n']) ? $field['n'] : '');
+                $fieldKey = $this->_childTableComparisonKey($fieldName);
+                if ($fieldKey !== '') $fieldSet[$fieldKey] = true;
+            }
+            if ($fieldSet) $existingFieldSets[] = $fieldSet;
+        }
+
+        $remaining = array();
+        $warnings = array();
+        foreach ((array)$plans as $plan) {
+            $name = !empty($plan['name']) ? $plan['name'] : (!empty($plan['n']) ? $plan['n'] : '');
+            $comparisonKey = $this->_childTableComparisonKey($name);
+            $matchesExistingFields = false;
+            $planFieldSet = array();
+            foreach (!empty($plan['fields']) ? (array)$plan['fields'] : array() as $field) {
+                $fieldName = !empty($field['field_name']) ? $field['field_name'] : (!empty($field['n']) ? $field['n'] : '');
+                $fieldKey = $this->_childTableComparisonKey($fieldName);
+                if ($fieldKey !== '') $planFieldSet[$fieldKey] = true;
+            }
+            foreach ($existingFieldSets as $existingFieldSet) {
+                $sharedCount = count(array_intersect_key($planFieldSet, $existingFieldSet));
+                $smallerCount = min(count($planFieldSet), count($existingFieldSet));
+                if ($smallerCount > 0 && $sharedCount >= 2 && ($sharedCount / $smallerCount) >= 0.5) {
+                    $matchesExistingFields = true;
+                    break;
+                }
+            }
+            if (($comparisonKey !== '' && isset($existingKeys[$comparisonKey])) || $matchesExistingFields) {
+                $warnings[] = __('The existing child table %s was recognized and will not be created again.', $name);
+                continue;
+            }
+            $remaining[] = $plan;
+        }
+        return array('tables' => array_values($remaining), 'warnings' => $warnings);
+    }
+
+    private function _childTableComparisonKey($value) {
+        $value = strtolower(trim((string)$value));
+        $value = preg_replace('/^(?:tbl|chd)_/', '', $value);
+        $value = preg_replace('/_?\d+_v\d+s?$/', '', $value);
+        $value = preg_replace('/_v\d+s?$/', '', $value);
+        return preg_replace('/[^a-z0-9]+/', '', $value);
     }
 
     private function _explainFieldVisibility($prompt, $existingFields) {
@@ -1281,6 +1386,91 @@ class AisController extends AppController {
             return filemtime($right) - filemtime($left);
         });
         return is_file($candidates[0]) ? $candidates[0] : '';
+    }
+
+    private function _prepareQcDocumentReference($qcDocumentId, $companyId) {
+        if ($qcDocumentId === '') {
+            return array(
+                'success' => false,
+                'message' => __('This form is not linked to a Quality Document.'),
+                'status' => 422
+            );
+        }
+
+        $conditions = array('QcDocument.id' => $qcDocumentId);
+        if ($companyId) $conditions['QcDocument.company_id'] = $companyId;
+        $qcDocument = $this->QcDocument->find('first', array(
+            'recursive' => -1,
+            'conditions' => $conditions
+        ));
+        if (!$qcDocument) {
+            return array(
+                'success' => false,
+                'message' => __('The linked Quality Document could not be found.'),
+                'status' => 404
+            );
+        }
+
+        $documentPath = $this->_qcDocumentPath($qcDocument);
+        if ($documentPath === '') {
+            return array(
+                'success' => false,
+                'message' => __('The linked Quality Document file could not be found on the FlinkISO server.'),
+                'status' => 404
+            );
+        }
+
+        $extension = strtolower(pathinfo($documentPath, PATHINFO_EXTENSION));
+        $isVisualDocument = in_array($extension, array('pdf', 'docx', 'xlsx'), true);
+        $extracted = $this->_extractDocumentText($documentPath);
+        if (!$extracted['success'] && !$isVisualDocument) {
+            return array(
+                'success' => false,
+                'message' => $extracted['message'],
+                'status' => 422
+            );
+        }
+
+        $documentFileBase64 = '';
+        if ($isVisualDocument) {
+            $documentBytes = @filesize($documentPath);
+            if ($documentBytes === false || $documentBytes <= 0 || $documentBytes > 25 * 1024 * 1024) {
+                return array(
+                    'success' => false,
+                    'message' => __('The linked Quality Document must be smaller than 25 MB for visual AI analysis.'),
+                    'status' => 413
+                );
+            }
+            $rawDocument = @file_get_contents($documentPath);
+            if ($rawDocument === false) {
+                return array(
+                    'success' => false,
+                    'message' => __('FlinkISO could not read the linked Quality Document for visual AI analysis.'),
+                    'status' => 422
+                );
+            }
+            $documentFileBase64 = base64_encode($rawDocument);
+            unset($rawDocument);
+        }
+
+        $document = $qcDocument['QcDocument'];
+        return array(
+            'success' => true,
+            'message' => '',
+            'status' => 200,
+            'title' => $document['title'],
+            'text' => $extracted['success'] ? $extracted['text'] : '',
+            'file_base64' => $documentFileBase64,
+            'context' => array(
+                'id' => $document['id'],
+                'title' => $document['title'],
+                'document_number' => $document['document_number'],
+                'revision_number' => $document['revision_number'],
+                'file_type' => $document['file_type'],
+                'source_file' => basename($documentPath),
+                'text_extraction_warning' => $extracted['success'] ? '' : $extracted['message']
+            )
+        );
     }
 
     private function _extractDocumentText($path) {
