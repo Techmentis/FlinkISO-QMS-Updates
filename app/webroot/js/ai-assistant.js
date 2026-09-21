@@ -1050,7 +1050,7 @@
       instanceRequestId = '';
       $('#fi-ai-instance-busy').hide();
       $('#fi-ai-instance-stop').hide().attr('data-ai-id', '');
-      var sendCurrentDocument = $panel.attr('data-controller') === 'qc_documents' && $('#fi-ai-send-current-document').prop('checked');
+      var sendCurrentDocument = $('#fi-ai-send-current-document').length > 0 && $('#fi-ai-send-current-document').prop('checked');
       appendMessage('user', message);
       $prompt.val('');
       setLoading(true);

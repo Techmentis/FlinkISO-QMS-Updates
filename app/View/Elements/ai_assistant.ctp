@@ -119,10 +119,14 @@ if ((strpos($aiController, 'tbl_') === 0 || strpos($aiController, 'chd_') === 0)
     <form id="fi-ai-form" class="fi-ai-form" novalidate>
       <textarea id="fi-ai-prompt" rows="2" maxlength="4000" placeholder="<?php echo __('Describe what you want FlinkISO to create or update...'); ?>" aria-label="<?php echo __('Message FlinkISO AI'); ?>"></textarea>
       <div class="fi-ai-composer-actions">
-        <?php if ($aiController === 'qc_documents') { ?>
-          <label class="fi-ai-document-option" for="fi-ai-send-current-document" title="<?php echo __('When selected, the current Quality Document is sent to the FlinkISO API for this AI request.'); ?>">
+        <?php if ($aiQcDocumentId !== '') { ?>
+          <label class="fi-ai-document-option" for="fi-ai-send-current-document" title="<?php echo $aiController === 'qc_documents'
+            ? __('When selected, the current Quality Document is sent to the FlinkISO API for this AI request.')
+            : __('When selected, the Quality Document linked to this form is sent to the FlinkISO API as reference material.'); ?>">
             <input type="checkbox" id="fi-ai-send-current-document" value="1">
-            <span><?php echo __('Send current document'); ?></span>
+            <span><?php echo $aiController === 'qc_documents'
+              ? __('Send current document')
+              : __('Use linked QC document'); ?></span>
           </label>
         <?php } ?>
         <span class="fi-ai-local-note"><i class="fa fa-shield"></i> <?php echo __('Secure AI API'); ?></span>
