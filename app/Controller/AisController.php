@@ -442,6 +442,7 @@ class AisController extends AppController {
         $streamBuffer = '';
         $modelContent = '';
         $streamError = '';
+        $streamErrorSource = '';
         $doneReason = '';
         $generatedTokenCount = 0;
         $apiV2Result = null;
@@ -488,7 +489,7 @@ class AisController extends AppController {
         @flush();
         $lastHeartbeat = microtime(true);
 
-        $consumeLine = function ($line) use (&$modelContent, &$streamError, &$doneReason, &$generatedTokenCount, &$apiV2Result, $emitStreamEvent) {
+        $consumeLine = function ($line) use (&$modelContent, &$streamError, &$streamErrorSource, &$doneReason, &$generatedTokenCount, &$apiV2Result, $emitStreamEvent) {
             $chunk = json_decode(trim($line), true);
             if (!is_array($chunk)) return;
             if (!empty($chunk['api_v2_heartbeat'])) return;
@@ -501,6 +502,9 @@ class AisController extends AppController {
                     $streamError = !empty($chunk['error']['message'])
                         ? (string)$chunk['error']['message']
                         : json_encode($chunk['error']);
+                    if (!empty($chunk['error']['source'])) {
+                        $streamErrorSource = (string)$chunk['error']['source'];
+                    }
                 } elseif (!empty($chunk['message'])) {
                     // API v2's shared access layer uses the legacy
                     // {error: 1, message: "..."} shape. Preserve the useful
@@ -508,6 +512,9 @@ class AisController extends AppController {
                     $streamError = (string)$chunk['message'];
                 } else {
                     $streamError = (string)$chunk['error'];
+                }
+                if (!empty($chunk['error_source'])) {
+                    $streamErrorSource = (string)$chunk['error_source'];
                 }
             }
             if (isset($chunk['message']['content'])) $modelContent .= $chunk['message']['content'];
@@ -574,15 +581,15 @@ class AisController extends AppController {
             if ($curlErrno === CURLE_OPERATION_TIMEDOUT) {
                 CakeLog::write('error', 'FlinkISO AI API generation timed out: '.$curlError);
                 return $this->_jsonResponse(false, array(
-                'message' => __('The FlinkISO AI API did not finish generating this form within %s minutes.', round($requestTimeout / 60, 1)),
-                'error_type' => 'generation_timeout',
+                'message' => __('AI error: The model did not finish generating this form within %s minutes.', round($requestTimeout / 60, 1)),
+                'error_type' => 'ai_timeout',
                 'duration_ms' => $durationMs
                 ), 504);
             }
             CakeLog::write('error', 'FlinkISO AI API connection failed: '.$curlError);
             return $this->_jsonResponse(false, array(
-            'message' => __('Could not connect to the FlinkISO AI API.'),
-            'error_type' => 'connection',
+            'message' => __('API error: FlinkISO could not connect to API v2.'),
+            'error_type' => 'api_connection',
             'duration_ms' => $durationMs
             ), 503);
         }
@@ -593,13 +600,20 @@ class AisController extends AppController {
             $isUnauthorized = stripos($streamError, 'unauthorized') !== false ||
                 stripos($streamError, 'invalid api key') !== false ||
                 stripos($streamError, 'incorrect credentials') !== false;
+            $isProviderError = $streamErrorSource === 'ai_provider' || $streamErrorSource === 'ai_transport';
             return $this->_jsonResponse(false, array(
             'message' => $isBusy
                 ? __('FlinkISO AI is processing another request. Wait for it to finish, or stop it from the panel where it was started.')
-                : ($isUnauthorized
-                    ? __('This FlinkISO instance is not authorized for API v2 AI. Confirm that its company ID is registered and AI access is enabled on the API server.')
-                    : $streamError),
-            'error_type' => $isBusy ? 'busy' : ($isUnauthorized ? 'ai_auth' : 'ai_api'),
+                : ($isProviderError
+                    ? ($isUnauthorized
+                        ? __('AI error: The configured AI provider rejected its API key. Update the AI API key in FlinkISO settings. API v2 was reached successfully.')
+                        : __('AI error: %s', $streamError))
+                    : ($isUnauthorized
+                        ? __('API error: API v2 rejected this FlinkISO instance. Confirm that the company ID is registered and API/AI access is enabled on the API server.')
+                        : __('API error: %s', $streamError))),
+            'error_type' => $isBusy ? 'busy' : ($isProviderError
+                ? ($isUnauthorized ? 'ai_provider_auth' : 'ai_provider')
+                : ($isUnauthorized ? 'api_v2_auth' : 'ai_api')),
             'duration_ms' => $durationMs
             ), $isBusy ? 429 : ($isUnauthorized ? 401 : 502));
         }
@@ -607,7 +621,8 @@ class AisController extends AppController {
         if ($httpCode < 200 || $httpCode >= 300 || ($modelContent === '' && !$apiV2Result)) {
             CakeLog::write('error', 'FlinkISO AI API returned HTTP '.$httpCode.'.');
             return $this->_jsonResponse(false, array(
-            'message' => __('The FlinkISO AI API returned an invalid response.'),
+            'message' => __('API error: The FlinkISO AI API returned an invalid response.'),
+            'error_type' => 'api_invalid_response',
             'duration_ms' => $durationMs
             ), 502);
         }
@@ -615,7 +630,7 @@ class AisController extends AppController {
         if ($doneReason === 'length') {
             CakeLog::write('error', 'FlinkISO AI output was truncated after '.$generatedTokenCount.' tokens.');
             return $this->_jsonResponse(false, array(
-            'message' => __('The AI service reached its output limit before it finished the form. No partial form was created. Please try again.'),
+            'message' => __('AI error: The model reached its output limit before it finished the form. No partial form was created. Please try again.'),
             'error_type' => 'output_truncated',
             'generated_tokens' => $generatedTokenCount,
             'duration_ms' => $durationMs
@@ -625,7 +640,8 @@ class AisController extends AppController {
         $modelResponse = $apiV2Result && isset($apiV2Result['model_response']) ? $apiV2Result['model_response'] : null;
         if (!is_array($modelResponse) || !isset($modelResponse['intent'], $modelResponse['operation'], $modelResponse['message'], $modelResponse['fields'], $modelResponse['insert_after'], $modelResponse['target_field'], $modelResponse['new_field_label'], $modelResponse['options_to_add'], $modelResponse['fields_to_remove'])) {
             return $this->_jsonResponse(false, array(
-            'message' => __('The AI response did not match the required preview format.'),
+            'message' => __('AI error: The model response did not match the required FlinkISO preview format.'),
+            'error_type' => 'ai_invalid_format',
             'duration_ms' => $durationMs
             ), 502);
         }

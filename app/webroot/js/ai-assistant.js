@@ -337,7 +337,13 @@
           var serviceError = typeof chunk.error === 'string'
             ? chunk.error
             : (chunk.error.message || JSON.stringify(chunk.error));
-          $live.text($live.text() + '\n[AI service error] ' + serviceError);
+          var errorSource = typeof chunk.error === 'object' && chunk.error.source
+            ? chunk.error.source
+            : '';
+          var errorLabel = errorSource === 'ai_provider' || errorSource === 'ai_transport'
+            ? 'AI error'
+            : 'API error';
+          $live.text($live.text() + '\n[' + errorLabel + '] ' + serviceError);
         }
         if (chunk.done) {
           var metrics = {
