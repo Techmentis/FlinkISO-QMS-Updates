@@ -13,6 +13,7 @@ class AisController extends AppController {
     public $uses = array('CustomTable', 'QcDocument', 'Ai');
     private $_debugStream = false;
     private $_historyId = '';
+    private $_historyCompanyId = '';
     private $_rawModelResponse = '';
 
     public function beforeFilter() {
@@ -500,6 +501,11 @@ class AisController extends AppController {
                     $streamError = !empty($chunk['error']['message'])
                         ? (string)$chunk['error']['message']
                         : json_encode($chunk['error']);
+                } elseif (!empty($chunk['message'])) {
+                    // API v2's shared access layer uses the legacy
+                    // {error: 1, message: "..."} shape. Preserve the useful
+                    // message instead of reporting the numeric flag as "1".
+                    $streamError = (string)$chunk['message'];
                 } else {
                     $streamError = (string)$chunk['error'];
                 }
@@ -584,12 +590,14 @@ class AisController extends AppController {
         if ($streamError !== '') {
             CakeLog::write('error', 'FlinkISO AI API error: '.$streamError);
             $isBusy = stripos($streamError, 'already processing') !== false;
-            $isUnauthorized = stripos($streamError, 'unauthorized') !== false || stripos($streamError, 'invalid api key') !== false;
+            $isUnauthorized = stripos($streamError, 'unauthorized') !== false ||
+                stripos($streamError, 'invalid api key') !== false ||
+                stripos($streamError, 'incorrect credentials') !== false;
             return $this->_jsonResponse(false, array(
             'message' => $isBusy
                 ? __('FlinkISO AI is processing another request. Wait for it to finish, or stop it from the panel where it was started.')
                 : ($isUnauthorized
-                    ? __('The AI provider rejected the API key. Create or copy a valid key from the provider, then save it again in AI Setup.')
+                    ? __('This FlinkISO instance is not authorized for API v2 AI. Confirm that its company ID is registered and AI access is enabled on the API server.')
                     : $streamError),
             'error_type' => $isBusy ? 'busy' : ($isUnauthorized ? 'ai_auth' : 'ai_api'),
             'duration_ms' => $durationMs
@@ -2301,10 +2309,15 @@ private function _startAiHistory($prompt, $sourceController, $sourceAction, $cus
     try {
         if (!$this->_ensureAiTable()) return;
         $id = CakeText::uuid();
+        // Keep the tenant identity in controller memory. The long-running
+        // preview releases the PHP session before contacting API v2, so the
+        // Session component is not a reliable source when the terminal
+        // history update runs several minutes later.
+        $this->_historyCompanyId = (string)$this->Session->read('User.company_id');
         $this->Ai->create();
         if ($this->Ai->save(array('Ai' => array(
         'id' => $id,
-        'company_id' => $this->Session->read('User.company_id'),
+        'company_id' => $this->_historyCompanyId,
         'user_id' => $this->Session->read('User.id'),
         'user_name' => (string)$this->Session->read('User.name'),
         'source_controller' => $sourceController,
@@ -2359,7 +2372,7 @@ private function _finishAiHistory($success, $body, $statusCode) {
         'Ai.modified' => $dataSource->value(date('Y-m-d H:i:s'))
         ), array(
         'Ai.id' => $this->_historyId,
-        'Ai.company_id' => $this->Session->read('User.company_id')
+        'Ai.company_id' => $this->_historyCompanyId
         ));
         if (!$updated) CakeLog::write('error', 'AI history completion update failed for '.$this->_historyId.'.');
         $this->Ai->clear();
