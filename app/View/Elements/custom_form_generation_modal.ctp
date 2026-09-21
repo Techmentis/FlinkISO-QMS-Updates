@@ -1,3 +1,27 @@
+<style type="text/css">
+	#custom-form-generation-modal.in{
+		display:flex!important;
+		align-items:center;
+		justify-content:center;
+		padding:16px!important;
+	}
+	#custom-form-generation-modal .modal-dialog{
+		position:relative;
+		top:auto!important;
+		left:auto!important;
+		width:560px!important;
+		max-width:100%;
+		margin:0!important;
+		-webkit-transform:none!important;
+		-ms-transform:none!important;
+		-o-transform:none!important;
+		transform:none!important;
+	}
+	#custom-form-generation-modal .modal-content{
+		width:100%;
+		border-radius:10px;
+	}
+</style>
 <div class="modal fade" id="custom-form-generation-modal" tabindex="-1" role="dialog" aria-labelledby="custom-form-generation-title">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">

@@ -1,17 +1,8 @@
-<head>
-    <style type="text/css">
-        body{margin:0; padding: 10px; background-color: #fff; width:100%; font-family:arial;text-align:left;}
-    </style>
-</head>
-<body>    
-    <div class="top">
-        <div class="logo">Flink<strong>ISO</strong></div>
-    </div>
-    <div class="content">
-        <h3>FlinkISO : Approval Reminder</h3>
-        <p>Dear User,</p>
-        <p>You have approval request pending sice <?php echo $date ;?>.<br /><br /></p>
-        <p>Please login to QMS application and process the request.</p>
-    </div>
-    
-</body>
+<?php echo $this->element('Emails/email_header', array(
+    'emailTitle' => 'Approval Reminder',
+    'emailPreheader' => 'You have a pending approval request.'
+)); ?>
+<p style="margin:0 0 20px 0;">Dear User,</p>
+<p style="margin:0 0 20px 0;">You have had an approval request pending since <strong><?php echo h($date); ?></strong>.</p>
+<p style="margin:0;">Please log in to FlinkISO QMS and process the request.</p>
+<?php echo $this->element('Emails/email_footer'); ?>

@@ -1,4 +1,9 @@
-<?php echo $this->Form->input('CustomTrigger.changed_field_value',array('id'=>'CustomTriggerChangedFieldValue', 'class'=>'form-control','options'=>$result)); ?>
+<?php
+$options = array('id'=>'CustomTriggerChangedFieldValue', 'class'=>'form-control');
+if (!empty($hasOptions)) $options['options'] = $result;
+else $options['type'] = 'text';
+echo $this->Form->input('CustomTrigger.changed_field_value', $options);
+?>
 <script type="text/javascript">
-	$("#CustomTriggerChangedFieldValue").chosen();
+	if ($('#CustomTriggerChangedFieldValue').is('select')) $("#CustomTriggerChangedFieldValue").chosen();
 </script>

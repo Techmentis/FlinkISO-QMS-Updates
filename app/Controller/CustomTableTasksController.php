@@ -42,12 +42,12 @@ public function add($custom_table_id = nuu) {
     $this->Session->setFlash(__('Duplicate Task. Please try other options'));
 }
 }
-
 $customTable = $this->CustomTableTask->CustomTable->find('first',array('conditions'=>array('CustomTable.id'=>$custom_table_id),'recursive'=>0));
 $fields = json_decode($customTable['CustomTable']['fields'],true);
+
         // $f = 0;
 foreach($fields as $field){
-    if($field['linked_to'] == 'Employees'){$result['emp'][$field['field_name']] = $field['field_name'];}
+    if($field['linked_to'] == 'Employee' || $field['linked_to'] == 'Employees' || $field['linked_to'] == 'User' || $field['linked_to'] == 'Users'){$result['emp'][$field['field_name']] = $field['field_name'];}
     if($field['data_type'] == 'radio'){$result['radio'][$field['field_name']] = $field['field_name'];}
     if($field['data_type'] == 'date'){$result['date'][$field['field_name']] = $field['field_name'];}
     

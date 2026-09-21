@@ -1,9 +1,15 @@
 <ul class="nav navbar-nav navbar-right">
   <?php 
+	  $aiController = $this->request->params['controller'];
+	  $aiEnabled = $aiController === 'qc_documents' || strpos($aiController, 'tbl_') === 0 || strpos($aiController, 'chd_') === 0;
+	  if (Configure::read('AI.ai_enabled') === true && $aiEnabled) {
+	    echo '<li class="fi-ai-nav-item"><a href="#" id="ask_ai_icon" class="tooltip1" aria-controls="load_ai_container" aria-expanded="false" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="FlinkISO AI">'. $this->Html->image("ai-svgrepo-com.svg",array("width"=>"20px")).'
+	<span class="sr-only">Open FlinkISO AI</span></a></li>';
+	  }
   if($this->Session->read('User.is_mr') == true){
     echo '<li class="">'.$this->Html->link('<i class="fa fa-cloud-download"></i>'.$update,array('controller'=>'billing','action'=>'update','timestamp'=>date('ymdhis')),array('class'=>'tooltip1','escape'=>false,'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Updates')).'</li>';
   }
-  ?>  
+  ?>
   <li class="dropdown user user-menu">
     <a href="#" class="dropdown-toggle user-menu-small" data-toggle="dropdown">
       <?php
@@ -51,21 +57,3 @@
   </ul>
 </li>
 </ul>
-<?php
-  $callinput['controller'] = $this->request->controller;
-  $callinput['action'] = $this->request->action;
-  $callinput['pass'] = $this->request->params['pass'];
-  $callinput['named'] = $this->request->named['named'];
-  if(isset($document) && !empty($document))$callinput['named']['document_found'] = $document['QcDocument']['id'];
-  $callinput = base64_encode(json_encode($callinput));
-?>
-
-<script>
-  $().ready(function(){
-    $("#ask_ai_icon").on('click',function(){
-          $("#load_ai_container").removeClass('hide');
-          $("#load_ai_container").load("<?php echo Router::url('/', true); ?>ais/ask_ai/<?php echo $callinput;?>");
-      });
-  })
-</script>
-

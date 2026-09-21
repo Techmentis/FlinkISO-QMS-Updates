@@ -10,6 +10,14 @@ function putFixture($root, $rel, $content) { if (!is_dir(dirname($root . '/' . $
 function removeFixture($path) { if (is_dir($path) && !is_link($path)) { foreach (scandir($path) as $name) if ($name !== '.' && $name !== '..') removeFixture($path . '/' . $name); rmdir($path); } else unlink($path); }
 $base = sys_get_temp_dir() . '/flinkiso-test-' . bin2hex(random_bytes(8)); mkdir($base);
 try {
+    $appRoot = dirname(__DIR__, 3);
+    $updateSql = file_get_contents($appRoot . '/webroot/updates/updates.sql');
+    $installSql = file_get_contents($appRoot . '/webroot/schema/flinkiso-on-premise.sql');
+    ensure(count(FlinkisoUpdater::splitSql($updateSql)) >= 9, 'Email-trigger updater SQL is missing required statements.');
+    ensure(substr_count($installSql, 'CREATE TABLE `email_trigger_outboxes`') === 1, 'Fresh installer contains duplicate email outbox definitions.');
+    ensure(substr_count($installSql, 'CREATE TABLE `email_trigger_deliveries`') === 1, 'Fresh installer must create one delivery table.');
+    ensure(strpos($updateSql, 'MODIFY `sr_no` int(11) NOT NULL AUTO_INCREMENT') !== false, 'Updater does not repair the outbox sequence column.');
+    ensure(strpos($updateSql, "MODIFY `created_by` varchar(36) NOT NULL DEFAULT '0'") !== false, 'Updater does not repair system audit defaults.');
     $parsed = FlinkisoUpdater::splitSql("-- comment;\nINSERT INTO t VALUES ('a;b', 'it''s'); /* x; */\nALTER TABLE t ADD x INT; # trailing");
     ensure(count($parsed) === 2, 'SQL splitting failed');
     foreach (array('../evil', '/absolute', 'a/../../evil', 'a\\evil', 'a/C:evil') as $path) ensure(!FlinkisoUpdater::safeArchivePath($path), 'Accepted traversal');
@@ -63,5 +71,5 @@ try {
         if ($scenario === 'repeat-allowed') ensure(count(glob($root . '/backup/' . date('Y-m-d') . '/*/.complete')) === 1, 'Repeat backup missing hh:mm subdirectory');
         echo "PASS $scenario\n";
     }
-    echo "PASS SQL lexer, archive paths, repository configuration\n";
+    echo "PASS installer SQL, SQL lexer, archive paths, repository configuration\n";
 } finally { removeFixture($base); }

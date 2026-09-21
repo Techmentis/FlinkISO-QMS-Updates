@@ -1,5 +1,5 @@
 <?php
-    if($this->request->controller == 'custom_tables' || $this->request->params['named']['custom_table_id'] != '')echo $this->Html->link('Custom Tables',array('controller'=>'custom_tables','action'=>'index'),array('class'=>'text')).' /';
+    if($this->request->controller == 'custom_tables' || $this->request->params['named']['custom_table_id'] != '')echo $this->Html->link('Custom Tables',array('controller'=>'custom_tables','action'=>'index','table_type'=>1),array('class'=>'text')).' /';
     if($this->request->controller == 'qc_documents')echo $this->Html->link('Documents',array('controller'=>'qc_documents','action'=>'index'),array('class'=>'text')).' /';
     $controllers = array('branches','departments','employees','users','designations');
     

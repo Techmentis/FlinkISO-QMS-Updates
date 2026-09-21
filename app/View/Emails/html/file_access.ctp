@@ -1,16 +1,7 @@
-<head>
-    <style type="text/css">
-        body{margin:0; padding: 10px; background-color: #fff; width:100%; font-family:arial;text-align:left;}        
-    </style>
-</head>
-<body>
-    <div class="top">
-        <div class="logo">Flink<strong>ISO</strong></div>
-    </div>
-    <div class="content">
-        <h3>FlinkISO : Approval Reminder</h3>
-        <p>Dear User,</p>
-        <p><?php echo $employee; ?></strong> was trying to access the file : <strong> <?php echo $file_name; ?></strong>. <br /> You can login to application and grant user required permissions.</p>
-    </div>    
-</body>
-
+<?php echo $this->element('Emails/email_header', array(
+    'emailTitle' => 'File Access Request',
+    'emailPreheader' => 'A user needs permission to access a file.'
+)); ?>
+<p style="margin:0 0 20px 0;">Dear User,</p>
+<p style="margin:0;"><strong><?php echo h($employee); ?></strong> tried to access <strong><?php echo h($file_name); ?></strong>. Log in to FlinkISO and grant the required permission if appropriate.</p>
+<?php echo $this->element('Emails/email_footer'); ?>

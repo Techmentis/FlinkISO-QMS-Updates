@@ -1,22 +1,11 @@
-<head>
-    <style type="text/css">
-        body{margin:0; padding: 10px; background-color: #fff; width:100%; font-family:arial;text-align:left;}
-        
-        
-        
-    </style>
-</head>
-<body>
-    
-        <div class="top">
-            <div class="logo">Flink<strong>ISO</strong></div>
-        </div>
-        <div class="content">
-            <h3>FlinkISO : Password Reset</h3>
-            <p>Dear User,</p>
-            <p>You are receiving this email in response to your recent <b>Reset Password</b> request.</p>
-            <p>To change your password click the link below.</p>
-            <p><?php echo $baseurl;?></p>
-        </div>
-    
-</body>
+<?php echo $this->element('Emails/email_header', array(
+    'emailTitle' => 'Password Reset',
+    'emailPreheader' => 'Complete your FlinkISO password reset.'
+)); ?>
+<p style="margin:0 0 20px 0;">Dear User,</p>
+<p style="margin:0 0 20px 0;">You are receiving this email in response to your recent password reset request.</p>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px 0;">
+    <tr><td style="background-color:#1769aa;"><a href="<?php echo h($baseurl); ?>" style="display:inline-block; padding:12px 22px; color:#ffffff; text-decoration:none; font-weight:bold;">Reset Password</a></td></tr>
+</table>
+<p style="margin:0; color:#777777; font-size:13px; word-break:break-all;">If the button does not work, open this link:<br><a href="<?php echo h($baseurl); ?>" style="color:#1769aa;"><?php echo h($baseurl); ?></a></p>
+<?php echo $this->element('Emails/email_footer'); ?>

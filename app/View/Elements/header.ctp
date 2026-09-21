@@ -39,10 +39,12 @@
             array('class'=>'tooltip1 btn','escape'=>false,
               'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Documents'
             )).'</li>';
-          echo '<li>'. $this->Html->link('<i class="fa fa-chain"></i>',array('controller'=>'processes', 'action'=>'index','timestamp'=>date('ymdhis')),
-            array('class'=>'tooltip1 btn','escape'=>false,
-              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Processes'
-            )).'</li>';
+          
+        // echo '<li>'. $this->Html->link('<i class="fa fa-chain"></i>',array('controller'=>'processes', 'action'=>'index','timestamp'=>date('ymdhis')),
+         // array('class'=>'tooltip1 btn','escape'=>false,
+              // 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Processes'
+        // )).'</li>';
+
           echo '<li>'. $this->Html->link('<i class="fa fa-gears"></i>',array('controller'=>'custom_tables', 'action'=>'index','table_type'=>1, 'timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn','escape'=>false,
               'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Forms'
@@ -78,6 +80,7 @@
                           <li><?php echo $this->Html->link(__('Add Logo'),array('controller'=>'settings','action'=>'edit',$this->Session->read('User.company_id'),'timestamp'=>date('ymdhis'))); ?></li>
                           <li><?php echo $this->Html->link(__('Add SMTP Email'),array('controller'=>'settings','action'=>'smtp_details',$this->Session->read('User.company_id'),'timestamp'=>date('ymdhis'))); ?></li>
                           <li><?php echo $this->Html->link(__('Add Password Policy'),array('controller'=>'settings','action'=>'password_setting',$this->Session->read('User.company_id'),'timestamp'=>date('ymdhis'))); ?></li>
+                          <?php if($this->Session->read('User.is_mr') == true){ ?><li><?php echo $this->Html->link(__('AI Setup'),array('controller'=>'settings','action'=>'ai_setup','timestamp'=>date('ymdhis'))); ?></li><?php } ?>
                           <li><?php echo $this->Html->link(__('Two Way Authentication'),array('controller'=>'users','action'=>'two_way_authentication',$this->Session->read('User.company_id'),'timestamp'=>date('ymdhis'))); ?></li>
                           <li><?php echo $this->Html->link(__('Define Change History Table'),array('controller'=>'qc_documents','action'=>'define_change_history_table','timestamp'=>date('ymdhis'))); ?></li>
                           <li><?php echo $this->Html->link(__('Graphs And panels'),array('controller'=>'graph_panels','action'=>'graphs','timestamp'=>date('ymdhis'))); ?></li>

@@ -173,7 +173,7 @@
 						$f = $f+1;
 						echo $this->Form->hidden('count',array('default'=>$f));
 						echo $this->Form->hidden('id',array());
-						echo $this->Form->hidden('custom_table_id',array('default'=>$this->request->data['CustomTable']['custom_table_id']));
+							echo $this->Form->hidden('custom_table_id',array('value'=>$customTable['CustomTable']['custom_table_id']));
 						echo $this->Form->hidden('qc_document_id',array());
 						echo $this->Form->hidden('process_id',array());
 						echo $this->Form->hidden('table_type',array());

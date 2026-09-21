@@ -118,7 +118,7 @@ $isMr = (bool)$this->Session->read('User.is_mr');
 						<td><?php echo h($childDocumentTable['name']); ?></td><td><?php echo h($childDocumentTable['table_name']); ?></td><td><?php echo h($childDocumentTable['table_version']); ?></td><td><?php echo h($childDocumentTable['description']); ?></td><td><?php echo $childDocumentTable['publish'] ? 'Published' : 'Unpublished'; ?></td>
 						<td class="text-right">
 							<?php echo $this->Html->link('<i class="fa fa-cogs text-warning"></i>', array('action' => 'view', $childDocumentTable['id'], 'timestamp' => date('ymdhis')), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => 'Open child document form')); ?>
-							<?php echo $this->Html->link('<i class="fa fa-refresh text-warning"></i>', array('action' => 'unlock', $childDocumentTable['id'], 'next_action' => 'recreate_child', 'timestamp' => date('ymdhis')), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => 'Recreate child document form')); ?>
+							<?php echo $this->Html->link('<i class="fa fa-refresh text-warning"></i>', array('action' => 'unlock', $childDocumentTable['id'], 'next_action' => 'recreate', 'timestamp' => date('ymdhis')), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => 'Recreate child document form')); ?>
 						</td>
 					</tr>
 				<?php } ?></tbody>
@@ -132,17 +132,17 @@ $isMr = (bool)$this->Session->read('User.is_mr');
 		<?php echo $this->Form->create('CustomTable', array('url' => array('action' => 'update_tab_settings', $table['id']), 'id' => 'update-tab-settings', 'class' => 'form')); ?>
 		<?php echo $this->Form->hidden('tab_settings', array('id' => 'CustomTableTabSettings')); ?>
 		<div class="box-body">
-			<p class="text-muted">Choose when each main-form tab and child-form tab is available. Leave a visibility rule as Always visible when no field-value rule is required.</p>
+			<p class="text-muted">Choose when each main-form tab or child document is available. Normal child forms are rendered independently and are not controlled here.</p>
 			<table class="table table-bordered tab-configuration-table" id="tab-configuration-table"><thead><tr><th>Tab</th><th>Position</th><th>Action visibility</th><th>Visibility rule</th></tr></thead><tbody>
 			<?php foreach((array)$tabConfigurationRows as $formTab){
-				$settingsForRow = $formTab['type'] === 'child_form' ? $childFormSettings : $tabSettings;
-				$setting = isset($settingsForRow[$formTab['key']]) ? $settingsForRow[$formTab['key']] : array();
+				$settingsGroup = $formTab['type'] === 'child_document' ? (array)$childDocumentSettings : (array)$tabSettings;
+				$setting = isset($settingsGroup[$formTab['key']]) ? $settingsGroup[$formTab['key']] : array();
 				$action = isset($setting['action_visibility']) ? $setting['action_visibility'] : 'always';
 				$fieldName = isset($setting['visibility_field']) ? $setting['visibility_field'] : '';
 				$values = isset($setting['visible_when']) ? (array)$setting['visible_when'] : array();
 			?>
 				<tr class="tab-configuration-row" data-tab-name="<?php echo h($formTab['key']); ?>" data-tab-type="<?php echo h($formTab['type']); ?>" data-selected-values="<?php echo h(json_encode($values)); ?>">
-					<td><strong><?php echo h($formTab['name']); ?></strong><?php echo $formTab['type'] === 'child_form' ? ' <small>(Child form)</small>' : ''; ?></td><td><?php echo h($formTab['position']); ?></td>
+					<td><strong><?php echo h($formTab['name']); ?></strong></td><td><?php echo h($formTab['position']); ?></td>
 					<td><select class="form-control input-sm tab-action-visibility"><option value="always"<?php echo $action === 'always' ? ' selected' : ''; ?>>Always visible</option><option value="hide_add"<?php echo $action === 'hide_add' ? ' selected' : ''; ?>>Hide on Add</option><option value="hide_edit"<?php echo $action === 'hide_edit' ? ' selected' : ''; ?>>Hide on Edit</option><option value="hide_both"<?php echo $action === 'hide_both' ? ' selected' : ''; ?>>Hide on Add &amp; Edit</option></select></td>
 					<td><select class="form-control input-sm tab-visibility-field"><option value="">No field-value rule</option><?php foreach((array)$visibilityFields as $visibilityField){ ?><option value="<?php echo h($visibilityField['name']); ?>" data-options="<?php echo h(json_encode($visibilityField['options'])); ?>"<?php echo $fieldName === $visibilityField['name'] ? ' selected' : ''; ?>><?php echo h($visibilityField['label']); ?></option><?php } ?></select><select class="form-control input-sm tab-visibility-values" multiple style="margin-top:6px"></select></td>
 				</tr>
@@ -155,7 +155,7 @@ $isMr = (bool)$this->Session->read('User.is_mr');
 		function loadValues(row){ var field=row.find('.tab-visibility-field option:selected'), values=row.find('.tab-visibility-values'), options=[], selected=[]; try{options=JSON.parse(field.attr('data-options')||'[]'); selected=JSON.parse(row.attr('data-selected-values')||'[]');}catch(e){} values.empty(); $.each(options,function(i,item){ $('<option/>',{value:item,text:item,selected:($.inArray(item,selected)>-1)}).appendTo(values); }); values.prop('disabled',!options.length).trigger('chosen:updated'); }
 		$('#tab-configuration-table .tab-configuration-row').each(function(){ loadValues($(this)); });
 		$('#tab-configuration-table').on('change','.tab-visibility-field',function(){ loadValues($(this).closest('tr')); });
-		$('#update-tab-settings').on('submit',function(){ var settings={tabs:{},child_forms:{}}; $('#tab-configuration-table .tab-configuration-row').each(function(){ var row=$(this), setting={action_visibility:row.find('.tab-action-visibility').val(),visibility_field:row.find('.tab-visibility-field').val()||'',visible_when:row.find('.tab-visibility-values').val()||[]}; if(row.attr('data-tab-type')==='child_form') settings.child_forms[row.attr('data-tab-name')]=setting; else settings.tabs[row.attr('data-tab-name')]=setting; }); $('#CustomTableTabSettings').val(JSON.stringify(settings)); });
+		$('#update-tab-settings').on('submit',function(){ var settings={tabs:{},child_documents:{}}; $('#tab-configuration-table .tab-configuration-row').each(function(){ var row=$(this), setting={action_visibility:row.find('.tab-action-visibility').val(),visibility_field:row.find('.tab-visibility-field').val()||'',visible_when:row.find('.tab-visibility-values').val()||[]}; var group=row.attr('data-tab-type')==='child_document'?settings.child_documents:settings.tabs; group[row.attr('data-tab-name')]=setting; }); $('#CustomTableTabSettings').val(JSON.stringify(settings)); });
 	})();
 	</script>
 
@@ -169,7 +169,7 @@ $isMr = (bool)$this->Session->read('User.is_mr');
 
 <?php }elseif($selectedTab === 'permissions'){ ?>
 	<?php if($isMr){ echo $this->Form->create('CustomTable', array('url' => 'updateaccess/'.$table['id'])); ?>
-	<div class="box box-default"><div class="box-header with-border"><h3 class="box-title">Table Permissions</h3></div><div class="box-body table-responsive"><table class="table table-bordered"><tr><th>Creators</th><th>Viewers</th><th>Editors</th><th>Approvers</th></tr><tr><td><?php echo $this->Form->input('creators',array('label'=>false,'multiple'=>true,'options'=>$users,'default'=>$creators)); ?></td><td><?php echo $this->Form->input('viewers',array('label'=>false,'multiple'=>true,'options'=>$users,'default'=>$viewers)); ?></td><td><?php echo $this->Form->input('editors',array('label'=>false,'multiple'=>true,'options'=>$users,'default'=>$editors)); ?></td><td><?php echo $this->Form->input('approvers',array('label'=>false,'multiple'=>true,'options'=>$users,'default'=>$approvers)); ?></td></tr></table></div><div class="box-footer text-right"><?php echo $this->Form->submit('Update Access',array('class'=>'btn btn-sm btn-success')); ?></div></div><?php echo $this->Form->end(); } ?>
+	<div class="box box-default"><div class="box-header with-border"><h3 class="box-title">Table Permissions</h3></div><div class="box-body table-responsive"><table class="table table-bordered"><tr><th>Creators</th><th>Viewers</th><th>Editors</th><th>Approvers</th></tr><tr><td height="300"><?php echo $this->Form->input('creators',array('label'=>false,'multiple'=>true,'options'=>$users,'default'=>$creators)); ?></td><td><?php echo $this->Form->input('viewers',array('label'=>false,'multiple'=>true,'options'=>$users,'default'=>$viewers)); ?></td><td><?php echo $this->Form->input('editors',array('label'=>false,'multiple'=>true,'options'=>$users,'default'=>$editors)); ?></td><td><?php echo $this->Form->input('approvers',array('label'=>false,'multiple'=>true,'options'=>$users,'default'=>$approvers)); ?></td></tr></table></div><div class="box-footer text-right"><?php echo $this->Form->submit('Update Access',array('class'=>'btn btn-sm btn-success')); ?></div></div><?php echo $this->Form->end(); } ?>
 
 <?php }elseif($selectedTab === 'charts_panels'){ ?>
 	<div class="configuration-plain-panel ajax-tab-content" data-load-url="<?php echo Router::url('/', true); ?>graph_panels/custom_table/<?php echo h($table['id']); ?>"><i class="fa fa-refresh fa-spin"></i> Loading chart and panel configuration...</div>

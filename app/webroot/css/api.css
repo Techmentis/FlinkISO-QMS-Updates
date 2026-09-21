@@ -233,6 +233,7 @@
   display: inline;
   white-space: normal;
   overflow-wrap: anywhere;
+/* font-weight:500 !important; */
 }
 
 #sortable > li .checkbox label {

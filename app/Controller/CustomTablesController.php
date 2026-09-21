@@ -2,6 +2,7 @@
 App::uses('AppController', 'Controller');
 App::uses('Folder', 'Utility');
 App::uses('File', 'Utility');
+App::uses('Cache', 'Cache');
 /**
  * CustomTables Controller
  *
@@ -158,10 +159,10 @@ class CustomTablesController extends AppController {
 
         $conditions = $this->_check_request();
         // $accessConditions = array('CustomTable.table_type'=>0);
-        if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 1)$accessConditions[] = array('CustomTable.table_type'=>1,'QcDocument.parent_document_id'=>-1);
+        if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 1)$accessConditions[] = array('QcDocument.parent_document_id'=>-1);
         else if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 2)$accessConditions[] = array('CustomTable.table_type'=>2);
         else if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 3)$accessConditions[] = array('CustomTable.table_type'=>3);
-        else if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 4)$accessConditions[] = array();
+        else if(isset($this->request->params['named']['table_type']) && $this->request->params['named']['table_type'] == 5)$accessConditions[] = array('CustomTable.name LIKE '=>'%chd');
         else {$accessConditions[] = array('CustomTable.table_type'=>array(0,1));$this->request->params['named']['table_type'] = 4;}
         
         $this->CustomTable->virtualFields = array(
@@ -370,13 +371,12 @@ class CustomTablesController extends AppController {
             'order' => array('QcDocument.title' => 'ASC', 'CustomTable.name' => 'ASC')
         ));
         $this->set('childDocumentForms', $childDocumentForms);
-
         $customTableFields = json_decode($customTable['CustomTable']['fields'], true);
         if (!is_array($customTableFields)) $customTableFields = array();
         $savedTabSettings = !empty($customTable['CustomTable']['tab_settings']) ? json_decode($customTable['CustomTable']['tab_settings'], true) : array();
         if (!is_array($savedTabSettings)) $savedTabSettings = array();
         $tabSettings = isset($savedTabSettings['tabs']) && is_array($savedTabSettings['tabs']) ? $savedTabSettings['tabs'] : $savedTabSettings;
-        $childFormSettings = isset($savedTabSettings['child_forms']) && is_array($savedTabSettings['child_forms']) ? $savedTabSettings['child_forms'] : array();
+        $childDocumentSettings = isset($savedTabSettings['child_documents']) && is_array($savedTabSettings['child_documents']) ? $savedTabSettings['child_documents'] : array();
         $formTabs = array();
         $visibilityFields = array();
         foreach ($customTableFields as $field) {
@@ -393,15 +393,41 @@ class CustomTablesController extends AppController {
         foreach ($formTabs as $formTab) {
             $tabConfigurationRows[] = array('type' => 'tab', 'key' => $formTab['name'], 'name' => $formTab['name'], 'position' => 'Group '.($formTab['group'] !== '' ? $formTab['group'] : '-').' / #'.($formTab['sequence'] !== '' ? $formTab['sequence'] : '-'));
         }
-        foreach ($childs as $child) {
-            if (empty($child['CustomTable']['table_name'])) continue;
-            $tabConfigurationRows[] = array('type' => 'child_form', 'key' => $child['CustomTable']['table_name'], 'name' => $child['CustomTable']['name'], 'position' => 'Child form tab');
+        foreach ($childDocumentForms as $childDocumentForm) {
+            $tabConfigurationRows[] = array('type' => 'child_document', 'key' => $childDocumentForm['CustomTable']['id'], 'name' => $childDocumentForm['CustomTable']['name'], 'position' => 'Child document');
         }
-        $this->set(compact('tabSettings', 'childFormSettings', 'visibilityFields', 'tabConfigurationRows'));
+        $this->set(compact('tabSettings', 'childDocumentSettings', 'visibilityFields', 'tabConfigurationRows'));
         $this->set('schedules', $this->CustomTable->QcDocument->Schedule->find('list'));
         $this->set('customArray', $this->CustomTable->customArray);
         $this->loadModel('User');
-        $users = $this->User->find('list', array('conditions' => array('User.publish' => 1, 'User.soft_delete' => 0), 'order' => array('User.name' => 'ASC')));
+        // $users = $this->User->find('list', array('conditions' => array('User.publish' => 1, 'User.soft_delete' => 0), 'order' => array('User.name' => 'ASC')));
+        $usersData = $this->User->find('all', array(
+            'conditions' => array(
+                'User.publish' => 1,
+                'User.soft_delete' => 0
+            ),
+            'fields' => array(
+                'User.id',
+                'User.name',
+                'Department.name',
+                'Branch.name'
+            ),
+            'order' => array(
+                'User.name' => 'ASC'
+            ),
+            'recursive' => 0
+        ));
+
+        $users = array();
+
+        foreach ($usersData as $user) {
+            $users[$user['User']['id']] =
+                $user['User']['name'] . ' - ' .
+                $user['Department']['name'] . ' - ' .
+                $user['Branch']['name'];
+        }
+
+        $this->set(compact('users'));
         $this->set('users', $users);
 
         $documentDefaults = !empty($customTable['QcDocument']) ? $customTable['QcDocument'] : array();
@@ -478,6 +504,624 @@ class CustomTablesController extends AppController {
         echo json_encode(array('success' => true, 'message' => __('Module rebuilt successfully.'), 'rebuilt' => $rebuilt));
     }
 
+    /**
+     * Apply a server-side AI proposal and rebuild the affected generated form
+     * through the established FlinkISO API/MVC generation pipeline.
+     */
+    public function ai_rebuild() {
+        $this->autoRender = false;
+        $this->response->type('json');
+
+        if (!$this->request->is('post')) {
+            return $this->_ai_rebuild_response(false, __('Only POST requests are accepted.'), 405);
+        }
+        if ($this->Session->read('User.is_mr') != true) {
+            return $this->_ai_rebuild_response(false, __('You are not authorized to rebuild this form.'), 403);
+        }
+
+        $token = isset($this->request->data['token']) ? trim($this->request->data['token']) : '';
+        if ($token === '' || !preg_match('/^[a-f0-9]{64}$/i', $token)) {
+            return $this->_ai_rebuild_response(false, __('The AI rebuild request is invalid.'), 422);
+        }
+
+        $sessionKey = 'FlinkisoAI.pending.'.$token;
+        $cacheKey = 'flinkiso_ai_pending_'.$token;
+        $pending = $this->_read_ai_pending_file($token);
+        if (!is_array($pending)) $pending = Cache::read($cacheKey, 'default');
+        // Accept an in-flight token created before the cache migration.
+        if (!is_array($pending)) $pending = $this->Session->read($sessionKey);
+        if (!is_array($pending) || empty($pending['expires']) || $pending['expires'] < time()) {
+            $this->Session->delete($sessionKey);
+            Cache::delete($cacheKey, 'default');
+            $this->_delete_ai_pending_file($token);
+            return $this->_ai_rebuild_response(false, __('This AI rebuild request has expired. Please submit it again.'), 410);
+        }
+        if (empty($pending['user_id']) || $pending['user_id'] !== $this->Session->read('User.id')) {
+            return $this->_ai_rebuild_response(false, __('This AI rebuild request belongs to another user.'), 403);
+        }
+        $companyId = $this->Session->read('User.company_id');
+        if (!empty($pending['company_id']) && $pending['company_id'] !== $companyId) {
+            return $this->_ai_rebuild_response(false, __('This AI rebuild request belongs to another company.'), 403);
+        }
+
+        if (isset($pending['operation']) && $pending['operation'] === 'create_form') {
+            if (!empty($pending['child_tables'])) {
+                $confirmed = !empty($this->request->data['confirm_child_tables']);
+                $parentOnly = !empty($this->request->data['parent_only']);
+                if (!$confirmed && !$parentOnly) {
+                    return $this->_ai_rebuild_response(false, __('Confirm whether the detected child tables should be created.'), 409);
+                }
+                if ($parentOnly) $pending['child_tables'] = array();
+            }
+            // Keep the one-time proposal available until the complete form has
+            // actually been generated. Consuming it before MVC generation made
+            // a recoverable API failure look like an expired request on retry.
+            $pending['expires'] = time() + 900;
+            $this->Session->write($sessionKey, $pending);
+            Cache::write($cacheKey, $pending, 'default');
+            $this->_write_ai_pending_file($token, $pending);
+            $response = $this->_create_ai_form($pending, $companyId);
+            $this->_record_ai_rebuild_history($pending, $response);
+            $body = $response instanceof CakeResponse ? json_decode($response->body(), true) : array();
+            // A child-generation error can still return a successfully created
+            // parent ID. Consume that request too, otherwise Retry would create
+            // a duplicate parent version. Failures with no retained parent keep
+            // the proposal and are safe to retry.
+            if (is_array($body) && (!empty($body['success']) || !empty($body['custom_table_id']))) {
+                $this->Session->delete($sessionKey);
+                Cache::delete($cacheKey, 'default');
+                $this->_delete_ai_pending_file($token);
+            }
+            return $response;
+        }
+        if (empty($pending['custom_table_id']) || empty($pending['source_controller']) || empty($pending['fields']) || !is_array($pending['fields'])) {
+            return $this->_ai_rebuild_response(false, __('The saved AI rebuild request is incomplete.'), 422);
+        }
+
+        $conditions = array(
+            'CustomTable.id' => $pending['custom_table_id'],
+            'CustomTable.table_name' => $pending['source_controller']
+        );
+        if ($companyId) $conditions['CustomTable.company_id'] = $companyId;
+        $customTable = $this->CustomTable->find('first', array('recursive' => -1, 'conditions' => $conditions));
+        if (empty($customTable)) {
+            $response = $this->_ai_rebuild_response(false, __('The generated form could not be found.'), 404);
+            $this->_record_ai_rebuild_history($pending, $response);
+            return $response;
+        }
+
+        $currentFields = json_decode($customTable['CustomTable']['fields'], true);
+        $currentHash = is_array($currentFields) ? hash('sha256', json_encode(array_values($currentFields))) : '';
+        if (empty($pending['base_fields_hash']) || !hash_equals($pending['base_fields_hash'], $currentHash)) {
+            $response = $this->_ai_rebuild_response(false, __('The form changed after the AI proposal was created. Submit the request again to avoid overwriting newer changes.'), 409);
+            $this->_record_ai_rebuild_history($pending, $response);
+            return $response;
+        }
+
+        // Keep the table-level display field synchronized with the one field
+        // marked default in the JSON definition. The generators use both.
+        $normalizedFields = array_values($pending['fields']);
+        $resolvedDefaultField = $this->_resolve_child_default_field($normalizedFields);
+        if (!$resolvedDefaultField) {
+            $response = $this->_ai_rebuild_response(false, __('The updated form has no usable default field.'), 422);
+            $this->_record_ai_rebuild_history($pending, $response);
+            return $response;
+        }
+        $pending['fields'] = $normalizedFields;
+        $customTable['CustomTable']['default_field'] = $resolvedDefaultField;
+        $customTable['CustomTable']['fields'] = json_encode($normalizedFields);
+        $isChildForm = strpos($customTable['CustomTable']['table_name'], 'chd_') === 0 || !empty($customTable['CustomTable']['custom_table_id']);
+        // Consume the proposal before invoking the generator so a repeated or
+        // concurrent browser request cannot rebuild the form twice.
+        $this->Session->delete($sessionKey);
+        Cache::delete($cacheKey, 'default');
+        $this->_delete_ai_pending_file($token);
+        $bufferLevel = ob_get_level();
+        ob_start();
+        try {
+            $result = $this->_rebuild_saved_table($customTable, $isChildForm);
+            while (ob_get_level() > $bufferLevel) ob_end_clean();
+            if ($result instanceof CakeResponse && $result->statusCode() >= 400) {
+                $body = json_decode($result->body(), true);
+                $message = !empty($body['message']) ? $body['message'] : __('The API could not rebuild the form.');
+                $response = $this->_ai_rebuild_response(false, $message, $result->statusCode());
+                $this->_record_ai_rebuild_history($pending, $response);
+                return $response;
+            }
+        } catch (Exception $exception) {
+            while (ob_get_level() > $bufferLevel) ob_end_clean();
+            CakeLog::write('error', 'AI form rebuild failed: '.$exception->getMessage());
+            $response = $this->_ai_rebuild_response(false, __('The API could not rebuild the form. No generated MVC files were replaced.'), 502);
+            $this->_record_ai_rebuild_history($pending, $response);
+            return $response;
+        }
+
+        $saved = $this->CustomTable->find('first', array(
+            'recursive' => -1,
+            'conditions' => array('CustomTable.id' => $pending['custom_table_id']),
+            'fields' => array('CustomTable.fields')
+        ));
+        $savedFields = !empty($saved['CustomTable']['fields']) ? json_decode($saved['CustomTable']['fields'], true) : null;
+        if (!is_array($savedFields) || hash('sha256', json_encode(array_values($savedFields))) !== hash('sha256', json_encode(array_values($pending['fields'])))) {
+            $response = $this->_ai_rebuild_response(false, __('The API finished, but the rebuilt field definition could not be verified.'), 500);
+            $this->_record_ai_rebuild_history($pending, $response);
+            return $response;
+        }
+
+        $this->_clear_cake_cache();
+        // Document/process-backed forms must be opened with their named IDs.
+        // Without them AppController::_prepare_update() cannot resolve the
+        // CustomTable or load the matching ONLYOFFICE document.
+        $hasQcDocument = !empty($customTable['CustomTable']['qc_document_id']);
+        $hasProcess = !empty($customTable['CustomTable']['process_id']);
+        $openAction = ($hasQcDocument || $hasProcess) ? 'add' : 'index';
+        $formRoute = array('controller' => $pending['source_controller'], 'action' => $openAction);
+        if ($openAction === 'add') {
+            $formRoute['custom_table_id'] = $pending['custom_table_id'];
+            if ($hasQcDocument) $formRoute['qc_document_id'] = $customTable['CustomTable']['qc_document_id'];
+            if ($hasProcess) $formRoute['process_id'] = $customTable['CustomTable']['process_id'];
+        }
+        $response = $this->_ai_rebuild_response(true, __('Form rebuilt successfully. Reload this page to use the updated form.'), 200, array(
+            'custom_table_id' => $pending['custom_table_id'],
+            'controller' => $pending['source_controller'],
+            'form_url' => Router::url($formRoute, true),
+            'design_url' => Router::url(array('controller' => 'custom_tables', 'action' => 'recreate', $pending['custom_table_id']), true)
+        ));
+        $this->_record_ai_rebuild_history($pending, $response);
+        return $response;
+    }
+
+    private function _record_ai_rebuild_history($pending, $response) {
+        if (empty($pending['ai_id'])) return;
+        try {
+            $this->loadModel('Ai');
+            $conditions = array(
+                'Ai.id' => $pending['ai_id'],
+                'Ai.company_id' => $this->Session->read('User.company_id'),
+                'Ai.user_id' => $this->Session->read('User.id')
+            );
+            $history = $this->Ai->find('first', array('recursive' => -1, 'conditions' => $conditions));
+            if (empty($history['Ai']['id'])) return;
+            $body = $response instanceof CakeResponse ? json_decode($response->body(), true) : array();
+            if (!is_array($body)) $body = array('success' => false, 'message' => __('The rebuild returned an unreadable response.'));
+            $this->Ai->id = $history['Ai']['id'];
+            $this->Ai->save(array('Ai' => array(
+                'rebuild_response' => json_encode($body),
+                'status' => !empty($body['success']) ? 'applied' : 'failed',
+                'error_details' => empty($body['success']) && !empty($body['message']) ? $body['message'] : '',
+                'http_status' => $response instanceof CakeResponse ? (int)$response->statusCode() : 500,
+                'modified' => date('Y-m-d H:i:s')
+            )), false);
+        } catch (Exception $exception) {
+            CakeLog::write('error', 'AI rebuild history update failed: '.$exception->getMessage());
+        }
+    }
+
+    private function _ai_rebuild_response($success, $message, $statusCode, $extra = array()) {
+        $this->response->type('json');
+        $this->response->statusCode($statusCode);
+        $this->response->body(json_encode(array_merge(array(
+            'success' => (bool)$success,
+            'message' => $message
+        ), $extra)));
+        return $this->response;
+    }
+
+    private function _read_ai_pending_file($token) {
+        $path = TMP.'flinkiso_ai'.DS.$token.'.json';
+        if (!is_file($path) || !is_readable($path)) return null;
+        $pending = json_decode(file_get_contents($path), true);
+        return is_array($pending) ? $pending : null;
+    }
+
+    private function _delete_ai_pending_file($token) {
+        $path = TMP.'flinkiso_ai'.DS.$token.'.json';
+        if (is_file($path)) @unlink($path);
+    }
+
+    private function _write_ai_pending_file($token, $pending) {
+        $directory = TMP.'flinkiso_ai'.DS;
+        if (!is_dir($directory) && !@mkdir($directory, 0700, true)) return false;
+        if (!is_writable($directory)) return false;
+        $json = json_encode($pending);
+        if ($json === false) return false;
+        return @file_put_contents($directory.$token.'.json', $json, LOCK_EX) !== false;
+    }
+
+    private function _create_ai_form($pending, $companyId) {
+        if (empty($pending['qc_document_id']) || empty($pending['fields']) || !is_array($pending['fields'])) {
+            return $this->_ai_rebuild_response(false, __('The saved AI form creation request is incomplete.'), 422);
+        }
+
+        $documentConditions = array('QcDocument.id' => $pending['qc_document_id']);
+        if ($companyId) $documentConditions['QcDocument.company_id'] = $companyId;
+        $qcDocument = $this->CustomTable->QcDocument->find('first', array(
+            'recursive' => -1,
+            'conditions' => $documentConditions
+        ));
+        if (empty($qcDocument)) {
+            return $this->_ai_rebuild_response(false, __('The source Quality Document could not be found.'), 404);
+        }
+
+        $fields = array_values($pending['fields']);
+        $defaultField = $this->_resolve_child_default_field($fields);
+        if (!$defaultField) {
+            return $this->_ai_rebuild_response(false, __('The generated form has no usable default field.'), 422);
+        }
+
+        $tableNameVersion = $this->_make_ai_table_name($qcDocument['QcDocument'], $companyId);
+        if (empty($tableNameVersion[0])) {
+            return $this->_ai_rebuild_response(false, __('FlinkISO could not generate a table name for this document.'), 422);
+        }
+        $userId = $this->Session->read('User.id');
+        $formName = !empty($pending['form_name']) ? trim($pending['form_name']) : $qcDocument['QcDocument']['title'];
+        $password = Security::hash(uniqid((string)mt_rand(), true), 'md5', true);
+        $record = array('CustomTable' => array(
+            'name' => $formName,
+            'description' => __('Created from Quality Document by FlinkISO AI.'),
+            'table_name' => $tableNameVersion[0],
+            'table_version' => $tableNameVersion[1],
+            'table_type' => 0,
+            'form_layout' => 2,
+            'qc_document_id' => $pending['qc_document_id'],
+            'default_field' => $defaultField,
+            'fields' => json_encode($fields),
+            'belongs_to' => json_encode(array()),
+            'has_many' => json_encode(array()),
+            'creators' => json_encode(array($userId)),
+            'password' => $password,
+            're-password' => $password,
+            'publish' => 1,
+            'soft_delete' => 0,
+            'company_id' => $companyId,
+            'created_by' => $userId,
+            'modified_by' => $userId
+        ));
+
+        $this->CustomTable->create();
+        if (!$this->CustomTable->save($record, false)) {
+            CakeLog::write('error', 'AI form record creation failed: '.json_encode($this->CustomTable->validationErrors));
+            return $this->_ai_rebuild_response(false, __('FlinkISO could not save the generated form definition.'), 500);
+        }
+        $customTableId = $this->CustomTable->id;
+        $sourceDocumentCopied = $this->_copy_ai_form_source_document(
+            $qcDocument['QcDocument'],
+            $customTableId,
+            $companyId
+        );
+        $saved = $this->CustomTable->find('first', array(
+            'recursive' => -1,
+            'conditions' => array('CustomTable.id' => $customTableId)
+        ));
+
+        $bufferLevel = ob_get_level();
+        ob_start();
+        try {
+            $result = $this->_rebuild_saved_table($saved, false);
+            while (ob_get_level() > $bufferLevel) ob_end_clean();
+            if ($result instanceof CakeResponse && $result->statusCode() >= 400) {
+                $body = json_decode($result->body(), true);
+                $message = !empty($body['message']) ? $body['message'] : __('The API could not create the form.');
+                $this->_cleanup_failed_ai_form($customTableId, $tableNameVersion[0], $companyId);
+                return $this->_ai_rebuild_response(false, $message, $result->statusCode());
+            }
+        } catch (Exception $exception) {
+            while (ob_get_level() > $bufferLevel) ob_end_clean();
+            CakeLog::write('error', 'AI form creation failed: '.$exception->getMessage());
+            $this->_cleanup_failed_ai_form($customTableId, $tableNameVersion[0], $companyId);
+            return $this->_ai_rebuild_response(false, __('The API could not generate the form. The incomplete definition was removed; you can retry this request.'), 502);
+        }
+
+        // Child tables are created only after the MR user explicitly confirms
+        // the detected repeatable structure in the AI panel.
+        $createdChildren = array();
+        if (!empty($pending['child_tables']) && is_array($pending['child_tables'])) {
+            $childResult = $this->_create_ai_child_tables($saved, $pending['child_tables'], $qcDocument['QcDocument'], $companyId, $userId);
+            if (empty($childResult['success'])) {
+                CakeLog::write('error', 'AI child form creation failed for parent '.$customTableId.': '.implode(' ', $childResult['errors']));
+                return $this->_ai_rebuild_response(false, __('The parent form was created, but FlinkISO could not create its confirmed child table(s): %s', implode(' ', $childResult['errors'])), 502, array(
+                    'custom_table_id' => $customTableId,
+                    'controller' => $tableNameVersion[0]
+                ));
+            }
+            $createdChildren = $childResult['tables'];
+        }
+
+        $this->_clear_cake_cache();
+        $creationMessage = $createdChildren
+        ? __('Form version %s and %s confirmed child table(s) created successfully.', $tableNameVersion[1], count($createdChildren))
+        : __('Form version %s created successfully.', $tableNameVersion[1]);
+        return $this->_ai_rebuild_response(true, $creationMessage, 200, array(
+            'custom_table_id' => $customTableId,
+            'controller' => $tableNameVersion[0],
+            'table_version' => $tableNameVersion[1],
+            'form_url' => Router::url(array(
+                'controller' => $tableNameVersion[0],
+                'action' => 'add',
+                'custom_table_id' => $customTableId,
+                'qc_document_id' => $pending['qc_document_id']
+            ), true),
+            'design_url' => Router::url(array('controller' => 'custom_tables', 'action' => 'recreate', $customTableId), true),
+            'source_document_copied' => $sourceDocumentCopied,
+            'child_tables' => $createdChildren
+        ));
+    }
+
+    /**
+     * Remove only the artifacts belonging to a newly-created AI form whose
+     * initial schema/MVC generation failed. Existing forms never use this path.
+     */
+    private function _cleanup_failed_ai_form($customTableId, $tableName, $companyId) {
+        if (empty($customTableId) || empty($tableName) || !preg_match('/^[a-zA-Z0-9_]+$/', $tableName)) return;
+
+        try {
+            $this->CustomTable->query('DROP TABLE IF EXISTS `'.$tableName.'`');
+        } catch (Exception $exception) {
+            CakeLog::write('error', 'Failed AI table cleanup for '.$tableName.': '.$exception->getMessage());
+        }
+
+        $controllerFile = APP.'Controller'.DS.Inflector::pluralize(Inflector::classify($tableName)).'Controller.php';
+        $modelFile = APP.'Model'.DS.Inflector::classify($tableName).'.php';
+        foreach (array($controllerFile, $modelFile) as $path) {
+            if (is_file($path) && !@unlink($path)) CakeLog::write('error', 'Failed AI file cleanup: '.$path);
+        }
+
+        $viewPath = APP.'View'.DS.Inflector::pluralize(Inflector::classify($tableName));
+        if (is_dir($viewPath)) {
+            $viewFolder = new Folder($viewPath);
+            if (!$viewFolder->delete()) CakeLog::write('error', 'Failed AI view cleanup: '.$viewPath);
+        }
+        if (!empty($companyId)) {
+            $uploadPath = WWW_ROOT.'files'.DS.$companyId.DS.'custom_tables'.DS.$customTableId;
+            if (is_dir($uploadPath)) {
+                $uploadFolder = new Folder($uploadPath);
+                if (!$uploadFolder->delete()) CakeLog::write('error', 'Failed AI upload cleanup: '.$uploadPath);
+            }
+        }
+
+        try {
+            $this->CustomTable->deleteAll(array('CustomTable.id' => $customTableId), false, false);
+        } catch (Exception $exception) {
+            CakeLog::write('error', 'Failed AI definition cleanup for '.$customTableId.': '.$exception->getMessage());
+        }
+    }
+
+    private function _create_ai_child_tables($parent, $plans, $qcDocument, $companyId, $userId) {
+        $result = array('success' => true, 'tables' => array(), 'errors' => array());
+        if (count($plans) > 5) return array('success' => false, 'tables' => array(), 'errors' => array(__('A maximum of five child tables can be generated from one document.')));
+
+        foreach ($plans as $plan) {
+            $friendlyName = !empty($plan['name']) ? trim((string)$plan['name']) : '';
+            $fields = !empty($plan['fields']) && is_array($plan['fields']) ? array_values($plan['fields']) : array();
+            if ($friendlyName === '' || !$fields || count($fields) > 60) {
+                $result['success'] = false;
+                $result['errors'][] = __('A detected child table had an invalid name or field count.');
+                break;
+            }
+            $defaultField = $this->_resolve_child_default_field($fields);
+            if (!$defaultField) {
+                $result['success'] = false;
+                $result['errors'][] = __('Child table %s has no usable default field.', $friendlyName);
+                break;
+            }
+
+            $existingChildren = $this->CustomTable->find('all', array(
+                'recursive' => -1,
+                'conditions' => array('CustomTable.custom_table_id' => $parent['CustomTable']['id']),
+                'fields' => array('CustomTable.table_name', 'CustomTable.name', 'CustomTable.table_version')
+            ));
+            $tableNameVersion = $this->_make_child_table_name($qcDocument['id'], 'qc_documents', count($existingChildren));
+            if (empty($tableNameVersion[0])) {
+                $result['success'] = false;
+                $result['errors'][] = __('FlinkISO could not allocate a table name for %s.', $friendlyName);
+                break;
+            }
+
+            $hasMany = array();
+            foreach ($existingChildren as $existingChild) {
+                $hasMany[] = array(
+                    'table_name' => $existingChild['CustomTable']['table_name'],
+                    'friendly_name' => $existingChild['CustomTable']['name'],
+                    'table_version' => $existingChild['CustomTable']['table_version']
+                );
+            }
+            $hasMany[] = array('table_name' => $tableNameVersion[0], 'friendly_name' => $friendlyName, 'table_version' => $tableNameVersion[1]);
+
+            $password = Security::hash(uniqid((string)mt_rand(), true), 'md5', true);
+            $childData = array('CustomTable' => array(
+                'name' => $friendlyName,
+                'description' => __('Detected as a repeatable document section by FlinkISO AI.'),
+                'table_name' => $tableNameVersion[0],
+                'table_version' => $tableNameVersion[1],
+                'table_type' => 0,
+                'form_layout' => 2,
+                'qc_document_id' => $qcDocument['id'],
+                'custom_table_id' => $parent['CustomTable']['id'],
+                'default_field' => $defaultField,
+                'fields' => json_encode($fields),
+                'belongs_to' => json_encode(array()),
+                'has_many' => json_encode(array()),
+                'creators' => json_encode(array($userId)),
+                'password' => $password,
+                're-password' => $password,
+                'publish' => 1,
+                'soft_delete' => 0,
+                'company_id' => $companyId,
+                'created_by' => $userId,
+                'modified_by' => $userId
+            ), 'CustomTableFields' => $fields);
+
+            $this->CustomTable->create();
+            if (!$this->CustomTable->save($childData, false)) {
+                $result['success'] = false;
+                $result['errors'][] = __('FlinkISO could not save child table %s.', $friendlyName);
+                break;
+            }
+            $childId = $this->CustomTable->id;
+            $dataSource = $this->CustomTable->getDataSource();
+            $this->CustomTable->updateAll(
+                array('CustomTable.has_many' => $dataSource->value(json_encode(array_values($hasMany)))),
+                array('CustomTable.id' => $parent['CustomTable']['id'])
+            );
+            $parent['CustomTable']['has_many'] = json_encode(array_values($hasMany));
+            $parent['CustomTable']['has_many_existing'] = json_encode(array_values($hasMany));
+
+            $childData['linkedTos'] = json_encode($this->_rebuild_linked_tos());
+            $childData['linkedTosWithDisplay'] = json_encode($this->_returnDetaultField($fields));
+            $apiPayload = array($childData, $tableNameVersion[0], $friendlyName, $defaultField, $parent);
+            $apiResponse = json_decode($this->curl('post', 'custom_forms', 'create_child', $apiPayload), true);
+            if (!$apiResponse || !empty($apiResponse['error']) || empty($apiResponse['response']['finalResult'])) {
+                $result['success'] = false;
+                $result['errors'][] = __('API V2 could not generate child table %s.', $friendlyName);
+                break;
+            }
+            $generated = json_decode($apiResponse['response']['finalResult'], true);
+            if (!is_array($generated) || !$this->_generated_code_is_safe($generated)) {
+                $result['success'] = false;
+                $result['errors'][] = __('API V2 returned unsafe or incomplete code for child table %s.', $friendlyName);
+                break;
+            }
+            $sqld = "`qc_document_id` varchar(36) NOT NULL DEFAULT ".$dataSource->value($qcDocument['id'], 'string').",\n";
+            $sqld .= "`custom_table_id` varchar(36) NOT NULL DEFAULT ".$dataSource->value($childId, 'string').",";
+            // _add_new_table deliberately refuses to reconcile a schema when
+            // request data names a different table. During AI parent creation
+            // the active request still names the parent, so provide the child
+            // payload for this one schema operation and restore it afterwards.
+            $parentRequestData = $this->request->data;
+            $this->request->data = $childData;
+            try {
+                $childTableCreated = $this->_add_new_table($tableNameVersion[0], $defaultField, $sqld, $fields, true);
+            } catch (Exception $exception) {
+                $childTableCreated = false;
+                CakeLog::write('error', 'AI child table schema creation failed for '.$tableNameVersion[0].': '.$exception->getMessage());
+            }
+            $this->request->data = $parentRequestData;
+            if (!$childTableCreated) {
+                $result['success'] = false;
+                $result['errors'][] = __('FlinkISO could not create the physical child table %s.', $friendlyName);
+                break;
+            }
+            // Publish the generated child and updated parent MVC files only
+            // after the child schema exists, so the parent cannot reference a
+            // model whose table has not been created.
+            $this->_write_ai_child_files($tableNameVersion[0], $parent['CustomTable']['table_name'], $generated);
+            $result['tables'][] = array('id' => $childId, 'name' => $friendlyName, 'controller' => $tableNameVersion[0], 'field_count' => count($fields));
+        }
+        return $result;
+    }
+
+    private function _write_ai_child_files($tableName, $parentTableName, $generated) {
+        if (!empty($generated['controller'])) {
+            $folder = APP.'Controller';
+            $this->_write_to_file($folder, $folder.DS.Inflector::pluralize(Inflector::classify($tableName)).'Controller.php', $generated['controller']);
+        }
+        if (!empty($generated['model'])) {
+            $folder = APP.'Model';
+            $this->_write_to_file($folder, $folder.DS.Inflector::classify($tableName).'.php', $generated['model']);
+        }
+        $viewFolder = APP.'View'.DS.Inflector::pluralize(Inflector::classify($tableName));
+        $folder = new Folder();
+        $folder->create($viewFolder);
+        foreach (array('index' => 'index.ctp', 'api' => 'json.ctp', 'xml' => 'xml.ctp') as $key => $fileName) {
+            if (!empty($generated[$key])) $this->_write_to_file($viewFolder, $viewFolder.DS.$fileName, $generated[$key]);
+        }
+        if (!empty($generated['formFile'])) {
+            $forms = json_decode($generated['formFile'], true);
+            foreach ((array)$forms as $fileName => $code) $this->_write_to_file($viewFolder, $viewFolder.DS.$fileName.'.ctp', $code);
+        }
+        if (!empty($generated['parentModelFile'])) {
+            $folder = APP.'Model';
+            $this->_write_to_file($folder, $folder.DS.Inflector::classify($parentTableName).'.php', $generated['parentModelFile']);
+        }
+    }
+
+    /**
+     * Allocate the next form version for an AI-generated Quality Document form.
+     *
+     * _make_table_name() uses a matching-record count. That can reuse an existing
+     * number when versions have gaps (for example, V1 and V3 exist but V2 was
+     * deleted). AI generation must always advance beyond the highest version.
+     */
+    private function _make_ai_table_name($qcDocument, $companyId) {
+        if (empty($qcDocument['id'])) return array(null, null);
+
+        $conditions = array('CustomTable.qc_document_id' => $qcDocument['id']);
+        if ($companyId) $conditions['CustomTable.company_id'] = $companyId;
+
+        $existingVersions = $this->CustomTable->find('all', array(
+            'recursive' => -1,
+            'conditions' => $conditions,
+            'fields' => array('CustomTable.table_version')
+        ));
+        $highestVersion = 0;
+        foreach ($existingVersions as $existingVersion) {
+            $highestVersion = max($highestVersion, (int)$existingVersion['CustomTable']['table_version']);
+        }
+        $version = $highestVersion + 1;
+
+        $baseName = trim($qcDocument['title'].'_'.$qcDocument['revision_number']);
+        $baseName = 'tbl_'.$this->_clean_table_names($baseName);
+
+        // Table/controller names are shared identifiers. Avoid an exact collision
+        // even if another document happens to have the same title and revision.
+        do {
+            $tableName = Inflector::pluralize($baseName.'_v'.$version);
+            $nameInUse = $this->CustomTable->find('count', array(
+                'recursive' => -1,
+                'conditions' => array('CustomTable.table_name' => $tableName)
+            ));
+            if ($nameInUse) $version++;
+        } while ($nameInUse);
+
+        return array($tableName, $version);
+    }
+
+    /**
+     * Generated form views load ONLYOFFICE through AppController::_prepare_update().
+     * That method expects the source QC document in the custom table directory.
+     */
+    private function _copy_ai_form_source_document($qcDocument, $customTableId, $companyId) {
+        if (empty($qcDocument['id']) || empty($qcDocument['file_type']) || empty($customTableId) || empty($companyId)) {
+            CakeLog::write('error', 'AI form source document copy skipped because its identifiers are incomplete.');
+            return false;
+        }
+
+        $fileType = strtolower(ltrim($qcDocument['file_type'], '.'));
+        $fileBase = $qcDocument['document_number'].'-'.$this->_clean_table_names($qcDocument['title']).'-'.$qcDocument['revision_number'];
+        $fileName = $this->_clean_table_names($fileBase).'.'.$fileType;
+        $sourceFolder = WWW_ROOT.'files'.DS.$companyId.DS.'qc_documents'.DS.$qcDocument['id'];
+        $sourceFile = $sourceFolder.DS.$fileName;
+
+        // Older document uploads can retain a slightly different cleaned name.
+        // Use the sole current file of the same type when the canonical name is absent.
+        if (!is_file($sourceFile)) {
+            $matches = glob($sourceFolder.DS.'*.'.$fileType);
+            if (count((array)$matches) === 1 && is_file($matches[0])) {
+                $sourceFile = $matches[0];
+            }
+        }
+
+        if (!is_file($sourceFile)) {
+            CakeLog::write('error', 'AI form source document was not found: '.$sourceFile);
+            return false;
+        }
+
+        $targetFolder = WWW_ROOT.'files'.DS.$companyId.DS.'custom_tables'.DS.$customTableId;
+        $folder = new Folder();
+        if (!$folder->create($targetFolder, 0777)) {
+            CakeLog::write('error', 'AI form source document directory could not be created: '.$targetFolder);
+            return false;
+        }
+
+        $targetFile = $targetFolder.DS.$fileName;
+        if (!copy($sourceFile, $targetFile)) {
+            CakeLog::write('error', 'AI form source document could not be copied to: '.$targetFile);
+            return false;
+        }
+        @chmod($targetFile, 0666);
+        return true;
+    }
+
     private function _rebuild_saved_table($customTable, $isChildForm = false) {
         $table = $customTable['CustomTable'];
         $fields = json_decode($table['fields'], true);
@@ -515,8 +1159,37 @@ class CustomTablesController extends AppController {
         $payload['linkedTos'] = json_encode($linkedTos);
         $payload['linkedTosWithDisplay'] = json_encode($this->_returnDetaultField($fields));
 
-        if ($isChildForm) $this->recreate_child($table['id'], true, $payload);
-        else $this->recreate($table['id'], true, $payload);
+        if ($isChildForm) return $this->recreate_child($table['id'], true, $payload);
+
+        // A brand-new AI form has no physical table yet. Create/rebuild it first,
+        // then add the document-link columns. Inspecting columns before creation
+        // caused SHOW COLUMNS to abort every first-time generation.
+        $result = $this->recreate($table['id'], true, $payload);
+        if (!empty($table['qc_document_id']) && !empty($table['id'])) {
+            $this->_ensure_ai_form_link_columns($table['table_name'], $table['qc_document_id'], $table['id']);
+        }
+        return $result;
+    }
+
+    private function _ensure_ai_form_link_columns($tableName, $qcDocumentId, $customTableId) {
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $tableName)) {
+            throw new InvalidArgumentException('Invalid generated table name.');
+        }
+        $columns = array();
+        foreach ((array)$this->CustomTable->query('SHOW COLUMNS FROM `'.$tableName.'`') as $row) {
+            foreach ((array)$row as $details) {
+                if (is_array($details) && isset($details['Field'])) $columns[$details['Field']] = true;
+            }
+        }
+        $dataSource = $this->CustomTable->getDataSource();
+        $alter = array();
+        if (!isset($columns['qc_document_id'])) {
+            $alter[] = 'ADD `qc_document_id` varchar(36) NOT NULL DEFAULT '.$dataSource->value($qcDocumentId, 'string');
+        }
+        if (!isset($columns['custom_table_id'])) {
+            $alter[] = 'ADD `custom_table_id` varchar(36) NOT NULL DEFAULT '.$dataSource->value($customTableId, 'string');
+        }
+        if ($alter) $this->CustomTable->query('ALTER TABLE `'.$tableName.'` '.implode(', ', $alter));
     }
 
     private function _resolve_child_default_field(&$fields) {
@@ -1936,9 +2609,6 @@ class CustomTablesController extends AppController {
 
                 // run update quieries
                 $sqlresult = $this->_add_new_table($table_name,$defaultfield,null,$this->request->data['CustomTableFields'],true);
-                $thisModel = Inflector::classify($table_name);
-                
-                $this->loadModel($thisModel);
                 $findChilds = $this->CustomTable->find('all',array(
                     'conditions'=>array(
                         'CustomTable.custom_table_id'=>$this->CustomTable->id
@@ -2160,12 +2830,33 @@ class CustomTablesController extends AppController {
             throw new NotFoundException(__('Invalid Table'));
         }
 
+        // Parent-table identity is authoritative server-side metadata. Do not
+        // rely on the hidden custom_table_id input: it can be omitted/blank in
+        // the AJAX form payload, which previously led to loadModel('').
+        $childTableDefinition = $this->CustomTable->find('first', array(
+            'recursive' => -1,
+            'conditions' => array('CustomTable.id' => $id)
+        ));
+
         if($skip == true){
             $this->request->data = $data;
         }
 
 
         if ($this->request->is('post') || $this->request->is('put')  || $skip == true) {
+
+            $parentTableId = !empty($childTableDefinition['CustomTable']['custom_table_id'])
+                ? $childTableDefinition['CustomTable']['custom_table_id']
+                : null;
+            if (empty($parentTableId)) {
+                $message = __('The child form is not linked to a parent form. It could not be saved.');
+                CakeLog::write('error', $message . ' Child table: ' . $id);
+                $this->Session->setFlash($message);
+                if ($this->_ajax_generation_response(false, $message, 422)) return $this->response;
+                $this->redirect(array('action' => 'recreate_child', $id));
+                return;
+            }
+            $this->request->data['CustomTable']['custom_table_id'] = $parentTableId;
             
             foreach ($this->request->data['CustomTableFields'] as $chkd) {
                 if ($chkd['field_name']) $chkarray[] = $chkd['field_name'];
@@ -2238,7 +2929,15 @@ class CustomTablesController extends AppController {
                 $this->request->data['CustomTable']['password'] = Security::hash($this->request->data['CustomTable']['password'], 'md5', true);
             }
             
-            $customTable = $this->CustomTable->find('first', array('recursive'=>-1, 'conditions' => array('CustomTable.id' => $this->request->data['CustomTable']['custom_table_id'])));
+            $customTable = $this->CustomTable->find('first', array('recursive'=>-1, 'conditions' => array('CustomTable.id' => $parentTableId)));
+            if (empty($customTable['CustomTable']['table_name'])) {
+                $message = __('The parent form for this child form was not found. It could not be saved.');
+                CakeLog::write('error', $message . ' Child table: ' . $id . '; parent table: ' . $parentTableId);
+                $this->Session->setFlash($message);
+                if ($this->_ajax_generation_response(false, $message, 422)) return $this->response;
+                $this->redirect(array('action' => 'recreate_child', $id));
+                return;
+            }
             
             $hasMany = json_decode($customTable['CustomTable']['has_many'], true);
             $model = Inflector::classify($customTable['CustomTable']['table_name']);
@@ -3667,7 +4366,7 @@ class CustomTablesController extends AppController {
         }
 
         $submittedTabSettings = isset($submittedSettings['tabs']) && is_array($submittedSettings['tabs']) ? $submittedSettings['tabs'] : $submittedSettings;
-        $submittedChildFormSettings = isset($submittedSettings['child_forms']) && is_array($submittedSettings['child_forms']) ? $submittedSettings['child_forms'] : array();
+        $submittedChildDocumentSettings = isset($submittedSettings['child_documents']) && is_array($submittedSettings['child_documents']) ? $submittedSettings['child_documents'] : array();
 
         $fields = json_decode($customTable['CustomTable']['fields'], true);
         if (!is_array($fields)) $fields = array();
@@ -3713,18 +4412,18 @@ class CustomTablesController extends AppController {
             );
         }
 
-        $childTables = $this->CustomTable->find('list', array(
-            'recursive' => -1,
-            'fields' => array('CustomTable.table_name', 'CustomTable.id'),
-            'conditions' => array('CustomTable.custom_table_id' => $id)
+        $childDocumentForms = $this->CustomTable->find('all', array(
+            'recursive' => 0,
+            'fields' => array('CustomTable.id'),
+            'conditions' => array('QcDocument.parent_document_id' => $customTable['CustomTable']['qc_document_id'], 'CustomTable.table_type !=' => 2),
         ));
-        $cleanChildFormSettings = array();
-        foreach ($submittedChildFormSettings as $tableName => $setting) {
-            if (!isset($childTables[$tableName]) || !is_array($setting)) continue;
-
+        $allowedChildDocuments = array();
+        foreach ($childDocumentForms as $childDocumentForm) $allowedChildDocuments[$childDocumentForm['CustomTable']['id']] = true;
+        $cleanChildDocumentSettings = array();
+        foreach ($submittedChildDocumentSettings as $childDocumentId => $setting) {
+            if (!isset($allowedChildDocuments[$childDocumentId]) || !is_array($setting)) continue;
             $actionVisibility = isset($setting['action_visibility']) ? $setting['action_visibility'] : 'always';
             if (!in_array($actionVisibility, $allowedActionVisibility)) $actionVisibility = 'always';
-
             $visibilityField = isset($setting['visibility_field']) ? $setting['visibility_field'] : '';
             $visibleWhen = isset($setting['visible_when']) && is_array($setting['visible_when']) ? $setting['visible_when'] : array();
             if (!isset($allowedVisibilityFields[$visibilityField])) {
@@ -3734,19 +4433,14 @@ class CustomTablesController extends AppController {
                 $visibleWhen = array_values(array_intersect($allowedVisibilityFields[$visibilityField], $visibleWhen));
                 if (!$visibleWhen) $visibilityField = '';
             }
-
-            $cleanChildFormSettings[$tableName] = array(
-                'action_visibility' => $actionVisibility,
-                'visibility_field' => $visibilityField,
-                'visible_when' => $visibleWhen,
-            );
+            $cleanChildDocumentSettings[$childDocumentId] = array('action_visibility' => $actionVisibility, 'visibility_field' => $visibilityField, 'visible_when' => $visibleWhen);
         }
 
         // updateAll intentionally avoids a stale Cake schema cache after the
         // tab_settings column is introduced on an already-running MAMP site.
         $dataSource = $this->CustomTable->getDataSource();
         if ($this->CustomTable->updateAll(
-            array('CustomTable.tab_settings' => $dataSource->value(json_encode(array('tabs' => $cleanSettings, 'child_forms' => $cleanChildFormSettings)))),
+            array('CustomTable.tab_settings' => $dataSource->value(json_encode(array('tabs' => $cleanSettings, 'child_documents' => $cleanChildDocumentSettings)))),
             array('CustomTable.id' => $id)
         )) {
             $this->Session->setFlash(__('Tab configuration saved.'), 'default', array('class' => 'alert alert-success'));

@@ -1,20 +1,7 @@
-<head>
-    <style type="text/css">
-        body{margin:0; padding: 10px; background-color: #fff; width:100%; font-family:arial;text-align:left;}
-        
-        
-        
-    </style>
-</head>
-<body>
-    
-        <div class="top">
-            <div class="logo">Flink<strong>ISO</strong></div>
-        </div>
-        <div class="content">
-            <h3>FlinkISO : <?php echo $title ?></h3>
-            <p>Dear User,</p>
-            <p><?php echo $html;?></p>
-        </div>
-    
-</body>
+<?php echo $this->element('Emails/email_header', array(
+    'emailTitle' => $title,
+    'emailPreheader' => 'A quality document has been shared with you.'
+)); ?>
+<p style="margin:0 0 20px 0;">Dear User,</p>
+<div><?php echo $html; ?></div>
+<?php echo $this->element('Emails/email_footer'); ?>

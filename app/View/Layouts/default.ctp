@@ -25,7 +25,10 @@
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <?php
   echo $this->Html->meta('icon');
-  echo $this->Html->css(array('font-awesome.min','icons','allcss'));
+  $aiFeatureEnabled = Configure::read('AI.ai_enabled') === true;
+  $layoutStyles = array('font-awesome.min','icons','allcss');
+  if ($aiFeatureEnabled) $layoutStyles[] = 'ai-assistant';
+  echo $this->Html->css($layoutStyles);
   $apiCssPath = $this->webroot . 'css/api.css';
   if (Configure::read('Asset.timestamp') && file_exists(WWW_ROOT . 'css' . DS . 'api.css')) {
     $apiCssPath .= '?' . filemtime(WWW_ROOT . 'css' . DS . 'api.css');
@@ -58,8 +61,14 @@ echo $this->fetch('script');
 ?>
 </head>
 <body class="hold-transition skin-blue sidebar-collapse sidebar-mini">
-	<?php if ($this->Session->read('User'))echo $this->Element('control-sidebar'); ?>		
-	<div id="load_ai_container" class="hide"></div>	
+	<?php if ($this->Session->read('User')) echo $this->Element('control-sidebar'); ?>
+	<?php
+	$aiController = $this->request->params['controller'];
+	$aiEnabled = $aiController === 'qc_documents' || strpos($aiController, 'tbl_') === 0 || strpos($aiController, 'chd_') === 0;
+	if ($aiFeatureEnabled && $this->Session->read('User') && $aiEnabled) {
+		echo $this->Element('ai_assistant');
+	}
+	?>
 	<div class="wrapper">
 	  <?php echo $this->Element('header');?>
 	  <!-- Content Wrapper. Contains page content -->
@@ -98,6 +107,11 @@ echo $this->Html->script(array(
 	'dist/js/demo',
 	'dist/js/app.min',
 ));
+$aiAssistantPath = $this->webroot . 'js/ai-assistant.js';
+if ($aiFeatureEnabled && is_file(WWW_ROOT . 'js' . DS . 'ai-assistant.js')) {
+	$aiAssistantPath .= '?' . filemtime(WWW_ROOT . 'js' . DS . 'ai-assistant.js');
+	echo '<script type="text/javascript" src="' . h($aiAssistantPath) . '"></script>';
+}
 echo $this->fetch('script');
 ?>
 <script type="text/javascript">

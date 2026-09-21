@@ -1,455 +1,455 @@
 <style type="text/css">.response-table{margin-left: 10px;}.response-table div{margin: 0 !important;padding: 0;}.timeline{margin-top: 20px;}</style>
-<?php 
+<?php
 if(!$currentStep['ApprovalStep']['id'])$approval_step_id = $this->request->params['named']['approval_step_id'];
 else $approval_step_id = $currentStep['ApprovalStep']['id'];
 ?>
 <div class="row">
-	<?php $approvalStatuses = array(0=>'Pending',1=>'Approved',2=>'Not Approved'); if(!empty($previousApprovalStep['ApprovalStep'])) $approvalStatuses[3] = 'Return to Previous Step'; ?>
-	<?php if($approvalComments){ ?>
-	<div class="col-md-12">
-		<ul class="timeline">
-			<?php foreach ($approvalComments as $approvalComment): 
-				if($approvalComment['ApprovalComment']['response_status'] == 2){ ?>
-					<li>
-						<i class="fa fa-check bg-green"></i>
-						<div class="timeline-item timeline-item-yellow">
-							<span class="time">
-								<?php
-								if($approvalComment['Approval']['status'] != 1 && empty($approvalComment['ApprovalComment']['response']) && $approvalComment['ApprovalComment']['response_status'] != 1){
-									echo "<span class='text-danger'><strong><i>Response pending from ".$approvalComment['User']['name']."</i>.</strong></span>";
-								}else{ ?>
-									<i class="fa fa-clock-o"></i> <?php echo h($approvalComment['ApprovalComment']['created']); ?>
-								<?php } ?>&nbsp;
-							</span>							
-							<div class="timeline-body" id="<?php echo $approvalComment['ApprovalComment']['id']?>_td_to_update">
-								<p><?php echo $approvalComment['ApprovalComment']['comments'] ?><br />-<?php echo $approvalComment['From']['name'];?>&nbsp;</p>
-								<hr />
-								<?php echo $approvalComment['ApprovalComment']['response'] ?> <span class="pull-right"><i class="fa fa-check text-green"></i>&nbsp;<small><?php echo date('Y-m-d H:i:s',strtotime($approvalComment['ApprovalComment']['created'])) ?>&nbsp;&nbsp;</small></span>
-								<br />-<?php echo $approvalComment['User']['name'];?>										
-							</div>
-						</div>
-					</li>
-				<?php }else{							
-					if($approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.id') || $approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.employee_id')){
-						$replayClass = 'fa-mail-forward';
-						$iClass = 'yellow';
-					}else{
-						$replayClass = 'fa-mail-reply';
-						$iClass = 'green';
-					}
-					if($approvalComment['Approval']['status'] != 1 && empty($approvalComment['ApprovalComment']['response']) && $approvalComment['ApprovalComment']['response_status'] != 1){
-						$replayClass = $replayClass .' bg-yellow';
-					}?>					
-					<li>
-						<i class="fa <?php echo $replayClass;?>"></i>
-						<div class="timeline-item timeline-item-<?php echo $iClass;?>">
-							<span class="time">
-								<?php
-								if($approvalComment['Approval']['status'] != 1 && empty($approvalComment['ApprovalComment']['response']) && $approvalComment['ApprovalComment']['response_status'] != 1){
-									echo "<span class='text-danger'><strong><i>Response pending from ".$approvalComment['User']['name']."</i>.</strong></span>";
-								}else{ ?>
-									<i class="fa fa-clock-o"></i> <?php echo h($approvalComment['ApprovalComment']['created']); ?>
-								<?php } ?>&nbsp;
-							</span>
-							<h3 class="timeline-header"><?php echo $approvalComment['From']['name'];?>&nbsp;</h3>
-							<div class="timeline-body" id="<?php echo $approvalComment['ApprovalComment']['id']?>_td_to_update">
-								<div class="row">
-									<div class="col-md-12">
-										<?php echo h($approvalComment['ApprovalComment']['comments']); ?>&nbsp;
-										<?php 
-										if($approvalComment['Approval']['status'] != 1 && $approvalComment['ApprovalComment']['response_status'] == 0  && ($approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.id') || $approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.employee_id'))){
-												echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.response',array(
-													'id'=>$approvalComment['ApprovalComment']['id'].'ResponseTxt',													
-													'type'=>'textarea','class'=>'form-control'));
-										}else{
-											if($approvalComment['ApprovalComment']['response']){
-												
-											}else{
-												
-											}
-										} ?>
-									</div>
-									<?php if($approvalComment['Approval']['status'] != 1 && $approvalComment['ApprovalComment']['response_status'] == 0  && $this->Session->read('User.is_approver') && ($approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.id') || $approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.employee_id'))){ 										
-									?>
-									<div class="col-md-12">
-										<?php echo $this->Form->hidden('comments',
-											array(
-												'div'=>false, 
-												'placeholder'=>'add comments for accept/reject', 
-												'class'=>'form-control',
-												'label'=>false,
-												'type'=>'text',
-												'id'=>'Approval'.$approval['Approval']['id'].'Comments',
+    <?php $approvalStatuses = array(0=>'Pending',1=>'Approved',2=>'Not Approved'); if(!empty($previousApprovalStep['ApprovalStep'])) $approvalStatuses[3] = 'Return to Previous Step'; ?>
+    <?php if($approvalComments){ ?>
+        <div class="col-md-12">
+            <ul class="timeline">
+                <?php foreach ($approvalComments as $approvalComment):
+                    if($approvalComment['ApprovalComment']['response_status'] == 2){ ?>
+                        <li>
+                            <i class="fa fa-check bg-green"></i>
+                            <div class="timeline-item timeline-item-yellow">
+                                <span class="time">
+                                    <?php
+                                    if($approvalComment['Approval']['status'] != 1 && empty($approvalComment['ApprovalComment']['response']) && $approvalComment['ApprovalComment']['response_status'] != 1){
+                                        echo "<span class='text-danger'><strong><i>Response pending from ".$approvalComment['User']['name']."</i>.</strong></span>";
+                                    }else{ ?>
+                                        <i class="fa fa-clock-o"></i> <?php echo h($approvalComment['ApprovalComment']['created']); ?>
+                                    <?php } ?>&nbsp;
+                                </span>
+                                <div class="timeline-body" id="<?php echo $approvalComment['ApprovalComment']['id']?>_td_to_update">
+                                <p><?php echo $approvalComment['ApprovalComment']['comments'] ?><br />-<?php echo $approvalComment['From']['name'];?>&nbsp;</p>
+                                <hr />
+                                <?php echo $approvalComment['ApprovalComment']['response'] ?> <span class="pull-right"><i class="fa fa-check text-green"></i>&nbsp;<small><?php echo date('Y-m-d H:i:s',strtotime($approvalComment['ApprovalComment']['created'])) ?>&nbsp;&nbsp;</small></span>
+                                <br />-<?php echo $approvalComment['User']['name'];?>
+                            </div>
+                        </div>
+                    </li>
+                <?php }else{
+                    if($approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.id') || $approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.employee_id')){
+                        $replayClass = 'fa-mail-forward';
+                        $iClass = 'yellow';
+                    }else{
+                        $replayClass = 'fa-mail-reply';
+                        $iClass = 'green';
+                    }
+                    if($approvalComment['Approval']['status'] != 1 && empty($approvalComment['ApprovalComment']['response']) && $approvalComment['ApprovalComment']['response_status'] != 1){
+                        $replayClass = $replayClass .' bg-yellow';
+                    }?>
+                    <li>
+                        <i class="fa <?php echo $replayClass;?>"></i>
+                    <div class="timeline-item timeline-item-<?php echo $iClass;?>">
+                    <span class="time">
+                        <?php
+                        if($approvalComment['Approval']['status'] != 1 && empty($approvalComment['ApprovalComment']['response']) && $approvalComment['ApprovalComment']['response_status'] != 1){
+                            echo "<span class='text-danger'><strong><i>Response pending from ".$approvalComment['User']['name']."</i>.</strong></span>";
+                        }else{ ?>
+                            <i class="fa fa-clock-o"></i> <?php echo h($approvalComment['ApprovalComment']['created']); ?>
+                        <?php } ?>&nbsp;
+                    </span>
+                    <h3 class="timeline-header"><?php echo $approvalComment['From']['name'];?>&nbsp;</h3>
+                    <div class="timeline-body" id="<?php echo $approvalComment['ApprovalComment']['id']?>_td_to_update">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <?php echo h($approvalComment['ApprovalComment']['comments']); ?>&nbsp;
+                            <?php
+                            if($approvalComment['Approval']['status'] != 1 && $approvalComment['ApprovalComment']['response_status'] == 0  && ($approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.id') || $approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.employee_id'))){
+                                echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.response',array(
+                                'id'=>$approvalComment['ApprovalComment']['id'].'ResponseTxt',
+                                'type'=>'textarea','class'=>'form-control'));
+                            }else{
+                                if($approvalComment['ApprovalComment']['response']){
 
-											));?>
-										<?php										
-										 if(isset($this->request->params['named']['custom_table_id']) && $this->request->params['named']['custom_table_id'] != -1){										 	
-												if(isset($approversLists)){
-													if(in_array($this->Session->read('User.employee_id'), array_keys($approversLists))){																												
-														if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
-															unset($approvalStatuses[1]);														
-														}														
-														if($approvalStatuses){
-													echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
-															'type'=>'radio',
-															'options'=>$approvalStatuses,
-															'default'=>$approvalComment['Approval']['approval_status']
-															));
-														}														
-													}else{														
-														if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
-															unset($approvalStatuses[1]);		
-														}
-														if($approvalStatuses){
-													echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
-															'type'=>'radio',
-															'options'=>$approvalStatuses,
-															'default'=>$approvalComment['Approval']['approval_status']
-															));
-														}														
-													}
-												}
-										}else{
-												if($this->Session->read('User.is_approver') == true){
-													if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
-														unset($approvalStatuses[1]);														
-													}
+                                }else{
 
-													if($approvalStatuses){
-													echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
-													// 'id'=>$approvalComment['ApprovalComment']['id'].'ResponseTxt',
-															'type'=>'radio',
-															'options'=>$approvalStatuses,
-																'default'=>$approvalComment['Approval']['approval_status']
-															));
-														}											
-													}else{
-														echo "<br />";
-													}
-												}
-											if(!empty($nextApprovalStep['ApprovalStep'])){
-												echo '<div id="'.$approvalComment['ApprovalComment']['id'].'NextApproverWrap" style="display:'.(!empty($nextApproverRequired) ? 'block' : 'none').'">';
-												echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.next_approver_ids',array(
-													'id'=>$approvalComment['ApprovalComment']['id'].'NextApproverId',
-													'type'=>'select','multiple'=>true,'options'=>$nextApproversList,'data-placeholder'=>'Select next approvers',
-													'label'=>$nextApprovalUserLabel,'class'=>'form-control'
-												));
-												if(empty($nextApproversList)) echo '<small class="text-danger">No eligible users are configured for the next step.</small>';
-												echo '</div>';
-											}?>
-									</div>
-								<?php } ?>
-								<div class="col-md-12">
-									<?php
-									if($approvalComment['Approval']['status'] != 1 && $approvalComment['ApprovalComment']['response_status'] == 0  && ($approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.id') || $approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.employee_id'))){
-										echo '<br />'.$this->Form->input(
-											'ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.user_id',array(
-											'id'=>$approvalComment['ApprovalComment']['id'].'UserTo',
-											'default'=>$approvalComment['From']['id'],
-											'type'=>'hidden',
-											'label'=>false)); 
-										
-									}else{
+                                }
+                            } ?>
+                        </div>
+                        <?php if($approvalComment['Approval']['status'] != 1 && $approvalComment['ApprovalComment']['response_status'] == 0  && $this->Session->read('User.is_approver') && ($approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.id') || $approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.employee_id'))){
+                            ?>
+                            <div class="col-md-12">
+                                <?php echo $this->Form->hidden('comments',
+                                array(
+                                'div'=>false,
+                                'placeholder'=>'add comments for accept/reject',
+                                'class'=>'form-control',
+                                'label'=>false,
+                                'type'=>'text',
+                                'id'=>'Approval'.$approval['Approval']['id'].'Comments',
 
-										if($approvalComment['ApprovalComment']['response']){
-											echo '- <strong>'.$approvalComment['User']['name'].'</strong>';
-											echo ' | <small><i class="fa fa-clock-o"></i> <span class="time">'.$approvalComment['ApprovalComment']['modified'].'</span></small>';	
-										}else{
-											// echo "<span class='text-danger'>Response pending...</span>";
-										}																	
-									}?>&nbsp;
+                                ));?>
+                                <?php
+                                if(isset($this->request->params['named']['custom_table_id']) && $this->request->params['named']['custom_table_id'] != -1){
+                                    if(isset($approversLists)){
+                                        if(in_array($this->Session->read('User.employee_id'), array_keys($approversLists))){
+                                            if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
+                                                unset($approvalStatuses[1]);
+                                            }
+                                            if($approvalStatuses){
+                                                echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
+                                                'type'=>'radio',
+                                                'options'=>$approvalStatuses,
+                                                'default'=>$approvalComment['Approval']['approval_status']
+                                                ));
+                                            }
+                                        }else{
+                                            if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
+                                                unset($approvalStatuses[1]);
+                                            }
+                                            if($approvalStatuses){
+                                                echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
+                                                'type'=>'radio',
+                                                'options'=>$approvalStatuses,
+                                                'default'=>$approvalComment['Approval']['approval_status']
+                                                ));
+                                            }
+                                        }
+                                    }
+                                }else{
+                                    if($this->Session->read('User.is_approver') == true){
+                                        if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
+                                            unset($approvalStatuses[1]);
+                                        }
 
-									<?php 
-									if($approvalComment['ApprovalComment']['response_status'] == 0  && ($approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.id') || $approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.employee_id'))){
-										echo '</div><div class="col-md-12">'. $this->Html->link('Respond','javascript:void(0);',array('id'=>$approvalComment['ApprovalComment']['id'].'_link','class'=>'btn badge-sm btn-success','style'=>'margin-top:15px', 'escape'=>false)); 
+                                        if($approvalStatuses){
+                                            echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
+                                            // 'id'=>$approvalComment['ApprovalComment']['id'].'ResponseTxt',
+                                            'type'=>'radio',
+                                            'options'=>$approvalStatuses,
+                                            'default'=>$approvalComment['Approval']['approval_status']
+                                            ));
+                                        }
+                                    }else{
+                                        echo "<br />";
+                                    }
+                                }
+                                if(!empty($nextApprovalStep['ApprovalStep'])){
+                                    echo '<div id="'.$approvalComment['ApprovalComment']['id'].'NextApproverWrap" style="display:'.(!empty($nextApproverRequired) ? 'block' : 'none').'">';
+                                        echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.next_approver_ids',array(
+                                        'id'=>$approvalComment['ApprovalComment']['id'].'NextApproverId',
+                                        'type'=>'select','multiple'=>true,'options'=>$nextApproversList,'data-placeholder'=>'Select next approvers',
+                                        'label'=>$nextApprovalUserLabel,'class'=>'form-control'
+                                        ));
+                                        if(empty($nextApproversList)) echo '<small class="text-danger">No eligible users are configured for the next step.</small>';
+                                        echo '</div>';
+                                }?>
+                            </div>
+                        <?php } ?>
+                        <div class="col-md-12">
+                            <?php
+                            if($approvalComment['Approval']['status'] != 1 && $approvalComment['ApprovalComment']['response_status'] == 0  && ($approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.id') || $approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.employee_id'))){
+                                echo '<br />'.$this->Form->input(
+                                'ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.user_id',array(
+                                'id'=>$approvalComment['ApprovalComment']['id'].'UserTo',
+                                'default'=>$approvalComment['From']['id'],
+                                'type'=>'hidden',
+                                'label'=>false));
 
-										echo "<i class='' id='".$approvalComment['ApprovalComment']['id']."_fa'></i>";
-									}else{
-										// echo '<l class="fa fa-check pull-right"></i>';
-									}?>&nbsp;
-								</div>								
-								<script type="text/javascript">											
-									var approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?> = "input[name='data[ApprovalComment][<?php echo $approvalComment['ApprovalComment']['id'];?>][approval_status]']";
-									$(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>).on('change',function(){
-										var approved = $(this).val() == '1';
-										var nextApproverWrap = $("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverWrap");
-										var nextApprover = $("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverId");
-										if(!approved){
-											nextApproverWrap.hide();
-											nextApprover.val('').trigger('chosen:updated');
-											return;
-										}
-										$.getJSON("<?php echo Router::url('/', true); ?>approval_comments/next_step_status/approval_id:<?php echo h($approvalComment['ApprovalComment']['approval_id']); ?>", function(data){
-											var required = data.next_approver_required === true;
-											nextApproverWrap.toggle(required);
-											if(!required) nextApprover.val('').trigger('chosen:updated');
-										});
-									});
-									$(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>+":checked").trigger('change');
-									$("#<?php echo $approvalComment['ApprovalComment']['id'];?>_link").on('click',function(){
-										if($("#<?php echo $approvalComment['ApprovalComment']['id']?>ResponseTxt").val() ==''){
-											alert('Add Response');
-											return false;
-										}
-										if($("input[name='data[ApprovalComment][<?php echo $approvalComment['ApprovalComment']['id'];?>][approval_status]']:checked").val() == '1' && $("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverWrap").is(':visible') && !$("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverId").val()){
-											alert('Select one or more next approvers.');
-											return false;
-										}
-										if($(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>+":checked").val() == '3' && !confirm('Return this record to the previous approval step?')) return false;
+                            }else{
 
-										$.ajax({
-											url: "<?php echo Router::url('/', true); ?>approval_comments/add_response/id:<?php echo $approvalComment['ApprovalComment']['id']?>/response:" + $("#<?php echo $approvalComment['ApprovalComment']['id'];?>ResponseTxt").val()+"/to:" + $("#<?php echo $approvalComment['ApprovalComment']['id'];?>UserTo").val(),
-											type : "POST",
-											data : {
-												'id':'<?php echo $approvalComment['ApprovalComment']['id']?>',
-												'response': $("#<?php echo $approvalComment['ApprovalComment']['id'];?>ResponseTxt").val(),
-												'to':$("#<?php echo $approvalComment['ApprovalComment']['id'];?>UserTo").val(),
-												'approval_id':'<?php echo h($approvalComment['ApprovalComment']['approval_id']); ?>',
-												'approval_status':$("input[name='data[ApprovalComment][<?php echo $approvalComment['ApprovalComment']['id'] ;?>][approval_status]']:checked").val(),
-															'approval_step_id':'<?php echo $approval_step_id;?>',
-															'next_approver_ids':$("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverId").val()
-											},
-											beforeSend: function( xhr ) {
-												$("#<?php echo $approvalComment['ApprovalComment']['id'];?>_link").remove();
-												$("#<?php echo $approvalComment['ApprovalComment']['id'];?>_fa").addClass('fa fa-refresh fa-spin');
-											},                    
-											error: function (err) {
-												
-											},
-										success: function(data, result) {
-											$('[id*="submit_id"]').show();
-											$("#<?php echo $approvalComment['ApprovalComment']['id']?>_td_to_update").html(data);
-											$("#<?php echo $approvalComment['ApprovalComment']['id'];?>_link").removeClass('fa fa-refresh fa-spin');
-											if($(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>+":checked").val() == '3') setTimeout(function(){ window.location.reload(); }, 800);
+                                if($approvalComment['ApprovalComment']['response']){
+                                    echo '- <strong>'.$approvalComment['User']['name'].'</strong>';
+                                    echo ' | <small><i class="fa fa-clock-o"></i> <span class="time">'.$approvalComment['ApprovalComment']['modified'].'</span></small>';
+                                }else{
+                                    // echo "<span class='text-danger'>Response pending...</span>";
+                                }
+                            }?>&nbsp;
 
-											},						        
-										});	
-									});
-								</script>
-							</div>
-						</div>
-					</div>
-				</li>
-			<?php } ?>
-		<?php endforeach; ?>
-		<?php 
-		if($approvalComment['Approval']['status'] != 1 && empty($approvalComment['ApprovalComment']['response']) && $approvalComment['ApprovalComment']['response_status'] != 1){
-			$replayClass = ' fa-exclamation-triangle bg-red';
-		}else{
-			$replayClass = ' fa-trophy bg-green';
-		}	?>
-		<li><i class="fa <?php echo $replayClass;?>"></i></li>
-	</ul>					
+                            <?php
+                            if($approvalComment['ApprovalComment']['response_status'] == 0  && ($approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.id') || $approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.employee_id'))){
+                                echo '</div><div class="col-md-12">'. $this->Html->link('Respond','javascript:void(0);',array('id'=>$approvalComment['ApprovalComment']['id'].'_link','class'=>'btn badge-sm btn-success','style'=>'margin-top:15px', 'escape'=>false));
+
+                                echo "<i class='' id='".$approvalComment['ApprovalComment']['id']."_fa'></i>";
+                            }else{
+                                // echo '<l class="fa fa-check pull-right"></i>';
+                            }?>&nbsp;
+                        </div>
+                        <script type="text/javascript">
+                            var approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?> = "input[name='data[ApprovalComment][<?php echo $approvalComment['ApprovalComment']['id'];?>][approval_status]']";
+                            $(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>).on('change',function(){
+                                var approved = $(this).val() == '1';
+                                var nextApproverWrap = $("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverWrap");
+                                var nextApprover = $("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverId");
+                                if(!approved){
+                                    nextApproverWrap.hide();
+                                    nextApprover.val('').trigger('chosen:updated');
+                                    return;
+                                }
+                                $.getJSON("<?php echo Router::url('/', true); ?>approval_comments/next_step_status/approval_id:<?php echo h($approvalComment['ApprovalComment']['approval_id']); ?>", function(data){
+                                    var required = data.next_approver_required === true;
+                                    nextApproverWrap.toggle(required);
+                                    if(!required) nextApprover.val('').trigger('chosen:updated');
+                                });
+                            });
+                            $(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>+":checked").trigger('change');
+                            $("#<?php echo $approvalComment['ApprovalComment']['id'];?>_link").on('click',function(){
+                                if($("#<?php echo $approvalComment['ApprovalComment']['id']?>ResponseTxt").val() ==''){
+                                    alert('Add Response');
+                                    return false;
+                                }
+                                if($("input[name='data[ApprovalComment][<?php echo $approvalComment['ApprovalComment']['id'];?>][approval_status]']:checked").val() == '1' && $("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverWrap").is(':visible') && !$("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverId").val()){
+                                    alert('Select one or more next approvers.');
+                                    return false;
+                                }
+                                if($(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>+":checked").val() == '3' && !confirm('Return this record to the previous approval step?')) return false;
+
+                                $.ajax({
+                                    url: "<?php echo Router::url('/', true); ?>approval_comments/add_response/id:<?php echo $approvalComment['ApprovalComment']['id']?>/response:" + $("#<?php echo $approvalComment['ApprovalComment']['id'];?>ResponseTxt").val()+"/to:" + $("#<?php echo $approvalComment['ApprovalComment']['id'];?>UserTo").val(),
+                                    type : "POST",
+                                    data : {
+                                        'id':'<?php echo $approvalComment['ApprovalComment']['id']?>',
+                                        'response': $("#<?php echo $approvalComment['ApprovalComment']['id'];?>ResponseTxt").val(),
+                                        'to':$("#<?php echo $approvalComment['ApprovalComment']['id'];?>UserTo").val(),
+                                        'approval_id':'<?php echo h($approvalComment['ApprovalComment']['approval_id']); ?>',
+                                        'approval_status':$("input[name='data[ApprovalComment][<?php echo $approvalComment['ApprovalComment']['id'] ;?>][approval_status]']:checked").val(),
+                                        'approval_step_id':'<?php echo $approval_step_id;?>',
+                                        'next_approver_ids':$("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverId").val()
+                                    },
+                                    beforeSend: function( xhr ) {
+                                        $("#<?php echo $approvalComment['ApprovalComment']['id'];?>_link").remove();
+                                        $("#<?php echo $approvalComment['ApprovalComment']['id'];?>_fa").addClass('fa fa-refresh fa-spin');
+                                    },
+                                    error: function (err) {
+
+                                    },
+                                    success: function(data, result) {
+                                        $('[id*="submit_id"]').show();
+                                        $("#<?php echo $approvalComment['ApprovalComment']['id']?>_td_to_update").html(data);
+                                        $("#<?php echo $approvalComment['ApprovalComment']['id'];?>_link").removeClass('fa fa-refresh fa-spin');
+                                        if($(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>+":checked").val() == '3') setTimeout(function(){ window.location.reload(); }, 800);
+
+                                    },
+                                });
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </li>
+    <?php } ?>
+<?php endforeach; ?>
+<?php
+if($approvalComment['Approval']['status'] != 1 && empty($approvalComment['ApprovalComment']['response']) && $approvalComment['ApprovalComment']['response_status'] != 1){
+    $replayClass = ' fa-exclamation-triangle bg-red';
+}else{
+    $replayClass = ' fa-trophy bg-green';
+}	?>
+<li><i class="fa <?php echo $replayClass;?>"></i></li>
+</ul>
 </div>
-<?php }else{ ?>			
-	<!-- Add first response  -->
-	<?php if($approval['Approval']['approval_status'] == 0){ ?>
-		<div class="col-md-12">
-			<ul class="timeline">
-				<li>
-					<i class="fa fa-mail-reply"></i>
-					<div class="timeline-item timeline-item-yellow">
-						<span class="time"><i class="fa fa-clock-o"></i> <?php echo h($approval['Approval']['created']); ?></span>
-						<h3 class="timeline-header"><?php echo h($approval['From']['name']); ?></h3>
-						<div class="timeline-body"><?php echo h($approval['Approval']['comments']); ?></div>
-						<div class="timeline-footer">
-							<div class="row">
-								<div class="col-md-12">
-								<?php if($approval['Approval']['user_id'] == $this->Session->read('User.id') || $approval['Approval']['user_id'] == $this->Session->read('User.employee_id')){
-										echo $this->Form->input('approval.'.$approval['Approval']['id'].'.user_id',array(
-											'id'=>$approval['Approval']['id'].'UserTo',
-											'label'=>false,'options'=>$approversLists,'default'=>$approval['Approval']['from'])); 
-										}else{
-											echo $approval['User']['name'];
-										}
-								?>&nbsp;
-								<?php if($approval['Approval']['user_id'] == $this->Session->read('User.id') || $approval['Approval']['user_id'] == $this->Session->read('User.employee_id')){
-										echo $this->Form->input('approval.'.$approval['Approval']['id'].'.response',array(
-											'id'=>$approval['Approval']['id'].'ResponseTxt',
-											'label'=>false,'type'=>'textarea','class'=>'form-control'));
-										}else{
-											
-								}?>
-								</div>
-								<div class="col-md-12">
-									<?php if(empty($approval['Approval']['response']) && $approval['Approval']['response_status'] != 1)echo "<small><span class='text-danger'>pending ...</span></small>";?>&nbsp;		
-								</div>
-								<div class="col-md-12">
+<?php }else{ ?>
+<!-- Add first response  -->
+<?php if($approval['Approval']['approval_status'] == 0){ ?>
+    <div class="col-md-12">
+        <ul class="timeline">
+            <li>
+                <i class="fa fa-mail-reply"></i>
+                <div class="timeline-item timeline-item-yellow">
+                    <span class="time"><i class="fa fa-clock-o"></i> <?php echo h($approval['Approval']['created']); ?></span>
+                    <h3 class="timeline-header"><?php echo h($approval['From']['name']); ?></h3>
+                    <div class="timeline-body"><?php echo h($approval['Approval']['comments']); ?></div>
+                    <div class="timeline-footer">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <?php if($approval['Approval']['user_id'] == $this->Session->read('User.id') || $approval['Approval']['user_id'] == $this->Session->read('User.employee_id')){
+                                    echo $this->Form->input('approval.'.$approval['Approval']['id'].'.user_id',array(
+                                    'id'=>$approval['Approval']['id'].'UserTo',
+                                    'label'=>false,'options'=>$approversLists,'default'=>$approval['Approval']['from']));
+                                }else{
+                                    echo $approval['User']['name'];
+                                }
+                                ?>&nbsp;
+                                <?php if($approval['Approval']['user_id'] == $this->Session->read('User.id') || $approval['Approval']['user_id'] == $this->Session->read('User.employee_id')){
+                                    echo $this->Form->input('approval.'.$approval['Approval']['id'].'.response',array(
+                                    'id'=>$approval['Approval']['id'].'ResponseTxt',
+                                    'label'=>false,'type'=>'textarea','class'=>'form-control'));
+                                }else{
 
-									<?php											
-										if(isset($this->request->params['named']['custom_table_id']) && $this->request->params['named']['custom_table_id'] != -1){
-											if(isset($approversLists)){
-												if(in_array($this->Session->read('User.employee_id'), array_keys($approversLists))){
-													if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
-														unset($approvalStatuses[1]);														
-													}
+                                }?>
+                            </div>
+                            <div class="col-md-12">
+                                <?php if(empty($approval['Approval']['response']) && $approval['Approval']['response_status'] != 1)echo "<small><span class='text-danger'>pending ...</span></small>";?>&nbsp;
+                            </div>
+                            <div class="col-md-12">
 
-													if($approvalStatuses){
-												echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.approval_status',array(
-													'type'=>'radio',
-													'options'=>$approvalStatuses,
-													'default'=>0
-														));
-													}													
-												}else{
-													// $approvalStatuses = array(0=>'Pending',2=>'Not Approved');
-													if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
-														unset($approvalStatuses[1]);
-													}
+                                <?php
+                                if(isset($this->request->params['named']['custom_table_id']) && $this->request->params['named']['custom_table_id'] != -1){
+                                    if(isset($approversLists)){
+                                        if(in_array($this->Session->read('User.employee_id'), array_keys($approversLists))){
+                                            if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
+                                                unset($approvalStatuses[1]);
+                                            }
 
-													if($approvalStatuses){
-												echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.approval_status',array(
-													'type'=>'radio',
-													'options'=>$approvalStatuses,
-													'default'=>0
-														));
-													}													
-												}
-											}
-										}else{
-											if($this->Session->read('User.is_approver') == true){
-												// $approvalStatuses = array(0=>'Pending',1=>'Approved',2=>'Not Approved');
-												if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
-													unset($approvalStatuses[1]);														
-												}
+                                            if($approvalStatuses){
+                                                echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.approval_status',array(
+                                                'type'=>'radio',
+                                                'options'=>$approvalStatuses,
+                                                'default'=>0
+                                                ));
+                                            }
+                                        }else{
+                                            // $approvalStatuses = array(0=>'Pending',2=>'Not Approved');
+                                            if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
+                                                unset($approvalStatuses[1]);
+                                            }
 
-												if($approvalStatuses){
-												echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.approval_status',array(
-												// 'id'=>$approval['Approval']['id'].'ResponseTxt',
-														'type'=>'radio',
-														'options'=>$approvalStatuses,
-														'default'=>0
-													));
-												}												
-											}else{
-												echo "<br />";
-											}
-										}
-									if(!empty($nextApprovalStep['ApprovalStep']) && ($approval['Approval']['user_id'] == $this->Session->read('User.id') || $approval['Approval']['user_id'] == $this->Session->read('User.employee_id'))){
-										echo '<div id="'.$approval['Approval']['id'].'NextApproverWrap" style="display:'.(!empty($nextApproverRequired) ? 'block' : 'none').'">';
-										echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.next_approver_ids',array(
-											'id'=>$approval['Approval']['id'].'NextApproverId',
-											'type'=>'select','multiple'=>true,'options'=>$nextApproversList,'data-placeholder'=>'Select next approvers',
-											'label'=>$nextApprovalUserLabel,'class'=>'form-control'
-										));
-										if(empty($nextApproversList)) echo '<small class="text-danger">No eligible users are configured for the next step.</small>';
-										echo '</div>';
-									}?>
-									</div>
-									<div class="col-md-12">
-										<div id="<?php echo $approval['Approval']['id']?>_td_to_update"><?php 
-										if($approval['Approval']['user_id'] == $this->Session->read('User.id') || $approval['Approval']['user_id'] == $this->Session->read('User.employee_id')){
-											echo $this->Html->link('Reply','javascript:void(0);',array('id'=>$approval['Approval']['id'].'_link_new','class'=>'btn btn-sm btn-success','escape'=>false)); 
+                                            if($approvalStatuses){
+                                                echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.approval_status',array(
+                                                'type'=>'radio',
+                                                'options'=>$approvalStatuses,
+                                                'default'=>0
+                                                ));
+                                            }
+                                        }
+                                    }
+                                }else{
+                                    if($this->Session->read('User.is_approver') == true){
+                                        // $approvalStatuses = array(0=>'Pending',1=>'Approved',2=>'Not Approved');
+                                        if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
+                                            unset($approvalStatuses[1]);
+                                        }
 
-											echo "<i class='' id='".$approval['Approval']['id']."_fa'></i>";
-										}else{
-											// echo '<l class="fa fa-check"></i>';
-										}?>&nbsp;
-										</div>	
-									</div>
-									<!-- need to pass comment id, to and response only  -->
-									<script type="text/javascript">										
-										var approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?> = "input[name='data[ApprovalComment][<?php echo $approval['Approval']['id'];?>][approval_status]']";
-										$(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>).on('change',function(){
-											var approved = $(this).val() == '1';
-											var nextApproverWrap = $("#<?php echo $approval['Approval']['id'];?>NextApproverWrap");
-											var nextApprover = $("#<?php echo $approval['Approval']['id'];?>NextApproverId");
-											if(!approved){
-												nextApproverWrap.hide();
-												nextApprover.val('').trigger('chosen:updated');
-												return;
-											}
-											$.getJSON("<?php echo Router::url('/', true); ?>approval_comments/next_step_status/approval_id:<?php echo h($approval['Approval']['id']); ?>", function(data){
-												var required = data.next_approver_required === true;
-												nextApproverWrap.toggle(required);
-												if(!required) nextApprover.val('').trigger('chosen:updated');
-											});
-										});
-										$(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>+":checked").trigger('change');
-										$("#<?php echo $approval['Approval']['id'];?>_link_new").on('click',function(){
-										if($("#<?php echo $approval['Approval']['id']?>ResponseTxt").val() ==''){
-											alert('Add Response');
-											return false;
-										}
-										if($("input[name='data[ApprovalComment][<?php echo $approval['Approval']['id'];?>][approval_status]']:checked").val() == '1' && $("#<?php echo $approval['Approval']['id'];?>NextApproverWrap").is(':visible') && !$("#<?php echo $approval['Approval']['id'];?>NextApproverId").val()){
-											alert('Select one or more next approvers.');
-											return false;
-										}
-										if($(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>+":checked").val() == '3' && !confirm('Return this record to the previous approval step?')) return false;
+                                        if($approvalStatuses){
+                                            echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.approval_status',array(
+                                            // 'id'=>$approval['Approval']['id'].'ResponseTxt',
+                                            'type'=>'radio',
+                                            'options'=>$approvalStatuses,
+                                            'default'=>0
+                                            ));
+                                        }
+                                    }else{
+                                        echo "<br />";
+                                    }
+                                }
+                                if(!empty($nextApprovalStep['ApprovalStep']) && ($approval['Approval']['user_id'] == $this->Session->read('User.id') || $approval['Approval']['user_id'] == $this->Session->read('User.employee_id'))){
+                                    echo '<div id="'.$approval['Approval']['id'].'NextApproverWrap" style="display:'.(!empty($nextApproverRequired) ? 'block' : 'none').'">';
+                                        echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.next_approver_ids',array(
+                                        'id'=>$approval['Approval']['id'].'NextApproverId',
+                                        'type'=>'select','multiple'=>true,'options'=>$nextApproversList,'data-placeholder'=>'Select next approvers',
+                                        'label'=>$nextApprovalUserLabel,'class'=>'form-control'
+                                        ));
+                                        if(empty($nextApproversList)) echo '<small class="text-danger">No eligible users are configured for the next step.</small>';
+                                        echo '</div>';
+                                }?>
+                            </div>
+                            <div class="col-md-12">
+                                <div id="<?php echo $approval['Approval']['id']?>_td_to_update"><?php
+                                if($approval['Approval']['user_id'] == $this->Session->read('User.id') || $approval['Approval']['user_id'] == $this->Session->read('User.employee_id')){
+                                    echo $this->Html->link('Reply','javascript:void(0);',array('id'=>$approval['Approval']['id'].'_link_new','class'=>'btn btn-sm btn-success','escape'=>false));
 
-											$.ajax({
-												url: "<?php echo Router::url('/', true); ?>approval_comments/add_response/approval_id:<?php echo $approval['Approval']['id']?>/response:" + $("#<?php echo $approval['Approval']['id'];?>ResponseTxt").val()+"/to:" + $("#<?php echo $approval['Approval']['id'];?>UserTo").val(),
-												type : "POST",
-												data : {															
-													'response': $("#<?php echo $approval['Approval']['id'];?>ResponseTxt").val(),
-													'to':$("#<?php echo $approval['Approval']['id'];?>UserTo").val(),
-													'approval_id':'<?php echo $approval['Approval']['id']?>',
-													'approval_status':$("input[name='data[ApprovalComment][<?php echo $approval['Approval']['id'];?>][approval_status]']:checked").val(),
-													'approval_step_id':'<?php echo $approval_step_id;?>',
-															'next_approver_ids':$("#<?php echo $approval['Approval']['id'];?>NextApproverId").val()
-												},
-												beforeSend: function( xhr ) {
-													$("#<?php echo $approval['Approval']['id']?>_link_new").remove();
-													$("#<?php echo $approval['Approval']['id']?>_fa").addClass('fa fa-refresh fa-spin');
-												},                    
-												error: function (err) {
-													
-												},
-											success: function(data, result) {
-												$('[id*="submit_id"]').show();
-												$("#<?php echo $approval['Approval']['id']?>_td_to_update").html(data);											
-												if($(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>+":checked").val() == '3') setTimeout(function(){ window.location.reload(); }, 800);
-											},					        
-											});	
-										})
-									</script>
-								</div>
-							</div>						
-						</div>
-					</li>
-				</ul>
-			</div>				
-			<?php }else{ ?>								
-				<div class="col-md-12">
-					<ul class="timeline">
-						<li>
-							<i class="fa fa-check bg-green"></i>
-							<div class="timeline-item timeline-item-yellow">
-								<span class="time"><i class="fa fa-clock-o"></i> <?php echo h($approval['Approval']['created']); ?></span>
-								<h3 class="timeline-header"><?php echo h($approval['From']['name']); ?></h3>
-								<div class="timeline-body">
-									<?php echo h($approval['Approval']['comments']); ?>
-									<br />-<?php echo h($approval['From']['name']); ?>
-								</div>
-								<div class="timeline-footer">
-									<div class="row">
-										<div class="col-md-12">																
-										</div>
-										<div class="col-md-12">
-											<?php echo $approval['Approval']['approver_comments'];?>&nbsp;		
-											<br />-<?php echo $approval['User']['name'];?>&nbsp;											
-										</div>
-										<div class="col-md-12">
-											
-										</div>
-										<div class="col-md-12">
-											
-										</div>
-										<!-- need to pass comment id, to and response only  -->
-										
-									</div>
-								</li>											
-								<li><i class="fa fa-trophy bg-green"></i></li>									
-							</ul>
-						</div>
-					</div>
-				</li>
-			</ul>
-			<?php } ?>
-		<?php } ?>
+                                    echo "<i class='' id='".$approval['Approval']['id']."_fa'></i>";
+                                }else{
+                                    // echo '<l class="fa fa-check"></i>';
+                                }?>&nbsp;
+                            </div>
+                        </div>
+                        <!-- need to pass comment id, to and response only  -->
+                        <script type="text/javascript">
+                            var approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?> = "input[name='data[ApprovalComment][<?php echo $approval['Approval']['id'];?>][approval_status]']";
+                            $(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>).on('change',function(){
+                                var approved = $(this).val() == '1';
+                                var nextApproverWrap = $("#<?php echo $approval['Approval']['id'];?>NextApproverWrap");
+                                var nextApprover = $("#<?php echo $approval['Approval']['id'];?>NextApproverId");
+                                if(!approved){
+                                    nextApproverWrap.hide();
+                                    nextApprover.val('').trigger('chosen:updated');
+                                    return;
+                                }
+                                $.getJSON("<?php echo Router::url('/', true); ?>approval_comments/next_step_status/approval_id:<?php echo h($approval['Approval']['id']); ?>", function(data){
+                                    var required = data.next_approver_required === true;
+                                    nextApproverWrap.toggle(required);
+                                    if(!required) nextApprover.val('').trigger('chosen:updated');
+                                });
+                            });
+                            $(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>+":checked").trigger('change');
+                            $("#<?php echo $approval['Approval']['id'];?>_link_new").on('click',function(){
+                                if($("#<?php echo $approval['Approval']['id']?>ResponseTxt").val() ==''){
+                                    alert('Add Response');
+                                    return false;
+                                }
+                                if($("input[name='data[ApprovalComment][<?php echo $approval['Approval']['id'];?>][approval_status]']:checked").val() == '1' && $("#<?php echo $approval['Approval']['id'];?>NextApproverWrap").is(':visible') && !$("#<?php echo $approval['Approval']['id'];?>NextApproverId").val()){
+                                    alert('Select one or more next approvers.');
+                                    return false;
+                                }
+                                if($(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>+":checked").val() == '3' && !confirm('Return this record to the previous approval step?')) return false;
+
+                                $.ajax({
+                                    url: "<?php echo Router::url('/', true); ?>approval_comments/add_response/approval_id:<?php echo $approval['Approval']['id']?>/response:" + $("#<?php echo $approval['Approval']['id'];?>ResponseTxt").val()+"/to:" + $("#<?php echo $approval['Approval']['id'];?>UserTo").val(),
+                                    type : "POST",
+                                    data : {
+                                        'response': $("#<?php echo $approval['Approval']['id'];?>ResponseTxt").val(),
+                                        'to':$("#<?php echo $approval['Approval']['id'];?>UserTo").val(),
+                                        'approval_id':'<?php echo $approval['Approval']['id']?>',
+                                        'approval_status':$("input[name='data[ApprovalComment][<?php echo $approval['Approval']['id'];?>][approval_status]']:checked").val(),
+                                        'approval_step_id':'<?php echo $approval_step_id;?>',
+                                        'next_approver_ids':$("#<?php echo $approval['Approval']['id'];?>NextApproverId").val()
+                                    },
+                                    beforeSend: function( xhr ) {
+                                        $("#<?php echo $approval['Approval']['id']?>_link_new").remove();
+                                        $("#<?php echo $approval['Approval']['id']?>_fa").addClass('fa fa-refresh fa-spin');
+                                    },
+                                    error: function (err) {
+
+                                    },
+                                    success: function(data, result) {
+                                        $('[id*="submit_id"]').show();
+                                        $("#<?php echo $approval['Approval']['id']?>_td_to_update").html(data);
+                                        if($(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>+":checked").val() == '3') setTimeout(function(){ window.location.reload(); }, 800);
+                                    },
+                                });
+                            })
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+<?php }else{ ?>
+<div class="col-md-12">
+    <ul class="timeline">
+        <li>
+            <i class="fa fa-check bg-green"></i>
+            <div class="timeline-item timeline-item-yellow">
+                <span class="time"><i class="fa fa-clock-o"></i> <?php echo h($approval['Approval']['created']); ?></span>
+                <h3 class="timeline-header"><?php echo h($approval['From']['name']); ?></h3>
+                <div class="timeline-body">
+                    <?php echo h($approval['Approval']['comments']); ?>
+                    <br />-<?php echo h($approval['From']['name']); ?>
+                </div>
+                <div class="timeline-footer">
+                    <div class="row">
+                        <div class="col-md-12">
+                        </div>
+                        <div class="col-md-12">
+                            <?php echo $approval['Approval']['approver_comments'];?>&nbsp;
+                            <br />-<?php echo $approval['User']['name'];?>&nbsp;
+                        </div>
+                        <div class="col-md-12">
+
+                        </div>
+                        <div class="col-md-12">
+
+                        </div>
+                        <!-- need to pass comment id, to and response only  -->
+
+                    </div>
+                </li>
+                <li><i class="fa fa-trophy bg-green"></i></li>
+            </ul>
+        </div>
+    </div>
+</li>
+</ul>
+<?php } ?>
+<?php } ?>
 <script type="text/javascript">
-	$().ready(function(){							
-		$('select').chosen();
-		$('[id*="submit_id"]').hide();
-	});				
+    $().ready(function(){
+        $('select').chosen();
+        $('[id*="submit_id"]').hide();
+    });
 </script>

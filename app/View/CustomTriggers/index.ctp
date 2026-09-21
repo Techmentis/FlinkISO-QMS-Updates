@@ -1,6 +1,7 @@
 <?php echo $this->element('checkbox-script'); ?><div  id="main">
 	<?php echo $this->Session->flash();?>	
 	<div class="customTriggers ">
+		<p class="text-right"><?php echo $this->Html->link('<i class="fa fa-envelope"></i> Delivery log', array('action'=>'deliveries'), array('class'=>'btn btn-default', 'escape'=>false)); ?></p>
 		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Custom Triggers','modelClass'=>'CustomTrigger','options'=>array("sr_no"=>"Sr No","name"=>"Name","details"=>"Details","file_name"=>"File Name","changed_field_value"=>"Changed Field Value","notify_user"=>"Notify User","notify_users"=>"Notify Users","if_added"=>"If Added","if_edited"=>"If Edited","if_publish"=>"If Publish","if_approved"=>"If Approved","if_soft_delete"=>"If Soft Delete","recipents"=>"Recipents","cc"=>"Cc","bcc"=>"Bcc","subject"=>"Subject","message"=>"Message"),'pluralVar'=>'customTriggers'))); ?>
 
 		<script type="text/javascript">
@@ -17,31 +18,33 @@
 			<table cellpadding="0" cellspacing="0" class="table table-hover">
 				<tr>
 					<th><?php echo $this->Paginator->sort('custom_table_id'); ?></th>
+					<th><?php echo $this->Paginator->sort('event_name', 'When'); ?></th>
 					<th><?php echo $this->Paginator->sort('name'); ?></th>
 					<th><?php echo $this->Paginator->sort('field_name'); ?></th>
 					<th><?php echo $this->Paginator->sort('changed_field_value'); ?></th>
 					<th><?php echo $this->Paginator->sort('notify_user'); ?></th>
-					<th><?php echo $this->Paginator->sort('prepared_by'); ?></th>		
-					<th><?php echo $this->Paginator->sort('approved_by'); ?></th>		
+					<th><?php echo $this->Paginator->sort('enabled'); ?></th>
 					<th>Actions</th>
 				</tr>
 				<?php if($customTriggers){ ?>
 					<?php foreach ($customTriggers as $customTrigger): ?>
 						<tr>
 							<td><?php echo $this->Html->link($customTrigger['CustomTable']['name'], array('controller' => 'custom_tables', 'action' => 'view', $customTrigger['CustomTable']['id'])); ?></td>
+							<?php $eventName = !empty($customTrigger['CustomTrigger']['event_name']) ? $customTrigger['CustomTrigger']['event_name'] : (!empty($customTrigger['CustomTrigger']['field_name']) ? 'field.changed' : ((int)$customTrigger['CustomTrigger']['action'] === 0 ? 'record.created' : ((int)$customTrigger['CustomTrigger']['action'] === 3 ? 'record.deleted' : ((int)$customTrigger['CustomTrigger']['action'] === 2 ? 'approval.excluded' : 'record.updated')))); ?>
+							<td><?php echo h(isset($eventNames[$eventName]) ? $eventNames[$eventName] : Inflector::humanize($eventName)); ?>&nbsp;</td>
 							<td><?php echo h($customTrigger['CustomTrigger']['name']); ?>&nbsp;</td>
 							<td><?php echo h($customTrigger['CustomTrigger']['field_name']); ?>&nbsp;</td>
 							<td><?php echo h($customTrigger['CustomTrigger']['changed_field_value']); ?>&nbsp;</td>
 							<td><?php echo h($customTrigger['CustomTrigger']['notify_user']); ?>&nbsp;</td>		
-							<td><?php echo h($PublishedEmployeeList[$customTrigger['CustomTrigger']['prepared_by']]); ?>&nbsp;</td>
-							<td><?php echo h($PublishedEmployeeList[$customTrigger['CustomTrigger']['approved_by']]); ?>&nbsp;</td>
-							<td class=" actions">	
+							<td><?php echo !empty($customTrigger['CustomTrigger']['enabled']) ? '<span class="label label-success">Enabled</span>' : '<span class="label label-default">Disabled</span>'; ?></td>
+							<td class=" actions">
+								<?php echo $this->Form->postLink(!empty($customTrigger['CustomTrigger']['enabled']) ? __('Disable') : __('Enable'), array('action'=>'toggle_enabled', $customTrigger['CustomTrigger']['id']), array('class'=>'btn btn-xs btn-default')); ?>
 								<?php echo $this->element('actions', array('created' => $customTrigger['CustomTrigger']['created_by'], 'postVal' => $customTrigger['CustomTrigger']['id'], 'softDelete' => $customTrigger['CustomTrigger']['soft_delete'])); ?>	
 							</td>
 						</tr>
 					<?php endforeach; ?>
 				<?php }else{ ?>
-					<tr><td colspan="9">No results found</td></tr>
+					<tr><td colspan="8">No results found</td></tr>
 				<?php } ?>
 			</table>
 			<?php echo $this->Form->end();?>			

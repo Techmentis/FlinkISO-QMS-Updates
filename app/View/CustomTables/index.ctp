@@ -153,32 +153,7 @@ if (!$this->request->is('post')) {
 <script>$.ajaxSetup({beforeSend:function(){$("#busy-indicator").show();},complete:function(){$("#busy-indicator").hide();}});</script>
 <script type="text/javascript">	$().ready(function(){$(".tooltip1").tooltip();});</script>
 <?php }else{ ?>	
-	<div class="row">
-		<div class="col-md-12">
-			<h3>How to Build Custom HTML Forms</h3>
-			<p>In order to use this section, you must add Documents to the application first. Once the documents are added, you can build Custom HTML Forms for each document by clicking on Database icon on the document's view page.</p>
-			<p>You can use the existing available forms by downloading them. You can edit those forms as per your requirements once you download them.</p>
-			<p>If the form/ module you need, does not exist, you can build your Forms.</p>
-			<p>Additionally you can also refer to following links & video for more details.
-				<ul>
-					<li><strong><a href="https://www.flinkiso.com/manual/custom-html-forms.html" target="_blank">https://www.flinkiso.com/manual/custom-html-forms.html</a></strong></li>
-					<li><strong><a href="https://www.flinkiso.com/manual/custom-form-layouts.html" target="_blank">https://www.flinkiso.com/manual/custom-form-layouts.html</a></strong></li>
-					<li><strong><a href="https://www.flinkiso.com/manual/custom-forms.html" target="_blank">https://www.flinkiso.com/manual/custom-forms.html</a></strong></li>
-				</ul>
-			</p>
-			<p><hr /></p>	
-		</div>
-		<div class="col-md-7">		
-			<div class="embed-responsive embed-responsive-16by9">	
-			<iframe class="embed-responsive-item" src="https://www.youtube.com/embed/kvqa19DJzsY?si=6PReZn8PSIKcpoqG" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-			</div>
-		</div>
-		<div class="col-md-5">
-			<h4>Types of HTML Forms You can create</h4> 
-                <?php 
-                echo $this->Html->link($this->Html->Image('structure.png',array('class'=>'img-responsive')),array('controller'=>'img','action'=>'structure.png'),array('target'=>'_blank', 'class'=>'img-responsive','escape'=>false));?>    
-		</div>		
-	</div>
+	<p>Forms are not added for this section.</p>
 <?php } ?>
 </div>
 <script>

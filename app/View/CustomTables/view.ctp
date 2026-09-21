@@ -25,10 +25,9 @@ $customTableFields = json_decode($customTable['CustomTable']['fields'], true);
 if (!is_array($customTableFields)) $customTableFields = array();
 $savedTabSettings = isset($customTable['CustomTable']['tab_settings']) ? json_decode($customTable['CustomTable']['tab_settings'], true) : array();
 if (!is_array($savedTabSettings)) $savedTabSettings = array();
-// Older saved records used the tab name directly as the key. Preserve them
-// while allowing child-form tab rules to live alongside ordinary form tabs.
+// Older saved records used the tab name directly as the key.
 $tabSettings = isset($savedTabSettings['tabs']) && is_array($savedTabSettings['tabs']) ? $savedTabSettings['tabs'] : $savedTabSettings;
-$childFormSettings = isset($savedTabSettings['child_forms']) && is_array($savedTabSettings['child_forms']) ? $savedTabSettings['child_forms'] : array();
+$childDocumentSettings = isset($savedTabSettings['child_documents']) && is_array($savedTabSettings['child_documents']) ? $savedTabSettings['child_documents'] : array();
 
 $formTabs = array();
 $visibilityFields = array();
@@ -67,14 +66,8 @@ foreach ($formTabs as $formTab) {
 		'position' => 'Group '.($formTab['group'] !== '' ? $formTab['group'] : '-').' / #'.($formTab['sequence'] !== '' ? $formTab['sequence'] : '-'),
 	);
 }
-foreach ((array)$childs as $child) {
-	if (empty($child['CustomTable']['table_name'])) continue;
-	$tabConfigurationRows[] = array(
-		'type' => 'child_form',
-		'key' => $child['CustomTable']['table_name'],
-		'name' => $child['CustomTable']['name'],
-		'position' => 'Child form tab',
-	);
+foreach ((array)$childDocumentForms as $childDocumentForm) {
+	$tabConfigurationRows[] = array('type' => 'child_document', 'key' => $childDocumentForm['CustomTable']['id'], 'name' => $childDocumentForm['CustomTable']['name'], 'position' => 'Child document');
 }
 ?>
 <script>
@@ -501,7 +494,7 @@ foreach ((array)$childs as $child) {
 						<h3 class="box-title" style="width:100%">Tab Configuration <span class="pull-right"><i class="fa fa-folder-o"></i></span></h3>
 					</div>
 					<div class="box-body">
-						<p class="tab-configuration-note">Define when each form tab is available. Leave the visibility rule as <strong>Always visible</strong>, or leave its values unselected, to apply no field-value restriction.</p>
+						<p class="tab-configuration-note">Define when each main-form tab or child document is available. Normal child forms are rendered independently and are not controlled here. Leave the visibility rule as <strong>Always visible</strong>, or leave its values unselected, to apply no field-value restriction.</p>
 						<?php echo $this->Form->create('CustomTable', array('url' => array('action' => 'update_tab_settings', $customTable['CustomTable']['id']), 'id' => 'update-tab-settings', 'class' => 'form')); ?>
 						<?php echo $this->Form->hidden('tab_settings', array('id' => 'CustomTableTabSettings')); ?>
 						<?php if($tabConfigurationRows){ ?>
@@ -517,8 +510,8 @@ foreach ((array)$childs as $child) {
 										</thead>
 									<tbody>
 										<?php foreach($tabConfigurationRows as $formTab){
-											$settingsForRow = $formTab['type'] === 'child_form' ? $childFormSettings : $tabSettings;
-											$formTabSetting = isset($settingsForRow[$formTab['key']]) && is_array($settingsForRow[$formTab['key']]) ? $settingsForRow[$formTab['key']] : array();
+											$settingsGroup = $formTab['type'] === 'child_document' ? (array)$childDocumentSettings : (array)$tabSettings;
+											$formTabSetting = isset($settingsGroup[$formTab['key']]) && is_array($settingsGroup[$formTab['key']]) ? $settingsGroup[$formTab['key']] : array();
 											$actionVisibility = isset($formTabSetting['action_visibility']) ? $formTabSetting['action_visibility'] : 'always';
 											$visibilityFieldName = isset($formTabSetting['visibility_field']) ? $formTabSetting['visibility_field'] : '';
 											$visibilityValues = isset($formTabSetting['visible_when']) && is_array($formTabSetting['visible_when']) ? $formTabSetting['visible_when'] : array();
@@ -532,7 +525,7 @@ foreach ((array)$childs as $child) {
 											}
 										?>
 											<tr class="tab-configuration-row" data-tab-name="<?php echo h($formTab['key']); ?>" data-tab-type="<?php echo h($formTab['type']); ?>">
-												<td><strong class="tab-name"><?php echo h($formTab['name']); ?><?php echo $formTab['type'] === 'child_form' ? ' <small>(Child form)</small>' : ''; ?></strong></td>
+												<td><strong class="tab-name"><?php echo h($formTab['name']); ?></strong></td>
 												<td><small class="tab-position"><?php echo h($formTab['position']); ?></small></td>
 												<td>
 													<select class="form-control input-sm tab-action-visibility">
@@ -760,7 +753,7 @@ foreach ((array)$childs as $child) {
 		});
 
 		$('#update-tab-settings').on('submit', function(){
-			var settings = {tabs: {}, child_forms: {}};
+			var settings = {tabs: {}, child_documents: {}};
 
 			$('#tab-configuration-table .tab-configuration-row').each(function(){
 				var row = $(this);
@@ -774,8 +767,8 @@ foreach ((array)$childs as $child) {
 					visibility_field: visibilityField || '',
 					visible_when: visibleWhen
 				};
-				if(row.attr('data-tab-type') === 'child_form') settings.child_forms[tabName] = setting;
-				else settings.tabs[tabName] = setting;
+				var settingsGroup = row.attr('data-tab-type') === 'child_document' ? settings.child_documents : settings.tabs;
+				settingsGroup[tabName] = setting;
 			});
 
 			$('#CustomTableTabSettings').val(JSON.stringify(settings));
