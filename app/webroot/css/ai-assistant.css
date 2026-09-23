@@ -81,6 +81,14 @@
 .fi-ai-icon-button:hover,
 .fi-ai-icon-button:focus { color: #fff; background: rgba(255,255,255,.16); outline: none; }
 
+.fi-ai-mode-switch { display: grid; grid-template-columns: 1fr 1fr; flex: 0 0 auto; gap: 5px; padding: 8px 14px; background: #fff; border-bottom: 1px solid #dfe6ec; }
+.fi-ai-mode-button { padding: 7px 10px; color: #5c6d7e; background: #f5f7f9; border: 1px solid #d8e0e7; border-radius: 8px; font-size: 11px; font-weight: 600; }
+.fi-ai-mode-button .fa { margin-right: 5px; }
+.fi-ai-mode-button:hover,
+.fi-ai-mode-button:focus { color: var(--site-blue-text); border-color: var(--site-blue-border); outline: none; }
+.fi-ai-mode-button.is-active { color: #fff; background: var(--site-blue); border-color: var(--site-blue); }
+.fi-ai-mode-button[disabled] { color: #aab3bb; background: #f5f5f5; border-color: #e5e8ea; cursor: not-allowed; opacity: .7; }
+
 .fi-ai-messages { flex: 1 1 auto; min-height: 0; padding: 20px 16px; overflow-y: auto; }
 .fi-ai-message { display: flex; align-items: flex-start; margin-bottom: 16px; }
 .fi-ai-message-icon { width: 30px; height: 30px; margin-right: 9px; color: #fff; background: var(--site-blue); }
@@ -88,6 +96,17 @@
 .fi-ai-message-content strong { display: block; margin-bottom: 4px; color: #253348; }
 .fi-ai-message-content p { margin: 0; line-height: 1.5; }
 .fi-ai-message-content > p + * { margin-top: 11px; }
+.fi-ai-rich-text { font-size: 12px; line-height: 1.55; overflow-wrap: anywhere; }
+.fi-ai-rich-text p { margin: 0 0 9px; }
+.fi-ai-rich-text p:last-child { margin-bottom: 0; }
+.fi-ai-rich-text ul,
+.fi-ai-rich-text ol { margin: 7px 0 10px; padding-left: 20px; }
+.fi-ai-rich-text li { margin: 3px 0; }
+.fi-ai-rich-text strong { display: inline; margin: 0; color: #253348; }
+.fi-ai-rich-text .fi-ai-rich-heading { display: block; margin: 11px 0 5px; color: #253348; font-size: 13px; }
+.fi-ai-rich-text .fi-ai-rich-heading:first-child { margin-top: 0; }
+.fi-ai-rich-text code { padding: 1px 4px; color: #253348; background: #eef3f7; border-radius: 3px; font-size: 10px; }
+.fi-ai-rich-text a { color: var(--site-blue-text); font-weight: 600; text-decoration: underline; }
 .fi-ai-live-output { display: block; width: 100%; max-height: 260px; margin: 10px 0 0; padding: 9px; overflow: auto; color: #d8e8f5; background: #1f2a35; border: 0; border-radius: 7px; font-family: Menlo, Monaco, Consolas, monospace; font-size: 10px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
 .fi-ai-message-user { justify-content: flex-end; }
 .fi-ai-message-user .fi-ai-message-content { max-width: 86%; color: var(--site-blue-text); background: var(--site-blue-soft); border-color: var(--site-blue-border); border-radius: 14px 4px 14px 14px; }
@@ -105,6 +124,24 @@
 .fi-ai-child-table-preview ul { margin: 0; padding-left: 18px; }
 .fi-ai-child-table-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
 .fi-ai-form-link { display: inline-block; margin-top: 9px; color: var(--site-blue-text); font-weight: 600; text-decoration: underline; }
+.fi-ai-answer-sources { margin-top: 12px; padding-top: 9px; border-top: 1px solid #e4e9ed; font-size: 11px; }
+.fi-ai-answer-sources > strong { margin: 0 0 4px; color: #59697a; font-size: 10px; text-transform: uppercase; letter-spacing: .035em; }
+.fi-ai-answer-sources ul { margin: 0; padding-left: 17px; }
+.fi-ai-answer-sources li { margin: 3px 0; }
+.fi-ai-answer-sources a { color: var(--site-blue-text); font-weight: 600; text-decoration: none; }
+.fi-ai-answer-sources a:hover,
+.fi-ai-answer-sources a:focus { text-decoration: underline; }
+.fi-ai-answer-images { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.fi-ai-answer-images figure { min-width: 0; margin: 0; }
+.fi-ai-answer-images a { display: block; overflow: hidden; background: #f4f7f9; border: 1px solid #dce5eb; border-radius: 7px; }
+.fi-ai-answer-images img { display: block; width: 100%; height: 92px; object-fit: cover; transition: transform .16s ease; }
+.fi-ai-answer-images a:hover img,
+.fi-ai-answer-images a:focus img { transform: scale(1.025); }
+.fi-ai-answer-images figcaption { margin-top: 4px; color: #68798a; font-size: 9px; line-height: 1.35; }
+.fi-ai-subscription-notice { margin-top: 12px; padding: 12px; border: 1px solid #efcc82; border-radius: 9px; background: #fff7e3; color: #59431a; }
+.fi-ai-subscription-notice > strong { display: block; margin-bottom: 5px; color: #2d3748; }
+.fi-ai-subscription-notice p { margin: 0; }
+.fi-ai-subscription-link { color: #175f9f; }
 .fi-ai-history-meta { margin-top: 7px; color: #84909d; font-size: 9px; text-transform: uppercase; letter-spacing: .035em; }
 .fi-ai-message-user .fi-ai-history-meta { color: var(--site-blue-text); opacity: .65; }
 #fi-ai-instance-busy-meta { color: #000; font-size: 12px; line-height: 1.5; text-transform: none; letter-spacing: 0; }

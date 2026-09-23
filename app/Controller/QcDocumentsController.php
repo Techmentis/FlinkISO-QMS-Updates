@@ -1774,6 +1774,22 @@ class QcDocumentsController extends AppController {
     }
 
     public function document_list($user_id = null){
+        $limit = 25;
+        $src = array();
+        $this->set('hide',false);
+        if ($this->request->is('post') || $this->request->is('put')) {
+            if(trim($this->data['search'])){
+                $src = array('OR'=> array(
+                    'QcDocument.name LIKE' => '%'.$this->data['search'].'%',
+                    'QcDocument.document_number LIKE' => '%'.$this->data['search'].'%',
+                ));
+                $limit = 100;
+                $this->set('hide',true);
+            }else{
+                $limit = 25;
+                $src = array();   
+            }
+        }
 
         if($user_id){
             $this->loadModel('User');
@@ -1783,8 +1799,11 @@ class QcDocumentsController extends AppController {
 
         $this->paginate = array(
             'recursive'=>0,
-            'limit'=>25,
-            'conditions'=>array('QcDocument.parent_document_id'=>array(NULL,-1,'')),
+            'limit'=>$limit,
+            'conditions'=>array($src, 
+                'QcDocument.archived'=>0,
+                'QcDocument.parent_document_id'=>array(NULL,-1,'')
+            ),
             'fields'=>array(
                 'QcDocument.id','QcDocument.title','QcDocument.name', 'QcDocument.document_number', 'QcDocument.standard_id','QcDocument.user_id','QcDocument.branches','QcDocument.departments','QcDocument.designations','QcDocument.editors','QcDocument.prepared_by','QcDocument.approved_by',
                 'PreparedBy.id',

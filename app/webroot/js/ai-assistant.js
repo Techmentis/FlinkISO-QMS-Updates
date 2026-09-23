@@ -25,6 +25,58 @@
   var instanceStatusTimer = null;
   var instanceStatusGeneration = 0;
   var instanceStatusReady = false;
+  var assistantMode = 'chat';
+
+  function isFormsMode() {
+    return assistantMode === 'forms';
+  }
+
+  function formsModeAvailable() {
+    return $panel && $panel.attr('data-form-ai-context') === '1';
+  }
+
+  function isGeneratedFormContext() {
+    var controller = $panel ? String($panel.attr('data-controller') || '') : '';
+    return controller.indexOf('tbl_') === 0 || controller.indexOf('chd_') === 0;
+  }
+
+  function isLocalAiProvider() {
+    return $panel && $panel.attr('data-ai-provider-local') === '1';
+  }
+
+  function applyAssistantModeUi() {
+    if (isFormsMode() && !formsModeAvailable()) { assistantMode = 'chat'; }
+    $('.fi-ai-mode-button').each(function () {
+      var active = $(this).attr('data-ai-mode') === assistantMode;
+      $(this).toggleClass('is-active', active).attr('aria-pressed', active ? 'true' : 'false');
+    });
+    $('[data-ai-mode-content]').hide().filter('[data-ai-mode-content="' + assistantMode + '"]').show();
+    $('#fi-ai-welcome-text').text(isFormsMode()
+      ? ($panel.attr('data-controller') === 'qc_documents'
+        ? 'Ask me to understand this document and prepare a FlinkISO form or module.'
+        : ($panel.attr('data-controller') === 'custom_tables'
+          ? 'Ask me to prepare a new FlinkISO form or help define its fields.'
+          : 'Ask me to create, review, or update fields for this form.'))
+      : 'Ask me a question about QMS or using FlinkISO.');
+    $prompt.attr('placeholder', isFormsMode()
+      ? 'Describe what you want FlinkISO to create or update...'
+      : 'Ask a question about QMS or using FlinkISO...');
+    var remoteGeneratedChat = !isFormsMode() && isGeneratedFormContext() && !isLocalAiProvider();
+    $('.fi-ai-document-option').toggle(isFormsMode() || remoteGeneratedChat);
+    $('#fi-ai-disclaimer').text(isFormsMode()
+      ? 'AI changes are validated before FlinkISO rebuilds the form.'
+      : 'AI guidance is provided by your configured AI provider.');
+    $('.fi-ai-local-note').html(isFormsMode()
+      ? '<i class="fa fa-shield"></i> Secure FlinkISO API'
+      : '<i class="fa fa-comments-o"></i> Chat');
+    if (isFormsMode()) {
+      activateFieldSelection();
+    } else {
+      $('.fi-ai-selectable-field, .fi-ai-selected-field').removeClass('fi-ai-selectable-field fi-ai-selected-field').removeAttr('data-fi-ai-field');
+      guidedAction = null;
+    }
+    if ($panel.hasClass('is-open')) setPageFormSubmissionLocked(isFormsMode());
+  }
 
   function openPanel() {
     if (!$panel || !$panel.length) { return; }
@@ -35,9 +87,8 @@
     $toggle.parent().removeClass('has-ai-completion');
     $toggle.attr('title', 'FlinkISO AI');
     if (!historyLoaded) { loadHistory(false); }
+    applyAssistantModeUi();
     refreshInstanceStatus();
-    activateFieldSelection();
-    setPageFormSubmissionLocked(true);
     window.setTimeout(function () { $(window).trigger('resize'); }, 260);
     window.setTimeout(function () { $prompt.focus(); }, 260);
   }
@@ -65,9 +116,123 @@
     $send.prop('disabled', !instanceStatusReady || requestInProgress || instanceBusy || $.trim($prompt.val()).length === 0);
   }
 
+  function appendInlineFormatting($target, value) {
+    var text = String(value || '');
+    var pattern = /(\*\*[^*\n]+\*\*|`[^`\n]+`|\[[^\]\n]+\]\(https?:\/\/[^\s)]+\)|https?:\/\/[^\s<]+)/g;
+    var cursor = 0;
+    var match;
+    while ((match = pattern.exec(text)) !== null) {
+      if (match.index > cursor) $target.append(document.createTextNode(text.substring(cursor, match.index)));
+      var token = match[0];
+      if (token.indexOf('**') === 0) {
+        $target.append($('<strong/>').text(token.substring(2, token.length - 2)));
+      } else if (token.charAt(0) === '`') {
+        $target.append($('<code/>').text(token.substring(1, token.length - 1)));
+      } else {
+        var label = token;
+        var href = token;
+        var markdownLink = token.match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/);
+        if (markdownLink) { label = markdownLink[1]; href = markdownLink[2]; }
+        $target.append($('<a/>', {href: href, target: '_blank', rel: 'noopener noreferrer'}).text(label));
+      }
+      cursor = pattern.lastIndex;
+    }
+    if (cursor < text.length) $target.append(document.createTextNode(text.substring(cursor)));
+  }
+
+  function formattedAssistantText(message) {
+    var $container = $('<div/>', {'class': 'fi-ai-rich-text'});
+    var lines = String(message || '').replace(/\r\n?/g, '\n').split('\n');
+    var index = 0;
+    while (index < lines.length) {
+      var line = $.trim(lines[index]);
+      if (!line) { index++; continue; }
+      var heading = line.match(/^#{1,3}\s+(.+)$/);
+      if (heading) {
+        var $heading = $('<strong/>', {'class': 'fi-ai-rich-heading'});
+        appendInlineFormatting($heading, heading[1]);
+        $container.append($heading);
+        index++;
+        continue;
+      }
+      var bullet = line.match(/^[-*]\s+(.+)$/);
+      var numbered = line.match(/^\d+[.)]\s+(.+)$/);
+      if (bullet || numbered) {
+        var ordered = !!numbered;
+        var $list = ordered ? $('<ol/>') : $('<ul/>');
+        while (index < lines.length) {
+          var itemLine = $.trim(lines[index]);
+          var item = ordered ? itemLine.match(/^\d+[.)]\s+(.+)$/) : itemLine.match(/^[-*]\s+(.+)$/);
+          if (!item) break;
+          var $li = $('<li/>');
+          appendInlineFormatting($li, item[1]);
+          $list.append($li);
+          index++;
+        }
+        $container.append($list);
+        continue;
+      }
+      var paragraph = [];
+      while (index < lines.length) {
+        var paragraphLine = $.trim(lines[index]);
+        if (!paragraphLine || /^#{1,3}\s+/.test(paragraphLine) || /^[-*]\s+/.test(paragraphLine) || /^\d+[.)]\s+/.test(paragraphLine)) break;
+        paragraph.push(paragraphLine);
+        index++;
+      }
+      var $paragraph = $('<p/>');
+      $.each(paragraph, function (lineIndex, paragraphText) {
+        if (lineIndex) $paragraph.append('<br>');
+        appendInlineFormatting($paragraph, paragraphText);
+      });
+      $container.append($paragraph);
+      if (index < lines.length && !$.trim(lines[index])) index++;
+    }
+    return $container;
+  }
+
+  function appendAnswerSources($content, sources) {
+    if (!$.isArray(sources) || !sources.length) return;
+    var $sources = $('<div/>', {'class': 'fi-ai-answer-sources'}).append($('<strong/>').text('Official FlinkISO guides'));
+    var $sourceList = $('<ul/>');
+    $.each(sources, function (_, source) {
+      if (!source || !source.url || !/^https?:\/\//i.test(source.url)) return;
+      $sourceList.append($('<li/>').append($('<a/>', {
+        href: source.url,
+        target: '_blank',
+        rel: 'noopener noreferrer'
+      }).text(source.title || source.url)));
+    });
+    if ($sourceList.children().length) $content.append($sources.append($sourceList));
+  }
+
+  function appendAnswerImages($content, images) {
+    if (!$.isArray(images) || !images.length) return;
+    var $gallery = $('<div/>', {'class': 'fi-ai-answer-images', 'aria-label': 'Related FlinkISO manual images'});
+    $.each(images, function (_, image) {
+      if (!image || !image.url) return;
+      var parser = document.createElement('a');
+      parser.href = image.url;
+      if (parser.protocol !== 'https:' || String(parser.hostname).toLowerCase() !== 'www.flinkiso.com') return;
+      var caption = image.caption || 'FlinkISO manual image';
+      var $figure = $('<figure/>');
+      var $link = $('<a/>', {
+        href: parser.href,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        title: 'Open image in a new tab'
+      });
+      $link.append($('<img/>', {src: parser.href, alt: caption, loading: 'lazy'}));
+      $figure.append($link).append($('<figcaption/>').text(caption));
+      $gallery.append($figure);
+    });
+    if ($gallery.children().length) $content.append($gallery);
+  }
+
   function appendMessage(kind, message) {
     var $item = $('<div/>', {'class': 'fi-ai-message fi-ai-message-' + kind});
-    var $content = $('<div/>', {'class': 'fi-ai-message-content'}).append($('<p/>').text(message));
+    var $content = $('<div/>', {'class': 'fi-ai-message-content'});
+    if (kind === 'assistant') $content.append(formattedAssistantText(message));
+    else $content.append($('<p/>').text(message));
     $item.append($content);
     $('#fi-ai-messages').append($item).scrollTop($('#fi-ai-messages')[0].scrollHeight);
     return $item;
@@ -83,8 +248,10 @@
     var meta = [item.status || '', item.operation || ''];
     if (item.duration_ms) { meta.push((item.duration_ms / 1000).toFixed(1) + 's'); }
     var $assistantContent = $('<div/>', {'class': 'fi-ai-message-content'})
-      .append($('<p/>').text(responseText))
-      .append($('<div/>', {'class': 'fi-ai-history-meta'}).text(meta.join(' · ')));
+      .append(formattedAssistantText(responseText));
+    appendAnswerImages($assistantContent, item.images);
+    appendAnswerSources($assistantContent, item.sources);
+    $assistantContent.append($('<div/>', {'class': 'fi-ai-history-meta'}).text(meta.join(' · ')));
     if (item.form_url) {
       $assistantContent.append($('<a/>', {'class': 'fi-ai-form-link', href: item.form_url}).text('Open generated form'));
     }
@@ -189,6 +356,14 @@
   }
 
   function applyInstanceStatus(result) {
+    if (!isFormsMode()) {
+      instanceStatusReady = true;
+      instanceBusy = false;
+      $('#fi-ai-instance-busy, #fi-ai-instance-stop').hide();
+      $prompt.prop('disabled', requestInProgress);
+      resizePrompt();
+      return;
+    }
     var wasBusy = instanceBusy;
     instanceStatusReady = !!(result && result.success === true);
     instanceBusy = !!(result && result.success === true && result.active === true);
@@ -225,7 +400,8 @@
       stopInstanceStatusPolling();
       $busy.hide();
       $stop.hide().attr('data-ai-id', '');
-      $('#fi-ai-welcome, .fi-ai-suggestions').show();
+      $('#fi-ai-welcome').show();
+      applyAssistantModeUi();
       // When this tab owns the request, API V2 can release its lock a moment
       // before the successful response finishes rendering. Let the request's
       // own completion path report the result instead of showing a false
@@ -269,6 +445,14 @@
   }
 
   function refreshInstanceStatus() {
+    if (!isFormsMode()) {
+      instanceStatusReady = true;
+      instanceBusy = false;
+      $prompt.prop('disabled', false);
+      $('#fi-ai-send-current-document').prop('disabled', true);
+      resizePrompt();
+      return;
+    }
     var url = $panel && $panel.attr('data-status-url');
     if (!url || instanceStatusLoading) { return; }
     var generation = instanceStatusGeneration;
@@ -291,9 +475,10 @@
 
   function startActivity(isDocumentRequest) {
     var startedAt = new Date().getTime();
-    var $item = appendMessage('system', isDocumentRequest
-      ? 'Reading the current document from FlinkISO…'
-      : 'Reading the current form definition…');
+    var isGeneralAssistance = !isFormsMode();
+    var $item = appendMessage('system', isGeneralAssistance
+      ? 'Asking your configured AI provider…'
+      : (isDocumentRequest ? 'Reading the current document from FlinkISO…' : 'Reading the current form definition…'));
     var $text = $item.find('p');
     var $live = $('<pre/>', {'class': 'fi-ai-live-output', 'aria-label': 'Live AI output'}).hide();
     $item.find('.fi-ai-message-content').append($live);
@@ -304,7 +489,15 @@
         ? elapsedSeconds + 's'
         : Math.floor(elapsedSeconds / 60) + 'm ' + (elapsedSeconds % 60) + 's';
       var message;
-      if (isDocumentRequest && elapsedSeconds < 5) {
+      if (isGeneralAssistance) {
+        if (elapsedSeconds < 15) {
+          message = 'Processing your question…';
+        } else if (elapsedSeconds < 45) {
+          message = 'Waiting for the AI response…';
+        } else {
+          message = 'The AI is preparing a response…';
+        }
+      } else if (isDocumentRequest && elapsedSeconds < 5) {
         message = 'Reading and extracting the current document…';
       } else if (elapsedSeconds < 15) {
         message = isDocumentRequest ? 'Sending document content to FlinkISO AI…' : 'Sending the field request to FlinkISO AI…';
@@ -372,6 +565,26 @@
       : ($.inArray(response.operation, ['create_form', 'add_fields']) !== -1 && $.isArray(response.field_details) ? response.field_details : []);
     var warnings = $.isArray(response.warnings) ? response.warnings : [];
     var childTables = $.isArray(response.child_tables) ? response.child_tables : [];
+
+    if (response.general_assistance) {
+      appendAnswerImages($content, response.images);
+      appendAnswerSources($content, response.sources);
+    }
+
+    if (response.subscription_required) {
+      var $subscription = $('<div/>', {'class': 'fi-ai-subscription-notice'});
+      $subscription.append($('<strong/>').text('API subscription required'));
+      $subscription.append($('<p/>').text('You can continue using AI for questions, analysis, and read-only recommendations. Automatic form creation and updates require an active FlinkISO API subscription.'));
+      if (response.payment_url) {
+        $subscription.append($('<a/>', {
+          'class': 'fi-ai-form-link fi-ai-subscription-link',
+          href: response.payment_url,
+          target: '_blank',
+          rel: 'noopener noreferrer'
+        }).text('View API plans'));
+      }
+      $content.append($subscription);
+    }
 
     if (response.form_name) {
       $content.prepend($('<strong/>').text(response.form_name));
@@ -950,7 +1163,9 @@
       } catch (ignore) {}
     }
     if (xhr && xhr.status === 0) { return 'The request could not reach FlinkISO. Check the application and local AI service.'; }
-    return 'FlinkISO AI could not generate a preview. Please try again.';
+    return isFormsMode()
+      ? 'FlinkISO AI could not generate a form preview. Please try again.'
+      : 'The configured AI provider could not complete this chat request. Please try again.';
   }
 
   $(function () {
@@ -978,7 +1193,7 @@
     // submit scripts cannot save the underlying form while AI edit mode is on.
     if (document.addEventListener) {
       document.addEventListener('submit', function (event) {
-        if (!$('body').hasClass('fi-ai-panel-open')) { return; }
+        if (!$('body').hasClass('fi-ai-panel-open') || !isFormsMode()) { return; }
         if ($(event.target).closest('.content-wrapper').length) {
           event.preventDefault();
           event.stopImmediatePropagation();
@@ -987,7 +1202,7 @@
     }
 
     $('.content-wrapper').on('click', '.fi-ai-selectable-field', function (event) {
-      if (!$('body').hasClass('fi-ai-panel-open')) { return; }
+      if (!$('body').hasClass('fi-ai-panel-open') || !isFormsMode()) { return; }
       event.preventDefault();
       event.stopPropagation();
       if (requestInProgress) { return; }
@@ -1031,6 +1246,20 @@
       $prompt.focus();
     });
 
+    $('.fi-ai-mode-button').on('click', function () {
+      var mode = $(this).attr('data-ai-mode');
+      if ($(this).prop('disabled') || requestInProgress || (mode === 'forms' && !formsModeAvailable())) { return; }
+      assistantMode = mode;
+      instanceStatusGeneration++;
+      stopInstanceStatusPolling();
+      instanceBusy = false;
+      instanceRequestId = '';
+      $('#fi-ai-instance-busy, #fi-ai-instance-stop').hide();
+      applyAssistantModeUi();
+      refreshInstanceStatus();
+      $prompt.focus();
+    });
+
     $prompt.on('input', resizePrompt);
     $prompt.on('keydown', function (event) {
       if (event.which === 13 && !event.shiftKey) {
@@ -1050,7 +1279,9 @@
       instanceRequestId = '';
       $('#fi-ai-instance-busy').hide();
       $('#fi-ai-instance-stop').hide().attr('data-ai-id', '');
-      var sendCurrentDocument = $('#fi-ai-send-current-document').length > 0 && $('#fi-ai-send-current-document').prop('checked');
+      var localGeneratedChat = !isFormsMode() && isGeneratedFormContext() && isLocalAiProvider();
+      var mayUseContextCheckbox = isFormsMode() || (!isFormsMode() && isGeneratedFormContext() && !isLocalAiProvider());
+      var sendCurrentDocument = localGeneratedChat || (mayUseContextCheckbox && $('#fi-ai-send-current-document').length > 0 && $('#fi-ai-send-current-document').prop('checked'));
       appendMessage('user', message);
       $prompt.val('');
       setLoading(true);
@@ -1059,7 +1290,7 @@
       var streamOffset = 0;
       var streamPending = '';
       var streamedResponse = null;
-      var submittedGuidedAction = guidedAction;
+      var submittedGuidedAction = isFormsMode() ? guidedAction : null;
       guidedAction = null;
       activeAiId = '';
       function processStream(rawText, isFinal) {
@@ -1095,6 +1326,7 @@
         },
         data: {
           prompt: message,
+          assistant_mode: assistantMode,
           source_controller: $panel.attr('data-controller'),
           source_action: $panel.attr('data-action'),
           custom_table_id: $panel.attr('data-custom-table-id'),
@@ -1134,9 +1366,11 @@
           $prompt.focus();
           return;
         }
-        activity.complete(response.handled_locally
+        activity.complete(response.general_assistance
+          ? 'AI response complete.'
+          : (response.handled_locally
           ? 'The selected field action was validated by FlinkISO.'
-          : 'AI analysis complete. The result was validated by FlinkISO.');
+          : 'AI analysis complete. The result was validated by FlinkISO.'));
         renderPreview(response);
         rebuildForm(response).always(function () {
           setLoading(false);

@@ -4729,6 +4729,22 @@ class CustomTablesController extends AppController {
 
     public function custom_table_list($user_id = null){
 
+        $limit = 25;
+        $src = array();
+        $this->set('hide',false);
+        if ($this->request->is('post') || $this->request->is('put')) {
+            if(trim($this->data['search'])){
+                $src = array('OR'=> array(
+                    'CustomTable.name LIKE' => '%'.$this->data['search'].'%',                    
+                ));
+                $limit = 100;
+                $this->set('hide',true);
+            }else{
+                $limit = 25;
+                $src = array();   
+            }
+        }
+
         if($user_id){
             $this->loadModel('User');
             $user = $this->User->find('first',array('recursive'=>-1,'conditions'=>array('User.id'=>$user_id)));
@@ -4736,10 +4752,10 @@ class CustomTablesController extends AppController {
         }
 
         $this->paginate = array(
-            'limit'=>25,
+            'limit'=>$limit,
             'recursive'=>-1,
             'fields'=>array('CustomTable.id','CustomTable.name','CustomTable.creators','CustomTable.editors','CustomTable.viewers','CustomTable.approvers'),
-            // 'conditions'=>array('CustomTable.custom_table_id'=> '')
+            'conditions'=>$src
         );
         $customTables = $this->paginate();
         $this->set('customTables',$customTables);

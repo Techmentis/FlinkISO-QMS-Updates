@@ -1,10 +1,17 @@
 <?php if($qcDocuments && $this->Session->read('User.is_mr')){ ?>
-    <div  id="doclist">
-        <div class="row">
-            <div class="col-md-12">
+    <?php if (isset($hide) && $hide == false) { ?>
+    <div class="row">
+        <div class="col-md-12">
                 <h4>Document Access</h4>
                 <p>You can enable/ disable document access to this user by clicking on the check or remove icon.</p>
-            </div>
+            </div>            
+        <div class="col-md-12">
+                <?php echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_doc_src_button', 'autocomplete'=>'off',  'label'=>false,'placeholder'=>'Quick search with sorting.','style'=>'margin-top: -12px'));?>
+        </div>
+    </div>
+    <?php } ?>     
+    <div  id="doclist">
+        <div class="row">
             <div class="col-md-12">
                 <table class="table table-responsive table-bordered">
                     <tr>
@@ -153,3 +160,35 @@
     <?php echo $this->Js->writeBuffer();?>
 </div>
 <?php } ?>
+<script>
+    var searchTimer;
+    $('#quick_doc_src_button').on('input', function () {
+    var search = $(this).val();
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function () {
+        if (search.length < 2) {
+            $('#doclist').html('');
+            return;
+        }
+
+        $.ajax({
+            url: '<?php echo Router::url('/', true); ?>/qc_documents/document_list/',
+            type: 'POST',
+            data: {
+                search: search
+            },
+            beforeSend: function () {
+                $('#doclist').html('Searching...');
+            },
+            success: function (response) {
+                $('#doclist').html(response);
+            },
+            error: function () {
+                $('#doclist').html('Error while searching.');
+            }
+        });
+
+    }, 300); // wait 300ms after user stops typing
+});
+</script>
+

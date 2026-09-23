@@ -63,9 +63,7 @@ echo $this->fetch('script');
 <body class="hold-transition skin-blue sidebar-collapse sidebar-mini">
 	<?php if ($this->Session->read('User')) echo $this->Element('control-sidebar'); ?>
 	<?php
-	$aiController = $this->request->params['controller'];
-	$aiEnabled = $aiController === 'qc_documents' || strpos($aiController, 'tbl_') === 0 || strpos($aiController, 'chd_') === 0;
-	if ($aiFeatureEnabled && $this->Session->read('User') && $aiEnabled) {
+	if ($aiFeatureEnabled && $this->Session->read('User')) {
 		echo $this->Element('ai_assistant');
 	}
 	?>

@@ -1,5 +1,5 @@
 <?php if($customTables && $this->Session->read('User.is_mr')){ ?>
-<div id="tbllist">
+    <?php if (isset($hide) && $hide == false) { ?>
     <div class="row">
         <div class="col-md-12">
             <h4>Custom HTML Forms Access</h4>
@@ -7,6 +7,14 @@
             <br />Make sure that the relevent document access is given to a user before allowing the Custom HTML Form access based on that Document.
             <br />If you allow any action for the HTML table, system will automatically add View permission for a linked document if the permission is missng.</p>
         </div>
+        
+        <div class="col-md-12">
+                <?php echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_ct_src_button', 'autocomplete'=>'off',  'label'=>false,'placeholder'=>'Quick search with sorting.','style'=>'margin-top: -12px'));?>
+        </div>
+    </div>
+    <?php } ?>
+<div id="tbllist">
+    <div class="row">
         <div class="col-md-12">
             <table class="table table-responsive table-bordered">
                 <tr>
@@ -157,3 +165,35 @@
     <?php echo $this->Js->writeBuffer();?>
 </div>
 <?php } ?>
+<script>
+    var searchTimer;
+    $('#quick_ct_src_button').on('input', function () {
+    var search = $(this).val();
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function () {
+        if (search.length < 2) {
+            $('#tbllist').html('');
+            return;
+        }
+
+        $.ajax({
+            url: '<?php echo Router::url('/', true); ?>/custom_tables/custom_table_list/',
+            type: 'POST',
+            data: {
+                search: search
+            },
+            beforeSend: function () {
+                $('#tbllist').html('Searching...');
+            },
+            success: function (response) {
+                $('#tbllist').html(response);
+            },
+            error: function () {
+                $('#tbllist').html('Error while searching.');
+            }
+        });
+
+    }, 300); // wait 300ms after user stops typing
+});
+</script>
+
