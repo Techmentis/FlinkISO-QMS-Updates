@@ -3296,6 +3296,12 @@ public function history() {
     'order' => array('Ai.created' => 'DESC', 'Ai.id' => 'DESC'),
     'limit' => 30
     ));
+    if (!is_array($rows)) {
+        CakeLog::write('error', 'AI history query failed after schema verification.');
+        return $this->_jsonResponse(false, array(
+            'message' => __('AI history could not be loaded from the database.')
+        ), 503);
+    }
     $hasMore = count($rows) === 30;
     $items = array();
     foreach (array_reverse($rows) as $row) {
@@ -3491,24 +3497,39 @@ private function _startAiHistory($prompt, $sourceController, $sourceAction, $cus
         // Session component is not a reliable source when the terminal
         // history update runs several minutes later.
         $this->_historyCompanyId = (string)$this->Session->read('User.company_id');
+        $userId = (string)$this->Session->read('User.id');
+        $modelName = $assistantMode === 'chat' ? (string)Configure::read('AI.ai_model') : 'API v2';
+        $historyData = array(
+            'id' => $id,
+            'company_id' => $this->_historyCompanyId,
+            'user_id' => $userId,
+            'user_name' => (string)$this->Session->read('User.name'),
+            'source_controller' => $sourceController,
+            'source_action' => $sourceAction,
+            'custom_table_id' => $customTableId,
+            'qc_document_id' => $qcDocumentId,
+            'record_id' => $recordId,
+            'request' => $prompt,
+            'status' => 'processing',
+            'operation' => $assistantMode === 'chat' ? 'chat' : '',
+            'model' => $modelName,
+            'created' => date('Y-m-d H:i:s'),
+            'modified' => date('Y-m-d H:i:s')
+        );
+        // The original `ais` table has mandatory audit/question columns.
+        // Populate them when present so upgraded installations retain their
+        // existing data and can also store the new assistant history.
+        $schema = (array)$this->Ai->schema();
+        if (isset($schema['question'])) $historyData['question'] = $prompt;
+        if (isset($schema['ai_model'])) $historyData['ai_model'] = $modelName;
+        if (isset($schema['created_by'])) $historyData['created_by'] = $userId;
+        if (isset($schema['modified_by'])) $historyData['modified_by'] = $userId;
         $this->Ai->create();
-        if ($this->Ai->save(array('Ai' => array(
-        'id' => $id,
-        'company_id' => $this->_historyCompanyId,
-        'user_id' => $this->Session->read('User.id'),
-        'user_name' => (string)$this->Session->read('User.name'),
-        'source_controller' => $sourceController,
-        'source_action' => $sourceAction,
-        'custom_table_id' => $customTableId,
-        'qc_document_id' => $qcDocumentId,
-        'record_id' => $recordId,
-        'request' => $prompt,
-        'status' => 'processing',
-        'operation' => $assistantMode === 'chat' ? 'chat' : '',
-        'model' => $assistantMode === 'chat' ? (string)Configure::read('AI.ai_model') : 'API v2',
-        'created' => date('Y-m-d H:i:s'),
-        'modified' => date('Y-m-d H:i:s')
-        )), false)) $this->_historyId = $id;
+        if ($this->Ai->save(array('Ai' => $historyData), false)) {
+            $this->_historyId = $id;
+        } else {
+            CakeLog::write('error', 'AI history start insert failed for '.$id.'.');
+        }
     } catch (Exception $exception) {
         CakeLog::write('error', 'AI history start failed: '.$exception->getMessage());
     }
@@ -3587,6 +3608,39 @@ private function _ensureAiTable() {
         KEY `context_lookup` (`company_id`,`source_controller`,`custom_table_id`,`qc_document_id`,`created`),
         KEY `user_lookup` (`company_id`,`user_id`,`created`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        // Protect installations that received application files without the
+        // matching updater SQL, and safely upgrade the legacy `ais` table.
+        $requiredColumns = array(
+            'user_id' => "char(36) NOT NULL DEFAULT ''",
+            'user_name' => "varchar(255) NOT NULL DEFAULT ''",
+            'source_controller' => "varchar(255) NOT NULL DEFAULT ''",
+            'source_action' => "varchar(100) NOT NULL DEFAULT ''",
+            'custom_table_id' => "char(36) DEFAULT NULL",
+            'qc_document_id' => "char(36) DEFAULT NULL",
+            'record_id' => "char(36) DEFAULT NULL",
+            'request' => "text NULL",
+            'raw_response' => "longtext NULL",
+            'rebuild_response' => "longtext NULL",
+            'operation' => "varchar(64) NOT NULL DEFAULT ''",
+            'status' => "varchar(32) NOT NULL DEFAULT 'completed'",
+            'model' => "varchar(100) NOT NULL DEFAULT ''",
+            'duration_ms' => "int unsigned NOT NULL DEFAULT 0",
+            'http_status' => "smallint unsigned NOT NULL DEFAULT 0",
+            'error_details' => "text NULL"
+        );
+        $schema = (array)$this->Ai->schema(true);
+        foreach ($requiredColumns as $column => $definition) {
+            if (array_key_exists($column, $schema)) continue;
+            $this->Ai->query('ALTER TABLE `ais` ADD COLUMN `'.$column.'` '.$definition);
+        }
+        $schema = (array)$this->Ai->schema(true);
+        foreach ($requiredColumns as $column => $definition) {
+            if (!array_key_exists($column, $schema)) {
+                CakeLog::write('error', 'AI history table is missing required column '.$column.'.');
+                return false;
+            }
+        }
         return true;
     } catch (Exception $exception) {
         CakeLog::write('error', 'AI history table unavailable: '.$exception->getMessage());

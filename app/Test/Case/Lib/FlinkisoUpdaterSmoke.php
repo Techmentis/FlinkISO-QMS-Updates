@@ -18,6 +18,8 @@ try {
     ensure(substr_count($installSql, 'CREATE TABLE `email_trigger_deliveries`') === 1, 'Fresh installer must create one delivery table.');
     ensure(strpos($updateSql, 'MODIFY `sr_no` int(11) NOT NULL AUTO_INCREMENT') !== false, 'Updater does not repair the outbox sequence column.');
     ensure(strpos($updateSql, "MODIFY `created_by` varchar(36) NOT NULL DEFAULT '0'") !== false, 'Updater does not repair system audit defaults.');
+    ensure(strpos($updateSql, 'ALTER TABLE `ais` ADD `user_id`') !== false, 'Updater does not migrate the legacy AI history table.');
+    ensure(strpos($updateSql, "ADD `status` varchar(32) NOT NULL DEFAULT 'completed'") !== false, 'Legacy AI rows could be mistaken for active requests.');
     $parsed = FlinkisoUpdater::splitSql("-- comment;\nINSERT INTO t VALUES ('a;b', 'it''s'); /* x; */\nALTER TABLE t ADD x INT; # trailing");
     ensure(count($parsed) === 2, 'SQL splitting failed');
     foreach (array('../evil', '/absolute', 'a/../../evil', 'a\\evil', 'a/C:evil') as $path) ensure(!FlinkisoUpdater::safeArchivePath($path), 'Accepted traversal');

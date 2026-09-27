@@ -7,3 +7,11 @@ ALTER TABLE `email_trigger_outboxes` ADD `sr_no` int(11) NOT NULL AUTO_INCREMENT
 ALTER TABLE `email_trigger_outboxes` ADD `created_by` varchar(36) NOT NULL DEFAULT '0' AFTER `sent_at`;
 ALTER TABLE `email_trigger_outboxes` ADD `modified_by` varchar(36) NOT NULL DEFAULT '0' AFTER `created`;
 ALTER TABLE `email_trigger_outboxes` MODIFY `sr_no` int(11) NOT NULL AUTO_INCREMENT, MODIFY `created_by` varchar(36) NOT NULL DEFAULT '0', MODIFY `modified_by` varchar(36) NOT NULL DEFAULT '0';
+
+-- Upgrade the legacy question/response AI table for the persistent assistant
+-- history. Each ADD is split by the updater, so an already-present column does
+-- not prevent any remaining columns from being installed.
+ALTER TABLE `ais` ADD `user_id` varchar(36) NOT NULL DEFAULT '', ADD `user_name` varchar(255) NOT NULL DEFAULT '', ADD `source_controller` varchar(255) NOT NULL DEFAULT '', ADD `source_action` varchar(100) NOT NULL DEFAULT '', ADD `custom_table_id` varchar(36) NULL DEFAULT NULL, ADD `qc_document_id` varchar(36) NULL DEFAULT NULL, ADD `record_id` varchar(36) NULL DEFAULT NULL, ADD `request` text NULL, ADD `raw_response` longtext NULL, ADD `rebuild_response` longtext NULL, ADD `operation` varchar(64) NOT NULL DEFAULT '', ADD `status` varchar(32) NOT NULL DEFAULT 'completed', ADD `model` varchar(100) NOT NULL DEFAULT '', ADD `duration_ms` int unsigned NOT NULL DEFAULT '0', ADD `http_status` smallint unsigned NOT NULL DEFAULT '0', ADD `error_details` text NULL;
+ALTER TABLE `ais` MODIFY `response` longtext NULL;
+ALTER TABLE `ais` ADD KEY `context_lookup` (`company_id`,`source_controller`,`custom_table_id`,`qc_document_id`,`created`);
+ALTER TABLE `ais` ADD KEY `user_lookup` (`company_id`,`user_id`,`created`);
