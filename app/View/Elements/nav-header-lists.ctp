@@ -163,10 +163,12 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
     }    
 }
 
-    echo $this->Html->link('<i class="fa fa-search"></i>','#',
-    array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
-        'data-toggle'=>'control-sidebar', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Search', 'id'=>'ad_src'
-    ));
+    if($this->action === 'index') {
+        echo $this->Html->link('<i class="fa fa-search"></i>','#',
+        array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
+            'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Search', 'id'=>'ad_src'
+        ));
+    }
 
     if($this->action == 'view' && isset($this->request->params['named']['custom_table_id'])){
         echo $this->Html->link('<i class="fa fa-clock-o"></i>',
@@ -389,9 +391,6 @@ $str .= 'timestamp:'.date('ymdhis');
     }
 
     $(document).ready(function(){
-        $("#ad_src").on('click',function(){
-            $("#ad_src_result").load("<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/advance_search/custom_table_id:<?php echo $this->request->params['named']['custom_table_id'];?>/qc_document_id:<?php echo $this->request->params['named']['qc_document_id'];?>/process_id:<?php echo $this->request->params['named']['process_id'];?>");
-        });
         <?php if($this->request->controller == 'custom_tables'){ ?>
             $("#quick_src_button").on('change', function(){
                 $("#quick_src_button").val($("#quick_src_button").val().replace(/ /g,"+"));

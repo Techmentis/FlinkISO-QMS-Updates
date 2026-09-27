@@ -98,7 +98,7 @@ class AppModel extends Model
 
         if($this->alias == 'CustomTable'){
             // delete graph panels
-            $this->loadmodel('GraphPanel');
+            $this->GraphPanel = ClassRegistry::init('GraphPanel');
             $this->GraphPanel->deleteAll(array('GraphPanel.custom_table_id'=>$this->id));
         }
 
@@ -110,21 +110,17 @@ class AppModel extends Model
             );
 
             foreach($deletearray as $delmodel){
-                $this->loadmodel($delmodel);
-                debug($delmodel);
+                $this->$delmodel = ClassRegistry::init($delmodel);
                 $this->$delmodel->deleteAll(array($delmodel.'.standard_id'=>$this->id));
             }            
         }
 
         if($this->alias == 'QcDocument'){
-            $deletearray = array(
-                'ChildQcDocument'                
-            );
-
-            foreach($deletearray as $delmodel){
-                $this->loadmodel($delmodel);
-                $this->$delmodel->deleteAll(array($delmodel.'.qc_document_id'=>$this->id));
-            }                
+            $this->ChildQcDocument = ClassRegistry::init(array(
+                'class' => 'QcDocument',
+                'alias' => 'ChildQcDocument'
+            ));
+            $this->ChildQcDocument->deleteAll(array('ChildQcDocument.parent_id'=>$this->deletedId));
         }
 
         if($this->alias == 'File'){

@@ -12,12 +12,20 @@
                 <div class="ai-server-field"><?php echo $this->Form->input('ai_model', array('class'=>'form-control','label'=>'AI Model','placeholder'=>'qwen3:8b or provider model name')); ?></div>
                 <div class="ai-server-field"><?php echo $this->Form->input('ai_vision_model', array('class'=>'form-control','label'=>'Vision Model','placeholder'=>'Required; may be the same as the text model')); ?></div>
                 <div class="ai-server-field"><?php echo $this->Form->input('ai_api_key_plain', array('type'=>'password','class'=>'form-control','label'=>'AI API Key','autocomplete'=>'new-password','placeholder'=>$hasApiKey ? 'Saved — leave blank to keep existing key' : 'Required for cloud AI')); ?></div>
-                <div class="ai-advanced"><?php echo $this->Form->input('ai_timeout', array('type'=>'number','class'=>'form-control','label'=>'Timeout (seconds)','min'=>30,'max'=>1800)); ?></div>
-                <div class="ai-advanced"><?php echo $this->Form->input('ai_vision_context', array('type'=>'number','class'=>'form-control','label'=>'Vision Context','min'=>4096,'max'=>131072)); ?></div>
-                <div class="ai-advanced"><?php echo $this->Form->input('vision_pdf_max_pages', array('type'=>'number','class'=>'form-control','label'=>'Maximum PDF Pages','min'=>1,'max'=>50)); ?></div>
-                <div class="ai-advanced"><?php echo $this->Form->input('vision_page_pixels', array('type'=>'number','class'=>'form-control','label'=>'Vision Page Pixels','min'=>600,'max'=>2400)); ?></div>
-                <div class="ai-advanced"><?php echo $this->Form->input('pdf_to_ppm_path', array('class'=>'form-control','label'=>'PDF to PPM Path')); ?></div>
-                <div class="ai-advanced"><?php echo $this->Form->input('libreoffice_path', array('class'=>'form-control','label'=>'LibreOffice Path')); ?></div>
+                <div class="ai-provider-advanced"><?php echo $this->Form->input('ai_timeout', array('type'=>'number','class'=>'form-control','label'=>'Timeout (seconds)','min'=>30,'max'=>1800)); ?></div>
+                <div class="ai-provider-advanced"><?php echo $this->Form->input('ai_vision_context', array('type'=>'number','class'=>'form-control','label'=>'Vision Context','min'=>4096,'max'=>131072)); ?></div>
+                <?php echo $this->Form->input('document_converter', array(
+                    'class'=>'form-control',
+                    'label'=>'Document Conversion Engine',
+                    'options'=>array(
+                        'onlyoffice'=>'ONLYOFFICE (default)',
+                        'local'=>'Local LibreOffice + Poppler'
+                    )
+                )); ?>
+                <div><?php echo $this->Form->input('vision_pdf_max_pages', array('type'=>'number','class'=>'form-control','label'=>'Maximum Document Pages','min'=>1,'max'=>50)); ?></div>
+                <div><?php echo $this->Form->input('vision_page_pixels', array('type'=>'number','class'=>'form-control','label'=>'Vision Page Pixels','min'=>600,'max'=>2400)); ?></div>
+                <div class="ai-local-converter"><?php echo $this->Form->input('pdf_to_ppm_path', array('class'=>'form-control','label'=>'PDF to PPM Path')); ?></div>
+                <div class="ai-local-converter"><?php echo $this->Form->input('libreoffice_path', array('class'=>'form-control','label'=>'LibreOffice Path')); ?></div>
                 <hr>
     <?php echo $this->Form->button(__('Save AI Setup'), array('class'=>'btn btn-primary')); ?>
     <?php echo $this->Form->end(); ?>
@@ -46,39 +54,41 @@
                                     <td><strong>AI API Key</strong><div class="ai-server-field"><p class="help-block">Authenticates requests to a cloud AI provider. It is required for Cloud/OpenAI-compatible services and normally not required for a local Ollama server. The key is encrypted before storage; leave this field blank to retain the saved key.</p></div></td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Timeout</strong><div class="ai-advanced"><p class="help-block">The maximum time allowed for an AI operation before it is treated as unavailable or timed out. Increase it for large documents or slower self-hosted models.</p></div></td>
+                                    <td><strong>Timeout</strong><div class="ai-provider-advanced"><p class="help-block">The maximum time allowed for an AI operation before it is treated as unavailable or timed out. Increase it for large documents or slower self-hosted models.</p></div></td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Vision Context</strong><div class="ai-advanced"><p class="help-block">Sets the context-window size used for document and image analysis. A larger value lets the model consider more content together but requires more memory and processing time.</p></div></td>
+                                    <td><strong>Vision Context</strong><div class="ai-provider-advanced"><p class="help-block">Sets the context-window size used for document and image analysis. A larger value lets the model consider more content together but requires more memory and processing time.</p></div></td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Maximum PDF Pages</strong><div class="ai-advanced"><p class="help-block">Limits how many pages of a PDF are converted to images and sent to the vision model. This controls processing time, memory use, and cloud AI cost.</p></div></td>
+                                    <td><strong>Document Conversion Engine</strong><p class="help-block">ONLYOFFICE is the default and uses the Document Server already configured for FlinkISO. Select Local LibreOffice + Poppler only when both executables are installed on this application server and you explicitly want local conversion.</p></td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Vision Page Pixels</strong><div class="ai-advanced"><p class="help-block">Controls the rendered image size for each document page. Higher values improve small-text recognition but increase memory use, request size, and processing time.</p></div></td>
+                                    <td><strong>Maximum Document Pages</strong><p class="help-block">Limits how many converted pages are sent to the vision model. This controls processing time, memory use, and cloud AI cost.</p></td>
                                 </tr>
                                 <tr>
-                                    <td><strong>PDF to PPM Path</strong><div class="ai-advanced"><p class="help-block">The full server path to the <code>pdftoppm</code> executable. It is used to convert PDF pages into images before sending them to the vision model.</p></div></td>
+                                    <td><strong>Vision Page Pixels</strong><p class="help-block">Controls the maximum rendered size of each document page. Higher values improve small-text recognition but increase memory use, request size, and processing time.</p></td>
                                 </tr>
-                                <tr>
-                                    <td><strong>LibreOffice Path</strong><div class="ai-advanced"><p class="help-block">The full server path to the LibreOffice executable. It is used to convert supported office documents into a format that can be extracted or visually analysed by AI.</p></div></td>
+                                <tr class="ai-local-converter">
+                                    <td><strong>Local conversion paths</strong><p class="help-block">PDF to PPM renders PDF pages as images. LibreOffice converts Office documents to PDF before Poppler renders them. Both absolute paths are validated when Local LibreOffice + Poppler is selected.</p></td>
                                 </tr>
-                            </td>
-                        </tr>
                     </table>
 
             </div>
         </div>
     </div>    
 </div>
-</div>
 <script>
     jQuery(function($){
         function providerFields(){
             var subscription=$('#AiSettingAiProvider').val()==='flinkiso_subscription';
-            $('.ai-server-field, .ai-advanced').toggle(!subscription);
+            $('.ai-server-field, .ai-provider-advanced').toggle(!subscription);
+        }
+        function converterFields(){
+            $('.ai-local-converter').toggle($('#AiSettingDocumentConverter').val()==='local');
         }
         $('#AiSettingAiProvider').on('change',providerFields);
+        $('#AiSettingDocumentConverter').on('change',converterFields);
         providerFields();
+        converterFields();
     });
 </script>

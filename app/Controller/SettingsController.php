@@ -193,23 +193,43 @@ public function ai_setup()
         $provider = isset($input['ai_provider']) ? trim($input['ai_provider']) : '';
         $api = isset($input['ai_api']) ? rtrim(trim($input['ai_api']), '/') : '';
         $model = isset($input['ai_model']) ? trim($input['ai_model']) : '';
+        $documentConverter = isset($input['document_converter']) ? trim($input['document_converter']) : 'onlyoffice';
         $enabled = !empty($input['ai_enabled']);
         $newApiKey = isset($input['ai_api_key_plain']) ? trim($input['ai_api_key_plain']) : '';
         $hasSavedKey = !empty($saved['AiSetting']['ai_api_key']);
         $error = '';
         if (!in_array($provider, $providers, true)) $error = __('Select a valid AI provider.');
-        if ($enabled && $provider !== 'flinkiso_subscription') {
+        if (!in_array($documentConverter, array('onlyoffice', 'local'), true)) {
+            $error = __('Select a valid document conversion engine.');
+        }
+        if ($error === '' && $enabled && $provider !== 'flinkiso_subscription') {
             if ($api === '' || !filter_var($api, FILTER_VALIDATE_URL) || !in_array(strtolower(parse_url($api, PHP_URL_SCHEME)), array('http', 'https'), true)) {
                 $error = __('Enter a valid HTTP or HTTPS AI API URL.');
             } elseif ($model === '') {
                 $error = __('Enter an AI model.');
             } elseif (empty($input['ai_vision_model'])) {
                 $error = __('Enter an AI vision model.');
-            } elseif (empty($input['pdf_to_ppm_path']) || empty($input['libreoffice_path'])) {
-                $error = __('Enter the PDF to PPM and LibreOffice paths.');
             } elseif ($provider === 'openai_compatible' && $newApiKey === '' && !$hasSavedKey) {
                 $error = __('Enter the cloud AI API key.');
             }
+        }
+        if ($error === '' && $enabled && $documentConverter === 'onlyoffice') {
+            if (trim((string)Configure::read('OnlyofficeConversionApi')) === '' || trim((string)Configure::read('onlyofficesecret')) === '') {
+                $error = __('ONLYOFFICE conversion is not configured on this FlinkISO server.');
+            }
+        }
+        if ($error === '' && $enabled && $documentConverter === 'local') {
+            $pdfToolError = $this->_validateAiConversionExecutable(
+                isset($input['pdf_to_ppm_path']) ? $input['pdf_to_ppm_path'] : '',
+                __('PDF to PPM'),
+                'pdftoppm'
+            );
+            $officeToolError = $this->_validateAiConversionExecutable(
+                isset($input['libreoffice_path']) ? $input['libreoffice_path'] : '',
+                __('LibreOffice'),
+                'libreoffice'
+            );
+            $error = $pdfToolError !== '' ? $pdfToolError : $officeToolError;
         }
         if ($error !== '') {
             $this->Session->setFlash($error, 'default', array('class' => 'alert alert-danger'));
@@ -222,12 +242,13 @@ public function ai_setup()
                 'ai_api' => $api,
                 'ai_model' => $model,
                 'ai_vision_model' => isset($input['ai_vision_model']) ? trim($input['ai_vision_model']) : '',
+                'document_converter' => $documentConverter,
                 'ai_timeout' => max(30, min(1800, (int)$input['ai_timeout'])),
                 'ai_vision_context' => max(4096, min(131072, (int)$input['ai_vision_context'])),
                 'vision_pdf_max_pages' => max(1, min(50, (int)$input['vision_pdf_max_pages'])),
                 'vision_page_pixels' => max(600, min(2400, (int)$input['vision_page_pixels'])),
-                'pdf_to_ppm_path' => trim($input['pdf_to_ppm_path']),
-                'libreoffice_path' => trim($input['libreoffice_path']),
+                'pdf_to_ppm_path' => isset($input['pdf_to_ppm_path']) ? trim($input['pdf_to_ppm_path']) : '/usr/bin/pdftoppm',
+                'libreoffice_path' => isset($input['libreoffice_path']) ? trim($input['libreoffice_path']) : '/usr/bin/libreoffice',
                 'modified' => date('Y-m-d H:i:s')
             ));
             if (empty($saved['AiSetting']['id'])) $row['AiSetting']['created'] = date('Y-m-d H:i:s');
@@ -258,12 +279,38 @@ public function ai_setup()
             $this->request->data['AiSetting'] = array(
                 'ai_enabled' => 0, 'ai_provider' => 'ollama', 'ai_timeout' => 360,
                 'ai_vision_context' => 32768, 'vision_pdf_max_pages' => 8,
+                'document_converter' => 'onlyoffice',
                 'vision_page_pixels' => 1200, 'pdf_to_ppm_path' => '/usr/bin/pdftoppm',
                 'libreoffice_path' => '/usr/bin/libreoffice'
             );
         }
     }
     $this->set('hasApiKey', $hasSavedKey = !empty($saved['AiSetting']['ai_api_key']));
+}
+
+private function _validateAiConversionExecutable($path, $label, $tool)
+{
+    $path = trim((string)$path);
+    if ($path === '' || substr($path, 0, 1) !== '/') {
+        return __('Enter an absolute executable path for %s.', $label);
+    }
+    $resolved = realpath($path);
+    if ($resolved === false || !is_file($resolved) || !is_executable($resolved)) {
+        return __('The configured %s executable was not found or is not executable.', $label);
+    }
+    $binaryName = strtolower(basename($resolved));
+    $validName = $tool === 'pdftoppm'
+        ? strpos($binaryName, 'pdftoppm') !== false
+        : (strpos($binaryName, 'libreoffice') !== false || strpos($binaryName, 'soffice') !== false);
+    if (!$validName) return __('The configured path does not point to the expected %s executable.', $label);
+    $versionOutput = array();
+    $versionStatus = 1;
+    $versionFlag = $tool === 'pdftoppm' ? '-v' : '--version';
+    exec(escapeshellarg($resolved).' '.$versionFlag.' 2>&1', $versionOutput, $versionStatus);
+    if ($versionStatus !== 0 || !$versionOutput) {
+        return __('FlinkISO could not run the configured %s executable.', $label);
+    }
+    return '';
 }
 
 private function _ensureAiSettingsTable()
@@ -276,11 +323,16 @@ private function _ensureAiSettingsTable()
             `ai_api_key` text, `ai_model` varchar(255) NOT NULL DEFAULT '', `ai_vision_model` varchar(255) NOT NULL DEFAULT '',
             `ai_timeout` int NOT NULL DEFAULT 360, `ai_vision_context` int NOT NULL DEFAULT 32768,
             `vision_pdf_max_pages` int NOT NULL DEFAULT 8, `vision_page_pixels` int NOT NULL DEFAULT 1200,
+            `document_converter` varchar(20) NOT NULL DEFAULT 'onlyoffice',
             `pdf_to_ppm_path` varchar(1000) NOT NULL DEFAULT '/usr/bin/pdftoppm',
             `libreoffice_path` varchar(1000) NOT NULL DEFAULT '/usr/bin/libreoffice',
             `created` datetime NOT NULL, `modified` datetime NOT NULL,
             PRIMARY KEY (`id`), UNIQUE KEY `company_ai_setting` (`company_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        $converterColumn = $this->AiSetting->query("SHOW COLUMNS FROM `ai_settings` LIKE 'document_converter'");
+        if (!$converterColumn) {
+            $this->AiSetting->query("ALTER TABLE `ai_settings` ADD `document_converter` varchar(20) NOT NULL DEFAULT 'onlyoffice' AFTER `vision_page_pixels`");
+        }
         $this->AiSetting->schema(true);
         return true;
     } catch (Exception $exception) {

@@ -1,7 +1,6 @@
 <?php
 App::uses('AppController', 'Controller');
 // App::uses('File', 'Utility');
-App::uses('CakePdf', 'CakePdf.Pdf');
 /**
  * DocumentDownloads Controller
  *
@@ -157,7 +156,7 @@ public function record_list(){
 					'fields'=>array(
 						$model.'.id',$model.'.'.$this->$model->displayField . ' as default',
 						'PreparedBy.name','ApprovedBy.name',
-						$model.'.file_id',$model.'.file_key',$model.'.custom_table_id','CustomTable.table_name','QcDocument.id',
+						$model.'.file_id',$model.'.file_key',$model.'.custom_table_id','CustomTable.id','CustomTable.table_name','QcDocument.id',
 					),
 					'conditions'=>array($model.'.id'=>$this->request->data['DocumentDownload']['record_id'])));
 				if($record){
@@ -184,7 +183,7 @@ public function record_list(){
 								'fields'=>array(
 									$childModel.'.id',$childModel.'.'.$this->$childModel->displayField .' as default',
 									'PreparedBy.name','ApprovedBy.name',
-									$childModel.'.file_id',$childModel.'.file_key',$childModel.'.custom_table_id','CustomTable.table_name'
+									$childModel.'.file_id',$childModel.'.file_key',$childModel.'.custom_table_id','CustomTable.id','CustomTable.table_name'
 								)
 							));
 						}						
@@ -441,7 +440,266 @@ public function download(){
 		}
 	}
 	$this->set('signature',$this->request->data['DocumentDownload']['signature']);
-				
+
+}
+
+/**
+ * Generate one PDF containing only the selected custom-table records.
+ * The related QC document and record attachments are deliberately excluded.
+ */
+public function download_record_bundle(){
+	$this->layout = false;
+	$this->set('bundle', null);
+	$this->set('bundleError', null);
+
+	if(!$this->request->is('post')){
+		throw new MethodNotAllowedException();
+	}
+
+	$documentDownload = isset($this->request->data['DocumentDownload'])
+		? $this->request->data['DocumentDownload'] : array();
+	$records = !empty($documentDownload['records'])
+		? json_decode($documentDownload['records'], true) : array();
+
+	if(!is_array($records) || empty($records)){
+		$this->set('bundleError', 'Select at least one record.');
+		return;
+	}
+	if(count($records) > 200){
+		$this->set('bundleError', 'A maximum of 200 records can be combined at one time.');
+		return;
+	}
+
+	$originalDocumentDownload = $documentDownload;
+	$unsecuredDocumentDownload = $documentDownload;
+	foreach(array(
+		'password','printing','degraded_printing','modify_contents','copy_contents',
+		'screen_readers','assembly','fill_in','modify_annotations'
+	) as $securityField){
+		$unsecuredDocumentDownload[$securityField] = '';
+	}
+	$this->request->data['DocumentDownload'] = $unsecuredDocumentDownload;
+	$requestedBundleId = isset($documentDownload['bundle_id']) ? $documentDownload['bundle_id'] : '';
+	if(preg_match('/^record-bundle-[A-Za-z0-9-]{8,80}$/', $requestedBundleId)){
+		$bundleId = $requestedBundleId;
+	}else{
+		$bundleId = 'record-bundle-'.date('YmdHis').'-'.substr(md5(microtime(true)), 0, 8);
+	}
+	$bundlePath = WWW_ROOT.'files'.DS.'pdf'.DS.$this->Session->read('User.id').DS.$bundleId;
+	$folder = new Folder();
+	if(!$folder->create($bundlePath, 0777)){
+		$this->request->data['DocumentDownload'] = $originalDocumentDownload;
+		$this->set('bundleError', 'Unable to create the combined PDF folder.');
+		return;
+	}
+	$errorMarker = $bundlePath.DS.'error.txt';
+	if(file_exists($errorMarker)) @unlink($errorMarker);
+
+	$generatedPdfs = array();
+	try{
+		foreach($records as $recordSpec){
+			$recordId = isset($recordSpec['id']) ? trim($recordSpec['id']) : '';
+			$customTableId = isset($recordSpec['custom_table_id']) ? trim($recordSpec['custom_table_id']) : '';
+			if($recordId === '' || $customTableId === ''){
+				throw new InvalidArgumentException('An invalid record selection was received.');
+			}
+
+			$pdf = $this->_generate_record_only_pdf($customTableId, $recordId);
+			if(!$pdf || !file_exists($pdf)){
+				throw new RuntimeException('PDF generation failed for record '.$recordId.'.');
+			}
+			$generatedPdfs[] = $pdf;
+		}
+
+		$tempOutput = $bundlePath.DS.'-remove-pdf-records-'.date('Ymd-His').'.pdf';
+		$pdftk = trim((string)Configure::read('PDFTkPath'));
+		if($pdftk === '' || !is_executable($pdftk)){
+			throw new RuntimeException('pdftk is not configured or is not executable.');
+		}
+
+		$command = escapeshellarg($pdftk);
+		foreach($generatedPdfs as $generatedPdf){
+			$command .= ' '.escapeshellarg($generatedPdf);
+		}
+		$command .= ' cat output '.escapeshellarg($tempOutput);
+		$mergeOutput = array();
+		$mergeCode = 0;
+		exec($command.' 2>&1', $mergeOutput, $mergeCode);
+		if($mergeCode !== 0 || !file_exists($tempOutput)){
+			throw new RuntimeException('pdftk could not combine the record PDFs: '.implode("\n", $mergeOutput));
+		}
+
+		// Apply the user's password and permission choices once, to the final file.
+		$this->request->data['DocumentDownload'] = $originalDocumentDownload;
+		$password = isset($originalDocumentDownload['password']) ? $originalDocumentDownload['password'] : null;
+		$finalOutput = $this->add_password($tempOutput, $password, $bundleId);
+		if(!$finalOutput || !file_exists($finalOutput)){
+			throw new RuntimeException('Unable to secure the combined record PDF.');
+		}
+
+		$this->set('bundle', array(
+			'url' => Router::url('/', true).'files/pdf/'
+				.rawurlencode($this->Session->read('User.id')).'/'
+				.rawurlencode($bundleId).'/'.rawurlencode(basename($finalOutput)),
+			'name' => basename($finalOutput),
+			'count' => count($generatedPdfs),
+		));
+	}catch(Exception $e){
+		$this->request->data['DocumentDownload'] = $originalDocumentDownload;
+		@file_put_contents($errorMarker, $e->getMessage(), LOCK_EX);
+		$this->set('bundleError', $e->getMessage());
+	}
+}
+
+/**
+ * Lightweight status endpoint used when the web server times out the long
+ * ONLYOFFICE request while PHP continues producing the bundle.
+ */
+public function record_bundle_status($bundleId = null){
+	$this->autoRender = false;
+	$this->response->type('json');
+
+	if(!preg_match('/^record-bundle-[A-Za-z0-9-]{8,80}$/', (string)$bundleId)){
+		return $this->response->body(json_encode(array('ready'=>false, 'error'=>'Invalid combined PDF identifier.')));
+	}
+
+	$bundlePath = WWW_ROOT.'files'.DS.'pdf'.DS.$this->Session->read('User.id').DS.$bundleId;
+	$errorMarker = $bundlePath.DS.'error.txt';
+	if(file_exists($errorMarker)){
+		$message = trim((string)file_get_contents($errorMarker));
+		return $this->response->body(json_encode(array(
+			'ready'=>false,
+			'error'=>$message !== '' ? $message : 'The combined PDF could not be generated.',
+		)));
+	}
+
+	$pdfs = glob($bundlePath.DS.'records-*.pdf');
+	if(!empty($pdfs)){
+		rsort($pdfs);
+		$pdf = $pdfs[0];
+		return $this->response->body(json_encode(array(
+			'ready'=>true,
+			'url'=>Router::url('/', true).'files/pdf/'
+				.rawurlencode($this->Session->read('User.id')).'/'
+				.rawurlencode($bundleId).'/'.rawurlencode(basename($pdf)),
+			'name'=>basename($pdf),
+		)));
+	}
+
+	return $this->response->body(json_encode(array('ready'=>false, 'processing'=>true)));
+}
+
+/**
+ * Reuse the normal record renderer while omitting linked document files.
+ */
+protected function _generate_record_only_pdf($customTableId, $recordId){
+	$this->loadModel('CustomTable');
+	$customTable = $this->CustomTable->find('first', array(
+		'conditions' => array('CustomTable.id' => $customTableId),
+		'recursive' => -1,
+	));
+	if(empty($customTable['CustomTable']['table_name'])){
+		throw new NotFoundException('The selected record type was not found.');
+	}
+
+	$model = Inflector::classify($customTable['CustomTable']['table_name']);
+	$this->loadModel($model);
+	$record = $this->$model->find('first', array(
+		'conditions' => array(
+			$model.'.id' => $recordId,
+			$model.'.custom_table_id' => $customTableId,
+		),
+		'recursive' => 0,
+	));
+	if(empty($record[$model])){
+		throw new NotFoundException('A selected record was not found.');
+	}
+	$record['CustomTable'] = $customTable['CustomTable'];
+
+	// Record-only bundles must not include an uploaded/linked document.
+	$record[$model]['file_id'] = null;
+	$record[$model]['additional_files'] = null;
+
+	$this->loadModel('QcDocument');
+	$qcDocument = $this->QcDocument->find('first', array(
+		'conditions' => array('QcDocument.id' => $record[$model]['qc_document_id']),
+	));
+
+	unset($this->viewVars['pdfHeader'], $this->viewVars['pdfTemplate'], $this->viewVars['header_file']);
+	$this->set('qcDocument', $qcDocument);
+	$this->set('record', $record);
+	$this->set('fields', json_decode($customTable['CustomTable']['fields'], true));
+	if(!empty($qcDocument['QcDocument']['title'])){
+		$recordHeading = $qcDocument['QcDocument']['title'];
+	}else if(!empty($customTable['CustomTable']['name'])){
+		$recordHeading = $customTable['CustomTable']['name'];
+	}else{
+		$recordHeading = Inflector::humanize($customTable['CustomTable']['table_name']);
+	}
+	$displayField = $this->$model->displayField;
+	$recordReference = isset($record[$model][$displayField]) ? $record[$model][$displayField] : '';
+	$rootCustomTableId = isset($this->request->data['DocumentDownload']['custom_table_id'])
+		? $this->request->data['DocumentDownload']['custom_table_id'] : '';
+	$this->set('recordPdfHeading', $recordHeading);
+	$this->set('recordPdfReference', $recordReference);
+	$this->set('recordPdfType', $customTableId === $rootCustomTableId ? 'Main record' : 'Related record');
+
+	$documentDownload = $this->request->data['DocumentDownload'];
+	$fontSize = !empty($documentDownload['font_size']) ? $documentDownload['font_size'] : 12;
+	$fontFace = !empty($documentDownload['font_face']) ? $documentDownload['font_face'] : 'Arial';
+	$headerFile = null;
+	$this->loadModel('PdfTemplate');
+
+	if(!empty($documentDownload['pdf_header_id']) && $documentDownload['pdf_header_id'] != -1){
+		$pdfHeader = $this->PdfTemplate->find('first', array(
+			'conditions' => array(
+				'PdfTemplate.id' => $documentDownload['pdf_header_id'],
+				'PdfTemplate.custom_table_id' => $customTableId,
+			),
+			'recursive' => -1,
+		));
+		if(!empty($pdfHeader['PdfTemplate'])){
+			$headerFile = $this->_generate_template_header(
+				$qcDocument, $fontSize, $fontFace, $record,
+				$documentDownload['pdf_header_id'], $model
+			);
+			$this->set('header_file', $headerFile);
+		}else if(!empty($documentDownload['add_header'])){
+			$headerFile = $this->_generate_header($qcDocument, $fontSize, $fontFace, $recordId);
+		}
+	}else if(!empty($documentDownload['add_header'])){
+		$headerFile = $this->_generate_header($qcDocument, $fontSize, $fontFace, $recordId);
+	}
+
+	if(!empty($documentDownload['pdf_template_id']) && $documentDownload['pdf_template_id'] != -1){
+		$pdfTemplate = $this->PdfTemplate->find('first', array(
+			'conditions' => array(
+				'PdfTemplate.id' => $documentDownload['pdf_template_id'],
+				'PdfTemplate.custom_table_id' => $customTableId,
+			),
+			'recursive' => -1,
+		));
+		if(empty($pdfTemplate['PdfTemplate'])){
+			// A parent table template cannot safely render a child table record.
+			$generatedPdf = $this->_generate_content($customTable['CustomTable']['fields'], $record, $model, $fontSize, $fontFace);
+		}else{
+			$this->set('pdfTemplate', $pdfTemplate);
+			$templateFile = Configure::read('files').DS.'pdf_template'.DS
+				.$pdfTemplate['PdfTemplate']['id'].DS.'template.html';
+			if(!is_file($templateFile)){
+				throw new NotFoundException('The selected PDF template file was not found.');
+			}
+			$contents = file_get_contents($templateFile);
+			$generatedPdf = $this->_generate_template_content(
+				$customTable['CustomTable']['fields'], $record, $model, $fontSize, $fontFace,
+				$contents, $pdfTemplate['PdfTemplate']['child_table_fields'], $headerFile
+			);
+		}
+	}else{
+		$generatedPdf = $this->_generate_content($customTable['CustomTable']['fields'], $record, $model, $fontSize, $fontFace);
+	}
+
+	return !empty($generatedPdf) ? $generatedPdf : false;
 }
 
 
@@ -724,8 +982,8 @@ public function _generate_template_content($fields = null, $record = null, $mode
 		if($file)$this->onlyoffice_pdf($file);
 	}
 	
-	$contents .= $this->_get_approvals($model, $record[$model]['id']);		
-	$this->_generate_pdf_file($header_file,$contents,$filenamae,$record[$model]['id']);
+		$contents .= $this->_get_approvals($model, $record[$model]['id']);
+		return $this->_generate_pdf_file($header_file,$contents,$filenamae,$record[$model]['id']);
 }
 
 
@@ -822,7 +1080,7 @@ public function _generate_content($fields = null, $record = null, $model = null,
 		if($file)$this->onlyoffice_pdf($file);
 	}
 	
-	$this->_generate_pdf_file($header_file,$str,$filenamae,$record[$model]['id']);
+		return $this->_generate_pdf_file($header_file,$str,$filenamae,$record[$model]['id']);
 }
 
 public function _get_approvals($model = null,$id = null){
@@ -913,138 +1171,179 @@ public function onlyoffice_pdf($file = null){
 }
 
 public function _generate_pdf_file($header_file = null,$content = null,$fileName = null, $record_id = null){
-	if(isset($this->viewVars['header_file'])){
-		$header_file = $this->viewVars['header_file'];
-	}
+	// Trial pipeline: CakePHP assembles the record HTML, ONLYOFFICE renders it,
+	// and AppController::add_password() applies the final pdftk security.
+	return $this->_generate_onlyoffice_record_pdf($header_file, $content, $fileName, $record_id);
+}
 
-
-	if(isset($this->viewVars['pdfHeader']['PdfTemplate'])){
-		$dpi = $this->viewVars['pdfHeader']['PdfTemplate']['dpi'];
-		$outline = $this->viewVars['pdfHeader']['PdfTemplate']['outline']?'true':'false';
-		$outline_depth = $this->viewVars['pdfHeader']['PdfTemplate']['outline_depth'];
-		$header_spacing = $this->viewVars['pdfHeader']['PdfTemplate']['header_spacing'];
-		$footer_left = $this->viewVars['pdfHeader']['PdfTemplate']['footer_left'];
-		$footer_center = $this->viewVars['pdfHeader']['PdfTemplate']['footer_center'];
-		$footer_right = $this->viewVars['pdfHeader']['PdfTemplate']['footer_right'];
-		$footer_font_size = $this->viewVars['pdfHeader']['PdfTemplate']['footer_font_size'];
-		$margin_bottom = $this->viewVars['pdfHeader']['PdfTemplate']['margin_bottom'];
-		$margin_left = $this->viewVars['pdfHeader']['PdfTemplate']['margin_left'];
-		$margin_right = $this->viewVars['pdfHeader']['PdfTemplate']['margin_right'];
-		$margin_top = $this->viewVars['pdfHeader']['PdfTemplate']['margin_top'];
-
-	}else if(isset($this->viewVars['pdfTemplate']['PdfTemplate'])){
-		$dpi = $this->viewVars['pdfTemplate']['PdfTemplate']['dpi'];
-		$outline = $this->viewVars['pdfTemplate']['PdfTemplate']['outline']?'true':'false';
-		$outline_depth = $this->viewVars['pdfTemplate']['PdfTemplate']['outline_depth'];
-		$header_spacing = $this->viewVars['pdfTemplate']['PdfTemplate']['header_spacing'];
-		$footer_left = $this->viewVars['pdfTemplate']['PdfTemplate']['footer_left'];
-		$footer_center = $this->viewVars['pdfTemplate']['PdfTemplate']['footer_center'];
-		$footer_right = $this->viewVars['pdfTemplate']['PdfTemplate']['footer_right'];
-		$footer_font_size = $this->viewVars['pdfTemplate']['PdfTemplate']['footer_font_size'];
-		$margin_bottom = $this->viewVars['pdfTemplate']['PdfTemplate']['margin_bottom'];
-		$margin_left = $this->viewVars['pdfTemplate']['PdfTemplate']['margin_left'];
-		$margin_right = $this->viewVars['pdfTemplate']['PdfTemplate']['margin_right'];
-		$margin_top = $this->viewVars['pdfTemplate']['PdfTemplate']['margin_top'];
-
-		if($this->viewVars['pdfTemplate']['PdfTemplate']['header'] == 1){
-			$header_file = '';
-		}
-	}
-	
-	if(!$dpi)$dpi = 360;
-	if(!$outline)$outline = false;
-	if(!$outline_depth)$outline_depth = 2;
-	if(!$header_spacing)$header_spacing = 2;
-	if(!$footer_left)$footer_left = 'Confidential Document
-				Generated by www.flinkiso.com
-				On : '. date('Y-m-d H:i:s');
-	
-	if(!$footer_center)$footer_center = 'Page [page] of [toPage]';
-	if(!$footer_right)$footer_right = '';
-	if(!$footer_font_size)$footer_font_size = 6;
-	if(!$margin_bottom)$margin_bottom = 5;
-	if(!$margin_left)$margin_left = 10;
-	if(!$margin_right)$margin_right = 10;
-	if(!$margin_top)$margin_top = 30;
-	
-	if($outline == true){
-		$CakePdf = new CakePdf(array(				
-			'options' => array(	
-				'header-html' => $header_file,
-				'print-media-type' => false,
-				'outline' => true,
-				'dpi' => $dpi,
-				'outline-depth'=>$outline_depth,
-				'enable-local-file-access'=>true,
-				'header-spacing'=>$header_spacing,
-				'footer-left'     => $footer_left,                
-				'footer-center'     => $footer_center,
-				'footer-font-size'     => $footer_font_size,
-			),
-			'margin' => array(
-				'bottom' => $margin_bottom,
-				'left' => $margin_left,
-				'right' => $margin_right,
-				'top' => $margin_top
-			),
-		));
-	}else{
-		$CakePdf = new CakePdf(array(				
-			'options' => array(	
-				'header-html' => $header_file,
-				'print-media-type' => false,
-				'outline' => false,
-				'dpi' => $dpi,
-				'outline-depth'=>$outline_depth,
-				'enable-local-file-access'=>true,
-				'header-spacing'=>$header_spacing,
-				'footer-left'     => $footer_left,                
-				'footer-center'     => $footer_center,
-				'footer-font-size'     => $footer_font_size,
-			),
-			'margin' => array(
-				'bottom' => $margin_bottom,
-				'left' => $margin_left,
-				'right' => $margin_right,
-				'top' => $margin_top
-			),
-		));
-	}
-
-	// check if logo if is available
-	$this->set('content',$content);
-	$path = WWW_ROOT .'files'. DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id;
-	
-	try{
-		$dir = WWW_ROOT .'files'. DS . 'pdf' . DS .$this->Session->read('User.id') . DS . $record_id;
-		if(!file_exists($dir)){
-			mkdir($dir);    
+	protected function _generate_onlyoffice_record_pdf($header_file = null, $content = null, $fileName = null, $record_id = null){
+		if(empty($record_id)){
+			throw new InvalidArgumentException('A record id is required to generate the PDF.');
 		}
 
-		if(!file_exists($path)){
-			mkdir($path);
+		if(isset($this->viewVars['header_file'])){
+			$header_file = $this->viewVars['header_file'];
 		}
-		chmod($dir,0777);
-		chmod($path,0777);
-	}catch(Exception $e){            
+
+		$config = array(
+			'margin_bottom' => 5,
+			'margin_left' => 10,
+			'margin_right' => 10,
+			'margin_top' => 30,
+			'footer_left' => 'Confidential Document - Generated by www.flinkiso.com - On: '.date('Y-m-d H:i:s'),
+			'footer_center' => '',
+			'footer_right' => '',
+			'footer_font_size' => 6,
+		);
+
+		$template = null;
+		if(isset($this->viewVars['pdfHeader']['PdfTemplate'])){
+			$template = $this->viewVars['pdfHeader']['PdfTemplate'];
+		}else if(isset($this->viewVars['pdfTemplate']['PdfTemplate'])){
+			$template = $this->viewVars['pdfTemplate']['PdfTemplate'];
+			if(!empty($template['header'])){
+				// This template already contains its own header.
+				$header_file = null;
+			}
+		}
+
+		if(is_array($template)){
+			foreach(array_keys($config) as $key){
+				if(isset($template[$key]) && $template[$key] !== ''){
+					$config[$key] = $template[$key];
+				}
+			}
+		}
+
+		$header_path = $this->_pdf_local_path($header_file);
+		$header_html = '';
+		if($header_path && file_exists($header_path)){
+			$header_html = file_get_contents($header_path);
+		}else if(!empty($header_file) && !$header_path){
+			// Fetch only genuinely external headers. A missing same-origin header
+			// URL is routed through CakePHP and returns the login page, which must
+			// never be embedded in the generated record PDF.
+			$header_html = @file_get_contents($header_file);
+		}
+		$header_html = $this->_pdf_html_body($header_html);
+
+		$footer_parts = array();
+		foreach(array($config['footer_left'], $config['footer_center'], $config['footer_right']) as $footer_part){
+			$footer_part = trim((string)$footer_part);
+			// Legacy page-number tokens cannot be expanded in ordinary HTML.
+			if($footer_part !== '' && stripos($footer_part, '[page]') === false && stripos($footer_part, '[toPage]') === false){
+				$footer_parts[] = nl2br(htmlspecialchars($footer_part, ENT_QUOTES, 'UTF-8'));
+			}
+		}
+
+		$css = '<style type="text/css">'
+			. '@page { margin: '.floatval($config['margin_top']).'mm '
+			. floatval($config['margin_right']).'mm '
+			. floatval($config['margin_bottom']).'mm '
+			. floatval($config['margin_left']).'mm; }'
+			. '.flinkiso-pdf-header { margin-bottom: 8mm; }'
+			. '.flinkiso-record-heading { border-bottom: 2px solid #333; margin: 0 0 8mm 0; padding: 0 0 4mm 0; }'
+			. '.flinkiso-record-heading h1 { font-family: Arial, sans-serif; font-size: 22px; line-height: 1.2; margin: 1mm 0; }'
+			. '.flinkiso-record-type { color: #666; font-family: Arial, sans-serif; font-size: 9px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }'
+			. '.flinkiso-record-reference { color: #444; font-family: Arial, sans-serif; font-size: 12px; }'
+			. '.flinkiso-pdf-footer { margin-top: 8mm; color: #555; font-size: '
+			. floatval($config['footer_font_size']).'px; }'
+			. '</style>';
+
+		$header_block = $header_html !== '' ? '<div class="flinkiso-pdf-header">'.$header_html.'</div>' : '';
+		$record_heading_block = '';
+		if(!empty($this->viewVars['recordPdfHeading'])){
+			$record_heading = htmlspecialchars($this->viewVars['recordPdfHeading'], ENT_QUOTES, 'UTF-8');
+			$record_reference = !empty($this->viewVars['recordPdfReference'])
+				? htmlspecialchars($this->viewVars['recordPdfReference'], ENT_QUOTES, 'UTF-8') : '';
+			$record_type = !empty($this->viewVars['recordPdfType'])
+				? htmlspecialchars($this->viewVars['recordPdfType'], ENT_QUOTES, 'UTF-8') : 'Record';
+			$record_heading_block = '<div class="flinkiso-record-heading">'
+				.'<div class="flinkiso-record-type">'.$record_type.'</div>'
+				.'<h1>'.$record_heading.'</h1>'
+				.($record_reference !== '' ? '<div class="flinkiso-record-reference">'.$record_reference.'</div>' : '')
+				.'</div>';
+		}
+		$footer_block = !empty($footer_parts) ? '<div class="flinkiso-pdf-footer">'.implode(' &nbsp; ', $footer_parts).'</div>' : '';
+		$html = (string)$content;
+
+		if(stripos($html, '<html') !== false){
+			if(stripos($html, '</head>') !== false){
+				$html = preg_replace('/<\/head>/i', $css.'</head>', $html, 1);
+			}else{
+				$html = $css.$html;
+			}
+
+			$opening_blocks = $header_block.$record_heading_block;
+			if($opening_blocks !== ''){
+				if(preg_match('/<body[^>]*>/i', $html)){
+					$html = preg_replace_callback('/<body[^>]*>/i', function($matches) use ($opening_blocks){
+						return $matches[0].$opening_blocks;
+					}, $html, 1);
+				}else{
+					$html = $opening_blocks.$html;
+				}
+			}
+
+			if(stripos($html, '</body>') !== false){
+				$html = preg_replace('/<\/body>/i', $footer_block.'</body>', $html, 1);
+			}else{
+				$html .= $footer_block;
+			}
+		}else{
+			$html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'.$css.'</head><body>'
+				.$header_block.$record_heading_block.$html.$footer_block.'</body></html>';
+		}
+
+		$safe_name = trim($this->_clean_table_names(str_replace(' ', '-', (string)$fileName)), '-');
+		if($safe_name === '') $safe_name = 'record-report';
+		$temp_name = 'onlyoffice-'.$safe_name.'-'.date('YmdHis').'-'.substr(md5(microtime(true)), 0, 8);
+		$temp_file = $this->_write_html_file($temp_name, $html, $record_id);
+		$temp_url = rtrim(Router::url('/', true), '/').'/files/pdf/'
+			.rawurlencode($this->Session->read('User.id')).'/'
+			.rawurlencode($record_id).'/'.rawurlencode($temp_name).'.html';
+
+		try{
+			$output_file = $this->_generate_onlyoffice_pdf($temp_url, 'html', 'pdf', null, $safe_name, $record_id, false);
+		}catch(Exception $e){
+			if($temp_file && file_exists($temp_file)) @unlink($temp_file);
+			throw $e;
+		}
+
+		if($temp_file && file_exists($temp_file)) @unlink($temp_file);
+		if($header_path && file_exists($header_path)){
+			$record_dir = realpath(WWW_ROOT.'files'.DS.'pdf'.DS.$this->Session->read('User.id').DS.$record_id);
+			$real_header = realpath($header_path);
+			if($record_dir && $real_header && strpos($real_header, $record_dir.DS) === 0){
+				@unlink($header_path);
+			}
+		}
+
+		return $output_file;
 	}
 
-	$fileName = str_replace(' ','-',$fileName);
+	protected function _pdf_local_path($file = null){
+		if(empty($file)) return null;
+		if(file_exists($file)) return $file;
 
-	$fileName = '-remove-pdf-' . $fileName . '-'. date('his');
-	$CakePdf->template('pagecontent', 'pagecontent');
-	$CakePdf->viewVars($this->viewVars);
-	$CakePdf->custom_write($path, $path . DS . $fileName.'.pdf');
-	$pdf = $path . DS . $fileName.'.pdf';
-	$fileName = $path . DS . $fileName.'.pdf';     
-	$this->add_password($fileName,null,$record_id);
-	// delete html file
-	
-	$header_file = str_replace(Router::url('/', true), WWW_ROOT, $header_file);
+		$base_url = rtrim(Router::url('/', true), '/');
+		if(strpos($file, $base_url) === 0){
+			$relative = ltrim(substr($file, strlen($base_url)), '/');
+			return WWW_ROOT.str_replace('/', DS, $relative);
+		}
 
-	unlink($header_file);
-	return $fileName;
-}	
+		return null;
+	}
+
+	protected function _pdf_html_body($html = null){
+		$html = trim((string)$html);
+		if($html === '') return '';
+		if(preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $matches)){
+			return $matches[1];
+		}
+		return $html;
+	}
+
 	public function _fetch_signature($id = null){
 		$this->loadModel('User');
 		$user = $this->User->find('first', array(

@@ -2,9 +2,25 @@
 <?php echo $this->Html->script(array('jquery.validate.min', 'jquery-form.min', 'sign')); ?>
 <style type="text/css">
 	.wrapper1,.wrapper2 {border-radius: 4px; border: 2px dashed #ccc;position: relative;width: 352px;height: 152px;-moz-user-select: none;-webkit-user-select: none;-ms-user-select: none;user-select: none;margin: auto; }.signature-pad {position: absolute;left: 0;top: 0;width:350px;height:150px;}
-	#signatureModal, .modal-dialog{width: 825px;height: 200px}#clear{width: 350px;border-radius: 0 0 4px 4px;}#fsubmit{margin-bottom: 20px !important}
+	#pdf-download .modal-dialog.modal-wide{
+		width:825px !important;
+		max-width:calc(100% - 30px) !important;
+		min-height:0 !important;
+		height:auto !important;
+		display:block !important;
+		align-items:stretch !important;
+		margin:30px auto !important;
+		-webkit-transform:none !important;
+		-ms-transform:none !important;
+		transform:none !important;
+	}
+	#pdf-download .modal-content{width:100%;}
+	#pdf-download .modal-body{max-height:calc(100vh - 180px);overflow-y:auto;}
+	#signatureModal{width:825px;}#clear{width: 350px;border-radius: 0 0 4px 4px;}#fsubmit{margin-bottom: 20px !important}
 	.requiredsign{border: 2px dashed red}
-	.chosen-container, .chosen-container-single, .chosen-select{min-width: 1px}
+	#pdf-download .chosen-container,
+	#pdf-download .chosen-container-single,
+	#pdf-download select{width:100% !important;min-width:100% !important;}
 </style>
 <?php echo $this->fetch('script'); ?>
 <?php echo $this->Form->create('DocumentDownload',array(),array('default'=>false)); ?>
@@ -262,7 +278,6 @@
 				},
 				complete: function(data) {
 					$("#pdf-spin").hide();
-					$(".modal-dialog").animate({width:'60%'});
 					$(".modal-title").html("Your PDFs files are ready for download.");
 				},
 				error: function(request, status, error) {
@@ -288,7 +303,7 @@
 	}
 
 	$().ready(function(){
-		$("select").chosen();
+		$("#pdf-download select").chosen({width:"100%"});
 
 		<?php if($signAvailable == true){ ?>
 			copysign();

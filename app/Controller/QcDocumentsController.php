@@ -98,12 +98,27 @@ class QcDocumentsController extends AppController {
      * @return void
      */
     public function index() {
+        $childDocumentAccessSql = '';
+        if ($this->Session->read('User.is_mr') == false) {
+            $dataSource = $this->QcDocument->getDataSource();
+            $employeeId = $dataSource->value($this->Session->read('User.employee_id'), 'string');
+            $branchId = $dataSource->value('%'.$this->Session->read('User.branch_id').'%', 'string');
+            $departmentId = $dataSource->value('%'.$this->Session->read('User.department_id').'%', 'string');
+            $userId = $dataSource->value('%'.$this->Session->read('User.id').'%', 'string');
+            $childDocumentAccessSql = ' AND ('
+                .'child_qc_document.prepared_by = '.$employeeId
+                .' OR child_qc_document.branches LIKE '.$branchId
+                .' OR child_qc_document.departments LIKE '.$departmentId
+                .' OR child_qc_document.user_id LIKE '.$userId
+                .')';
+        }
+
         $this->QcDocument->virtualFields = array(
             'intdocunumber' => 'CAST(QcDocument.document_number as UNSIGNED)',
             'parent_id'=>'QcDocument.parent_document_id',
             'tables' => 'select count(*) from `custom_tables` where `custom_tables`.`qc_document_id` LIKE QcDocument.id', 
             'active_tables' => 'select count(*) from `custom_tables` where `custom_tables`.`publish` = 1 AND `custom_tables`.`table_locked` = 0 AND `custom_tables`.`qc_document_id` LIKE QcDocument.id',
-            'childDoc'=>'select count(*) from qc_documents where qc_documents.parent_document_id LIKE QcDocument.id',
+            'child_documents' => '(SELECT GROUP_CONCAT(CONCAT(child_qc_document.id, ":", HEX(child_qc_document.name)) ORDER BY CAST(child_qc_document.document_number AS UNSIGNED), child_qc_document.title SEPARATOR "|||") FROM qc_documents child_qc_document WHERE child_qc_document.parent_document_id = QcDocument.id AND child_qc_document.archived != 1'.$childDocumentAccessSql.')',
             'srct' => $this->_qc_document_access_virtual_field()
         );
         
@@ -147,7 +162,7 @@ class QcDocumentsController extends AppController {
                 'QcDocument.standard_id',
                 'QcDocument.file_type',
                 'QcDocument.parent_document_id',
-                'QcDocument.childDoc',
+                'QcDocument.child_documents',
                 'QcDocument.srct',
                 'QcDocument.and_or_condition',
                 'QcDocument.branches',
@@ -175,6 +190,7 @@ class QcDocumentsController extends AppController {
         $this->QcDocument->recursive = 0;
         $qcDocuments = $this->paginate();
         $this->set('qcDocuments', $qcDocuments);
+
         $this->_get_count();
         $this->_commons($this->Session->read('User.id'));
 
@@ -1399,7 +1415,7 @@ class QcDocumentsController extends AppController {
             $qcDocument['QcDocument']['revision_number'] = $archiveQcDocument['QcDocument']['revision_number'];
             $qcDocument['QcDocument']['revision_date'] = $this->request->data['QcDocument']['revision_date'];
             $qcDocument['QcDocument']['publish'] = 1;
-            $qcDocument['QcDocument']['document_status'] = 5;
+            $qcDocument['QcDocument']['document_status'] = 9;
             $qcDocument['QcDocument']['modified'] = date('Y-m-d H:i:s');
             $qcDocument['QcDocument']['modified_by'] = $this->Session->read('User.id');
             $qcDocument['QcDocument']['file_key'] = $this->_generate_onlyoffice_key($qcDocument['QcDocument']['id'] . date('Ymdhis'));

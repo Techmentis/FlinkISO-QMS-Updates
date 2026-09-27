@@ -140,13 +140,42 @@
     if (cursor < text.length) $target.append(document.createTextNode(text.substring(cursor)));
   }
 
-  function formattedAssistantText(message) {
+  function answerImageFigure(image, imageIndex, inline) {
+    if (!image || !image.url) return $();
+    var parser = document.createElement('a');
+    parser.href = image.url;
+    if (parser.protocol !== 'https:' || String(parser.hostname).toLowerCase() !== 'www.flinkiso.com') return $();
+    var caption = image.caption || 'FlinkISO manual image';
+    var $figure = $('<figure/>', {
+      'class': inline ? 'fi-ai-inline-image' : '',
+      'data-image-index': imageIndex
+    });
+    var $link = $('<a/>', {
+      href: parser.href,
+      target: '_blank',
+      rel: 'noopener noreferrer',
+      title: 'Open image in a new tab'
+    });
+    $link.append($('<img/>', {src: parser.href, alt: caption, loading: 'lazy'}));
+    return $figure.append($link).append($('<figcaption/>').text(caption));
+  }
+
+  function formattedAssistantText(message, images) {
     var $container = $('<div/>', {'class': 'fi-ai-rich-text'});
+    images = $.isArray(images) ? images : [];
     var lines = String(message || '').replace(/\r\n?/g, '\n').split('\n');
     var index = 0;
     while (index < lines.length) {
       var line = $.trim(lines[index]);
       if (!line) { index++; continue; }
+      var imagePlaceholder = line.match(/^\[\[image:(\d+)\]\]$/i);
+      if (imagePlaceholder) {
+        var imageIndex = parseInt(imagePlaceholder[1], 10) - 1;
+        var $inlineImage = answerImageFigure(images[imageIndex], imageIndex, true);
+        if ($inlineImage.length) $container.append($inlineImage);
+        index++;
+        continue;
+      }
       var heading = line.match(/^#{1,3}\s+(.+)$/);
       if (heading) {
         var $heading = $('<strong/>', {'class': 'fi-ai-rich-heading'});
@@ -175,7 +204,7 @@
       var paragraph = [];
       while (index < lines.length) {
         var paragraphLine = $.trim(lines[index]);
-        if (!paragraphLine || /^#{1,3}\s+/.test(paragraphLine) || /^[-*]\s+/.test(paragraphLine) || /^\d+[.)]\s+/.test(paragraphLine)) break;
+        if (!paragraphLine || /^\[\[image:\d+\]\]$/i.test(paragraphLine) || /^#{1,3}\s+/.test(paragraphLine) || /^[-*]\s+/.test(paragraphLine) || /^\d+[.)]\s+/.test(paragraphLine)) break;
         paragraph.push(paragraphLine);
         index++;
       }
@@ -207,31 +236,19 @@
 
   function appendAnswerImages($content, images) {
     if (!$.isArray(images) || !images.length) return;
+    if ($content.find('.fi-ai-inline-image').length) return;
     var $gallery = $('<div/>', {'class': 'fi-ai-answer-images', 'aria-label': 'Related FlinkISO manual images'});
-    $.each(images, function (_, image) {
-      if (!image || !image.url) return;
-      var parser = document.createElement('a');
-      parser.href = image.url;
-      if (parser.protocol !== 'https:' || String(parser.hostname).toLowerCase() !== 'www.flinkiso.com') return;
-      var caption = image.caption || 'FlinkISO manual image';
-      var $figure = $('<figure/>');
-      var $link = $('<a/>', {
-        href: parser.href,
-        target: '_blank',
-        rel: 'noopener noreferrer',
-        title: 'Open image in a new tab'
-      });
-      $link.append($('<img/>', {src: parser.href, alt: caption, loading: 'lazy'}));
-      $figure.append($link).append($('<figcaption/>').text(caption));
-      $gallery.append($figure);
+    $.each(images, function (imageIndex, image) {
+      var $figure = answerImageFigure(image, imageIndex, false);
+      if ($figure.length) $gallery.append($figure);
     });
     if ($gallery.children().length) $content.append($gallery);
   }
 
-  function appendMessage(kind, message) {
+  function appendMessage(kind, message, images) {
     var $item = $('<div/>', {'class': 'fi-ai-message fi-ai-message-' + kind});
     var $content = $('<div/>', {'class': 'fi-ai-message-content'});
-    if (kind === 'assistant') $content.append(formattedAssistantText(message));
+    if (kind === 'assistant') $content.append(formattedAssistantText(message, images));
     else $content.append($('<p/>').text(message));
     $item.append($content);
     $('#fi-ai-messages').append($item).scrollTop($('#fi-ai-messages')[0].scrollHeight);
@@ -248,7 +265,7 @@
     var meta = [item.status || '', item.operation || ''];
     if (item.duration_ms) { meta.push((item.duration_ms / 1000).toFixed(1) + 's'); }
     var $assistantContent = $('<div/>', {'class': 'fi-ai-message-content'})
-      .append(formattedAssistantText(responseText));
+      .append(formattedAssistantText(responseText, item.images));
     appendAnswerImages($assistantContent, item.images);
     appendAnswerSources($assistantContent, item.sources);
     $assistantContent.append($('<div/>', {'class': 'fi-ai-history-meta'}).text(meta.join(' · ')));
@@ -557,7 +574,7 @@
   }
 
   function renderPreview(response) {
-    var $item = appendMessage('assistant', response.message || 'A FlinkISO field change was prepared.');
+    var $item = appendMessage('assistant', response.message || 'A FlinkISO field change was prepared.', response.images);
     var $content = $item.find('.fi-ai-message-content');
     var proposedFields = $.isArray(response.proposed_fields) ? response.proposed_fields : [];
     var fields = proposedFields.length

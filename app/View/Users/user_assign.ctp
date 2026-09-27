@@ -4,7 +4,6 @@
         <div class="users form col-md-12">
             <h4><?php echo __('Add User'); ?>
             <?php echo $this->Html->link(__('List'), array('action' => 'index'), array('id' => 'list', 'class' => 'label btn-info')); ?>
-            <?php echo $this->Html->link(__('Download PDF'), array('action' => 'view',$this->request->params['pass'][0].'.pdf'), array('id' => 'pdf', 'class' => 'label btn-info')); ?>
             
         </h4>
         <table class="table table-responsive">

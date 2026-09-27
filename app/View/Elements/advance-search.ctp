@@ -22,13 +22,8 @@
 	<?php echo $this->Form->create($this->name, array('action' => 'advance_search/custom_table_id:'.$this->request->params['named']['custom_table_id'].'/qc_document_id:'.$this->request->params['named']['qc_document_id'].'/process_id:'.$this->request->params['named']['process_id'], 'role' => 'form', 'class' => 'advanced-search-form', 'id' => 'advance-search-form', 'type' => 'post')); ?>
 	<div class="panel">
 
-		<div class="panel-heading">                                
-			<h4 class="modal-title"><?php echo __('Advanced Search'); ?>
-			<?php echo $this->Html->link('<i class="fa fa-close"></i>','#',
-    			array('class'=>'btn-app btn-sm btn-default pull-right','escape'=>false,
-        		'data-toggle'=>'control-sidebar', 'id'=>'close_sidebar'
-    		)); ?>
-    		</h4>
+			<div class="panel-heading">
+				<h4 class="modal-title"><?php echo __('Advanced Search'); ?></h4>
 			<small>Set your required conditions and click submit to search.</small>
 		</div>
 		<div class="panel-body">
@@ -100,13 +95,7 @@
 </div>
 
 <script>
-	$().ready(function(){
-		$("#close_sidebar").on('click',function(){
-			$(".control-sidebar").removeClass('control-sidebar-open');
-		})
-	})
-
-	function datePicker() {   
+	function datePicker() {
 	}
 </script>
 <script>

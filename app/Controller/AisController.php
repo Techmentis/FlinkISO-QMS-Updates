@@ -2,6 +2,7 @@
 App::uses('AppController', 'Controller');
 App::uses('Security', 'Utility');
 App::uses('CakeText', 'Utility');
+App::uses('Folder', 'Utility');
 
 /**
 * Authenticated client bridge for the paid API v2 AI service.
@@ -156,6 +157,7 @@ class AisController extends AppController {
         $documentContext = null;
         $documentText = '';
         $documentFileBase64 = '';
+        $documentImages = array();
         $qualityDocumentTitle = '';
         if ($isGeneratedForm) {
             if ($customTableId === '') {
@@ -299,6 +301,7 @@ class AisController extends AppController {
                 $documentContext = $referenceDocument['context'];
                 $documentText = $referenceDocument['text'];
                 $documentFileBase64 = $referenceDocument['file_base64'];
+                $documentImages = !empty($referenceDocument['images']) ? $referenceDocument['images'] : array();
             }
         } elseif ($sourceController === 'qc_documents') {
             if ($qcDocumentId === '') {
@@ -317,7 +320,7 @@ class AisController extends AppController {
                     return $this->_jsonResponse(false, array('message' => __('The document displayed in ONLYOFFICE could not be found on the FlinkISO server.')), 404);
                 }
                 $visualExtension = strtolower(pathinfo($documentPath, PATHINFO_EXTENSION));
-                $isVisualDocument = in_array($visualExtension, array('pdf', 'docx', 'xlsx'), true);
+                $isVisualDocument = $this->_isAiVisualDocumentExtension($visualExtension);
                 $extracted = $this->_extractDocumentText($documentPath);
                 if (!$extracted['success'] && !$isVisualDocument) {
                     return $this->_jsonResponse(false, array('message' => $extracted['message']), 422);
@@ -326,21 +329,17 @@ class AisController extends AppController {
                 // still read its rendered pages, so text extraction is an
                 // enhancement rather than a prerequisite for visual formats.
                 $documentText = $extracted['success'] ? $extracted['text'] : '';
-                // API V2 owns document AI. Send the original PDF as reference
-                // material so its vision model can see tables, columns and
-                // repeated line items that disappear in pdftotext output.
                 if ($isVisualDocument) {
                     $documentBytes = @filesize($documentPath);
                     $maxVisionBytes = 25 * 1024 * 1024;
                     if ($documentBytes === false || $documentBytes <= 0 || $documentBytes > $maxVisionBytes) {
                         return $this->_jsonResponse(false, array('message' => __('The selected document must be smaller than 25 MB for visual AI analysis.')), 413);
                     }
-                    $rawDocument = @file_get_contents($documentPath);
-                    if ($rawDocument === false) {
-                        return $this->_jsonResponse(false, array('message' => __('FlinkISO could not read the selected document for visual AI analysis.')), 422);
+                    $rendered = $this->_prepareAiVisionImages($documentPath);
+                    if (!$rendered['success']) {
+                        return $this->_jsonResponse(false, array('message' => $rendered['message']), $rendered['status']);
                     }
-                    $documentFileBase64 = base64_encode($rawDocument);
-                    unset($rawDocument);
+                    $documentImages = $rendered['images'];
                 }
                 $documentContext = array(
                 'id' => $qcDocument['QcDocument']['id'],
@@ -463,6 +462,7 @@ class AisController extends AppController {
         'document_context' => $documentContext,
         'document_text' => $documentText,
         'document_file_base64' => $documentFileBase64,
+        'document_images' => $documentImages,
         'document_included' => $sendCurrentDocument,
         'general_assistance' => !$isFormAiContext,
         'ai_config' => array(
@@ -475,6 +475,7 @@ class AisController extends AppController {
             'ai_vision_context' => (int)Configure::read('AI.ai_vision_context'),
             'vision_pdf_max_pages' => (int)Configure::read('AI.vision_pdf_max_pages'),
             'vision_page_pixels' => (int)Configure::read('AI.vision_page_pixels'),
+            'document_converter' => Configure::read('AI.document_converter'),
             'pdf_to_ppm_path' => Configure::read('AI.pdf_to_ppm_path'),
             'libreoffice_path' => Configure::read('AI.libreoffice_path')
         )
@@ -2077,6 +2078,231 @@ class AisController extends AppController {
         return is_file($candidates[0]) ? $candidates[0] : '';
     }
 
+    private function _isAiVisualDocumentExtension($extension) {
+        return in_array(strtolower((string)$extension), array(
+            'pdf', 'doc', 'docx', 'docm', 'dot', 'dotx', 'rtf', 'odt', 'ott',
+            'xls', 'xlsx', 'xlsm', 'xlsb', 'ods', 'csv',
+            'ppt', 'pptx', 'pptm', 'pps', 'ppsx', 'odp'
+        ), true);
+    }
+
+    private function _prepareAiVisionImages($documentPath) {
+        $converter = Configure::read('AI.document_converter') === 'local' ? 'local' : 'onlyoffice';
+        CakeLog::write('info', 'AI document conversion started with '.$converter.' for '.basename($documentPath).'.');
+        $result = $converter === 'local'
+            ? $this->_renderAiDocumentLocally($documentPath)
+            : $this->_renderAiDocumentWithOnlyOffice($documentPath);
+        if (!empty($result['success'])) {
+            CakeLog::write('info', 'AI document conversion completed with '.$converter.' ('.count($result['images']).' page images).');
+        } else {
+            CakeLog::write('error', 'AI document conversion failed with '.$converter.': '.$result['message']);
+        }
+        return $result;
+    }
+
+    private function _renderAiDocumentWithOnlyOffice($documentPath) {
+        $conversionBase = rtrim(trim((string)Configure::read('OnlyofficeConversionApi')), '/');
+        if ($conversionBase === '' || trim((string)Configure::read('onlyofficesecret')) === '') {
+            return $this->_aiVisionError(__('ONLYOFFICE conversion is not configured on this FlinkISO server.'), 503);
+        }
+        $sourceUrl = $this->_aiDocumentPublicUrl($documentPath);
+        if ($sourceUrl === '') {
+            return $this->_aiVisionError(__('FlinkISO could not create an ONLYOFFICE-accessible URL for this document.'), 422);
+        }
+
+        $pixels = max(600, min(2400, (int)Configure::read('AI.vision_page_pixels')));
+        $request = array(
+            'async' => false,
+            'url' => $sourceUrl,
+            'outputtype' => 'jpg',
+            'filetype' => strtolower(pathinfo($documentPath, PATHINFO_EXTENSION)),
+            'title' => basename($documentPath),
+            'key' => $this->_generate_onlyoffice_key($this->_historyId.date('YmdHis')),
+            'thumbnail' => array(
+                'aspect' => 1,
+                'first' => false,
+                'height' => $pixels,
+                'width' => $pixels
+            )
+        );
+        $request['token'] = $this->generateJWT($request);
+        $endpoint = $conversionBase.'/ConvertService.ashx';
+        $curl = curl_init($endpoint);
+        curl_setopt_array($curl, array(
+            CURLOPT_POST => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 180,
+            CURLOPT_HTTPHEADER => array('Accept: application/json', 'Content-Type: application/json'),
+            CURLOPT_POSTFIELDS => json_encode($request)
+        ));
+        $response = curl_exec($curl);
+        $curlError = curl_error($curl);
+        $httpStatus = (int)curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
+        if ($response === false || $httpStatus < 200 || $httpStatus >= 300) {
+            return $this->_aiVisionError(__('ONLYOFFICE could not convert this document. %s', $curlError !== '' ? $curlError : 'HTTP '.$httpStatus), 502);
+        }
+        $converted = json_decode($response, true);
+        if (!is_array($converted) || !empty($converted['error']) || empty($converted['fileUrl'])) {
+            $code = is_array($converted) && isset($converted['error']) ? ' Error '.$converted['error'].'.' : '';
+            return $this->_aiVisionError(__('ONLYOFFICE did not return converted page images.%s', $code), 502);
+        }
+
+        $fileUrl = (string)$converted['fileUrl'];
+        $scheme = strtolower((string)parse_url($fileUrl, PHP_URL_SCHEME));
+        if (!in_array($scheme, array('http', 'https'), true)) {
+            return $this->_aiVisionError(__('ONLYOFFICE returned an invalid converted-file URL.'), 502);
+        }
+        $temporaryFile = tempnam(TMP, 'flinkiso_ai_pages_');
+        $handle = $temporaryFile !== false ? @fopen($temporaryFile, 'wb') : false;
+        if (!$handle) return $this->_aiVisionError(__('FlinkISO could not prepare temporary image storage.'), 500);
+        $download = curl_init($fileUrl);
+        curl_setopt_array($download, array(
+            CURLOPT_FILE => $handle,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 180
+        ));
+        $downloaded = curl_exec($download);
+        $downloadError = curl_error($download);
+        $downloadStatus = (int)curl_getinfo($download, CURLINFO_HTTP_CODE);
+        curl_close($download);
+        fclose($handle);
+        if (!$downloaded || $downloadStatus < 200 || $downloadStatus >= 300 || !is_file($temporaryFile)) {
+            @unlink($temporaryFile);
+            return $this->_aiVisionError(__('FlinkISO could not download the ONLYOFFICE page images. %s', $downloadError), 502);
+        }
+        $fileSize = @filesize($temporaryFile);
+        if ($fileSize === false || $fileSize <= 0 || $fileSize > 80 * 1024 * 1024) {
+            @unlink($temporaryFile);
+            return $this->_aiVisionError(__('The converted page-image archive is empty or larger than 80 MB.'), 413);
+        }
+
+        $imageBytes = array();
+        $signature = @file_get_contents($temporaryFile, false, null, 0, 4);
+        if (substr((string)$signature, 0, 2) === 'PK') {
+            $zip = new ZipArchive();
+            if ($zip->open($temporaryFile) !== true) {
+                @unlink($temporaryFile);
+                return $this->_aiVisionError(__('FlinkISO could not open the ONLYOFFICE page-image archive.'), 502);
+            }
+            $entries = array();
+            for ($index = 0; $index < $zip->numFiles; $index++) {
+                $name = $zip->getNameIndex($index);
+                if ($name === false || !preg_match('/\.(?:jpe?g|png)$/i', $name)) continue;
+                $entries[] = array('index' => $index, 'name' => $name);
+            }
+            usort($entries, function ($left, $right) {
+                return strnatcasecmp($left['name'], $right['name']);
+            });
+            $maximumPages = max(1, min(50, (int)Configure::read('AI.vision_pdf_max_pages')));
+            foreach (array_slice($entries, 0, $maximumPages) as $entry) {
+                $bytes = $zip->getFromIndex($entry['index']);
+                if ($bytes !== false) $imageBytes[] = $bytes;
+            }
+            $zip->close();
+        } else {
+            $bytes = @file_get_contents($temporaryFile);
+            if ($bytes !== false) $imageBytes[] = $bytes;
+        }
+        @unlink($temporaryFile);
+        return $this->_encodeAiVisionImages($imageBytes);
+    }
+
+    private function _renderAiDocumentLocally($documentPath) {
+        $pdfTool = realpath(trim((string)Configure::read('AI.pdf_to_ppm_path')));
+        $officeTool = realpath(trim((string)Configure::read('AI.libreoffice_path')));
+        if ($pdfTool === false || !is_executable($pdfTool)) {
+            return $this->_aiVisionError(__('The configured PDF to PPM executable is unavailable.'), 503);
+        }
+        $directory = TMP.'flinkiso_ai_render_'.CakeText::uuid().DS;
+        $folder = new Folder();
+        if (!$folder->create($directory, 0700)) {
+            return $this->_aiVisionError(__('FlinkISO could not prepare the local document renderer.'), 500);
+        }
+        $pdfPath = $documentPath;
+        if (strtolower(pathinfo($documentPath, PATHINFO_EXTENSION)) !== 'pdf') {
+            if ($officeTool === false || !is_executable($officeTool)) {
+                $folder = new Folder($directory);
+                $folder->delete();
+                return $this->_aiVisionError(__('The configured LibreOffice executable is unavailable.'), 503);
+            }
+            $profile = $directory.'profile';
+            $output = array();
+            $status = 1;
+            $command = escapeshellarg($officeTool).' --headless --nologo --nodefault --nofirststartwizard '.
+                escapeshellarg('-env:UserInstallation=file://'.$profile).' --convert-to pdf --outdir '.
+                escapeshellarg($directory).' '.escapeshellarg($documentPath).' 2>&1';
+            exec($command, $output, $status);
+            $converted = glob($directory.'*.pdf');
+            if ($status !== 0 || !$converted) {
+                $folder = new Folder($directory);
+                $folder->delete();
+                return $this->_aiVisionError(__('LibreOffice could not convert this document to PDF.'), 422);
+            }
+            $pdfPath = reset($converted);
+        }
+
+        $maximumPages = max(1, min(50, (int)Configure::read('AI.vision_pdf_max_pages')));
+        $pixels = max(600, min(2400, (int)Configure::read('AI.vision_page_pixels')));
+        $prefix = $directory.'page';
+        $output = array();
+        $status = 1;
+        $command = escapeshellarg($pdfTool).' -f 1 -l '.$maximumPages.' -jpeg -jpegopt quality=85 -scale-to '.$pixels.' '.
+            escapeshellarg($pdfPath).' '.escapeshellarg($prefix).' 2>&1';
+        exec($command, $output, $status);
+        $pages = glob($prefix.'-*.jpg');
+        if ($status !== 0 || !$pages) {
+            $folder = new Folder($directory);
+            $folder->delete();
+            return $this->_aiVisionError(__('Poppler could not render this document into page images.'), 422);
+        }
+        natsort($pages);
+        $imageBytes = array();
+        foreach (array_slice(array_values($pages), 0, $maximumPages) as $page) {
+            $bytes = @file_get_contents($page);
+            if ($bytes !== false) $imageBytes[] = $bytes;
+        }
+        $folder = new Folder($directory);
+        $folder->delete();
+        return $this->_encodeAiVisionImages($imageBytes);
+    }
+
+    private function _aiDocumentPublicUrl($documentPath) {
+        $webroot = realpath(WWW_ROOT);
+        $realPath = realpath($documentPath);
+        if ($webroot === false || $realPath === false || strpos($realPath, $webroot.DS) !== 0) return '';
+        $relative = str_replace(DS, '/', substr($realPath, strlen($webroot) + 1));
+        $segments = array_map('rawurlencode', explode('/', $relative));
+        return rtrim(Router::url('/', true), '/').'/'.implode('/', $segments);
+    }
+
+    private function _encodeAiVisionImages($imageBytes) {
+        $images = array();
+        $totalBytes = 0;
+        foreach ((array)$imageBytes as $bytes) {
+            if (!is_string($bytes) || $bytes === '') continue;
+            $isJpeg = substr($bytes, 0, 3) === "\xFF\xD8\xFF";
+            $isPng = substr($bytes, 0, 8) === "\x89PNG\r\n\x1A\n";
+            if (!$isJpeg && !$isPng) continue;
+            $totalBytes += strlen($bytes);
+            if ($totalBytes > 32 * 1024 * 1024) {
+                return $this->_aiVisionError(__('The selected document produced more than 32 MB of page images.'), 413);
+            }
+            $images[] = array(
+                'mime_type' => $isPng ? 'image/png' : 'image/jpeg',
+                'data' => base64_encode($bytes)
+            );
+        }
+        if (!$images) return $this->_aiVisionError(__('The document converter did not produce readable page images.'), 422);
+        return array('success' => true, 'message' => '', 'status' => 200, 'images' => $images);
+    }
+
+    private function _aiVisionError($message, $status) {
+        return array('success' => false, 'message' => $message, 'status' => (int)$status, 'images' => array());
+    }
+
     private function _prepareQcDocumentReference($qcDocumentId, $companyId, $includeBinary = true) {
         if ($qcDocumentId === '') {
             return array(
@@ -2110,7 +2336,7 @@ class AisController extends AppController {
         }
 
         $extension = strtolower(pathinfo($documentPath, PATHINFO_EXTENSION));
-        $isVisualDocument = in_array($extension, array('pdf', 'docx', 'xlsx'), true);
+        $isVisualDocument = $this->_isAiVisualDocumentExtension($extension);
         $extracted = $this->_extractDocumentText($documentPath);
         if (!$extracted['success'] && !$isVisualDocument) {
             return array(
@@ -2121,6 +2347,7 @@ class AisController extends AppController {
         }
 
         $documentFileBase64 = '';
+        $documentImages = array();
         if ($isVisualDocument && $includeBinary) {
             $documentBytes = @filesize($documentPath);
             if ($documentBytes === false || $documentBytes <= 0 || $documentBytes > 25 * 1024 * 1024) {
@@ -2130,16 +2357,15 @@ class AisController extends AppController {
                     'status' => 413
                 );
             }
-            $rawDocument = @file_get_contents($documentPath);
-            if ($rawDocument === false) {
+            $rendered = $this->_prepareAiVisionImages($documentPath);
+            if (!$rendered['success']) {
                 return array(
                     'success' => false,
-                    'message' => __('FlinkISO could not read the linked Quality Document for visual AI analysis.'),
-                    'status' => 422
+                    'message' => $rendered['message'],
+                    'status' => $rendered['status']
                 );
             }
-            $documentFileBase64 = base64_encode($rawDocument);
-            unset($rawDocument);
+            $documentImages = $rendered['images'];
         }
 
         $document = $qcDocument['QcDocument'];
@@ -2150,6 +2376,7 @@ class AisController extends AppController {
             'title' => $document['title'],
             'text' => $extracted['success'] ? $extracted['text'] : '',
             'file_base64' => $documentFileBase64,
+            'images' => $documentImages,
             'context' => array(
                 'id' => $document['id'],
                 'title' => $document['title'],

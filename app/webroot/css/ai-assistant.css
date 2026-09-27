@@ -107,6 +107,12 @@
 .fi-ai-rich-text .fi-ai-rich-heading:first-child { margin-top: 0; }
 .fi-ai-rich-text code { padding: 1px 4px; color: #253348; background: #eef3f7; border-radius: 3px; font-size: 10px; }
 .fi-ai-rich-text a { color: var(--site-blue-text); font-weight: 600; text-decoration: underline; }
+.fi-ai-rich-text .fi-ai-inline-image { margin: 10px 0 13px; }
+.fi-ai-rich-text .fi-ai-inline-image a { display: block; overflow: hidden; background: #f4f7f9; border: 1px solid #dce5eb; border-radius: 8px; }
+.fi-ai-rich-text .fi-ai-inline-image img { display: block; width: 100%; max-height: 220px; object-fit: contain; transition: transform .16s ease; }
+.fi-ai-rich-text .fi-ai-inline-image a:hover img,
+.fi-ai-rich-text .fi-ai-inline-image a:focus img { transform: scale(1.015); }
+.fi-ai-rich-text .fi-ai-inline-image figcaption { margin-top: 5px; color: #68798a; font-size: 9px; line-height: 1.4; }
 .fi-ai-live-output { display: block; width: 100%; max-height: 260px; margin: 10px 0 0; padding: 9px; overflow: auto; color: #d8e8f5; background: #1f2a35; border: 0; border-radius: 7px; font-family: Menlo, Monaco, Consolas, monospace; font-size: 10px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
 .fi-ai-message-user { justify-content: flex-end; }
 .fi-ai-message-user .fi-ai-message-content { max-width: 86%; color: var(--site-blue-text); background: var(--site-blue-soft); border-color: var(--site-blue-border); border-radius: 14px 4px 14px 14px; }

@@ -247,3 +247,34 @@
 #sortable > li .checkbox input {
   flex: 0 0 auto;
 }
+
+/* Advanced Search is closed by default and always has a visible exit control. */
+.control-sidebar .advanced-search-sidebar-close {
+  border: 0;
+  background: transparent;
+  color: #555;
+  font-size: 20px;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.control-sidebar .advanced-search-sidebar-close:hover,
+.control-sidebar .advanced-search-sidebar-close:focus {
+  color: #000;
+  outline: none;
+}
+
+.control-sidebar .advanced-search-sidebar-close-persistent {
+  position: absolute;
+  top: 58px;
+  right: 12px;
+  z-index: 20;
+  padding: 2px 7px;
+  font-size: 28px;
+}
+
+.control-sidebar .advanced-search-loading {
+  padding: 20px;
+  color: #666;
+}

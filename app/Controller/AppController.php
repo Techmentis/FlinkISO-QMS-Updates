@@ -28,33 +28,7 @@ App::uses('Xml', 'Utility');
 App::uses('CakeText', 'Utility');
 App::uses('Security', 'Utility');
 App::uses('ConnectionManager', 'Model');
-/** adding new PDF plug in **/
-Configure::write('CakePdf', array(
-'engine' => 'CakePdf.WkHtmlToPdf',
-'binary' => Configure::read('WkHtmlToPdfPath'),
-'crypto' => 'CakePdf.Pdftk',
-'options' => array(
-'print-media-type' => false,
-'outline' => false,
-'dpi' => 96,
-'header-html' => Router::url('/', true) . 'files/pdf_header.html',
-'footer-center' => 'Page [page] of [toPage]',
-'footer-right' => 'Confidential Document. All rights reserved.',
-'footer-font-size' => '8',
-'footer-line' => true,
-'header-line' => true,
-'enable-local-file-access' => true,
-'header-font-name' => 'Trebuchet MS', 'footer-font-name' => 'Trebuchet MS',),
-'margin' => array(
-'bottom' => 10,
-'left' => 10,
-'right' => 10,
-'top' => 25
-),
-'title' => 'Generated via FlinkISO',
-'orientation' => 'portrait',
-'download' => true,)
-);
+/** PDF generation is handled by ONLYOFFICE; pdftk is retained for final PDF security. **/
 /**
 * Application Controller
 *
@@ -4352,7 +4326,7 @@ class AppController  extends Controller {
 
         if($type == 2){
             $employees = $this->Employee->find('all',array('recursive'=>-1,'fields'=>array('Employee.id','Employee.name','Employee.office_email'),
-            'conditions'=>array('Employee.desiganation_id'=>$values)));
+            'conditions'=>array('Employee.designation_id'=>$values)));
         }
 
         foreach($employees as $employee){
@@ -5098,232 +5072,251 @@ class AppController  extends Controller {
         $this->render('/Elements/field_fetch');
     }
 
+    /**
+     * Final FlinkISO PDF pipeline:
+     *   1. ONLYOFFICE converts the source document to PDF.
+     *   2. ONLYOFFICE applies the QMS status watermark during conversion.
+     *   3. pdftk applies the final open/owner password and permission flags.
+     *
+     * This pipeline has no legacy HTML-to-PDF engine dependency.
+     */
     public function _generate_onlyoffice_pdf($url = null,$filetype = null,$outputtype = null, $password = null, $title = null,$record_id = null,$cover = null,$attach_cover = null){
-        $this->set('addwatermark',true);
-        $path = Configure::read('OnlyofficeConversionApi'). '/ConvertService.ashx';
-        $key = $this->_generate_onlyoffice_key($record_id . date('Ymdhis'));
-        $payload = array(
-        'async'=>false,
-        'url'=>$url,
-        'outputtype'=>$outputtype,
-        'filetype'=>$filetype,
-        'title'=>$title,
-        'key'=>$key,
+        $path = rtrim(Configure::read('OnlyofficeConversionApi'), '/') . '/ConvertService.ashx';
+        $key = $this->_generate_onlyoffice_key($record_id . date('YmdHis'));
+
+        $arr = array(
+            'async' => false,
+            'url' => $url,
+            'outputtype' => $outputtype,
+            'filetype' => $filetype,
+            'title' => $title,
+            'key' => $key,
         );
-        $token = $this->jwtencode(json_encode($payload));
-        $arr = [
-            'async'=>false,
-            'url'=>$url,
-            'outputtype'=>$outputtype,
-            'filetype'=>$filetype,
-            'title'=>$title,
-            'key'=>$key,
-        ];
-        // add header token
-        $headerToken = "";
-        $jwtHeader = Configure::read('onlyofficesecret');
-        $arr["token"] = $this->generateJWT($arr);
+
+        // ONLYOFFICE applies the QMS status watermark during PDF conversion.
+        if(strtolower((string)$outputtype) === 'pdf' && $cover == false){
+            $watermarkText = $this->_onlyoffice_pdf_watermark_text($record_id);
+            if($watermarkText !== ''){
+                $arr['watermark'] = array(
+                    'align' => 1,
+                    'fill' => array(),
+                    'height' => 80,
+                    'margins' => array(5,5,5,5),
+                    'paragraphs' => array(
+                        array(
+                            'align' => 2,
+                            'fill' => array(),
+                            'linespacing' => 1,
+                            'runs' => array(
+                                array(
+                                    'bold' => true,
+                                    'italic' => false,
+                                    'fill' => array(170,170,170),
+                                    'font-family' => 'Arial',
+                                    'font-size' => 42,
+                                    'strikeout' => false,
+                                    'text' => $watermarkText,
+                                    'underline' => false,
+                                )
+                            )
+                        )
+                    ),
+                    'rotate' => -45,
+                    'transparent' => 0.70,
+                    'type' => 'rect',
+                    'stroke-width' => 0,
+                    'stroke' => array(),
+                    'width' => 160,
+                );
+            }
+        }
+
+        // Sign the final payload, including the watermark options.
+        $arr['token'] = $this->generateJWT($arr);
         $data = json_encode($arr);
-        // request parameters
+
         $opts = array('http' => array(
-        'method'  => 'POST',
-        'timeout' => 30,
-        'header'=> "Content-type: application/json\r\n" .
-        "Accept: application/json\r\n" .
-        (empty($headerToken) ? "" : $jwtHeader.": Bearer ".$arr['token']."\r\n"),
-        'content' => $data
+            'method' => 'POST',
+            'timeout' => 60,
+            'ignore_errors' => true,
+            'header' => "Content-type: application/json\r\nAccept: application/json\r\n",
+            'content' => $data
         ));
+
         $context = stream_context_create($opts);
-        $response_data = file_get_contents($path, FALSE, $context);
-        $downloadUri = json_decode($response_data,true);
-        $downloadUri = $downloadUri['fileUrl'];
-        if (file_get_contents($downloadUri) === FALSE) {
-            Echo "Error in file conversion";
-            exit;
-        } else {
-            $savepath = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id;
-            if(!file_exists($savepath)){
-                $folder = new Folder();
-                if ($folder->create($savepath,0777)) {
-                } else {
-                    echo "Folder creation failed";
-                    exit;
-                }
-            }
-            if($cover == false){
-                $new_data = file_get_contents($downloadUri);
-                $file_for_save = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id . DS .  '-remove-pdf-'. $title . '-' . date('his') .'.'.$outputtype;
-                if (file_put_contents($file_for_save, $new_data)) {
-                    $this->add_password($file_for_save,null,$record_id);
-                } else {
-                }
-            }else{
-                $new_data = file_get_contents($downloadUri);
-                $file_for_save = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id . DS .  'cover-pdf'.'.'.$outputtype;
-                if (file_put_contents($file_for_save, $new_data)) {
-                    unlink(WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id . DS . 'template.html');
-                } else {
-                }
+        $response_data = @file_get_contents($path, false, $context);
+        if($response_data === false){
+            throw new RuntimeException('ONLYOFFICE conversion service could not be reached.');
+        }
+
+        $response = json_decode($response_data, true);
+        if(!is_array($response)){
+            throw new RuntimeException('Invalid response received from ONLYOFFICE conversion service.');
+        }
+        if(!empty($response['error'])){
+            throw new RuntimeException('ONLYOFFICE conversion failed. Error code: ' . $response['error']);
+        }
+        if(empty($response['fileUrl'])){
+            throw new RuntimeException('ONLYOFFICE conversion did not return a file URL.');
+        }
+
+        $new_data = @file_get_contents($response['fileUrl']);
+        if($new_data === false){
+            throw new RuntimeException('Unable to download the converted PDF from ONLYOFFICE.');
+        }
+
+        $savepath = WWW_ROOT . 'files' . DS . 'pdf' . DS .
+            $this->Session->read('User.id') . DS . $record_id;
+
+        if(!file_exists($savepath)){
+            $folder = new Folder();
+            if(!$folder->create($savepath, 0777)){
+                throw new RuntimeException('PDF folder creation failed.');
             }
         }
+
+        if($cover == false){
+            $file_for_save = $savepath . DS . '-remove-pdf-' .
+                $title . '-' . date('His') . '.' . $outputtype;
+
+            if(file_put_contents($file_for_save, $new_data, LOCK_EX) === false){
+                throw new RuntimeException('Unable to save the ONLYOFFICE generated PDF.');
+            }
+
+            // Password comes from the existing DocumentDownload form when present.
+            if(empty($password) && !empty($this->request->data['DocumentDownload']['password'])){
+                $password = $this->request->data['DocumentDownload']['password'];
+            }
+
+            return $this->add_password($file_for_save, $password, $record_id);
+        }
+
+        // Compatibility path for callers that separately generate a cover.
+        $file_for_save = $savepath . DS . 'cover-pdf.' . $outputtype;
+        if(file_put_contents($file_for_save, $new_data, LOCK_EX) === false){
+            throw new RuntimeException('Unable to save the ONLYOFFICE generated cover PDF.');
+        }
+
+        $template = $savepath . DS . 'template.html';
+        if(file_exists($template)) @unlink($template);
+
+        return $file_for_save;
     }
 
-    public function add_password($pdf = null, $password = null, $record_id = null){
-        $allow = '';
-        if($this->request->data){
-            if($this->request->data['DocumentDownload']['printing']){
-                $allow .= 'printing ';
-            }else{
-                $blockprint = 'print=n';
-            }
+    protected function _onlyoffice_pdf_watermark_text($record_id = null){
+        if(empty($record_id)) return '';
 
-            if($this->request->data['DocumentDownload']['degraded_printing']){
-                $allow .= 'DegradedPrinting ';
-            }else{
-
-            }
-
-            if($this->request->data['DocumentDownload']['modify_contents']){
-                $allow .= 'ModifyContents ';
-            }else{
-
-            }
-
-            if($this->request->data['DocumentDownload']['copy_contents']){
-                $allow .= 'CopyContents ';
-            }else{
-
-            }
-
-            if($this->request->data['DocumentDownload']['modify_annotations']){
-                $allow .= 'ModifyAnnotations ';
-            }else{
-
-            }
-        }
-
-        if($allow != ''){
-            $allowcommand = ' allow ' . $allow;
-        }else{
-            $allowcommand = '';
-        }
-
-        $password = $this->request->data['DocumentDownload']['password'];
-        // check if cover pdf exists, if yes, attach it
-        $cover = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $record_id . DS .  'cover-pdf.pdf';
-        if(file_exists($cover)){
-            $input = $pdf;
-            $newoutput = str_replace('-remove-pdf-', '-add-cover-', $pdf);
-            $exec = Configure::read('PDFTkPath') . ' A=' .$cover .' B=' .$input.  ' cat A B output '. $newoutput .'';
-            exec($exec);
-            $input = $pdf;
-            $output = str_replace('-add-cover-', '', $newoutput);
-            $output = str_replace($record_id, $this->request->params['named']['id'],$output);
-            $sign = $this->_sign_to_pdf($this->request->data['DocumentDownload']['signature'],$record_id,$this->request->data['DocumentDownload']['font_face'],$this->request->data['DocumentDownload']['font_size']);
-            if($password && $password != ''){
-                $ownerpass = $password . '-owner';
-                $exec = Configure::read('PDFTkPath') . ' ' .$newoutput .' multistamp ' .$sign.  ' output '. $output . ' user_pw '. $password .' owner_pw '.$ownerpass.' ' . $allowcommand;
-            }else{
-                $exec = Configure::read('PDFTkPath') . ' ' .$newoutput .' multistamp ' .$sign.  ' output '. $output .' ' . $allowcommand;
-            }
-            exec($exec);
-            unlink($newoutput);
-            unlink($cover);
-            unlink($input);
-            unlink($sign);
-        }else{
-            $input = $pdf;
-            $output = str_replace('-remove-pdf-', '', $pdf);
-            $output = str_replace($record_id, $this->request->params['named']['id'],$output);
-            $sign = $this->_sign_to_pdf($this->request->data['DocumentDownload']['signature'],$record_id,$this->request->data['DocumentDownload']['font_face'],$this->request->data['DocumentDownload']['font_size']);
-            if($password && $password != ''){
-                $ownerpass = $password . '-owner';
-                $exec = Configure::read('PDFTkPath') . ' ' .$input .' multistamp ' .$sign.  ' output '. $output . ' user_pw '.$password.' owner_pw '.$ownerpass.' ' . $allowcommand;
-            }else{
-                $exec = Configure::read('PDFTkPath') . ' ' .$input .' multistamp ' .$sign.  ' output '. $output .' '. $allowcommand;
-            }
-            exec($exec);
-            unlink($input);
-            unlink($sign);
-        }
-    }
-
-    public function _sign_to_pdf($sign = null,$record_id = null,$font_face = null, $font_size = null){
-        if(!$font_size){
-            $font_size = '6px';
-        }
-        $CakePdf = new CakePdf(array(
-        'options' => array(
-        'print-media-type' => false,
-        'outline' => false,
-        'dpi' => 360,
-        'outline'=>true,
-        'outline-depth'=>2,
-        'enable-local-file-access'=>true,
-        ),
-        'margin' => array(
-        'bottom' => 0,
-        'left' => 0,
-        'right' => 0,
-        'top' => 0
-        ),
+        $this->loadModel('QcDocument');
+        $qcDocument = $this->QcDocument->find('first', array(
+            'conditions' => array('QcDocument.id' => $record_id),
+            'fields' => array('QcDocument.id','QcDocument.document_status'),
+            'recursive' => -1
         ));
 
-        // get document details
-        $this->loadModel('QcDocument');
-        $qcDocument = $this->QcDocument->find('first',
-        array(
-        'conditions'=>array('QcDocument.id'=>$record_id),
-        'fields'=>array('QcDocument.id','QcDocument.it_categories','QcDocument.document_status'),
-        'recursive'=>-1));
-        if($qcDocument){
-            $category = $this->QcDocument->customArray['itCategories'][$qcDocument['QcDocument']['it_categories']];
-            $status = $this->QcDocument->customArray['documentStatuses'][$qcDocument['QcDocument']['document_status']];
-            $this->set('category',$category);
-            $this->set('status',$status);
-        }
-        $this->set('sign',$sign);
-        $CakePdf->template('sign', 'sign');
-        $CakePdf->viewVars($this->viewVars);
-        $path = WWW_ROOT .'files'. DS . 'pdf' . DS .$this->Session->read('User.id') . DS . $record_id;
-        try{
-            $dir = WWW_ROOT .'files'. DS . 'pdf' .DS . $this->Session->read('User.id'). DS . $record_id;
-            if(!file_exists($dir)){
-                mkdir($dir);
-            }
-            if(!file_exists($path)){
-                mkdir($path);
-            }
-            chmod($dir,0777);
-            chmod($path,0777);
-        }catch(Exception $e){
-            echo "Path creation failed";
-            exit;
-        }
-        $pagecontentfilename = 'signpdf';
-        $pdf = $CakePdf->custom_write($path,$path . DS . $pagecontentfilename.'.pdf');
-        $pdf = $path . DS . $pagecontentfilename.'.pdf';
-        $pagecontentfilename = $path . DS . $pagecontentfilename.'-.pdf';
-        if(!$qcDocument){
+        // Custom-table PDF generation passes the record id, not the related
+        // QcDocument id. The download controller has already loaded that
+        // document into viewVars, so use it when the direct lookup is empty.
+        if(empty($qcDocument['QcDocument']) && !empty($this->viewVars['qcDocument']['QcDocument'])){
             $qcDocument = $this->viewVars['qcDocument'];
         }
-        if($this->viewVars['addwatermark'] == true){
-            $output = $path . DS . 'signpdf.pdf';
-            $background = WWW_ROOT . 'files' . DS . 'samples' . DS . $qcDocument['QcDocument']['document_status'].'.pdf';
-            $exec = Configure::read('PDFTkPath') . ' ' .$pagecontentfilename .' multistamp ' .$background.  ' output '. $output .'';
-            exec($exec);
-            unlink($pagecontentfilename);
-            $this->set('addwatermark',false);
-            return $output;
-        }else{
-            $output = $path . DS . 'signpdf.pdf';
-            $background = WWW_ROOT . 'files' . DS . 'samples' . DS . $qcDocument['QcDocument']['document_status'].'.pdf';
-            $exec = Configure::read('PDFTkPath') . ' ' .$pagecontentfilename .'  output '. $output .'';
-            exec($exec);
-            unlink($pagecontentfilename);
-            $this->set('addwatermark',false);
-            return $output;
+
+        if(empty($qcDocument['QcDocument'])) return '';
+
+        $status = $qcDocument['QcDocument']['document_status'];
+        if(isset($this->QcDocument->customArray['documentStatuses'][$status])){
+            return strtoupper(trim($this->QcDocument->customArray['documentStatuses'][$status]));
         }
+
+        return strtoupper(trim((string)$status));
+    }
+
+    /**
+     * Final PDF security stage.
+     *
+     * ONLYOFFICE has already created the complete PDF and watermark.
+     * pdftk is used here only to apply the open password, owner password
+     * and the existing FlinkISO permission selections.
+     */
+    public function add_password($pdf = null, $password = null, $record_id = null){
+        if(empty($pdf) || !file_exists($pdf)){
+            return false;
+        }
+
+        $allow = '';
+
+        if(!empty($this->request->data['DocumentDownload'])){
+            $dd = $this->request->data['DocumentDownload'];
+
+            if(!empty($dd['printing']))             $allow .= 'printing ';
+            if(!empty($dd['degraded_printing']))   $allow .= 'DegradedPrinting ';
+            if(!empty($dd['modify_contents']))     $allow .= 'ModifyContents ';
+            if(!empty($dd['copy_contents']))       $allow .= 'CopyContents ';
+            if(!empty($dd['screen_readers']))      $allow .= 'ScreenReaders ';
+            if(!empty($dd['assembly']))            $allow .= 'Assembly ';
+            if(!empty($dd['fill_in']))             $allow .= 'FillIn ';
+            if(!empty($dd['modify_annotations']))  $allow .= 'ModifyAnnotations ';
+
+            if(empty($password) && !empty($dd['password'])){
+                $password = $dd['password'];
+            }
+        }
+
+        $allowcommand = trim($allow) !== '' ? ' allow ' . trim($allow) : '';
+
+        $output = str_replace('-remove-pdf-', '', $pdf);
+        if(isset($this->request->params['named']['id']) &&
+            !empty($this->request->params['named']['id']) &&
+            !empty($record_id)){
+            $output = str_replace($record_id, $this->request->params['named']['id'], $output);
+        }
+
+        // Existing core.php installations may deliberately include a trailing
+        // space in PDFTkPath. Normalize it here so both forms are supported.
+        $pdftk = trim((string)Configure::read('PDFTkPath'));
+        if(empty($pdftk)){
+            throw new RuntimeException('PDFTkPath is not configured.');
+        }
+        if(!is_executable($pdftk)){
+            throw new RuntimeException('pdftk executable not found or not executable: ' . $pdftk);
+        }
+
+        $command = escapeshellarg($pdftk) . ' ' . escapeshellarg($pdf) . ' output ' . escapeshellarg($output);
+
+        if(!empty($password)){
+            $ownerpass = $password . '-owner';
+            $command .= ' user_pw ' . escapeshellarg($password);
+            $command .= ' owner_pw ' . escapeshellarg($ownerpass);
+        }
+
+        if($allowcommand !== ''){
+            // pdftk permission keywords are controlled values created above.
+            $command .= $allowcommand;
+        }
+
+        $stderr = array();
+        $returnCode = 0;
+        exec($command . ' 2>&1', $stderr, $returnCode);
+
+        if($returnCode !== 0 || !file_exists($output)){
+            throw new RuntimeException(
+                'pdftk failed to apply PDF security: ' . implode("\n", $stderr)
+            );
+        }
+
+        if(realpath($pdf) !== realpath($output) && file_exists($pdf)){
+            @unlink($pdf);
+        }
+
+        return $output;
+    }
+
+    /**
+     * Kept only so existing callers do not fatal.
+     * Signature stamping is intentionally not part of this pipeline.
+     * It is intentionally not part of this test pipeline.
+     */
+    public function _sign_to_pdf($sign = null,$record_id = null,$font_face = null, $font_size = null){
+        return false;
     }
 
     public function _fetch_signature($employee_id = null){
@@ -5761,9 +5754,29 @@ class AppController  extends Controller {
             $modelClass = $this->modelClass;
 
             $fields = $this->$modelClass->schema();
-            if(array_key_exists('approval_step_id', $fields)){
-            }else{
-                $updatesql = 'ALTER TABLE `'.$this->request->controller.'` ADD `approval_step_id` VARCHAR(36) NULL DEFAULT NULL AFTER `status_user_id`;';
+            $targetTable = $this->$modelClass->useTable;
+
+            // A route such as document_downloads/add can carry a custom_table_id
+            // even though its model is DocumentDownload. Never alter that helper
+            // table when the approval process belongs to the selected custom table.
+            if(!empty($this->request->params['named']['custom_table_id'])){
+                $this->loadModel('CustomTable');
+                $approvalCustomTable = $this->CustomTable->find('first', array(
+                    'recursive' => -1,
+                    'fields' => array('CustomTable.table_name'),
+                    'conditions' => array('CustomTable.id' => $this->request->params['named']['custom_table_id'])
+                ));
+                if(!empty($approvalCustomTable['CustomTable']['table_name']) &&
+                    $targetTable !== $approvalCustomTable['CustomTable']['table_name']){
+                    return $approvalProcess;
+                }
+            }
+
+            if(!array_key_exists('approval_step_id', $fields)){
+                // status_user_id is optional in older and generated schemas.
+                $afterClause = array_key_exists('status_user_id', $fields) ? ' AFTER `status_user_id`' : '';
+                $safeTable = str_replace('`', '``', $targetTable);
+                $updatesql = 'ALTER TABLE `'.$safeTable.'` ADD `approval_step_id` VARCHAR(36) NULL DEFAULT NULL'.$afterClause.';';
                 $this->$modelClass->query($updatesql);
 
             }

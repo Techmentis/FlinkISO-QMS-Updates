@@ -61,7 +61,11 @@ echo $this->fetch('script');
 ?>
 </head>
 <body class="hold-transition skin-blue sidebar-collapse sidebar-mini">
-	<?php if ($this->Session->read('User')) echo $this->Element('control-sidebar'); ?>
+	<?php
+	if ($this->Session->read('User') && $this->action === 'index') {
+		echo $this->Element('control-sidebar');
+	}
+	?>
 	<?php
 	if ($aiFeatureEnabled && $this->Session->read('User')) {
 		echo $this->Element('ai_assistant');
@@ -285,7 +289,6 @@ if($this->action == 'index'){?>
 	}
 
 ?>
-<div id="ad_src_result"></div>
 <?php if($this->request->params['named']['custom_table_id']){ ?>
 <script type="text/javascript">
 
