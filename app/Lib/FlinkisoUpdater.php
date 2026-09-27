@@ -55,13 +55,13 @@ class FlinkisoUpdater {
         return array('date' => date('Y-m-d'), 'exists' => is_dir($this->root . '/backup/' . date('Y-m-d')));
     }
 
-    private function event($step, $percent, $message, $error = false, $warning = false) {
+    private function event($step, $percent, $message, $error = false, $warning = false, $display = true) {
         if (!empty($this->config['pat'])) $message = str_replace($this->config['pat'], '[REDACTED]', $message);
         $row = array('step' => $step, 'percent' => $percent, 'message' => $message, 'error' => $error, 'warning' => $warning);
         if ($this->log && file_put_contents($this->log, json_encode($row) . "\n", FILE_APPEND | LOCK_EX) === false) {
             throw new RuntimeException('Cannot write updater log: ' . $this->log);
         }
-        if ($this->emit) call_user_func($this->emit, $row);
+        if ($display && $this->emit) call_user_func($this->emit, $row);
     }
 
     private function mkdirChecked($path) {
@@ -233,23 +233,22 @@ class FlinkisoUpdater {
             $step = 'sql';
             $this->event($step, 0, 'Applying SQL before publishing application files.');
             $sqlWarnings = $sqlMissing ? 1 : 0;
-            if ($sqlMissing) $this->event($step, 100, 'Warning: updates.sql is absent; continuing with application files.', false, true);
+            if ($sqlMissing) $this->event($step, 100, 'updates.sql is absent; continuing with application files.', false, true, false);
             foreach ($statements as $index => $statement) {
                 try {
                     if (call_user_func($executeSql, $statement) === false) throw new RuntimeException('Database rejected statement.');
                 } catch (Throwable $e) {
                     $sqlWarnings++;
-                    $this->event($step, (int)(($index + 1) * 100 / max(1, count($statements))), 'Warning: SQL statement ' . ($index + 1) . ' skipped: ' . $e->getMessage(), false, true);
-                    continue;
+                    $this->event($step, (int)(($index + 1) * 100 / max(1, count($statements))), 'SQL statement ' . ($index + 1) . ' skipped: ' . $e->getMessage(), false, true, false);
                 }
-                $this->event($step, (int)(($index + 1) * 100 / max(1, count($statements))), 'SQL statement ' . ($index + 1) . ' / ' . count($statements) . ' completed.');
+                $this->event($step, (int)(($index + 1) * 100 / max(1, count($statements))), 'SQL statement ' . ($index + 1) . ' / ' . count($statements) . ' processed.');
             }
-            $this->event($step, 100, $sqlWarnings ? 'SQL finished with ' . $sqlWarnings . ' skipped statement(s). Review the warnings for unapplied database changes.' : 'SQL completed successfully.', false, $sqlWarnings > 0);
+            $this->event($step, 100, 'SQL processing completed.');
             $step = 'install';
             $this->event($step, 0, 'Publishing application files...');
             $this->publish($incoming);
             $this->event($step, 100, 'Application files installed.');
-            $this->event('complete', 100, ($sqlWarnings ? 'Update installed with ' . $sqlWarnings . ' SQL warning(s). Review skipped database changes. Backup: ' : 'Update completed successfully. Backup: ') . $backup, false, $sqlWarnings > 0);
+            $this->event('complete', 100, 'Update completed successfully. Backup: ' . $backup);
         } catch (Throwable $e) {
             $message = $e->getMessage();
             if (!empty($this->config['pat'])) $message = str_replace($this->config['pat'], '[REDACTED]', $message);
