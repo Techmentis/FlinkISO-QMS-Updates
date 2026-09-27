@@ -24,7 +24,7 @@
             <strong>After updating, check <code>app/Config/core.php</code>.</strong>
             This file is preserved and is not changed by the updater.
             <ol style="margin:8px 0 0 20px;padding-left:0">
-                <li>Change <code>ApiPath</code> from the older API address to <code>https://api.flinkiso.com/v1/</code>.</li>
+                <li>Change <code>ApiPath</code> from the older API address to <code>https://api.flinkiso.com/v2/</code>.</li>
                 <li>Verify that <code>PDFTkPath</code> contains the full path returned by <code>command -v pdftk</code>, followed by a space. Common values are <code>/usr/bin/pdftk </code> and <code>/usr/local/bin/pdftk </code>.</li>
             </ol>
         </div>
