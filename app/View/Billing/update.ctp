@@ -20,6 +20,14 @@
         <p>Download and install the latest application updates from your configured GitHub repository.</p>
         <p>A dated application backup is created first. Configuration and uploaded files are preserved. Please run during a maintenance window with other users signed out.</p>
         <p class="text-muted">SQL runs before files are published. SQL errors are logged and skipped, and installation continues.</p>
+        <div class="alert alert-info" style="margin-top:15px">
+            <strong>After updating, check <code>app/Config/core.php</code>.</strong>
+            This file is preserved and is not changed by the updater.
+            <ol style="margin:8px 0 0 20px;padding-left:0">
+                <li>Change <code>ApiPath</code> from the older API address to <code>https://api.flinkiso.com/v1/</code>.</li>
+                <li>Verify that <code>PDFTkPath</code> contains the full path returned by <code>command -v pdftk</code>, followed by a space. Common values are <code>/usr/bin/pdftk </code> and <code>/usr/local/bin/pdftk </code>.</li>
+            </ol>
+        </div>
         <button type="button" class="btn btn-success" id="updater-start">Back up and update</button>
         <div id="updater-working" style="display:none" role="status"><span class="updater-spinner" aria-hidden="true"></span>Updater is working. Please keep this page open.</div>
         <div id="updater-status" role="status" aria-live="polite" style="margin:15px 0"></div>
