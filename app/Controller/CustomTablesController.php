@@ -642,7 +642,11 @@ class CustomTablesController extends AppController {
             'fields' => array('CustomTable.fields')
         ));
         $savedFields = !empty($saved['CustomTable']['fields']) ? json_decode($saved['CustomTable']['fields'], true) : null;
-        if (!is_array($savedFields) || hash('sha256', json_encode(array_values($savedFields))) !== hash('sha256', json_encode(array_values($pending['fields'])))) {
+        $expectedVerificationFields = $this->_canonical_ai_field_definition($pending['fields']);
+        $savedVerificationFields = $this->_canonical_ai_field_definition($savedFields);
+        if ($expectedVerificationFields === null || $savedVerificationFields === null ||
+            hash('sha256', json_encode($savedVerificationFields)) !== hash('sha256', json_encode($expectedVerificationFields))) {
+            CakeLog::write('error', 'AI rebuilt field verification mismatch for custom table '.$pending['custom_table_id'].'.');
             $response = $this->_ai_rebuild_response(false, __('The API finished, but the rebuilt field definition could not be verified.'), 500);
             $this->_record_ai_rebuild_history($pending, $response);
             return $response;
@@ -705,6 +709,43 @@ class CustomTablesController extends AppController {
             'message' => $message
         ), $extra)));
         return $this->response;
+    }
+
+    /**
+     * Compare generated form definitions by meaning instead of raw JSON.
+     *
+     * The regular builder normalizes empty editor lists from an absent value
+     * or an empty string to "[]", and adds the designation list when it was
+     * omitted. Those representations are equivalent and must not turn a
+     * successful rebuild into an HTTP 500.
+     */
+    private function _canonical_ai_field_definition($fields) {
+        if (!is_array($fields)) return null;
+        $canonical = array();
+        foreach (array_values($fields) as $field) {
+            if (!is_array($field) || empty($field['field_name'])) return null;
+            $field['who_can_edit'] = $this->_encode_field_editors(
+                isset($field['who_can_edit']) ? $field['who_can_edit'] : array()
+            );
+            $field['who_can_edit_designations'] = $this->_encode_field_editors(
+                isset($field['who_can_edit_designations']) ? $field['who_can_edit_designations'] : array()
+            );
+            if (array_key_exists('approval_step_rules', $field)) {
+                $field['approval_step_rules'] = $this->_encode_field_approval_step_rules($field['approval_step_rules']);
+            }
+            if (array_key_exists('child_tables', $field)) {
+                $childTables = $field['child_tables'];
+                for ($pass = 0; $pass < 3 && is_string($childTables); $pass++) {
+                    $decoded = json_decode($childTables, true);
+                    if (json_last_error() !== JSON_ERROR_NONE) break;
+                    $childTables = $decoded;
+                }
+                $field['child_tables'] = json_encode(is_array($childTables) ? $childTables : array());
+            }
+            ksort($field);
+            $canonical[] = $field;
+        }
+        return $canonical;
     }
 
     private function _read_ai_pending_file($token) {
@@ -959,10 +1000,9 @@ class CustomTablesController extends AppController {
             }
             $childId = $this->CustomTable->id;
             $dataSource = $this->CustomTable->getDataSource();
-            $this->CustomTable->updateAll(
-                array('CustomTable.has_many' => $dataSource->value(json_encode(array_values($hasMany)))),
-                array('CustomTable.id' => $parent['CustomTable']['id'])
-            );
+            // Do not publish the association yet. If schema/MVC generation
+            // fails, publishing it here makes CakePHP load a child model whose
+            // table or model file is not ready and breaks the parent form.
             $parent['CustomTable']['has_many'] = json_encode(array_values($hasMany));
             $parent['CustomTable']['has_many_existing'] = json_encode(array_values($hasMany));
 
@@ -973,12 +1013,14 @@ class CustomTablesController extends AppController {
             if (!$apiResponse || !empty($apiResponse['error']) || empty($apiResponse['response']['finalResult'])) {
                 $result['success'] = false;
                 $result['errors'][] = __('API V2 could not generate child table %s.', $friendlyName);
+                $this->_cleanup_failed_ai_form($childId, $tableNameVersion[0], $companyId);
                 break;
             }
             $generated = json_decode($apiResponse['response']['finalResult'], true);
-            if (!is_array($generated) || !$this->_generated_code_is_safe($generated)) {
+            if (!is_array($generated) || !$this->_generated_code_is_safe($generated) || !$this->_generated_child_code_is_complete($generated)) {
                 $result['success'] = false;
                 $result['errors'][] = __('API V2 returned unsafe or incomplete code for child table %s.', $friendlyName);
+                $this->_cleanup_failed_ai_form($childId, $tableNameVersion[0], $companyId);
                 break;
             }
             $sqld = "`qc_document_id` varchar(36) NOT NULL DEFAULT ".$dataSource->value($qcDocument['id'], 'string').",\n";
@@ -999,18 +1041,30 @@ class CustomTablesController extends AppController {
             if (!$childTableCreated) {
                 $result['success'] = false;
                 $result['errors'][] = __('FlinkISO could not create the physical child table %s.', $friendlyName);
+                $this->_cleanup_failed_ai_form($childId, $tableNameVersion[0], $companyId);
                 break;
             }
             // Publish the generated child and updated parent MVC files only
             // after the child schema exists, so the parent cannot reference a
             // model whose table has not been created.
-            $this->_write_ai_child_files($tableNameVersion[0], $parent['CustomTable']['table_name'], $generated);
+            if (!$this->_write_ai_child_files($tableNameVersion[0], $parent['CustomTable']['table_name'], $generated)) {
+                $result['success'] = false;
+                $result['errors'][] = __('FlinkISO could not publish the generated files for child table %s.', $friendlyName);
+                $this->_cleanup_failed_ai_form($childId, $tableNameVersion[0], $companyId);
+                break;
+            }
+            $this->CustomTable->updateAll(
+                array('CustomTable.has_many' => $dataSource->value(json_encode(array_values($hasMany)))),
+                array('CustomTable.id' => $parent['CustomTable']['id'])
+            );
             $result['tables'][] = array('id' => $childId, 'name' => $friendlyName, 'controller' => $tableNameVersion[0], 'field_count' => count($fields));
         }
         return $result;
     }
 
     private function _write_ai_child_files($tableName, $parentTableName, $generated) {
+        $parentModelPath = APP.'Model'.DS.Inflector::classify($parentTableName).'.php';
+        $originalParentModel = is_file($parentModelPath) ? file_get_contents($parentModelPath) : false;
         if (!empty($generated['controller'])) {
             $folder = APP.'Controller';
             $this->_write_to_file($folder, $folder.DS.Inflector::pluralize(Inflector::classify($tableName)).'Controller.php', $generated['controller']);
@@ -1033,6 +1087,31 @@ class CustomTablesController extends AppController {
             $folder = APP.'Model';
             $this->_write_to_file($folder, $folder.DS.Inflector::classify($parentTableName).'.php', $generated['parentModelFile']);
         }
+
+        $modelFile = APP.'Model'.DS.Inflector::classify($tableName).'.php';
+        $controllerFile = APP.'Controller'.DS.Inflector::pluralize(Inflector::classify($tableName)).'Controller.php';
+        $parentModelFile = $parentModelPath;
+        $published = is_file($modelFile) && is_file($controllerFile) && is_file($parentModelFile);
+        $modelCode = is_file($modelFile) ? file_get_contents($modelFile) : false;
+        $published = $published && $modelCode !== false && strpos($modelCode, "public \$useTable = '".$tableName."'") !== false;
+        $forms = json_decode($generated['formFile'], true);
+        $published = $published && is_array($forms) && !empty($forms);
+        foreach ((array)$forms as $fileName => $code) {
+            if (!is_file($viewFolder.DS.$fileName.'.ctp')) $published = false;
+        }
+        if (!$published && $originalParentModel !== false) {
+            $this->_write_to_file(APP.'Model', $parentModelPath, $originalParentModel);
+        }
+        return $published;
+    }
+
+    private function _generated_child_code_is_complete($generated) {
+        if (!is_array($generated)) return false;
+        foreach (array('controller', 'model', 'formFile', 'parentModelFile') as $key) {
+            if (empty($generated[$key]) || !is_string($generated[$key])) return false;
+        }
+        $forms = json_decode($generated['formFile'], true);
+        return is_array($forms) && !empty($forms);
     }
 
     /**
