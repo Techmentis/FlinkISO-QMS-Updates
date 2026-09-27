@@ -67,12 +67,7 @@
 		</div>
 	</div>
 	<div class="row">
-<?php if(Configure::read('WkHtmlToPdfPath') == ''){ ?>
-	<div class="col-md-12">
-		<div class="alert alert-danger">You must install WkHtmlToPdf and update its binary path in core.php for PDF export to function properly.</div>
-	</div>
-<?php } ?>
-<?php if(Configure::read('PDFTkPath') == ''){ ?>
+	<?php if(Configure::read('PDFTkPath') == ''){ ?>
 	<div class="col-md-12">
 		<div class="alert alert-danger">You must install PDFTk Server and update its binary path in core.php for PDF export to function properly.</div>
 	</div>
