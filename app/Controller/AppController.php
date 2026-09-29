@@ -536,6 +536,16 @@ class AppController  extends Controller {
         END';
     }
 
+    protected function _custom_table_access_virtual_field() {
+        $userId = $this->Session->read('User.id');
+        $matches = array();
+        foreach(array('creators', 'viewers', 'editors', 'approvers') as $accessField){
+            $matches[] = $this->_qc_document_json_member_sql('CustomTable.'.$accessField, $userId);
+        }
+
+        return 'CASE WHEN ('.implode(' OR ', $matches).') THEN 1 ELSE 0 END';
+    }
+
     public function _check_access() {
         $this->_customtableacces();
         // if user is not admin
@@ -655,6 +665,8 @@ class AppController  extends Controller {
     }
 
     public function _customtableacces(){
+        if($this->Session->read('User.is_mr') == true) return;
+
         if(isset($this->request->params['named']['custom_table_id']) && $this->request->params['named']['custom_table_id'] != -1){
             $this->loadModel('CustomTable');
             $customTable = $this->CustomTable->find('first',array(
@@ -670,49 +682,35 @@ class AppController  extends Controller {
             'conditions'=>array('CustomTable.id'=>$this->request->params['named']['custom_table_id'])));
 
             if($customTable){
+                $userId = $this->Session->read('User.id');
+                $accessLists = array();
+                foreach(array('creators', 'editors', 'viewers', 'approvers') as $accessField){
+                    $decoded = json_decode($customTable['CustomTable'][$accessField], true);
+                    $accessLists[$accessField] = is_array($decoded) ? $decoded : array();
+                }
                 switch ($this->request->action) {
                     case 'add':
-                    if($customTable['CustomTable']['creators']){
-                        if(is_array(json_decode($customTable['CustomTable']['creators'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['creators'],true))){
-                            $this->_access_redirect();
-                        }
-                    }else{
+                    if(!in_array($userId, $accessLists['creators'])){
                         $this->_access_redirect();
                     }
                     break;
                     case 'edit':
-                    if($customTable['CustomTable']['editors']){
-                        if(is_array(json_decode($customTable['CustomTable']['editors'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['creators'],true))){
-                            $this->_access_redirect();
-                        }
-                    }else{
+                    if(!in_array($userId, $accessLists['editors'])){
                         $this->_access_redirect();
                     }
                     break;
                     case 'index':
-                    if($customTable['CustomTable']['viewers']){
-                        if(is_array(json_decode($customTable['CustomTable']['viewers'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['creators'],true))){
-                            $this->_access_redirect();
-                        }
-                    }else{
+                    if(!in_array($userId, $accessLists['viewers'])){
                         $this->_access_redirect();
                     }
                     break;
                     case 'view':
-                    if($customTable['CustomTable']['viewers']){
-                        if(is_array(json_decode($customTable['CustomTable']['viewers'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['creators'],true))){
-                            $this->_access_redirect();
-                        }
-                    }else{
+                    if(!in_array($userId, $accessLists['viewers'])){
                         $this->_access_redirect();
                     }
                     break;
                     case 'reports':
-                    if($customTable['CustomTable']['viewers']){
-                        if(is_array(json_decode($customTable['CustomTable']['viewers'],true)) && !in_array($this->Session->read('User.id'), json_decode($customTable['CustomTable']['viewers'],true))){
-                            $this->_access_redirect();
-                        }
-                    }else{
+                    if(!in_array($userId, $accessLists['viewers'])){
                         $this->_access_redirect();
                     }
                     break;
@@ -720,6 +718,56 @@ class AppController  extends Controller {
             }
         }
 
+    }
+
+    public function _index_search_conditions($modelName = null) {
+        if (!$modelName) $modelName = $this->modelClass;
+
+        $result = array('active' => false, 'conditions' => array());
+        if (!isset($this->request->params['named']) || !is_array($this->request->params['named'])) {
+            return $result;
+        }
+
+        $namedParams = $this->request->params['named'];
+        $modelFields = array_keys($this->$modelName->schema());
+        $searchFields = array('name','title','document_number','clause','sub-clause','employee_number');
+        $displayField = $this->$modelName->displayField;
+        if ($displayField && !in_array($displayField, $searchFields)) $searchFields[] = $displayField;
+
+        $searchConditions = array();
+        $filterConditions = array();
+        $hasSearch = array_key_exists('search', $namedParams);
+        if ($hasSearch && trim($namedParams['search']) !== '') {
+            $search = strtolower(str_replace(' ', '', trim($namedParams['search'])));
+            foreach ($searchFields as $field) {
+                if (in_array($field, $modelFields)) {
+                    $searchConditions[] = array(
+                        'LOWER(REPLACE('.$modelName.'.'.$field.', " ", "")) LIKE' => '%'.$search.'%'
+                    );
+                }
+            }
+        }
+
+        $ignoredParams = array('search','strict','published','sort','page','direction','limit','timestamp');
+        if ($this->request->controller == 'custom_tables') {
+            $ignoredParams[] = 'table_type';
+        }
+        foreach ($namedParams as $field => $value) {
+            if (!in_array($field, $ignoredParams) && in_array($field, $modelFields) && $value !== '' && $value != -1) {
+                $filterConditions[] = array($modelName.'.'.$field => $value);
+            }
+        }
+
+        $result['active'] = $hasSearch || !empty($filterConditions);
+        if (isset($namedParams['strict']) && $namedParams['strict'] == 1) {
+            $orConditions = array_merge($searchConditions, $filterConditions);
+            if (!empty($orConditions)) $result['conditions'][] = array('OR' => $orConditions);
+        } else {
+            if (!empty($searchConditions)) $result['conditions'][] = array('OR' => $searchConditions);
+            $result['conditions'] = array_merge($result['conditions'], $filterConditions);
+        }
+
+        return $result;
     }
 
     public function _check_request() {
@@ -730,9 +778,6 @@ class AppController  extends Controller {
         $modelName = $this->modelClass;
         $deptCon = array();
         $pubCon = array();
-        $indexSearchConditions = array();
-        $indexFilterConditions = array();
-        $hasIndexSearch = false;
 
         // check if user/employee is involved departmentwise
         // and if the user is HoD
@@ -765,7 +810,10 @@ class AppController  extends Controller {
         }else{
             if($deptCon)$onlyBranch = $deptCon;
         }
-        if($this->Session->read('User.is_view_all') == 0){
+        // Custom-table definitions have their own creator/viewer/editor/approver
+        // permissions. Applying record ownership here makes a shared form vanish
+        // from the forms index unless the viewer also created or modified it.
+        if($this->Session->read('User.is_view_all') == 0 && $this->request->controller != 'custom_tables'){
             $onlyOwn = array(
             'OR'=>array(
             $modelName.'.prepared_by'=>$this->Session->read('User.employee_id'),
@@ -796,44 +844,11 @@ class AppController  extends Controller {
             $conditions=array($onlyBranch,$onlyOwn,null,$pubCon,$modelName.'.soft_delete'=>0);
         }
 
-        if(isset($this->request->params['named']) && is_array($this->request->params['named'])){
-            $namedParams = $this->request->params['named'];
-            $modelFields = array_keys($this->$modelName->schema());
-            $searchFields = array('name','title','document_number','clause','sub-clause','employee_number');
-            $displayField = $this->$modelName->displayField;
-            if($displayField && !in_array($displayField, $searchFields)) $searchFields[] = $displayField;
-            $hasIndexSearch = array_key_exists('search', $namedParams);
-
-            if($hasIndexSearch && trim($namedParams['search']) !== ''){
-                $search = strtolower(str_replace(' ', '', trim($namedParams['search'])));
-                foreach($searchFields as $field){
-                    if(in_array($field, $modelFields)){
-                        $indexSearchConditions[] = array(
-                        'LOWER(REPLACE('.$modelName.'.'.$field.', " ", "")) LIKE' => '%'.$search.'%'
-                        );
-                    }
-                }
-            }
-
-            $ignoredParams = array('search','strict','published','sort','page','direction','limit','timestamp');
-            foreach($namedParams as $field => $value){
-                if(!in_array($field, $ignoredParams) && in_array($field, $modelFields) && $value !== '' && $value != -1){
-                    $indexFilterConditions[] = array($modelName.'.'.$field => $value);
-                }
-            }
-
-            if($hasIndexSearch || !empty($indexFilterConditions)){
-                if(!isset($namedParams['published'])) $conditions[] = $pubCon;
-                $conditions[] = array($modelName.'.soft_delete' => 0);
-
-                if(isset($namedParams['strict']) && $namedParams['strict'] == 1){
-                    $orConditions = array_merge($indexSearchConditions, $indexFilterConditions);
-                    if(!empty($orConditions)) $conditions[] = array('OR' => $orConditions);
-                }else{
-                    if(!empty($indexSearchConditions)) $conditions[] = array('OR' => $indexSearchConditions);
-                    foreach($indexFilterConditions as $filterCondition) $conditions[] = $filterCondition;
-                }
-            }
+        $indexSearch = $this->_index_search_conditions($modelName);
+        if ($indexSearch['active']) {
+            if (!isset($this->request->params['named']['published'])) $conditions[] = $pubCon;
+            $conditions[] = array($modelName.'.soft_delete' => 0);
+            $conditions = array_merge($conditions, $indexSearch['conditions']);
         }
         return array_filter($conditions);
 
@@ -2566,7 +2581,8 @@ class AppController  extends Controller {
         foreach($standards as $key => $value){
             foreach($documentTypes as $dkey => $documentType){
                 $this->CustomTable->virtualFields = array(
-                'srct' => $this->_qc_document_access_virtual_field()
+                'srct' => $this->_qc_document_access_virtual_field(),
+                'user_access' => $this->_custom_table_access_virtual_field()
                 );
                 $conditions = $this->_check_request();
                 $accessConditions = array();
@@ -2589,7 +2605,7 @@ class AppController  extends Controller {
 
                 $result = $this->CustomTable->find('all',array(
                 'recursive'=>0,
-                'fields'=>array('CustomTable.id','CustomTable.name','CustomTable.table_name','CustomTable.table_version','CustomTable.qc_document_id','CustomTable.process_id','CustomTable.srct'),
+                'fields'=>array('CustomTable.id','CustomTable.name','CustomTable.table_name','CustomTable.table_version','CustomTable.qc_document_id','CustomTable.process_id','CustomTable.srct','CustomTable.user_access'),
                 'conditions'=>array(
                 'QcDocument.standard_id'=>$key,
                 'CustomTable.publish' => 1,
@@ -2598,6 +2614,7 @@ class AppController  extends Controller {
                 'CustomTable.table_locked' => 0,
                 'CustomTable.table_name NOT LIKE' => '%_child_%',
                 'OR' => array(
+                'CustomTable.user_access >' => 0,
                 'QcDocument.departments LIKE ' => '%' . $this->Session->read('User.department_id') . '%',
                 'QcDocument.branches LIKE ' => '%' . $this->Session->read('User.branch_id') . '%',
                 'QcDocument.user_id LIKE ' => '%' . $this->Session->read('User.id') . '%',
@@ -5997,5 +6014,5 @@ class AppController  extends Controller {
             $response = 'Signature not available';
         }
         return $response;
-   }
+   }    
 }

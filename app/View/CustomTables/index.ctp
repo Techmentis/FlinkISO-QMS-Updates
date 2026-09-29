@@ -3,10 +3,10 @@ $docarray = array('doc','docx');
 $sheetarray = array('xls','xlsx');
 $pdfarray = array('pdf');
 $pptarray = array('ppt','pptx');
-
-if (!$this->request->is('post')) {
-	echo $this->Form->input('form_search',array('class'=>'form-control pull-right'));
-}
+$formSearchRoute = array('controller'=>'custom_tables', 'action'=>'index');
+if (isset($this->request->params['named']['standard_id'])) $formSearchRoute['standard_id'] = $this->request->params['named']['standard_id'];
+if (isset($this->request->params['named']['table_type'])) $formSearchRoute['table_type'] = $this->request->params['named']['table_type'];
+$formSearchUrl = Router::url($formSearchRoute, true);
 ?>
 
 <div  id="main">
@@ -24,8 +24,21 @@ if (!$this->request->is('post')) {
 				.box-title{
 					font-size: 14px !important;
 				}
+				.custom-table-toolbar{
+					margin-bottom: 15px;
+				}
+				.custom-table-search .input{
+					margin: 0;
+				}
+				@media (max-width: 767px){
+					.custom-table-search{
+						margin-top: 10px;
+					}
+				}
 			</style>
-			<div class="btn-group">
+			<div class="row custom-table-toolbar">
+				<div class="col-md-8 col-sm-8 col-xs-12">
+					<div class="btn-group">
 			<?php 
 				if($this->request->params['named']['table_type'] == 1 || !isset($this->request->params['named']['table_type'])){
 					echo $this->Html->link('Documents',array('action'=>'index','table_type'=>1),array('class'=>'btn btn-sm btn-bold  btn-info'));
@@ -58,7 +71,12 @@ if (!$this->request->is('post')) {
 					}					
 				}
 			?>
-		</div>		
+					</div>
+				</div>
+				<div class="col-md-4 col-sm-4 col-xs-12 custom-table-search">
+					<?php echo $this->Form->input('form_search', array('class'=>'form-control', 'id'=>'form_search', 'label'=>false, 'placeholder'=>'Form Search...', 'autocomplete'=>'off')); ?>
+				</div>
+			</div>
 <div id="searchResults">		
 <?php if($customTables){ ?>
 	<?php echo $this->element('checkbox-script'); ?>	
@@ -158,32 +176,37 @@ if (!$this->request->is('post')) {
 </div>
 <script>
 	var searchTimer;
-	$('#form_search').on('input', function () {
-    var search = $(this).val();
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(function () {
-        if (search.length < 2) {
-            $('#main').html('');
-            return;
-        }
+	$(document)
+		.off('input.customTableSearch', '#form_search')
+		.on('input.customTableSearch', '#form_search', function () {
+			var search = $.trim($(this).val());
+			clearTimeout(searchTimer);
+			if (search.length === 1) return;
 
-        $.ajax({
-            url: '<?php echo Router::url('/', true); ?>/custom_tables/index/',
-            type: 'POST',
-            data: {
-                search: search
-            },
-            beforeSend: function () {
-                $('#main').html('Searching...');
-            },
-            success: function (response) {
-                $('#main').html(response);
-            },
-            error: function () {
-                $('#main').html('Error while searching.');
-            }
-        });
-
-    }, 300); // wait 300ms after user stops typing
-});
+			searchTimer = setTimeout(function () {
+				$.ajax({
+					url: '<?php echo $formSearchUrl; ?>',
+					type: 'POST',
+					data: {search: search},
+					beforeSend: function () {
+						$('#busy-indicator').show();
+					},
+					success: function (response) {
+						var results = $('<div>').append($.parseHTML(response, document, false)).find('#searchResults').first();
+						if (results.length) {
+							$('#searchResults').html(results.html());
+							$('.tooltip1').tooltip();
+						} else {
+							$('#searchResults').html('Error while searching.');
+						}
+					},
+					error: function () {
+						$('#searchResults').html('Error while searching.');
+					},
+					complete: function () {
+						$('#busy-indicator').hide();
+					}
+				});
+			}, 300);
+		});
 </script>

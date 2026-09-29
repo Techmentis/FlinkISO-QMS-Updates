@@ -54,7 +54,7 @@ class ProcessesController extends AppController {
             'active_tables' => 'select count(*) from `custom_tables` where `custom_tables`.`publish` = 1 AND `custom_tables`.`table_locked` = 0 AND `custom_tables`.`process_id` LIKE Process.id'
         );
 
-        // $conditions = $this->_check_request();
+        $conditions = $this->_check_request();
         $this->paginate = array('order' => array('Process.sr_no' => 'DESC'), 'conditions' => array($conditions));
         $this->Process->recursive = 0;
         $this->set('processes', $this->paginate());

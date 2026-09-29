@@ -92,8 +92,13 @@ if ((strpos($aiController, 'tbl_') === 0 || strpos($aiController, 'chd_') === 0)
   </div>
 
   <div class="fi-ai-mode-switch" role="group" aria-label="<?php echo __('AI mode'); ?>">
-    <button type="button" class="fi-ai-mode-button is-active" data-ai-mode="chat" aria-pressed="true">
+    <button type="button" class="fi-ai-mode-button" data-ai-mode="chat" aria-pressed="false"
+            title="<?php echo __('Ask the configured AI provider general QMS or other questions'); ?>">
       <i class="fa fa-comments-o" aria-hidden="true"></i> <?php echo __('Chat'); ?>
+    </button>
+    <button type="button" class="fi-ai-mode-button is-active" data-ai-mode="flinkiso" aria-pressed="true"
+            title="<?php echo __('Ask questions using FlinkISO manuals and the current application context'); ?>">
+      <i class="fa fa-magic" aria-hidden="true"></i> <?php echo __('FlinkISO'); ?>
     </button>
     <button type="button" class="fi-ai-mode-button" data-ai-mode="forms" aria-pressed="false"<?php echo $aiIsFormContext ? '' : ' disabled'; ?>
             title="<?php echo $aiIsFormContext ? __('Create or modify FlinkISO forms through API V2') : __('Forms mode is available only in Quality Documents, Custom Tables, and generated forms'); ?>">
@@ -121,7 +126,12 @@ if ((strpos($aiController, 'tbl_') === 0 || strpos($aiController, 'chd_') === 0)
       </div>
     </div>
 
-    <div class="fi-ai-suggestions" data-ai-mode-content="chat" aria-label="<?php echo __('Suggested chat requests'); ?>">
+    <div class="fi-ai-suggestions" data-ai-mode-content="chat" aria-label="<?php echo __('Suggested general chat requests'); ?>" style="display:none">
+      <button type="button" class="fi-ai-suggestion" data-prompt="Answer a general QMS question."><i class="fa fa-question-circle"></i><span><?php echo __('Ask a general QMS question'); ?></span></button>
+      <button type="button" class="fi-ai-suggestion" data-prompt="Help me understand this topic."><i class="fa fa-comments-o"></i><span><?php echo __('Ask another question'); ?></span></button>
+      <button type="button" class="fi-ai-suggestion" data-prompt="Give me practical guidance and examples."><i class="fa fa-lightbulb-o"></i><span><?php echo __('Get practical guidance'); ?></span></button>
+    </div>
+    <div class="fi-ai-suggestions" data-ai-mode-content="flinkiso" aria-label="<?php echo __('Suggested FlinkISO requests'); ?>">
       <button type="button" class="fi-ai-suggestion" data-prompt="How can FlinkISO help me manage this area?"><i class="fa fa-question-circle"></i><span><?php echo __('Help with this module'); ?></span></button>
       <button type="button" class="fi-ai-suggestion" data-prompt="Explain the QMS requirements related to this area."><i class="fa fa-book"></i><span><?php echo __('Ask a QMS question'); ?></span></button>
       <button type="button" class="fi-ai-suggestion" data-prompt="Give me practical QMS guidance for this activity."><i class="fa fa-lightbulb-o"></i><span><?php echo __('Get practical guidance'); ?></span></button>

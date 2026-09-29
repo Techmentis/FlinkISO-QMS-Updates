@@ -25,10 +25,14 @@
   var instanceStatusTimer = null;
   var instanceStatusGeneration = 0;
   var instanceStatusReady = false;
-  var assistantMode = 'chat';
+  var assistantMode = 'flinkiso';
 
   function isFormsMode() {
     return assistantMode === 'forms';
+  }
+
+  function isFlinkisoMode() {
+    return assistantMode === 'flinkiso';
   }
 
   function formsModeAvailable() {
@@ -45,7 +49,7 @@
   }
 
   function applyAssistantModeUi() {
-    if (isFormsMode() && !formsModeAvailable()) { assistantMode = 'chat'; }
+    if (isFormsMode() && !formsModeAvailable()) { assistantMode = 'flinkiso'; }
     $('.fi-ai-mode-button').each(function () {
       var active = $(this).attr('data-ai-mode') === assistantMode;
       $(this).toggleClass('is-active', active).attr('aria-pressed', active ? 'true' : 'false');
@@ -57,18 +61,24 @@
         : ($panel.attr('data-controller') === 'custom_tables'
           ? 'Ask me to prepare a new FlinkISO form or help define its fields.'
           : 'Ask me to create, review, or update fields for this form.'))
-      : 'Ask me a question about QMS or using FlinkISO.');
+      : (isFlinkisoMode()
+        ? 'Ask me a question about QMS or using FlinkISO.'
+        : 'Ask the configured AI provider a general QMS or other question.'));
     $prompt.attr('placeholder', isFormsMode()
       ? 'Describe what you want FlinkISO to create or update...'
-      : 'Ask a question about QMS or using FlinkISO...');
-    var remoteGeneratedChat = !isFormsMode() && isGeneratedFormContext() && !isLocalAiProvider();
-    $('.fi-ai-document-option').toggle(isFormsMode() || remoteGeneratedChat);
+      : (isFlinkisoMode()
+        ? 'Ask a question about QMS or using FlinkISO...'
+        : 'Ask a general question...'));
+    var remoteGeneratedFlinkiso = isFlinkisoMode() && isGeneratedFormContext() && !isLocalAiProvider();
+    $('.fi-ai-document-option').toggle(isFormsMode() || remoteGeneratedFlinkiso);
     $('#fi-ai-disclaimer').text(isFormsMode()
       ? 'AI changes are validated before FlinkISO rebuilds the form.'
       : 'AI guidance is provided by your configured AI provider.');
     $('.fi-ai-local-note').html(isFormsMode()
       ? '<i class="fa fa-shield"></i> Secure FlinkISO API'
-      : '<i class="fa fa-comments-o"></i> Chat');
+      : (isFlinkisoMode()
+        ? '<i class="fa fa-magic"></i> FlinkISO guidance'
+        : '<i class="fa fa-comments-o"></i> General chat'));
     if (isFormsMode()) {
       activateFieldSelection();
     } else {
@@ -271,6 +281,12 @@
     $assistantContent.append($('<div/>', {'class': 'fi-ai-history-meta'}).text(meta.join(' · ')));
     if (item.form_url) {
       $assistantContent.append($('<a/>', {'class': 'fi-ai-form-link', href: item.form_url}).text('Open generated form'));
+    }
+    if (item.artifact_ready && item.artifact_download_url) {
+      $assistantContent.append($('<a/>', {
+        'class': 'fi-ai-form-link fi-ai-artifact-link',
+        href: item.artifact_download_url
+      }).append('<i class="fa fa-download" aria-hidden="true"></i> Download ' + String(item.artifact_format || 'file').toUpperCase()));
     }
     if (item.can_cancel) {
       $assistantContent.append($('<button/>', {
@@ -586,6 +602,12 @@
     if (response.general_assistance) {
       appendAnswerImages($content, response.images);
       appendAnswerSources($content, response.sources);
+      if (response.artifact_ready && response.artifact_download_url) {
+        $content.append($('<a/>', {
+          'class': 'fi-ai-form-link fi-ai-artifact-link',
+          href: response.artifact_download_url
+        }).append('<i class="fa fa-download" aria-hidden="true"></i> Download ' + String(response.artifact_format || 'file').toUpperCase()));
+      }
     }
 
     if (response.subscription_required) {
@@ -688,7 +710,12 @@
     }
 
     var seconds = response.duration_ms ? (response.duration_ms / 1000).toFixed(1) + 's' : '';
-    var status = response.read_only ? 'Read-only preview' : 'Preview';
+    var status;
+    if (response.general_assistance) {
+      status = response.assistant_mode === 'chat' ? 'Chat response' : 'FlinkISO response';
+    } else {
+      status = response.read_only ? 'Read-only preview' : 'Preview';
+    }
     $content.append($('<div/>', {'class': 'fi-ai-result-meta'}).text(status + (seconds ? ' · ' + seconds : '')));
     $('#fi-ai-messages').scrollTop($('#fi-ai-messages')[0].scrollHeight);
   }
@@ -1296,9 +1323,9 @@
       instanceRequestId = '';
       $('#fi-ai-instance-busy').hide();
       $('#fi-ai-instance-stop').hide().attr('data-ai-id', '');
-      var localGeneratedChat = !isFormsMode() && isGeneratedFormContext() && isLocalAiProvider();
-      var mayUseContextCheckbox = isFormsMode() || (!isFormsMode() && isGeneratedFormContext() && !isLocalAiProvider());
-      var sendCurrentDocument = localGeneratedChat || (mayUseContextCheckbox && $('#fi-ai-send-current-document').length > 0 && $('#fi-ai-send-current-document').prop('checked'));
+      var localGeneratedFlinkiso = isFlinkisoMode() && isGeneratedFormContext() && isLocalAiProvider();
+      var mayUseContextCheckbox = isFormsMode() || (isFlinkisoMode() && isGeneratedFormContext() && !isLocalAiProvider());
+      var sendCurrentDocument = localGeneratedFlinkiso || (mayUseContextCheckbox && $('#fi-ai-send-current-document').length > 0 && $('#fi-ai-send-current-document').prop('checked'));
       appendMessage('user', message);
       $prompt.val('');
       setLoading(true);

@@ -122,7 +122,8 @@ class QcDocumentsController extends AppController {
             'srct' => $this->_qc_document_access_virtual_field()
         );
         
-        $conditions = $this->_check_request();
+        $indexSearch = $this->_index_search_conditions('QcDocument');
+        $conditions = $indexSearch['conditions'];
         if($this->Session->read('User.is_mr') == false){
             $accessConditions = array(
                 'QcDocument.archived !='=>1,
@@ -140,8 +141,9 @@ class QcDocumentsController extends AppController {
             );
         }
 
-        if(isset($this->request->params['named']['standard_id'])){
-            $accessConditions[] = array('QcDocument.standard_id'=>$this->request->params['named']['standard_id']);
+        $indexConditions = array($accessConditions);
+        if (!empty($conditions)) {
+            $indexConditions = array_merge($indexConditions, $conditions);
         }
         
         $this->paginate = array('all',
@@ -183,9 +185,7 @@ class QcDocumentsController extends AppController {
                 'ReviewedBy.name',                
             ),
             'order' => array('QcDocument.intdocunumber' => 'ASC'),
-            'conditions' => array(
-                $accessConditions
-            ));
+            'conditions' => $indexConditions);
 
         $this->QcDocument->recursive = 0;
         $qcDocuments = $this->paginate();
@@ -294,6 +294,7 @@ class QcDocumentsController extends AppController {
         );
         
 
+        $this->set('documentTables', $this->_get_document_tables($id));
         $this->set('qcDocument', $qcDocument);
         $this->_commons($qcDocument['QcDocument']['created_by']);
         $this->set('childDocs', $this->_get_child_docs($id));
@@ -307,6 +308,75 @@ class QcDocumentsController extends AppController {
         }
         // get CR record count
         $this->set('crs',$this->change_history($id));
+    }
+
+    protected function _get_document_tables($qcDocumentId) {
+        $this->loadModel('CustomTable');
+
+        $fields = array(
+            'CustomTable.id', 'CustomTable.name', 'CustomTable.table_name',
+            'CustomTable.table_version', 'CustomTable.publish',
+            'CustomTable.table_locked', 'CustomTable.qc_document_id',
+            'CustomTable.custom_table_id', 'CustomTable.process_id',
+            'QcDocument.id', 'QcDocument.name', 'QcDocument.document_number',
+            'QcDocument.parent_document_id'
+        );
+        $rootTableCondition = array('OR' => array(
+            'ltrim(rtrim(CustomTable.custom_table_id))' => '',
+            'CustomTable.custom_table_id' => null
+        ));
+        $commonOptions = array(
+            'recursive' => 0,
+            'fields' => $fields,
+            'order' => array('CustomTable.name' => 'ASC')
+        );
+
+        $mainOptions = $commonOptions;
+        $mainOptions['conditions'] = array(
+            'CustomTable.qc_document_id' => $qcDocumentId,
+            'CustomTable.soft_delete' => 0,
+            $rootTableCondition
+        );
+        $mainTables = $this->CustomTable->find('all', $mainOptions);
+
+        $childDocumentIds = $this->QcDocument->find('list', array(
+            'recursive' => -1,
+            'fields' => array('QcDocument.id', 'QcDocument.id'),
+            'conditions' => array(
+                'QcDocument.parent_document_id' => $qcDocumentId,
+                'QcDocument.soft_delete' => 0
+            )
+        ));
+        $childTables = array();
+        if ($childDocumentIds) {
+            $childOptions = $commonOptions;
+            $childOptions['conditions'] = array(
+                'CustomTable.qc_document_id' => array_values($childDocumentIds),
+                'CustomTable.soft_delete' => 0,
+                $rootTableCondition
+            );
+            $childTables = $this->CustomTable->find('all', $childOptions);
+        }
+
+        $rootTableIds = array();
+        foreach (array_merge($mainTables, $childTables) as $rootTable) {
+            $rootTableIds[] = $rootTable['CustomTable']['id'];
+        }
+        $linkedTables = array();
+        if ($rootTableIds) {
+            $linkedOptions = $commonOptions;
+            $linkedOptions['conditions'] = array(
+                'CustomTable.custom_table_id' => $rootTableIds,
+                'CustomTable.soft_delete' => 0
+            );
+            $linkedTables = $this->CustomTable->find('all', $linkedOptions);
+        }
+
+        return array(
+            'main' => $mainTables,
+            'child' => $childTables,
+            'linked' => $linkedTables
+        );
     }
 
     public function view_archived($id = null) {

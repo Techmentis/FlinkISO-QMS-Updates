@@ -25,7 +25,8 @@
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <?php
   echo $this->Html->meta('icon');
-  $aiFeatureEnabled = Configure::read('AI.ai_enabled') === true;
+  $aiFeatureEnabled = Configure::read('AI.ai_enabled') === true
+    && $this->Session->read('User.is_mr') == true;
   $layoutStyles = array('font-awesome.min','icons','allcss');
   if ($aiFeatureEnabled) $layoutStyles[] = 'ai-assistant';
   echo $this->Html->css($layoutStyles);

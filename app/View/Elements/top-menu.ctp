@@ -1,6 +1,6 @@
 <ul class="nav navbar-nav navbar-right">
   <?php 
-	  if (Configure::read('AI.ai_enabled') === true) {
+	  if (Configure::read('AI.ai_enabled') === true && $this->Session->read('User.is_mr') == true) {
 	    echo '<li class="fi-ai-nav-item"><a href="#" id="ask_ai_icon" class="tooltip1" aria-controls="load_ai_container" aria-expanded="false" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="FlinkISO AI">'. $this->Html->image("ai-svgrepo-com.svg",array("width"=>"20px")).'
 	<span class="sr-only">Open FlinkISO AI</span></a></li>';
 	  }

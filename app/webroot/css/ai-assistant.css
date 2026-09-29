@@ -81,13 +81,14 @@
 .fi-ai-icon-button:hover,
 .fi-ai-icon-button:focus { color: #fff; background: rgba(255,255,255,.16); outline: none; }
 
-.fi-ai-mode-switch { display: grid; grid-template-columns: 1fr 1fr; flex: 0 0 auto; gap: 5px; padding: 8px 14px; background: #fff; border-bottom: 1px solid #dfe6ec; }
+.fi-ai-mode-switch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); flex: 0 0 auto; gap: 5px; padding: 8px 14px; background: #fff; border-bottom: 1px solid #dfe6ec; }
 .fi-ai-mode-button { padding: 7px 10px; color: #5c6d7e; background: #f5f7f9; border: 1px solid #d8e0e7; border-radius: 8px; font-size: 11px; font-weight: 600; }
 .fi-ai-mode-button .fa { margin-right: 5px; }
 .fi-ai-mode-button:hover,
 .fi-ai-mode-button:focus { color: var(--site-blue-text); border-color: var(--site-blue-border); outline: none; }
 .fi-ai-mode-button.is-active { color: #fff; background: var(--site-blue); border-color: var(--site-blue); }
 .fi-ai-mode-button[disabled] { color: #aab3bb; background: #f5f5f5; border-color: #e5e8ea; cursor: not-allowed; opacity: .7; }
+.fi-ai-artifact-link { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; font-weight: 700; }
 
 .fi-ai-messages { flex: 1 1 auto; min-height: 0; padding: 20px 16px; overflow-y: auto; }
 .fi-ai-message { display: flex; align-items: flex-start; margin-bottom: 16px; }

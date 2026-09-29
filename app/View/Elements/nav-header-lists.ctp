@@ -270,7 +270,12 @@ $str .= 'timestamp:'.date('ymdhis');
             var options = [];
             $('#indexsort').serializeArray().forEach(function(field){
                 if(field.value !== '' && field.value !== '-1'){
-                    options.push({name: field.name, value: field.value});
+                    var nameMatch = field.name.match(/\[([^\]]+)\]$/);
+                    options.push({
+                        name: nameMatch ? nameMatch[1] : field.name,
+                        inputName: field.name,
+                        value: field.value
+                    });
                 }
             });
             return options;
@@ -317,11 +322,18 @@ $str .= 'timestamp:'.date('ymdhis');
                     $('#main').html(responseMain.html());
                     $('#quick_src_button').val(search);
                     options.forEach(function(field){
-                        $('#indexsort [name="' + field.name + '"]').val(field.value);
+                        $('#indexsort [name="' + field.inputName + '"]').val(field.value);
                     });
 
                     if($.fn.chosen){
-                        $('#indexsort select').chosen();
+                        $('#main select').each(function(){
+                            var select = $(this);
+                            if(select.data('chosen')){
+                                select.trigger('chosen:updated');
+                            }else{
+                                select.chosen({width: '100%'});
+                            }
+                        });
                     }
                     if(options.some(function(field){ return field.name !== 'strict'; })){
                         $('#srcdivhideshow').removeClass('hidden');

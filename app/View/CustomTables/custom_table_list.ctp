@@ -1,3 +1,7 @@
+<?php
+$accessListUserId = !empty($user['User']['id']) ? $user['User']['id'] : null;
+$accessListSearchUrl = Router::url(array('controller'=>'custom_tables', 'action'=>'custom_table_list', $accessListUserId), true);
+?>
 <?php if($customTables && $this->Session->read('User.is_mr')){ ?>
     <?php if (isset($hide) && $hide == false) { ?>
     <div class="row">
@@ -19,7 +23,7 @@
             <table class="table table-responsive table-bordered">
                 <tr>
                     <th>Table</th>
-                    <th>Creator</th>
+                    <th>Add</th>
                     <th>Viewer</th>
                     <th>Editor</th>
                     <th>Approver</th>
@@ -135,6 +139,14 @@
         </div>
     </div>
     <script>    
+    function setTableAccessIcon($icon,custom_table_id,user_id,action,enabled){
+        var nextType = enabled ? 0 : 1;
+        $icon
+            .removeClass('fa-refresh fa-spin fa-check fa-remove text-success text-danger')
+            .addClass(enabled ? 'fa-check text-success link' : 'fa-remove text-danger link')
+            .attr('onclick','updatetableaccess(\''+custom_table_id+'\',\''+user_id+'\',\''+action+'\',this.id,'+nextType+')');
+    }
+
     function updatetableaccess(custom_table_id,user_id,action,thisid,typ){
         $.ajax({
          url: "<?php echo Router::url('/', true); ?>custom_tables/update_access",
@@ -146,17 +158,18 @@
             $("#"+thisid).removeClass('fa-check').removeClass('fa-remove').addClass('fa-refresh fa-spin');
         },
         success: function (result) {
-            $("#"+thisid).removeClass('fa-refresh fa-spin');
-            if(typ == 0){
-                $("#"+thisid).removeClass('text-success fa-check ').addClass('fa-remove text-danger link');
-                $("#"+thisid).attr('onclick','updatetableaccess(\''+custom_table_id+'\',\''+user_id+'\',\''+action+'\',this.id,1)');
-            }
-            if(typ == 1){                        
-                $("#"+thisid).removeClass('text-danger ').addClass('fa-check text-success link');
-                $("#"+thisid).attr('onclick','updatetableaccess(\''+custom_table_id+'\',\''+user_id+'\',\''+action+'\',this.id,0)');
+            var $row = $("#"+thisid).closest('tr');
+            if(result && result.success && result.access){
+                setTableAccessIcon($row.find('td').eq(1).find('i'),custom_table_id,user_id,'create',result.access.create);
+                setTableAccessIcon($row.find('td').eq(2).find('i'),custom_table_id,user_id,'view',result.access.view);
+                setTableAccessIcon($row.find('td').eq(3).find('i'),custom_table_id,user_id,'edit',result.access.edit);
+                setTableAccessIcon($row.find('td').eq(4).find('i'),custom_table_id,user_id,'approve',result.access.approve);
+            }else{
+                $("#"+thisid).removeClass('fa-refresh fa-spin').addClass(typ == 1 ? 'fa-remove text-danger' : 'fa-check text-success');
             }
         },
         error: function (err) {
+            $("#"+thisid).removeClass('fa-refresh fa-spin').addClass(typ == 1 ? 'fa-remove text-danger' : 'fa-check text-success');
         }
     });
 }
@@ -177,7 +190,7 @@
         }
 
         $.ajax({
-            url: '<?php echo Router::url('/', true); ?>/custom_tables/custom_table_list/',
+            url: '<?php echo $accessListSearchUrl; ?>',
             type: 'POST',
             data: {
                 search: search
@@ -196,4 +209,3 @@
     }, 300); // wait 300ms after user stops typing
 });
 </script>
-

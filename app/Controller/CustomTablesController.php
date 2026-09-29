@@ -168,17 +168,27 @@ class CustomTablesController extends AppController {
         $this->CustomTable->virtualFields = array(
             'linked' => 'select count(*) from `custom_tables` where `custom_tables`.`custom_table_id` LIKE CustomTable.id ',
             'childDoc' => 'select count(*) from `qc_documents` where QcDocument.parent_document_id LIKE `qc_documents`.id ',
-            'srct' => $this->_qc_document_access_virtual_field()
+            'srct' => $this->_qc_document_access_virtual_field(),
+            'user_access' => $this->_custom_table_access_virtual_field()
         );
 
         if($this->Session->read('User.is_mr') == false){
-            $accessConditions[] = array(
-                'OR'=>array(
-                    'CustomTable.srct >' => 0,
-                    'CustomTable.creators LIKE ' => '%'.$this->Session->read('User.id').'%'
-                )
-                
+            $tableAccessConditions = array(
+                'CustomTable.srct >' => 0,
+                'CustomTable.user_access >' => 0
             );
+            $documentAccessValues = array(
+                'QcDocument.departments' => $this->Session->read('User.department_id'),
+                'QcDocument.branches' => $this->Session->read('User.branch_id'),
+                'QcDocument.user_id' => $this->Session->read('User.id'),
+                'QcDocument.editors' => $this->Session->read('User.id')
+            );
+            foreach($documentAccessValues as $field => $value){
+                if($value !== null && $value !== '') {
+                    $tableAccessConditions[] = $this->_qc_document_json_member_sql($field, $value);
+                }
+            }
+            $accessConditions[] = array('OR'=>$tableAccessConditions);
         }else{
             $accessConditions[] = array();
         }
@@ -193,6 +203,7 @@ class CustomTablesController extends AppController {
             'order' => array('CustomTable.name' => 'ASC'), 
             'conditions' => array(
                 $accessConditions,
+                $conditions,
                 $tablesearch,            
                 'OR' => array('ltrim(rtrim(CustomTable.custom_table_id))' => "", 'CustomTable.custom_table_id' => null, 'CustomTable.linked >' => 0)));
         $this->CustomTable->recursive = 0;
@@ -4554,74 +4565,72 @@ class CustomTablesController extends AppController {
 
     public function update_access($custom_table_id = null, $user_id = null){
         $this->autoRender = false;
+        $this->response->type('json');
         if($this->Session->read('User.is_mr') == true){
             if ($this->request->is('post')) {
                 $customTable = $this->CustomTable->find('first',array(
                     'fields'=>array('CustomTable.id','CustomTable.creators','CustomTable.viewers','CustomTable.editors','CustomTable.approvers','CustomTable.qc_document_id'),
                     'recursive'=>-1,
                     'conditions'=>array('CustomTable.id'=>$this->request->data['custom_table_id'])));
-                
-                if($this->request->data['typ'] == 0){
-                    $action = 'remove'.$this->request->data['action'];
-                }else{
-                    $action = 'add'.$this->request->data['action'];
-                }
 
                 if($customTable){
-                    switch ($action) {
-                        case 'addcreate' :
-                            $users = json_decode($customTable['CustomTable']['creators'],true);
-                            $users[] = $this->request->data['user_id'];
-                            $customTable['CustomTable']['creators'] = json_encode(array_values($users));
-
-                        break;
-
-                        case 'removecreate' :
-                            $users = json_decode($customTable['CustomTable']['creators'],true);
-                            $users = $this->_removefromarray($users,$this->request->data['user_id']);
-                            $customTable['CustomTable']['creators'] = json_encode(array_values($users));
-
-                        break;
-
-                        case 'addedit' :
-                            $users = json_decode($customTable['CustomTable']['editors'],true);
-                            $users[] = $this->request->data['user_id']; 
-                            $customTable['CustomTable']['editors'] = json_encode(array_values($users));
-                        break;
-
-                        case 'removeedit' :
-                            $users = json_decode($customTable['CustomTable']['editors'],true);
-                            $users = $this->_removefromarray($users,$this->request->data['user_id']);
-                            $customTable['CustomTable']['editors'] = json_encode(array_values($users));
-                        break;
-
-                        case 'addview' :
-                            $users = json_decode($customTable['CustomTable']['viewers'],true);
-                            $users[] = $this->request->data['user_id'];  
-                            $customTable['CustomTable']['viewers'] = json_encode(array_values($users));
-                        break;
-
-                        case 'removeview' :
-                            $users = json_decode($customTable['CustomTable']['viewers'],true);
-                            $users = $this->_removefromarray($users,$this->request->data['user_id']);
-                            $customTable['CustomTable']['viewers'] = json_encode(array_values($users));
-                        break;
-
-                        case 'addapprove' :
-                            $users = json_decode($customTable['CustomTable']['approvers'],true);
-                            $users[] = $this->request->data['user_id']; 
-                            $customTable['CustomTable']['approvers'] = json_encode(array_values($users)); 
-                        break;
-
-                        case 'removeapprove' :
-                            $users = json_decode($customTable['CustomTable']['approvers'],true);
-                            $users = $this->_removefromarray($users,$this->request->data['user_id']);
-                            $customTable['CustomTable']['approvers'] = json_encode(array_values($users));
-                        break;
+                    $userId = $this->request->data['user_id'];
+                    $permission = $this->request->data['action'];
+                    $enabled = (int)$this->request->data['typ'] === 1;
+                    $fieldMap = array(
+                        'create' => 'creators',
+                        'view' => 'viewers',
+                        'edit' => 'editors',
+                        'approve' => 'approvers'
+                    );
+                    if(!isset($fieldMap[$permission])){
+                        $this->response->statusCode(400);
+                        $this->response->body(json_encode(array('success'=>false, 'message'=>'Invalid permission.')));
+                        return $this->response;
                     }
-                    
+
+                    $access = array();
+                    foreach($fieldMap as $field){
+                        $users = json_decode($customTable['CustomTable'][$field], true);
+                        $access[$field] = is_array($users) ? array_values(array_unique(array_filter($users))) : array();
+                    }
+
+                    $field = $fieldMap[$permission];
+                    if($enabled){
+                        if(!in_array($userId, $access[$field], true)) $access[$field][] = $userId;
+                    }else{
+                        $access[$field] = $this->_removefromarray($access[$field], $userId);
+                    }
+
+                    // Add access includes edit and view. Removing Add revokes both
+                    // dependent permissions. Edit always includes View; removing
+                    // Edit also removes its View permission when Add is not active.
+                    if($permission === 'create' && !$enabled){
+                        $access['editors'] = $this->_removefromarray($access['editors'], $userId);
+                        $access['viewers'] = $this->_removefromarray($access['viewers'], $userId);
+                    }
+                    if($permission === 'edit' && !$enabled && !in_array($userId, $access['creators'], true)){
+                        $access['viewers'] = $this->_removefromarray($access['viewers'], $userId);
+                    }
+                    if(in_array($userId, $access['creators'], true)){
+                        if(!in_array($userId, $access['editors'], true)) $access['editors'][] = $userId;
+                        if(!in_array($userId, $access['viewers'], true)) $access['viewers'][] = $userId;
+                    }
+                    if(in_array($userId, $access['editors'], true) && !in_array($userId, $access['viewers'], true)){
+                        $access['viewers'][] = $userId;
+                    }
+
+                    foreach($access as $accessField => $users){
+                        $customTable['CustomTable'][$accessField] = json_encode(array_values(array_unique($users)));
+                    }
+
                     $this->CustomTable->create();
-                    $this->CustomTable->save($customTable,false);
+                    $saved = $this->CustomTable->save($customTable,false);
+                    if(!$saved){
+                        $this->response->statusCode(500);
+                        $this->response->body(json_encode(array('success'=>false, 'message'=>'Access could not be updated.')));
+                        return $this->response;
+                    }
 
                     // remove copy_acl_from
                     $this->loadModel('User');
@@ -4633,14 +4642,26 @@ class CustomTablesController extends AppController {
                     }
                     // update qc document permission
                     // if add/ edit/ approver is added then also add VIEW permission to QC Document
-                    if($this->request->data['typ'] == 1){
-                        $this->_update_qc_document_view_permission($customTable['CustomTable']['qc_document_id'],$this->request->data['user_id']);
+                    if($enabled){
+                        $this->_update_qc_document_view_permission($customTable['CustomTable']['qc_document_id'],$userId);
                     }
-                    return true;
+
+                    $this->response->body(json_encode(array(
+                        'success'=>true,
+                        'access'=>array(
+                            'create'=>in_array($userId, $access['creators'], true),
+                            'view'=>in_array($userId, $access['viewers'], true),
+                            'edit'=>in_array($userId, $access['editors'], true),
+                            'approve'=>in_array($userId, $access['approvers'], true)
+                        )
+                    )));
+                    return $this->response;
                 }
-                return false;
             }
         }
+        $this->response->statusCode(403);
+        $this->response->body(json_encode(array('success'=>false, 'message'=>'Invalid access.')));
+        return $this->response;
     }
 
     public function _update_qc_document_view_permission($qc_document_id = null, $user_id = null){
@@ -4649,11 +4670,12 @@ class CustomTablesController extends AppController {
             $qcDocument = $this->QcDocument->find('first',array('recursive'=>-1,'conditions'=>array('QcDocument.id'=>$qc_document_id)));            
             if($qcDocument){
                 $users = json_decode($qcDocument['QcDocument']['user_id'],true);
-                if(in_array($user_id, $users)){
+                if(!is_array($users)) $users = array();
+                if(in_array($user_id, $users, true)){
 
                 }else{
                     $users[] = $user_id;
-                    $qcDocument['QcDocument']['user_id'] = json_encode($users);
+                    $qcDocument['QcDocument']['user_id'] = json_encode(array_values(array_unique($users)));
                     $this->QcDocument->create();
                     $this->QcDocument->save($qcDocument,false);
                 }

@@ -190,7 +190,7 @@
                         ?>&nbsp;
                         </td> 
                         <td>                            
-                            <?php echo $this->Form->input('copy_acl_from',array('options'=>$PublishedUserList, 'default'=>$user['User']['copy_acl_from'], 'id'=>false,'label'=>false,'onChange'=>'copyaccess(this.value,\''.$user['User']['id'].'\')'));?>
+                            <?php echo $this->Form->input('copy_acl_from',array('options'=>$PublishedUserList, 'default'=>$user['User']['copy_acl_from'], 'id'=>false, 'label'=>false, 'class'=>'copy-access-select', 'data-target-user'=>$user['User']['id']));?>
                         </td>                        
                     <?php } ?>                    
                     <td width="60">
@@ -313,6 +313,12 @@
             }); 
         }
     }
+
+    $(document)
+        .off('change.userCopyAccess', '.copy-access-select')
+        .on('change.userCopyAccess', '.copy-access-select', function(){
+            copyaccess(this.value, $(this).attr('data-target-user'));
+        });
     
     $.ajaxSetup({beforeSend: function () {$("#busy-indicator").show();},complete: function () {$("#busy-indicator").hide();}});
 </script>
