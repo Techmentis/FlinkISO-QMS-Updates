@@ -18,15 +18,8 @@
   <?php
   echo $this->Html->script(array(
     'plugins/jQuery/jQuery-2.2.0.min',
-    // 'plugins/jQueryUI/jquery-ui.min',
     'js/bootstrap.min',
     'validation',
-    // 'chosen.min',
-    // 'tooltip.min',
-    // 'plugins/daterangepicker/moment.min',
-    // 'jquery.datepicker',    
-    // 'plugins/daterangepicker/daterangepicker',
-    // 'plugins/datepicker/bootstrap-datepicker',    
 ));
 
 
@@ -64,18 +57,12 @@ echo $this->fetch('script');
       <!-- /.content-wrapper -->
       <footer class="main-footer">  
         <div class="pull-right hidden-xs">
-          <b>Version</b> 2.2.42
+          <b>Version</b> 2.4.42
       </div>
       <strong>Copyright &copy; 2013 <a href="http://www.techmentis.biz">Techmentis Global Services Pvt Ltd</a>.</strong> All rights
       reserved.
   </footer>
-  <?php
-  if ($this->Session->read('User'))
-    // echo $this->Element('control-sidebar');
-    ?>  
-
 </div>
-
 <?php
 echo $this->Html->script(array(
     'dist/js/demo',

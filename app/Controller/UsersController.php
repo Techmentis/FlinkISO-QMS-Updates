@@ -49,7 +49,8 @@ class UsersController extends AppController {
         $this->User->recursive = 0;
         $this->set('users', $this->paginate());
         $this->_get_count();
-        $this->_get_user_list();        
+        $this->_get_user_list();
+        $this->_commons();
     }
     /**
      * view method
