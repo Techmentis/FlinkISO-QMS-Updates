@@ -71,6 +71,10 @@
         : 'Ask a general question...'));
     var remoteGeneratedFlinkiso = isFlinkisoMode() && isGeneratedFormContext() && !isLocalAiProvider();
     $('.fi-ai-document-option').toggle(isFormsMode() || remoteGeneratedFlinkiso);
+    // Choosing whether to share the current document is a local composer
+    // preference. Do not lock this checkbox while the instance-status request
+    // is loading or unavailable; only lock it after a prompt is submitted.
+    $('#fi-ai-send-current-document').prop('disabled', requestInProgress);
     $('#fi-ai-disclaimer').text(isFormsMode()
       ? 'AI changes are validated before FlinkISO rebuilds the form.'
       : 'AI guidance is provided by your configured AI provider.');
@@ -344,7 +348,7 @@
   function setLoading(isLoading) {
     requestInProgress = isLoading;
     $prompt.prop('disabled', !instanceStatusReady || isLoading || instanceBusy);
-    $('#fi-ai-send-current-document').prop('disabled', !instanceStatusReady || isLoading || instanceBusy);
+    $('#fi-ai-send-current-document').prop('disabled', isLoading);
     $cancel.toggleClass('is-visible', isLoading).attr('aria-hidden', isLoading ? 'false' : 'true');
     $send.find('.fa')
       .toggleClass('fa-arrow-up', !isLoading)
@@ -458,7 +462,7 @@
       }
     }
     $prompt.prop('disabled', !instanceStatusReady || requestInProgress || instanceBusy);
-    $('#fi-ai-send-current-document').prop('disabled', !instanceStatusReady || requestInProgress || instanceBusy);
+    $('#fi-ai-send-current-document').prop('disabled', requestInProgress);
     resizePrompt();
   }
 
@@ -482,7 +486,7 @@
       instanceStatusReady = true;
       instanceBusy = false;
       $prompt.prop('disabled', false);
-      $('#fi-ai-send-current-document').prop('disabled', true);
+      $('#fi-ai-send-current-document').prop('disabled', requestInProgress);
       resizePrompt();
       return;
     }
