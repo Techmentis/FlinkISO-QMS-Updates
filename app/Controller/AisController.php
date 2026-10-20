@@ -3899,14 +3899,22 @@ public function cancel() {
 }
 
 private function _startAiHistory($prompt, $sourceController, $sourceAction, $customTableId, $qcDocumentId, $recordId, $assistantMode = 'forms') {
+    // API v2 uses this UUID for request state, cancellation and temporary
+    // files. Generate it before touching the history table so a history
+    // storage failure can never turn an otherwise valid AI call into an
+    // "invalid request identifier" error.
+    $id = CakeText::uuid();
+    $this->_historyId = $id;
+    $this->_historyCompanyId = (string)$this->Session->read('User.company_id');
     try {
-        if (!$this->_ensureAiTable()) return;
-        $id = CakeText::uuid();
+        if (!$this->_ensureAiTable()) {
+            CakeLog::write('error', 'AI history storage is unavailable for request '.$id.'. Continuing with a valid transient request identifier.');
+            return;
+        }
         // Keep the tenant identity in controller memory. The long-running
         // preview releases the PHP session before contacting API v2, so the
         // Session component is not a reliable source when the terminal
         // history update runs several minutes later.
-        $this->_historyCompanyId = (string)$this->Session->read('User.company_id');
         $userId = (string)$this->Session->read('User.id');
         $usesConfiguredProvider = $assistantMode === 'chat' || $assistantMode === 'flinkiso';
         $modelName = $usesConfiguredProvider ? (string)Configure::read('AI.ai_model') : 'API v2';
@@ -3936,9 +3944,7 @@ private function _startAiHistory($prompt, $sourceController, $sourceAction, $cus
         if (isset($schema['created_by'])) $historyData['created_by'] = $userId;
         if (isset($schema['modified_by'])) $historyData['modified_by'] = $userId;
         $this->Ai->create();
-        if ($this->Ai->save(array('Ai' => $historyData), false)) {
-            $this->_historyId = $id;
-        } else {
+        if (!$this->Ai->save(array('Ai' => $historyData), false)) {
             CakeLog::write('error', 'AI history start insert failed for '.$id.'.');
         }
     } catch (Exception $exception) {
