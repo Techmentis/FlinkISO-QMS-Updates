@@ -24,8 +24,8 @@
     <?php echo $this->Session->flash();?><div class="nav">
         <div class="approvals form col-md-8">
           
-          <h2>Click here to login into application</h2>
-          <?php echo $this->Html->link('Login', array('controller' => 'users', 'action' => 'login',1), array('class'=>'btn btn-success', 'disabled'=>'disabled','id'=>'login')); ?>
+          <h2><?php echo h(__('Click here to login into application')); ?></h2>
+          <?php echo $this->Html->link(__('Login'), array('controller' => 'users', 'action' => 'login',1), array('class'=>'btn btn-success', 'disabled'=>'disabled','id'=>'login')); ?>
       </div>
   </div>
 </div>

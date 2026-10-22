@@ -38,7 +38,7 @@ if(!empty($logo)){
 			?>
 			<img src="<?php echo $sign;?>" height="60">			
 		</p>
-		<p>Prepared By</p>
+		<p><?php echo h(__('Prepared By')); ?></p>
 		<p><?php echo $qcDocument['PreparedBy']['name'];?></p>
 	</div>
 	<div class="col-md-3">
@@ -52,7 +52,7 @@ if(!empty($logo)){
 			?>
 			<img src="<?php echo $sign;?>" height="60">
 		</p>
-		<p>Approved By</p>
+		<p><?php echo h(__('Approved By')); ?></p>
 		<p><?php echo $qcDocument['ApprovedBy']['name'];?></p>
 	</div>
 	<div class="col-md-3">
@@ -66,7 +66,7 @@ if(!empty($logo)){
 			?>
 			<img src="<?php echo $sign;?>" height="60">
 		</p>
-		<p>Issued By</p>
+		<p><?php echo h(__('Issued By')); ?></p>
 		<p><?php echo $qcDocument['IssuedBy']['name'];?></p>
 	</div>
 	<div class="col-md-3">
@@ -78,7 +78,7 @@ if(!empty($logo)){
 			?>
 			<img src="<?php echo $sign;?>" height="60">
 		</p>
-		<p>Downloaded By</p>
+		<p><?php echo h(__('Downloaded By')); ?></p>
 		<p><?php echo $this->Session->read('User.name');?></p>
 	</div>
 </div>

@@ -12,20 +12,20 @@
 		</script>
 		<div class="row">
 			<div class="col-md-12">
-				<h4>Shared With</h4>
+				<h4><?php echo h(__('Shared With')); ?></h4>
 				<?php foreach($pending[0] as $pending_id => $pending_name){
 					echo $pending_name.', ';
 				}?>
 
 			</div>
 			<div class="col-md-8">
-				<h4>Read Receipts</h4>
+				<h4><?php echo h(__('Read Receipts')); ?></h4>
 				<div class="table-responsive">		
 					<table cellpadding="0" cellspacing="0" class="table table-hover table-bordered">
 						<tr>
-							<th><?php echo $this->Paginator->sort('created_by','User'); ?></th>
+							<th><?php echo $this->Paginator->sort('created_by',__('User')); ?></th>
 							<th><?php echo $this->Paginator->sort('action'); ?></th>
-							<th><?php echo $this->Paginator->sort('created','Date/Time'); ?></th>					
+							<th><?php echo $this->Paginator->sort('created',__('Date/Time')); ?></th>					
 						</tr>
 						<?php if($histories){ ?>
 							<?php foreach ($histories as $history): ?>
@@ -37,7 +37,7 @@
 								<?php $x++;?>			
 							<?php endforeach; ?>
 						<?php }else{ ?>
-							<tr><td colspan="3">No results found</td></tr>
+							<tr><td colspan="3"><?php echo h(__('No results found')); ?></td></tr>
 						<?php } ?>
 					</table>			
 				</div>
@@ -63,7 +63,7 @@
 				</ul>
 			</div>				
 			<div class="col-md-4">
-				<h4>Pending</h4>
+				<h4><?php echo h(__('Pending')); ?></h4>
 				<div class="table-responsive">		
 					<table cellpadding="0" cellspacing="0" class="table table-hover table-bordered">
 						<?php foreach($pending[1] as $pending_user_id => $pending_user_name){ ?>

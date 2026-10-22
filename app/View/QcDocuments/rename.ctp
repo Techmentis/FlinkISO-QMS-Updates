@@ -1,7 +1,7 @@
 <?php echo $this->Html->script(array('jquery.validate.min', 'jquery-form.min')); ?>
 <?php echo $this->fetch('script'); ?><div id="qcDocuments_ajax">
 	<?php echo $this->Session->flash();?>	
-	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Edit Document','modelClass'=>'QcDocument','options'=>array("sr_no"=>"Sr No","document_number"=>"Document Number","reference_number"=>"Reference Number","issue_number"=>"Issue Number","date_of_next_issue"=>"Date Of Next Issue","date_of_issue"=>"Date Of Issue","effective_from_date"=>"Effective From Date","revision_number"=>"Revision Number","date_of_review"=>"Date Of Review","revision_date"=>"Revision Date","document_type"=>"Document Type","it_categories"=>"It Categories","document_status"=>"Document Status","issued_by"=>"Issued By","archived"=>"Archived","change_history"=>"Change History","cr_status"=>"Cr Status","mark_for_cr_update"=>"Mark For Cr Update","temp_date_of_issue"=>"Temp Date Of Issue","temp_effective_from_date"=>"Temp Effective From Date","linked_formats"=>"Linked Formats","cover_page"=>"Cover Page","page_orientation"=>"Page Orientation"),'pluralVar'=>'qcDocuments'))); 
+	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Edit Document'),'modelClass'=>'QcDocument','options'=>array("sr_no"=>__("Sr No"),"document_number"=>__("Document Number"),"reference_number"=>__("Reference Number"),"issue_number"=>__("Issue Number"),"date_of_next_issue"=>__("Date Of Next Issue"),"date_of_issue"=>__("Date Of Issue"),"effective_from_date"=>__("Effective From Date"),"revision_number"=>__("Revision Number"),"date_of_review"=>__("Date Of Review"),"revision_date"=>__("Revision Date"),"document_type"=>__("Document Type"),"it_categories"=>__("It Categories"),"document_status"=>__("Document Status"),"issued_by"=>__("Issued By"),"archived"=>__("Archived"),"change_history"=>__("Change History"),"cr_status"=>__("Cr Status"),"mark_for_cr_update"=>__("Mark For Cr Update"),"temp_date_of_issue"=>__("Temp Date Of Issue"),"temp_effective_from_date"=>__("Temp Effective From Date"),"linked_formats"=>__("Linked Formats"),"cover_page"=>__("Cover Page"),"page_orientation"=>__("Page Orientation")),'pluralVar'=>'qcDocuments'))); 
 	?>
 
 	<div class="nav panel panel-default">
@@ -9,9 +9,9 @@
 		<div class="qcDocuments form col-md-12">
 			<?php echo $this->Form->create('QcDocument',array('role'=>'form','class'=>'form')); ?>
 			<div class="row">
-				<div class="col-md-6"><h3><small>Document Name:</small><br /><?php echo $this->data['QcDocument']['name'] ?></h3></div>
-				<div class="col-md-3"><h3><small>Number:</small><br /><?php echo $this->data['QcDocument']['document_number'] ?></h3></div>
-				<div class="col-md-3"><h3><small>Revision:</small><br /><?php echo $this->data['QcDocument']['revision_number'] ?></h3></div>
+				<div class="col-md-6"><h3><small><?php echo h(__('Document Name:')); ?></small><br /><?php echo $this->data['QcDocument']['name'] ?></h3></div>
+				<div class="col-md-3"><h3><small><?php echo h(__('Number:')); ?></small><br /><?php echo $this->data['QcDocument']['document_number'] ?></h3></div>
+				<div class="col-md-3"><h3><small><?php echo h(__('Revision:')); ?></small><br /><?php echo $this->data['QcDocument']['revision_number'] ?></h3></div>
 
 			</div>
 			
@@ -20,19 +20,19 @@
 				if($this->data['QcDocument']['name']){
 					echo "<div class='col-md-6'>".$this->Form->input('name',
 						array(
-							'label'=>'<strong>Name:</strong> Do not add document extension (doc,docx,elxs etc) in this field',
+							'label'=>'<strong>' . h(__('Name:')) . '</strong> ' . h(__('Do not add document extension (doc,docx,elxs etc) in this field')),
 							'class'=>'form-control')) . '</div>'; 	
 				}
 				if($this->data['QcDocument']['document_number']){
 					echo "<div class='col-md-3'>".$this->Form->input('document_number',
 						array(
-							'label'=>'<strong>Document Numner:</strong>',
+							'label'=>'<strong>' . h(__('Document Numner:')) . '</strong>',
 							'class'=>'form-control')) . '</div>'; 	
 				}
 				if(isset($this->data['QcDocument']['revision_number'])){
 					echo "<div class='col-md-3'>".$this->Form->input('revision_number',
 						array(
-							'label'=>'<strong>Revision Numner:</strong>',
+							'label'=>'<strong>' . h(__('Revision Numner:')) . '</strong>',
 							'class'=>'form-control')) . '</div>'; 	
 				}
 
@@ -104,7 +104,7 @@
 
 		jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 			return this.optional(element) || (parseFloat(value) != -1);
-		}, "Please select the value");
+		}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 		$('#QcDocumentEditForm').validate({}); 
 

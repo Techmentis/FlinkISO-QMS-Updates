@@ -1,7 +1,7 @@
 <?php echo $this->element('checkbox-script'); ?><div  id="main">
 	<?php echo $this->Session->flash();?>	
 	<div class="templates ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'templates','modelClass'=>'Template','options'=>array("sr_no"=>"Sr No","name"=>"Name","details"=>"Details","departments"=>"Departments"),'pluralVar'=>'templates'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('templates'),'modelClass'=>'Template','options'=>array("sr_no"=>__("Sr No"),"name"=>__("Name"),"details"=>__("Details"),"departments"=>__("Departments")),'pluralVar'=>'templates'))); ?>
 
 		<script type="text/javascript">
 			$(document).ready(function(){
@@ -17,7 +17,7 @@
 			<table id="templates" cellpadding="0" cellspacing="0" class="table table-hover index" id="exportcsv">
 				<tr>
 					<th><?php echo $this->Paginator->sort('name'); ?></th>
-					<th>Actions</th>
+					<th><?php echo h(__('Actions')); ?></th>
 				</tr>
 				<?php if($templates){ ?>
 					<?php foreach ($templates as $template): ?>
@@ -29,7 +29,7 @@
 						</tr>
 					<?php endforeach; ?>
 				<?php }else{ ?>
-					<tr><td colspan="7">No results found</td></tr>
+					<tr><td colspan="7"><?php echo h(__('No results found')); ?></td></tr>
 				<?php } ?>
 			</table>
 			<?php echo $this->Form->end();?>			

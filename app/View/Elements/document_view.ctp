@@ -49,7 +49,7 @@
 		<td colspan="6">
 			<div class="btn-group1">
 				<?php     
-				echo $this->Html->link('<i class="fa fa-trash-o fa-lg"></i>',array('action'=>'delete',$qcDocument['QcDocument']['id']),array('confirm'=>'This action can not be revered. Do you want to procced?', 'class'=>'btn btn-lg btn-danger','escape'=>false));
+				echo $this->Html->link('<i class="fa fa-trash-o fa-lg"></i>',array('action'=>'delete',$qcDocument['QcDocument']['id']),array('confirm'=>__('This action can not be revered. Do you want to procced?'), 'class'=>'btn btn-lg btn-danger','escape'=>false));
 				echo "&nbsp;" . $this->Html->link('<i class="fa fa-edit fa-lg"></i>',array('action'=>'edit',$qcDocument['QcDocument']['id']),array('class'=>'btn btn-lg btn-warning','escape'=>false));
 				echo "&nbsp;" . $this->Html->link('<i class="fa fa-database fa-lg"></i>',array('controller'=>'custom_tables', 'action'=>'add', 'qc_document_id'=> $qcDocument['QcDocument']['id']),array('class'=>'btn btn-lg btn-info','escape'=>false));        
 				?>

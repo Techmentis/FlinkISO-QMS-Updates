@@ -19,6 +19,7 @@
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTDXHTML 1.0 Transitional//EN" <html lang="en-US" xml:lang="en-US" xmlns="http://www.w3.org/1999/xhtml">
 <head>
+<?php echo $this->element('translation_strings'); ?>
     <title>FlinkISO</title>
     <meta http-equiv="refresh" content="0.5">
     <meta http-Equiv="Cache-Control" Content="no-cache">

@@ -1,14 +1,14 @@
 <div id="approvalProcesses_ajax">
 	<?php echo $this->Session->flash();?>	
 	<div class="approvalProcesses ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Approval Processes','modelClass'=>'ApprovalProcess','options'=>array(),'pluralVar'=>'approvalProcesses'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Approval Processes'),'modelClass'=>'ApprovalProcess','options'=>array(),'pluralVar'=>'approvalProcesses'))); ?>
 		<div class="nav panel panel-default">
 			<div class="approvalProcesses form col-md-12 table-responsive">
 				<table class="table table-responsive">
 					<tr><th colspan="2"><?php echo h($approvalProcess['ApprovalProcess']['title']); ?>&nbsp;</th></tr>
 					<tr><td colspan="2"><?php echo h($approvalProcess['ApprovalProcess']['process_description']); ?>&nbsp;</td></tr>
 					<tr><td>
-						<h4>Applicable To</h4>
+						<h4><?php echo h(__('Applicable To')); ?></h4>
 						<ul class="list-group">
 						<?php 
 						$applicableTos = json_decode($approvalProcess['ApprovalProcess']['applicable_to'],true);
@@ -19,24 +19,24 @@
 						</td>
 						<td>
 							<div class="col-md-12 table-responsive">
-								<h4>Approval Steps</h4>
+								<h4><?php echo h(__('Approval Steps')); ?></h4>
 								<table class="table table-bordered table-condenced">
 									<thead>
 										<tr>
 											<th rowspan="2" width="80">#</th>
-											<th rowspan="2">Title</th>
-											<th rowspan="2">Comment</th>
-											<th colspan="6">Send To</th>							
+											<th rowspan="2"><?php echo h(__('Title')); ?></th>
+											<th rowspan="2"><?php echo h(__('Comment')); ?></th>
+											<th colspan="6"><?php echo h(__('Send To')); ?></th>							
 										</tr>
 										<tr>
-											<th>Reviwer</th>							
-											<th>Approver</th>
-											<th>HOD</th>
-											<th>Admin</th>							
-											<th>Designation</th>										
-											<th>Users</th>
-											<th>Publisher</th>
-											<th>Action</th>
+											<th><?php echo h(__('Reviwer')); ?></th>							
+											<th><?php echo h(__('Approver')); ?></th>
+											<th><?php echo h(__('HOD')); ?></th>
+											<th><?php echo h(__('Admin')); ?></th>							
+											<th><?php echo h(__('Designation')); ?></th>										
+											<th><?php echo h(__('Users')); ?></th>
+											<th><?php echo h(__('Publisher')); ?></th>
+											<th><?php echo h(__('Action')); ?></th>
 										</tr>
 									</thead>
 									<tbody>
@@ -73,7 +73,7 @@
 												<td><?php if($approvalStep['send_to_publishers'])echo '<i class="fa fa-check"></i>'; ?></td>
 												<td><?php echo $this->Form->postLink('<i class="fa fa-minus btn-remove-record"></i>',
 													array('controller'=>'approval_steps','action'=>'delete',$approvalStep['id']),
-													array('confirm'=>'Are you sure you want to delete this record?','class'=>'btn btn-xs btn-default','escape'=>false));
+													array('confirm'=>__('Are you sure you want to delete this record?'),'class'=>'btn btn-xs btn-default','escape'=>false));
 													?>								
 												</td>
 											</tr>

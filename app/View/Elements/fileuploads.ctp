@@ -21,28 +21,28 @@ if(!$id){
 <?php echo $this->Html->script(array('jquery.validate.min', 'jquery-form.min')); ?>
 <?php echo $this->fetch('script'); ?>
 <div id="upload">
-	<h4>Add New Files</h4>
+	<h4><?php echo h(__('Add New Files')); ?></h4>
 
 	<div class="panel panel-default">
 		<div class="panel-body">
 			<?php  echo $this->Form->create(false,array('url'=>array('controller'=>$this->request->controller, 'action'=>'upload_document'),'id'=>'uploadform','role'=>'form','default'=>false, 'class'=>'form','type'=>'file'));?>	
 			<div class="row">		
 				<?php echo "<div class=''>".$this->Form->hidden('id',array('default'=>$id))."</div>";
-				echo "<div class='col-md-5'><label>Define path: <small>Seperated by '/' and without spaces.</small></lable>".$this->Form->input('path',array('class'=>'form-control','div'=>array('class'=>'input-group'),'before'=>'<span class="input-group-addon"><i class="fa fa-folder"></i></span>','label'=>false))."</div>";
+				echo '<div class=\'col-md-5\'><label>' . h(__('Define path:')) . ' <small>' . h(__('Seperated by \'/\' and without spaces.')) . '</small></lable>'.$this->Form->input('path',array('class'=>'form-control','div'=>array('class'=>'input-group'),'before'=>'<span class="input-group-addon"><i class="fa fa-folder"></i></span>','label'=>false))."</div>";
 				?>				
 				<div class="col-md-5"><br />
 					<?php 
-					echo "<span class='control-fileupload'><i class='fa fa-file-o'></i>". $this->Form->input('file',array('class'=>$block_class ,  'type'=>'file', 'label'=>'Upload File', 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));'))					
+					echo "<span class='control-fileupload'><i class='fa fa-file-o'></i>". $this->Form->input('file',array('class'=>$block_class ,  'type'=>'file', 'label'=>__('Upload File'), 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));'))					
 					?>
 				</div>
 				<div class="col-md-2">
 					<br />
-					<?php echo $this->Form->submit('Upload File',array('class'=>'btn btn-sm btn-info','id'=>'submit_id'));?>
+					<?php echo $this->Form->submit(__('Upload File'),array('class'=>'btn btn-sm btn-info','id'=>'submit_id'));?>
 				</div>		
 				<div class="col-md-12">
 					<div class="progress progress-sm active">
 						<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-							<span class="sr-only">20% Complete</span>
+							<span class="sr-only"><?php echo h(__('20% Complete')); ?></span>
 						</div>
 					</div>
 				</div>		
@@ -50,9 +50,9 @@ if(!$id){
 		</div>
 		<div class="panel-footer">
 			<span class="help-text text-warning">
-				<small>Allowed file types : Images/Documents/PDF. Max Size: 5MB.
-					<br />Note : These documents will not be version controlled and will be available to download as it is.
-					<br />These documents will be available for download to everyone who has access to this record.
+				<small><?php echo h(__('Allowed file types : Images/Documents/PDF. Max Size: 5MB.')); ?>
+					<br /><?php echo h(__('Note : These documents will not be version controlled and will be available to download as it is.')); ?>
+					<br /><?php echo h(__('These documents will be available for download to everyone who has access to this record.')); ?>
 				</small>
 			</span>
 		</div>
@@ -80,7 +80,7 @@ if(!$id){
                    // $("#submit-indicator").hide();
 				},
 				error: function(request, status, error) {                    
-					alert('Action failed!');
+					alert(<?php echo json_encode(__('Action failed!'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 				}
 			});
 		}
@@ -89,14 +89,14 @@ if(!$id){
 		$(".progress").hide();
 		jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 			return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';
-		}, "Please select the value");
+		}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 		
 		$('#uploadform').validate({    
 		}); 
 	});
 </script><script>$.ajaxSetup({beforeSend:function(){$("#submit-indicator").show();},complete:function(){$("#busy-indicator").hide();}});</script>
 
-<h4>Available files:</h4>
+<h4><?php echo h(__('Available files:')); ?></h4>
 <div class="panel panel-default">
 	<div class="panel-body">
 		<div class="row">
@@ -140,7 +140,7 @@ if(!$id){
 
 	function deletefile(file,id){
 		var txt;
-		var r = confirm("Delete file? This action can not be reversed.");
+		var r = confirm(<?php echo json_encode(__('Delete file? This action can not be reversed.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 		if (r == true) {
 			$.ajax({
 				url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/delete_uploaded_file/" + file,
@@ -166,7 +166,7 @@ if(!$id){
 
 	function deletefolder(folderpath,id){
 		var txt;
-		var r = confirm("Delete folder? This action can not be reversed.");
+		var r = confirm(<?php echo json_encode(__('Delete folder? This action can not be reversed.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 		if (r == true) {
 			$.ajax({
 				url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/delete_uploaded_folder/" + folderpath,

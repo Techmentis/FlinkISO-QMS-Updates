@@ -44,11 +44,11 @@
             </div>
             <div class="row">
                 <div class="col-md-12">   
-                    <?php echo $this->Form->input('logo', array('type' => 'radio', 'options' => array(0 => 'Default', 1 => 'Custom Logo'))); ?>
+                    <?php echo $this->Form->input('logo', array('type' => 'radio', 'options' => array(0 => __('Default'), 1 => __('Custom Logo')))); ?>
                 </div>                
                 <div id="customLogo" class="col-md-12">                                        
-                    <span class='control-fileupload'><i class='fa fa-file-o'></i><?php echo $this->Form->input('company_logo',array('class'=>$block_class ,  'type'=>'file', 'label'=>'Upload Company Logo', 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));'));?></span>
-                    <p class="help-text">Acceptable image formats are 'jpg/jpeg,png'</p>
+                    <span class='control-fileupload'><i class='fa fa-file-o'></i><?php echo $this->Form->input('company_logo',array('class'=>$block_class ,  'type'=>'file', 'label'=>__('Upload Company Logo'), 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));'));?></span>
+                    <p class="help-text"><?php echo h(__('Acceptable image formats are \'jpg/jpeg,png\'')); ?></p>
                 </div>
             </div>
             <?php echo $this->Form->hidden('History.pre_post_values', array('value'=>json_encode($this->data)));

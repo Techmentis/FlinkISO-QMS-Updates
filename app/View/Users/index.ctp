@@ -3,7 +3,7 @@
         .fa{font-size: 14px}
     </style>
     <?php echo $this->Session->flash(); ?>
-    <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Users','modelClass'=>'User','options'=>array(),'pluralVar'=>'users'))); ?>
+    <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Users'),'modelClass'=>'User','options'=>array(),'pluralVar'=>'users'))); ?>
     <div class="users ">
         <div class="table-responsive" style="min-height: 450px;">
             <?php echo $this->Form->create(array('class' => 'no-padding no-margin no-background')); ?>
@@ -20,12 +20,12 @@
                         <th><?php echo $this->Paginator->sort('is_creator', __('Creator')); ?></th>                    
                         <th><?php echo $this->Paginator->sort('is_approver', __('Approver')); ?></th>
                         <th><?php echo $this->Paginator->sort('is_publisher', __('Publisher')); ?></th>                        
-                        <th>Block/Release</th>
+                        <th><?php echo h(__('Block/Release')); ?></th>
                         <th><?php echo __('Copy Access From');?></th>
                     <?php } ?>                                        
                     <th><?php echo $this->Paginator->sort('publish', __('Publish')); ?></th>
                     <?php if($this->Session->read('User.is_mr') == true){ ?>
-                        <th width="120">Actions</th>
+                        <th width="120"><?php echo h(__('Actions')); ?></th>
                     <?php } ?>
                 </tr>
                 <?php if ($users) {
@@ -335,7 +335,7 @@
 
     function copyaccess(from,to){
         if(from == to){
-            alert('Same user.')
+            alert(<?php echo json_encode(__('Same user.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>)
             return false;
         }else{
             $.ajax({

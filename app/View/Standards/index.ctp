@@ -2,7 +2,7 @@
 	.ui-tabs .ui-tabs-panel{padding: 0 !important;}	
 </style>
 <?php echo $this->Session->flash();?>
-<div><?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Standard-wise Documents & tables','modelClass'=>'Standard','options'=>array("sr_no"=>"Sr No","name"=>"Name","details"=>"Details"),'pluralVar'=>'standards'))); ?>
+<div><?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Standard-wise Documents & tables'),'modelClass'=>'Standard','options'=>array("sr_no"=>__("Sr No"),"name"=>__("Name"),"details"=>__("Details")),'pluralVar'=>'standards'))); ?>
 <div class="main">
 	<div class="row">
 		<div class="col-md-12">
@@ -26,8 +26,8 @@
 			beforeLoad: function( event, ui ) {
 				ui.jqXHR.error(function() {
 					ui.panel.html(
-						"Error Loading ... " +
-						"Please contact administrator." );
+						<?php echo json_encode(__('Error Loading ... '), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?> +
+						<?php echo json_encode(__('Please contact administrator.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?> );
 				});
 			}
 		});

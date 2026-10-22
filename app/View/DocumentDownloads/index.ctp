@@ -1,7 +1,7 @@
 <div  id="document_download">
 	<div class="panel panel-body">
 		<div class="document_download ">		
-			<h4>PDF Download Receipts</h4>
+			<h4><?php echo h(__('PDF Download Receipts')); ?></h4>
 			<?php $x = 0;?>
 			<script type="text/javascript">
 				$(document).ready(function() {
@@ -15,10 +15,10 @@
 			<div class="table-responsive">		
 				<table cellpadding="0" cellspacing="0" class="table table-hover">
 					<tr>
-						<th><?php echo "Document";?></th>
-						<th><?php echo $this->Paginator->sort('created_by','Downloaded By'); ?></th>
-						<th><?php echo $this->Paginator->sort('time','Download Date/ Time'); ?></th>						
-						<th>Signature</th>
+						<th><?php echo __("Document");?></th>
+						<th><?php echo $this->Paginator->sort('created_by',__('Downloaded By')); ?></th>
+						<th><?php echo $this->Paginator->sort('time',__('Download Date/ Time')); ?></th>						
+						<th><?php echo h(__('Signature')); ?></th>
 					</tr>
 					<?php if($documentDownloads){ ?>
 						<?php foreach ($documentDownloads as $documentDownload): ?>
@@ -31,7 +31,7 @@
 							<?php $x++;?>			
 						<?php endforeach; ?>
 					<?php }else{ ?>
-						<tr><td colspan="4">No results found</td></tr>
+						<tr><td colspan="4"><?php echo h(__('No results found')); ?></td></tr>
 					<?php } ?>
 				</table>			
 			</div>

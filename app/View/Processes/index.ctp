@@ -1,7 +1,7 @@
 <div  id="main">
 	<?php echo $this->Session->flash();?>
 
-	<?php echo $this->element('nav-header-lists',array('postData'=>array('friendlyName'=>'Processes', 'pluralHumanName'=>'processes','modelClass'=>'Processes','options'=>array("process_definition"=>"Process Definition","process_objective_and_metrics"=>"Process Objecttive And Metrics","process_owners"=>"Process Owners","applicable_to_branches"=>"Applicable To Branches","additional_responsibilities"=>"Additional Responsibilities","input_processes"=>"Input Processes","output_processes"=>"Outout Processes","process_output"=>"Process Output","risks_and_opportunities"=>"Risks And Opportunities","standards"=>"Standards","clauses"=>"Clauses"),'pluralVar'=>'processes'))); ?><div class="row"><div class="col-md-12">
+	<?php echo $this->element('nav-header-lists',array('postData'=>array('friendlyName'=>__('Processes'), 'pluralHumanName'=>__('processes'),'modelClass'=>'Processes','options'=>array("process_definition"=>__("Process Definition"),"process_objective_and_metrics"=>__("Process Objecttive And Metrics"),"process_owners"=>__("Process Owners"),"applicable_to_branches"=>__("Applicable To Branches"),"additional_responsibilities"=>__("Additional Responsibilities"),"input_processes"=>__("Input Processes"),"output_processes"=>__("Outout Processes"),"process_output"=>__("Process Output"),"risks_and_opportunities"=>__("Risks And Opportunities"),"standards"=>__("Standards"),"clauses"=>__("Clauses")),'pluralVar'=>'processes'))); ?><div class="row"><div class="col-md-12">
 	</div></div>
 	<?php if($processes){ ?>
 		<div class="panel panel-default"><div class="panel-body no-padding">
@@ -10,11 +10,11 @@
 				<table cellpadding="0" cellspacing="0" class="table table-responsive table-hover index">
 					<tr>
 						<th><?php echo $this->Paginator->sort('name'); ?></th>
-						<th><?php echo $this->Paginator->sort('qc_document_id','Document'); ?></th>
+						<th><?php echo $this->Paginator->sort('qc_document_id',__('Document')); ?></th>
 						<th><?php echo $this->Paginator->sort('process_owners'); ?></th>
 						<th><?php echo $this->Paginator->sort('standards'); ?></th>
 						<th><?php echo $this->Paginator->sort('clauses'); ?></th>						
-						<th width="100">Actions</th>
+						<th width="100"><?php echo h(__('Actions')); ?></th>
 					</tr>
 					<?php foreach ($processes as $process): ?>
 						<tr class="" onclick="addrec('<?php echo $process['Process']['id'];?>')" id="<?php echo $process['Process']['id'];?>_tr">
@@ -39,7 +39,7 @@
 			<?php } ?>
 
 			<?php if(!$processes){ ?>
-				<p class='text-center'><span class='text-warning'><i class='fa fa-exclamation-triangle';></i> No records found.</span></p>
+				<p class='text-center'><span class='text-warning'><i class='fa fa-exclamation-triangle';></i> <?php echo h(__('No records found.')); ?></span></p>
 			<?php } ?>
 			<?php echo $this->element('paging');?>
 		</div>

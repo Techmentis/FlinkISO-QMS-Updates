@@ -5,7 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-touch-fullscreen" content="yes">
-  <title>FlinkISO | QMS</title>
+  <title><?php echo h(__('FlinkISO | QMS')); ?></title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <?php
@@ -70,10 +70,10 @@
   <!-- /.content-wrapper -->
   <footer class="main-footer">
     <div class="pull-right hidden-xs">
-      <b>Version</b> 2.0
+      <b><?php echo h(__('Version')); ?></b> 2.0
     </div>
-    <strong>Copyright &copy; 2013 <a href="http://www.techmentis.biz">Techmentis Global Services Pvt Ltd</a>.</strong> All rights
-    reserved.
+    <strong><?php echo h(__('Copyright')); ?> &copy; 2013 <a href="http://www.techmentis.biz"><?php echo h(__('Techmentis Global Services Pvt Ltd')); ?></a>.</strong> <?php echo h(__('All rights
+    reserved.')); ?>
   </footer>
 
 </div>

@@ -57,18 +57,18 @@
     $('[data-ai-mode-content]').hide().filter('[data-ai-mode-content="' + assistantMode + '"]').show();
     $('#fi-ai-welcome-text').text(isFormsMode()
       ? ($panel.attr('data-controller') === 'qc_documents'
-        ? 'Ask me to understand this document and prepare a FlinkISO form or module.'
+        ? window.fiTranslate('Ask me to understand this document and prepare a FlinkISO form or module.')
         : ($panel.attr('data-controller') === 'custom_tables'
-          ? 'Ask me to prepare a new FlinkISO form or help define its fields.'
-          : 'Ask me to create, review, or update fields for this form.'))
+          ? window.fiTranslate('Ask me to prepare a new FlinkISO form or help define its fields.')
+          : window.fiTranslate('Ask me to create, review, or update fields for this form.')))
       : (isFlinkisoMode()
-        ? 'Ask me a question about QMS or using FlinkISO.'
-        : 'Ask the configured AI provider a general QMS or other question.'));
+        ? window.fiTranslate('Ask me a question about QMS or using FlinkISO.')
+        : window.fiTranslate('Ask the configured AI provider a general QMS or other question.')));
     $prompt.attr('placeholder', isFormsMode()
-      ? 'Describe what you want FlinkISO to create or update...'
+      ? window.fiTranslate('Describe what you want FlinkISO to create or update...')
       : (isFlinkisoMode()
-        ? 'Ask a question about QMS or using FlinkISO...'
-        : 'Ask a general question...'));
+        ? window.fiTranslate('Ask a question about QMS or using FlinkISO...')
+        : window.fiTranslate('Ask a general question...')));
     var remoteGeneratedFlinkiso = isFlinkisoMode() && isGeneratedFormContext() && !isLocalAiProvider();
     $('.fi-ai-document-option').toggle(isFormsMode() || remoteGeneratedFlinkiso);
     // Choosing whether to share the current document is a local composer
@@ -76,8 +76,8 @@
     // is loading or unavailable; only lock it after a prompt is submitted.
     $('#fi-ai-send-current-document').prop('disabled', requestInProgress);
     $('#fi-ai-disclaimer').text(isFormsMode()
-      ? 'AI changes are validated before FlinkISO rebuilds the form.'
-      : 'AI guidance is provided by your configured AI provider.');
+      ? window.fiTranslate('AI changes are validated before FlinkISO rebuilds the form.')
+      : window.fiTranslate('AI guidance is provided by your configured AI provider.'));
     $('.fi-ai-local-note').html(isFormsMode()
       ? '<i class="fa fa-shield"></i> Secure FlinkISO API'
       : (isFlinkisoMode()
@@ -99,7 +99,7 @@
     $backdrop.addClass('is-open').attr('aria-hidden', 'false');
     $toggle.attr('aria-expanded', 'true').parent().addClass('is-active');
     $toggle.parent().removeClass('has-ai-completion');
-    $toggle.attr('title', 'FlinkISO AI');
+    $toggle.attr('title', window.fiTranslate('FlinkISO AI'));
     if (!historyLoaded) { loadHistory(false); }
     applyAssistantModeUi();
     refreshInstanceStatus();
@@ -113,7 +113,7 @@
     $('body').removeClass('fi-ai-panel-open fi-ai-panel-wide');
     $backdrop.removeClass('is-open').attr('aria-hidden', 'true');
     $toggle.attr('aria-expanded', 'false').parent().removeClass('is-active');
-    $('#fi-ai-expand').attr('title', 'Expand panel').find('.fa').removeClass('fa-compress').addClass('fa-expand');
+    $('#fi-ai-expand').attr('title', window.fiTranslate('Expand panel')).find('.fa').removeClass('fa-compress').addClass('fa-expand');
     $('.fi-ai-selectable-field, .fi-ai-selected-field').removeClass('fi-ai-selectable-field fi-ai-selected-field').removeAttr('data-fi-ai-field');
     setPageFormSubmissionLocked(false);
     if (!instanceBusy && !requestInProgress) { stopInstanceStatusPolling(); }
@@ -159,7 +159,7 @@
     var parser = document.createElement('a');
     parser.href = image.url;
     if (parser.protocol !== 'https:' || String(parser.hostname).toLowerCase() !== 'www.flinkiso.com') return $();
-    var caption = image.caption || 'FlinkISO manual image';
+    var caption = image.caption || window.fiTranslate('FlinkISO manual image');
     var $figure = $('<figure/>', {
       'class': inline ? 'fi-ai-inline-image' : '',
       'data-image-index': imageIndex
@@ -168,7 +168,7 @@
       href: parser.href,
       target: '_blank',
       rel: 'noopener noreferrer',
-      title: 'Open image in a new tab'
+      title: window.fiTranslate('Open image in a new tab')
     });
     $link.append($('<img/>', {src: parser.href, alt: caption, loading: 'lazy'}));
     return $figure.append($link).append($('<figcaption/>').text(caption));
@@ -235,7 +235,7 @@
 
   function appendAnswerSources($content, sources) {
     if (!$.isArray(sources) || !sources.length) return;
-    var $sources = $('<div/>', {'class': 'fi-ai-answer-sources'}).append($('<strong/>').text('Official FlinkISO guides'));
+    var $sources = $('<div/>', {'class': 'fi-ai-answer-sources'}).append($('<strong/>').text(window.fiTranslate('Official FlinkISO guides')));
     var $sourceList = $('<ul/>');
     $.each(sources, function (_, source) {
       if (!source || !source.url || !/^https?:\/\//i.test(source.url)) return;
@@ -251,7 +251,7 @@
   function appendAnswerImages($content, images) {
     if (!$.isArray(images) || !images.length) return;
     if ($content.find('.fi-ai-inline-image').length) return;
-    var $gallery = $('<div/>', {'class': 'fi-ai-answer-images', 'aria-label': 'Related FlinkISO manual images'});
+    var $gallery = $('<div/>', {'class': 'fi-ai-answer-images', 'aria-label': window.fiTranslate('Related FlinkISO manual images')});
     $.each(images, function (imageIndex, image) {
       var $figure = answerImageFigure(image, imageIndex, false);
       if ($figure.length) $gallery.append($figure);
@@ -275,7 +275,7 @@
       .append($('<div/>', {'class': 'fi-ai-message-content'})
         .append($('<p/>').text(item.request || ''))
         .append($('<div/>', {'class': 'fi-ai-history-meta'}).text((item.user_name || 'User') + ' · ' + (item.created || ''))));
-    var responseText = item.response_message || (item.status === 'processing' ? 'AI request is still processing.' : 'No response was recorded.');
+    var responseText = item.response_message || (item.status === 'processing' ? window.fiTranslate('AI request is still processing.') : window.fiTranslate('No response was recorded.'));
     var meta = [item.status || '', item.operation || ''];
     if (item.duration_ms) { meta.push((item.duration_ms / 1000).toFixed(1) + 's'); }
     var $assistantContent = $('<div/>', {'class': 'fi-ai-message-content'})
@@ -284,20 +284,20 @@
     appendAnswerSources($assistantContent, item.sources);
     $assistantContent.append($('<div/>', {'class': 'fi-ai-history-meta'}).text(meta.join(' · ')));
     if (item.form_url) {
-      $assistantContent.append($('<a/>', {'class': 'fi-ai-form-link', href: item.form_url}).text('Open generated form'));
+      $assistantContent.append($('<a/>', {'class': 'fi-ai-form-link', href: item.form_url}).text(window.fiTranslate('Open generated form')));
     }
     if (item.artifact_ready && item.artifact_download_url) {
       $assistantContent.append($('<a/>', {
         'class': 'fi-ai-form-link fi-ai-artifact-link',
         href: item.artifact_download_url
-      }).append('<i class="fa fa-download" aria-hidden="true"></i> Download ' + String(item.artifact_format || 'file').toUpperCase()));
+      }).append(window.fiTranslate('<i class="fa fa-download" aria-hidden="true"></i> Download ') + String(item.artifact_format || 'file').toUpperCase()));
     }
     if (item.can_cancel) {
       $assistantContent.append($('<button/>', {
         type: 'button',
         'class': 'fi-ai-history-cancel',
         'data-ai-id': item.id
-      }).append('<i class="fa fa-stop" aria-hidden="true"></i> Stop'));
+      }).append(window.fiTranslate('<i class="fa fa-stop" aria-hidden="true"></i> Stop')));
     }
     if (item.clarification_question) {
       renderClarification($assistantContent, item.clarification_question);
@@ -359,7 +359,7 @@
   function cancelAiRequest(id, $button) {
     if (!id || !$panel.attr('data-cancel-url')) { return; }
     stopInstanceStatusPolling();
-    if ($button && $button.length) { $button.prop('disabled', true).text('Stopping…'); }
+    if ($button && $button.length) { $button.prop('disabled', true).text(window.fiTranslate('Stopping…')); }
     $.ajax({
       url: $panel.attr('data-cancel-url'),
       type: 'POST',
@@ -370,24 +370,24 @@
       instanceRequestId = id;
       if ($button && $button.length) {
         var $content = $button.closest('.fi-ai-message-content');
-        $content.children('p').text(result && result.message ? result.message : 'Stop requested.');
-        $content.find('.fi-ai-history-meta').text('cancelled');
+        $content.children('p').text(result && result.message ? result.message : window.fiTranslate('Stop requested.'));
+        $content.find('.fi-ai-history-meta').text(window.fiTranslate('cancelled'));
         if ($button.is('#fi-ai-instance-stop')) {
-          $button.hide().prop('disabled', false).html('<i class="fa fa-stop" aria-hidden="true"></i> Stop');
+          $button.hide().prop('disabled', false).html(window.fiTranslate('<i class="fa fa-stop" aria-hidden="true"></i> Stop'));
         } else {
           $button.remove();
         }
       }
       $('#fi-ai-instance-busy').show()
-        .find('.fi-ai-message-content > strong').first().text('Stopping AI task');
+        .find('.fi-ai-message-content > strong').first().text(window.fiTranslate('Stopping AI task'));
       $('#fi-ai-instance-busy').find('.fi-ai-message-content > p').first()
-        .text('FlinkISO AI is cancelling the current request. A new request can be submitted after it has stopped.');
+        .text(window.fiTranslate('FlinkISO AI is cancelling the current request. A new request can be submitted after it has stopped.'));
       $('#fi-ai-instance-stop').hide().attr('data-ai-id', '');
       $prompt.prop('disabled', true);
       $('#fi-ai-send-current-document').prop('disabled', true);
       window.setTimeout(refreshInstanceStatus, 500);
     }).fail(function (xhr) {
-      if ($button && $button.length) { $button.prop('disabled', false).text('Stop'); }
+      if ($button && $button.length) { $button.prop('disabled', false).text(window.fiTranslate('Stop')); }
       appendMessage('system', responseError(xhr));
     });
   }
@@ -416,18 +416,18 @@
       // show the instance-wide busy alert for the same submission.
       var isCurrentTabRequest = requestInProgress && (!activeAiId || !result.request_id || result.request_id === activeAiId);
       $busy.toggle(!isCurrentTabRequest);
-      $busy.find('.fi-ai-message-content > strong').first().text(isCancelling ? 'Stopping AI task' : 'AI task in progress');
+      $busy.find('.fi-ai-message-content > strong').first().text(isCancelling ? window.fiTranslate('Stopping AI task') : window.fiTranslate('AI task in progress'));
       $busy.find('.fi-ai-message-content > p').first().text(isCancelling
-        ? 'FlinkISO AI is cancelling the current request. A new request can be submitted after it has stopped.'
-        : 'FlinkISO AI is currently processing a request for this instance.');
+        ? window.fiTranslate('FlinkISO AI is cancelling the current request. A new request can be submitted after it has stopped.')
+        : window.fiTranslate('FlinkISO AI is currently processing a request for this instance.'));
       var $meta = $('#fi-ai-instance-busy-meta').empty();
-      $meta.append(document.createTextNode('Started by ' + (result.user_name || 'User')));
+      $meta.append(document.createTextNode(window.fiTranslate('Started by ') + (result.user_name || 'User')));
       if (result.source) $meta.append('<br>').append($('<strong/>').text(result.source));
       if (result.started) $meta.append('<br>').append(document.createTextNode(result.started));
       if (result.prompt) {
         $meta.append(
           $('<div/>', {'class': 'fi-ai-instance-prompt'})
-            .append($('<span/>').text('Prompt'))
+            .append($('<span/>').text(window.fiTranslate('Prompt')))
             .append($('<p/>').text(result.prompt))
         );
       }
@@ -447,14 +447,14 @@
         var finishedSameRequest = !result.last_request_id || !instanceRequestId || result.last_request_id === instanceRequestId;
         var finalStatus = finishedSameRequest ? (result.last_status || 'completed') : 'completed';
         var completionMessage = finalStatus === 'cancelled'
-          ? 'The AI task was cancelled. FlinkISO AI is ready for another request.'
+          ? window.fiTranslate('The AI task was cancelled. FlinkISO AI is ready for another request.')
           : (finalStatus === 'failed'
-            ? 'The AI task finished with an error. Open the AI panel to review it.'
-            : 'The AI task is complete. FlinkISO AI is ready for another request.');
+            ? window.fiTranslate('The AI task finished with an error. Open the AI panel to review it.')
+            : window.fiTranslate('The AI task is complete. FlinkISO AI is ready for another request.'));
         appendMessage('system', completionMessage);
         if (!$panel.hasClass('is-open') && finalStatus !== 'cancelled') {
           $toggle.parent().addClass('has-ai-completion');
-          $toggle.attr('title', finalStatus === 'failed' ? 'AI task needs attention' : 'AI task complete');
+          $toggle.attr('title', finalStatus === 'failed' ? window.fiTranslate('AI task needs attention') : window.fiTranslate('AI task complete'));
         }
         instanceRequestId = '';
       } else if (wasBusy) {
@@ -514,10 +514,10 @@
     var startedAt = new Date().getTime();
     var isGeneralAssistance = !isFormsMode();
     var $item = appendMessage('system', isGeneralAssistance
-      ? 'Asking your configured AI provider…'
-      : (isDocumentRequest ? 'Reading the current document from FlinkISO…' : 'Reading the current form definition…'));
+      ? window.fiTranslate('Asking your configured AI provider…')
+      : (isDocumentRequest ? window.fiTranslate('Reading the current document from FlinkISO…') : window.fiTranslate('Reading the current form definition…')));
     var $text = $item.find('p');
-    var $live = $('<pre/>', {'class': 'fi-ai-live-output', 'aria-label': 'Live AI output'}).hide();
+    var $live = $('<pre/>', {'class': 'fi-ai-live-output', 'aria-label': window.fiTranslate('Live AI output')}).hide();
     $item.find('.fi-ai-message-content').append($live);
 
     function update() {
@@ -528,20 +528,20 @@
       var message;
       if (isGeneralAssistance) {
         if (elapsedSeconds < 15) {
-          message = 'Processing your question…';
+          message = window.fiTranslate('Processing your question…');
         } else if (elapsedSeconds < 45) {
-          message = 'Waiting for the AI response…';
+          message = window.fiTranslate('Waiting for the AI response…');
         } else {
-          message = 'The AI is preparing a response…';
+          message = window.fiTranslate('The AI is preparing a response…');
         }
       } else if (isDocumentRequest && elapsedSeconds < 5) {
-        message = 'Reading and extracting the current document…';
+        message = window.fiTranslate('Reading and extracting the current document…');
       } else if (elapsedSeconds < 15) {
-        message = isDocumentRequest ? 'Sending document content to FlinkISO AI…' : 'Sending the field request to FlinkISO AI…';
+        message = isDocumentRequest ? window.fiTranslate('Sending document content to FlinkISO AI…') : window.fiTranslate('Sending the field request to FlinkISO AI…');
       } else if (elapsedSeconds < 45) {
-        message = isDocumentRequest ? 'FlinkISO AI is analyzing the document structure…' : 'FlinkISO AI is interpreting the requested field change…';
+        message = isDocumentRequest ? window.fiTranslate('FlinkISO AI is analyzing the document structure…') : window.fiTranslate('FlinkISO AI is interpreting the requested field change…');
       } else {
-        message = isDocumentRequest ? 'FlinkISO AI is generating the form fields…' : 'FlinkISO AI is preparing the field operation…';
+        message = isDocumentRequest ? window.fiTranslate('FlinkISO AI is generating the form fields…') : window.fiTranslate('FlinkISO AI is preparing the field operation…');
       }
       $text.text(message + ' (' + elapsedText + ')');
     }
@@ -551,7 +551,7 @@
     return {
       complete: function (message) {
         window.clearInterval(timer);
-        $text.text(message || 'AI analysis complete. Validating the result…');
+        $text.text(message || window.fiTranslate('AI analysis complete. Validating the result…'));
       },
       fail: function (message) {
         window.clearInterval(timer);
@@ -571,8 +571,8 @@
             ? chunk.error.source
             : '';
           var errorLabel = errorSource === 'ai_provider' || errorSource === 'ai_transport'
-            ? 'AI error'
-            : 'API error';
+            ? window.fiTranslate('AI error')
+            : window.fiTranslate('API error');
           $live.text($live.text() + '\n[' + errorLabel + '] ' + serviceError);
         }
         if (chunk.done) {
@@ -585,7 +585,7 @@
             eval_count: chunk.eval_count,
             eval_duration: chunk.eval_duration
           };
-          $live.text($live.text() + '\n\n[AI metrics]\n' + JSON.stringify(metrics, null, 2));
+          $live.text($live.text() + window.fiTranslate('\n\n[AI metrics]\n') + JSON.stringify(metrics, null, 2));
         }
         $live.scrollTop($live[0].scrollHeight);
         $('#fi-ai-messages').scrollTop($('#fi-ai-messages')[0].scrollHeight);
@@ -594,7 +594,7 @@
   }
 
   function renderPreview(response) {
-    var $item = appendMessage('assistant', response.message || 'A FlinkISO field change was prepared.', response.images);
+    var $item = appendMessage('assistant', response.message || window.fiTranslate('A FlinkISO field change was prepared.'), response.images);
     var $content = $item.find('.fi-ai-message-content');
     var proposedFields = $.isArray(response.proposed_fields) ? response.proposed_fields : [];
     var fields = proposedFields.length
@@ -610,21 +610,21 @@
         $content.append($('<a/>', {
           'class': 'fi-ai-form-link fi-ai-artifact-link',
           href: response.artifact_download_url
-        }).append('<i class="fa fa-download" aria-hidden="true"></i> Download ' + String(response.artifact_format || 'file').toUpperCase()));
+        }).append(window.fiTranslate('<i class="fa fa-download" aria-hidden="true"></i> Download ') + String(response.artifact_format || 'file').toUpperCase()));
       }
     }
 
     if (response.subscription_required) {
       var $subscription = $('<div/>', {'class': 'fi-ai-subscription-notice'});
-      $subscription.append($('<strong/>').text('API subscription required'));
-      $subscription.append($('<p/>').text('You can continue using AI for questions, analysis, and read-only recommendations. Automatic form creation and updates require an active FlinkISO API subscription.'));
+      $subscription.append($('<strong/>').text(window.fiTranslate('API subscription required')));
+      $subscription.append($('<p/>').text(window.fiTranslate('You can continue using AI for questions, analysis, and read-only recommendations. Automatic form creation and updates require an active FlinkISO API subscription.')));
       if (response.payment_url) {
         $subscription.append($('<a/>', {
           'class': 'fi-ai-form-link fi-ai-subscription-link',
           href: response.payment_url,
           target: '_blank',
           rel: 'noopener noreferrer'
-        }).text('View API plans'));
+        }).text(window.fiTranslate('View API plans')));
       }
       $content.append($subscription);
     }
@@ -635,25 +635,25 @@
 
     if (fields.length) {
       var fieldWord = fields.length === 1 ? 'field' : 'fields';
-      $content.append($('<div/>', {'class': 'fi-ai-result-meta'}).text(fields.length + ' ' + fieldWord + ' prepared for FlinkISO.'));
+      $content.append($('<div/>', {'class': 'fi-ai-result-meta'}).text(fields.length + ' ' + fieldWord + window.fiTranslate(' prepared for FlinkISO.')));
     }
 
     if (childTables.length) {
       var $children = $('<div/>', {'class': 'fi-ai-child-table-preview'});
-      $children.append($('<strong/>').text(childTables.length === 1 ? 'Detected child table' : 'Detected child tables'));
+      $children.append($('<strong/>').text(childTables.length === 1 ? window.fiTranslate('Detected child table') : window.fiTranslate('Detected child tables')));
       var $childList = $('<ul/>');
       $.each(childTables, function (_, table) {
         var count = table && $.isArray(table.fields) ? table.fields.length : 0;
-        $childList.append($('<li/>').text((table.name || 'Child table') + ' · ' + count + (count === 1 ? ' field' : ' fields')));
+        $childList.append($('<li/>').text((table.name || window.fiTranslate('Child table')) + ' · ' + count + (count === 1 ? ' field' : ' fields')));
       });
       $children.append($childList);
       if (response.requires_child_confirmation && response.apply_url && response.apply_token) {
         var submitConfirmedBuild = function (parentOnly, $button) {
           $children.find('button').prop('disabled', true);
-          $button.text('Creating…');
+          $button.text(window.fiTranslate('Creating…'));
           var $status = appendMessage('system', parentOnly
-            ? 'Creating the parent form without the detected child tables…'
-            : 'Creating the parent form and confirmed child tables…');
+            ? window.fiTranslate('Creating the parent form without the detected child tables…')
+            : window.fiTranslate('Creating the parent form and confirmed child tables…'));
           $.ajax({
             url: response.apply_url,
             type: 'POST',
@@ -661,22 +661,22 @@
             timeout: 930000,
             data: {token: response.apply_token, confirm_child_tables: parentOnly ? 0 : 1, parent_only: parentOnly ? 1 : 0}
           }).done(function (result) {
-            $status.find('p').text(result && result.message ? result.message : 'Form structure created successfully.');
+            $status.find('p').text(result && result.message ? result.message : window.fiTranslate('Form structure created successfully.'));
             if (result && result.form_url) {
-              $status.find('.fi-ai-message-content').append($('<a/>', {'class': 'fi-ai-form-link', href: result.form_url}).text('Open generated form'));
+              $status.find('.fi-ai-message-content').append($('<a/>', {'class': 'fi-ai-form-link', href: result.form_url}).text(window.fiTranslate('Open generated form')));
             }
             if (result && result.design_url) {
-              $status.find('.fi-ai-message-content').append($('<a/>', {'class': 'fi-ai-form-link fi-ai-design-link', href: result.design_url}).text('Go to Form Builder'));
+              $status.find('.fi-ai-message-content').append($('<a/>', {'class': 'fi-ai-form-link fi-ai-design-link', href: result.design_url}).text(window.fiTranslate('Go to Form Builder')));
             }
           }).fail(function (xhr) {
             $status.find('p').text(responseError(xhr));
             $children.find('button').prop('disabled', false);
-            $button.text(parentOnly ? 'Create parent only' : 'Create parent and child tables');
+            $button.text(parentOnly ? window.fiTranslate('Create parent only') : window.fiTranslate('Create parent and child tables'));
           });
         };
         var $actions = $('<div/>', {'class': 'fi-ai-child-table-actions'});
-        var $confirm = $('<button/>', {type: 'button', 'class': 'fi-ai-clarification-choice is-primary', text: 'Create parent and child tables'});
-        var $parentOnly = $('<button/>', {type: 'button', 'class': 'fi-ai-clarification-choice', text: 'Create parent only'});
+        var $confirm = $('<button/>', {type: 'button', 'class': 'fi-ai-clarification-choice is-primary', text: window.fiTranslate('Create parent and child tables')});
+        var $parentOnly = $('<button/>', {type: 'button', 'class': 'fi-ai-clarification-choice', text: window.fiTranslate('Create parent only')});
         $confirm.on('click', function () { submitConfirmedBuild(false, $confirm); });
         $parentOnly.on('click', function () { submitConfirmedBuild(true, $parentOnly); });
         $actions.append($confirm).append($parentOnly);
@@ -686,19 +686,19 @@
     }
 
     if (response.insert_after) {
-      $content.append($('<div/>', {'class': 'fi-ai-result-meta'}).text('Insert after: ' + response.insert_after));
+      $content.append($('<div/>', {'class': 'fi-ai-result-meta'}).text(window.fiTranslate('Insert after: ') + response.insert_after));
     }
 
     if (response.target_field && $.isArray(response.options_to_add) && response.options_to_add.length) {
-      $content.append($('<div/>', {'class': 'fi-ai-result-meta'}).text('Add to ' + response.target_field + ': ' + response.options_to_add.join(', ')));
+      $content.append($('<div/>', {'class': 'fi-ai-result-meta'}).text(window.fiTranslate('Add to ') + response.target_field + ': ' + response.options_to_add.join(', ')));
     }
 
     if (response.target_field && response.new_field_label) {
-      $content.append($('<div/>', {'class': 'fi-ai-result-meta'}).text('Rename label for ' + response.target_field + ': ' + response.new_field_label));
+      $content.append($('<div/>', {'class': 'fi-ai-result-meta'}).text(window.fiTranslate('Rename label for ') + response.target_field + ': ' + response.new_field_label));
     }
 
     if ($.isArray(response.fields_to_remove) && response.fields_to_remove.length) {
-      $content.append($('<div/>', {'class': 'fi-ai-result-meta'}).text('Remove field: ' + response.fields_to_remove.join(', ')));
+      $content.append($('<div/>', {'class': 'fi-ai-result-meta'}).text(window.fiTranslate('Remove field: ') + response.fields_to_remove.join(', ')));
     }
 
     if (response.clarification_question) {
@@ -706,7 +706,7 @@
     }
 
     if (warnings.length) {
-      var $warnings = $('<div/>', {'class': 'fi-ai-warnings'}).append($('<strong/>').text('Review notes'));
+      var $warnings = $('<div/>', {'class': 'fi-ai-warnings'}).append($('<strong/>').text(window.fiTranslate('Review notes')));
       var $list = $('<ul/>');
       $.each(warnings, function (_, warning) { $list.append($('<li/>').text(warning)); });
       $warnings.append($list);
@@ -716,9 +716,9 @@
     var seconds = response.duration_ms ? (response.duration_ms / 1000).toFixed(1) + 's' : '';
     var status;
     if (response.general_assistance) {
-      status = response.assistant_mode === 'chat' ? 'Chat response' : 'FlinkISO response';
+      status = response.assistant_mode === 'chat' ? window.fiTranslate('Chat response') : window.fiTranslate('FlinkISO response');
     } else {
-      status = response.read_only ? 'Read-only preview' : 'Preview';
+      status = response.read_only ? window.fiTranslate('Read-only preview') : 'Preview';
     }
     $content.append($('<div/>', {'class': 'fi-ai-result-meta'}).text(status + (seconds ? ' · ' + seconds : '')));
     $('#fi-ai-messages').scrollTop($('#fi-ai-messages')[0].scrollHeight);
@@ -759,7 +759,7 @@
         $control.data('fi-ai-was-disabled', $control.prop('disabled') ? 1 : 0);
         $control.data('fi-ai-old-title', $control.attr('title') || '');
         $control.prop('disabled', true)
-          .attr('title', 'Close FlinkISO AI before submitting this form.')
+          .attr('title', window.fiTranslate('Close FlinkISO AI before submitting this form.'))
           .addClass('fi-ai-submit-locked');
       });
     } else {
@@ -800,8 +800,8 @@
       .append($('<div/>', {'class': 'fi-ai-message-icon', 'aria-hidden': 'true'}).append('<i class="fa fa-magic"></i>'));
     var $card = $('<div/>', {'class': 'fi-ai-message-content'})
       .append($('<strong/>').text(label))
-      .append($('<p/>').text('What would you like to modify?'));
-    var metaText = 'Type: ' + (field.data_type || 'unknown') + (field.linked_to && field.linked_to !== '-1' ? ' · Linked to: ' + field.linked_to : '') + (field.tab_name ? ' · Tab: ' + field.tab_name : '');
+      .append($('<p/>').text(window.fiTranslate('What would you like to modify?')));
+    var metaText = 'Type: ' + (field.data_type || 'unknown') + (field.linked_to && field.linked_to !== '-1' ? window.fiTranslate(' · Linked to: ') + field.linked_to : '') + (field.tab_name ? ' · Tab: ' + field.tab_name : '');
     if (field.data_type === 'checkbox') {
       metaText += ' · Layout: ' + (field.checkbox_layout || 'vertical');
       if ($.isArray(field.options) && field.options.length) metaText += ' · Items: ' + field.options.join(', ');
@@ -809,91 +809,91 @@
     var $meta = $('<div/>', {'class': 'fi-ai-field-current'}).text(metaText);
     var $actions = $('<div/>', {'class': 'fi-ai-field-action-grid'});
 
-    $actions.append(actionButton(field.mandatory ? 'Make optional' : 'Make mandatory', function () {
+    $actions.append(actionButton(field.mandatory ? window.fiTranslate('Make optional') : window.fiTranslate('Make mandatory'), function () {
       submitGuidedAction((field.mandatory ? 'Make ' + fieldName + ' optional.' : 'Make ' + fieldName + ' mandatory.'), 'mandatory', fieldName, field.mandatory ? '0' : '1');
     }));
-    var $defaultAction = actionButton('Make default', function () {
-      submitGuidedAction('Make ' + fieldName + ' the default field.', 'default', fieldName, '1');
+    var $defaultAction = actionButton(window.fiTranslate('Make default'), function () {
+      submitGuidedAction('Make ' + fieldName + window.fiTranslate(' the default field.'), 'default', fieldName, '1');
     });
     if (field.default_field === true || field.default_field === 1 || field.default_field === '1') {
-      $defaultAction.prop('disabled', true).attr('title', 'This is the current default field');
+      $defaultAction.prop('disabled', true).attr('title', window.fiTranslate('This is the current default field'));
     }
     $actions.append($defaultAction);
-    $actions.append(actionButton(field.index_show ? 'Hide from list' : 'Show on list', function () {
-      submitGuidedAction((field.index_show ? 'Hide ' + fieldName + ' from the index page.' : 'Show ' + fieldName + ' on the index page.'), 'index', fieldName, field.index_show ? '0' : '1');
+    $actions.append(actionButton(field.index_show ? window.fiTranslate('Hide from list') : window.fiTranslate('Show on list'), function () {
+      submitGuidedAction((field.index_show ? 'Hide ' + fieldName + window.fiTranslate(' from the index page.') : 'Show ' + fieldName + window.fiTranslate(' on the index page.')), 'index', fieldName, field.index_show ? '0' : '1');
     }));
 
     if (field.data_type === 'checkbox') {
-      $actions.append(actionButton('Add checkbox items', function () {
-        fieldActionInput($card, 'New items separated by commas', 'Add items', function (items) {
-          submitGuidedAction('Add ' + items + ' to the ' + fieldName + ' checkbox items.', 'add_option', fieldName, '', items);
+      $actions.append(actionButton(window.fiTranslate('Add checkbox items'), function () {
+        fieldActionInput($card, window.fiTranslate('New items separated by commas'), window.fiTranslate('Add items'), function (items) {
+          submitGuidedAction('Add ' + items + window.fiTranslate(' to the ') + fieldName + window.fiTranslate(' checkbox items.'), 'add_option', fieldName, '', items);
         });
       }));
       if ($.isArray(field.options) && field.options.length) {
-        $actions.append(actionButton('Remove checkbox item', function () {
+        $actions.append(actionButton(window.fiTranslate('Remove checkbox item'), function () {
           var $editor = $card.find('.fi-ai-field-action-editor').empty();
           var $select = $('<select/>', {'class': 'fi-ai-field-action-select'});
           $.each(field.options, function (_, option) { $select.append($('<option/>', {value: option, text: option})); });
-          $editor.append($select).append(actionButton('Remove item', function () {
+          $editor.append($select).append(actionButton(window.fiTranslate('Remove item'), function () {
             var item = $select.val();
-            submitGuidedAction('Remove ' + item + ' from the ' + fieldName + ' checkbox items.', 'remove_option', fieldName, '', item);
+            submitGuidedAction('Remove ' + item + window.fiTranslate(' from the ') + fieldName + window.fiTranslate(' checkbox items.'), 'remove_option', fieldName, '', item);
           }, true));
         }));
       }
       $.each(['inline', 'vertical'], function (_, layout) {
-        var $layoutButton = actionButton(layout === 'inline' ? 'Inline layout' : 'Vertical layout', function () {
+        var $layoutButton = actionButton(layout === 'inline' ? window.fiTranslate('Inline layout') : window.fiTranslate('Vertical layout'), function () {
           submitGuidedAction('Make ' + fieldName + ' checkboxes ' + layout + '.', 'checkbox_layout', fieldName, layout);
         });
-        if ((field.checkbox_layout || 'vertical') === layout) $layoutButton.prop('disabled', true).attr('title', 'Current layout');
+        if ((field.checkbox_layout || 'vertical') === layout) $layoutButton.prop('disabled', true).attr('title', window.fiTranslate('Current layout'));
         $actions.append($layoutButton);
       });
     }
 
     $.each([
-      {label: 'Text', value: 'text'}, {label: 'Long text', value: 'textarea'}, {label: 'Date', value: 'date'}
+      {label: window.fiTranslate('Text'), value: 'text'}, {label: window.fiTranslate('Long text'), value: 'textarea'}, {label: window.fiTranslate('Date'), value: 'date'}
     ], function (_, type) {
-      $actions.append(actionButton('Change to ' + type.label, function () {
+      $actions.append(actionButton(window.fiTranslate('Change to ') + type.label, function () {
         submitGuidedAction('Change ' + fieldName + ' to ' + type.label + '.', 'type', fieldName, type.value);
       }));
     });
-    $.each([{label: 'Radio', value: 'radio'}, {label: 'Checkbox', value: 'checkbox'}], function (_, type) {
-      $actions.append(actionButton('Change to ' + type.label, function () {
-        fieldActionInput($card, 'Choices separated by commas', 'Apply ' + type.label, function (choices) {
-          submitGuidedAction('Change ' + fieldName + ' to ' + type.label + ' with choices ' + choices + '.', 'type', fieldName, type.value, choices);
+    $.each([{label: window.fiTranslate('Radio'), value: 'radio'}, {label: window.fiTranslate('Checkbox'), value: 'checkbox'}], function (_, type) {
+      $actions.append(actionButton(window.fiTranslate('Change to ') + type.label, function () {
+        fieldActionInput($card, window.fiTranslate('Choices separated by commas'), 'Apply ' + type.label, function (choices) {
+          submitGuidedAction('Change ' + fieldName + ' to ' + type.label + window.fiTranslate(' with choices ') + choices + '.', 'type', fieldName, type.value, choices);
         });
       }));
     });
 
     $.each(['Employee', 'Branch', 'Department', 'Designation', 'QcDocument'], function (_, model) {
-      var modelLabel = model === 'QcDocument' ? 'Quality Document' : model;
-      $actions.append(actionButton('Link to ' + modelLabel, function () {
+      var modelLabel = model === 'QcDocument' ? window.fiTranslate('Quality Document') : model;
+      $actions.append(actionButton(window.fiTranslate('Link to ') + modelLabel, function () {
         submitGuidedAction('Link ' + fieldName + ' to ' + model + ' model.', 'link', fieldName, model);
       }));
     });
-    $actions.append(actionButton('Link to another…', function () {
-      fieldActionInput($card, 'Exact FlinkISO model or form name', 'Link field', function (model) {
+    $actions.append(actionButton(window.fiTranslate('Link to another…'), function () {
+      fieldActionInput($card, window.fiTranslate('Exact FlinkISO model or form name'), window.fiTranslate('Link field'), function (model) {
         submitGuidedAction('Link ' + fieldName + ' to ' + model + ' model.', 'link', fieldName, model);
       });
     }));
     $actions.append(actionButton('Rename', function () {
-      fieldActionInput($card, 'New field label', 'Rename', function (newLabel) {
+      fieldActionInput($card, window.fiTranslate('New field label'), 'Rename', function (newLabel) {
         submitGuidedAction('Rename ' + fieldName + ' to ' + newLabel + '.', 'rename', fieldName, newLabel);
       });
     }));
-    $actions.append(actionButton(field.tab_name ? 'Move to tab' : 'Add to tab', function () {
+    $actions.append(actionButton(field.tab_name ? window.fiTranslate('Move to tab') : window.fiTranslate('Add to tab'), function () {
       var $editor = $card.find('.fi-ai-field-action-editor').empty();
       var $select = $('<select/>', {'class': 'fi-ai-field-action-select'});
       $.each(tabContext, function (_, tab) {
         if (tab && tab.name && tab.name !== field.tab_name) $select.append($('<option/>', {value: tab.name, text: tab.name}));
       });
-      $select.append($('<option/>', {value: '__new__', text: 'Create a new tab…'}));
-      var $newTab = $('<input/>', {type: 'text', 'class': 'fi-ai-clarification-input fi-ai-new-tab-name', placeholder: 'New tab name'}).hide();
+      $select.append($('<option/>', {value: '__new__', text: window.fiTranslate('Create a new tab…')}));
+      var $newTab = $('<input/>', {type: 'text', 'class': 'fi-ai-clarification-input fi-ai-new-tab-name', placeholder: window.fiTranslate('New tab name')}).hide();
       function toggleNewTab() { $newTab.toggle($select.val() === '__new__'); }
       $select.on('change', toggleNewTab);
-      var $apply = actionButton('Apply tab', function () {
+      var $apply = actionButton(window.fiTranslate('Apply tab'), function () {
         var tabName = $select.val() === '__new__' ? $.trim($newTab.val()) : $select.val();
         if (!tabName) { $newTab.show().focus(); return; }
-        submitGuidedAction('Add ' + fieldName + ' to the ' + tabName + ' tab.', 'tab', fieldName, tabName);
+        submitGuidedAction('Add ' + fieldName + window.fiTranslate(' to the ') + tabName + ' tab.', 'tab', fieldName, tabName);
       });
       $newTab.on('keydown', function (event) { if (event.which === 13) { event.preventDefault(); $apply.trigger('click'); } });
       $editor.append($select).append($newTab).append($apply);
@@ -901,28 +901,28 @@
     }));
     $actions.append(actionButton('Move', function () {
       var $editor = $card.find('.fi-ai-field-action-editor').empty();
-      var $select = $('<select/>', {'class': 'fi-ai-field-action-select'}).append($('<option/>', {value: '', text: 'Beginning of form'}));
+      var $select = $('<select/>', {'class': 'fi-ai-field-action-select'}).append($('<option/>', {value: '', text: window.fiTranslate('Beginning of form')}));
       $.each(fieldContext, function (name, candidate) {
-        if (name !== fieldName) $select.append($('<option/>', {value: name, text: 'After ' + (candidate.field_label || name)}));
+        if (name !== fieldName) $select.append($('<option/>', {value: name, text: window.fiTranslate('After ') + (candidate.field_label || name)}));
       });
-      $editor.append($select).append(actionButton('Move field', function () {
+      $editor.append($select).append(actionButton(window.fiTranslate('Move field'), function () {
         var after = $select.val();
-        submitGuidedAction('Move ' + fieldName + (after ? ' after ' + after : ' to the beginning') + '.', 'reorder', fieldName, after);
+        submitGuidedAction('Move ' + fieldName + (after ? ' after ' + after : window.fiTranslate(' to the beginning')) + '.', 'reorder', fieldName, after);
       }));
     }));
-    $actions.append(actionButton('Delete field', function () {
+    $actions.append(actionButton(window.fiTranslate('Delete field'), function () {
       var $button = $(this);
       if ($button.attr('data-confirmed') === '1') {
-        submitGuidedAction('Delete the field ' + fieldName + '.', 'delete', fieldName, '');
+        submitGuidedAction(window.fiTranslate('Delete the field ') + fieldName + '.', 'delete', fieldName, '');
       } else {
-        $button.attr('data-confirmed', '1').text('Confirm delete');
+        $button.attr('data-confirmed', '1').text(window.fiTranslate('Confirm delete'));
       }
     }, true));
     if ($panel.attr('data-form-builder-url')) {
       $actions.append($('<a/>', {
         'class': 'fi-ai-field-action fi-ai-form-builder-action',
         href: $panel.attr('data-form-builder-url')
-      }).append('<i class="fa fa-wrench" aria-hidden="true"></i> Go to Form Builder'));
+      }).append(window.fiTranslate('<i class="fa fa-wrench" aria-hidden="true"></i> Go to Form Builder')));
     }
 
     $card.append($meta).append($actions).append($('<div/>', {'class': 'fi-ai-field-action-editor'}));
@@ -934,7 +934,7 @@
     var typeLabels = {};
     $.each(question.field_types || [], function (_, item) { if (item && item.value) typeLabels[item.value] = item.label || item.value; });
     var state = {
-      label: question.label || 'New field',
+      label: question.label || window.fiTranslate('New field'),
       insertAfter: question.insert_after || '',
       type: '', linkedTo: '', options: [], checkboxLayout: 'vertical',
       mandatory: false, width: 6, indexShow: false
@@ -969,23 +969,23 @@
     function back() { if (stepIndex > 0) { stepIndex--; render(); } }
 
     function finalPrompt() {
-      var prompt = 'Add a ' + state.type + ' field called ' + JSON.stringify(state.label);
-      if (state.linkedTo) prompt += ' linked to ' + state.linkedTo;
-      if (state.options.length) prompt += ' with choices ' + state.options.join(', ');
+      var prompt = 'Add a ' + state.type + window.fiTranslate(' field called ') + JSON.stringify(state.label);
+      if (state.linkedTo) prompt += window.fiTranslate(' linked to ') + state.linkedTo;
+      if (state.options.length) prompt += window.fiTranslate(' with choices ') + state.options.join(', ');
       if (state.type === 'checkbox') prompt += ' using a ' + state.checkboxLayout + ' layout';
       if (hasStandardSettings()) {
         prompt += state.mandatory ? ', mandatory' : ', optional';
         prompt += ', width ' + state.width + ' of 12';
-        if (state.type !== 'hidden') prompt += state.indexShow ? ', and shown on the index page' : ', and hidden from the index page';
+        if (state.type !== 'hidden') prompt += state.indexShow ? window.fiTranslate(', and shown on the index page') : window.fiTranslate(', and hidden from the index page');
       }
-      prompt += state.insertAfter ? ' after ' + state.insertAfter + '.' : ' at the end of the form.';
+      prompt += state.insertAfter ? ' after ' + state.insertAfter + '.' : window.fiTranslate(' at the end of the form.');
       return prompt;
     }
 
     function renderSummary($target) {
       var parts = ['Field: ' + state.label];
       if (state.type) parts.push(typeLabels[state.type] || state.type);
-      if (state.linkedTo) parts.push('Linked to ' + state.linkedTo);
+      if (state.linkedTo) parts.push(window.fiTranslate('Linked to ') + state.linkedTo);
       if (state.options.length) parts.push(state.options.join(', '));
       if (state.type && hasStandardSettings()) parts.push(state.mandatory ? 'Mandatory' : 'Optional');
       $.each(parts, function (_, part) { $target.append($('<span/>').text(part)); });
@@ -1003,8 +1003,8 @@
       var $choices = $('<div/>', {'class': 'fi-ai-clarification-options'});
 
       if (step === 'name') {
-        $question.text('What should this field be called?');
-        var $nameInput = $('<input/>', {type: 'text', 'class': 'fi-ai-clarification-input', placeholder: 'Field name'}).val(state.label);
+        $question.text(window.fiTranslate('What should this field be called?'));
+        var $nameInput = $('<input/>', {type: 'text', 'class': 'fi-ai-clarification-input', placeholder: window.fiTranslate('Field name')}).val(state.label);
         var continueName = function () {
           var newName = $.trim($nameInput.val());
           if (!newName) { $nameInput.focus(); return; }
@@ -1014,7 +1014,7 @@
         $box.append($question).append($nameInput);
         addChoice($choices, 'Continue', continueName, true);
       } else if (step === 'type') {
-        $question.text('Select the FlinkISO field type.');
+        $question.text(window.fiTranslate('Select the FlinkISO field type.'));
         $.each(question.field_types || [], function (_, item) {
           if (!item || !item.value) return;
           addChoice($choices, item.label || item.value, function () {
@@ -1029,14 +1029,14 @@
           });
         });
       } else if (step === 'linked') {
-        $question.text('Which FlinkISO model should supply the dropdown values?');
+        $question.text(window.fiTranslate('Which FlinkISO model should supply the dropdown values?'));
         $.each(question.linked_models || [], function (_, item) {
           if (!item || !item.value) return;
           addChoice($choices, item.label || item.value, function () { state.linkedTo = item.value; next(); });
         });
       } else if (step === 'options') {
-        $question.text('Enter the available choices, separated by commas.');
-        var $input = $('<input/>', {type: 'text', 'class': 'fi-ai-clarification-input', placeholder: 'For example: Yes, No, Not Applicable'}).val(state.options.join(', '));
+        $question.text(window.fiTranslate('Enter the available choices, separated by commas.'));
+        var $input = $('<input/>', {type: 'text', 'class': 'fi-ai-clarification-input', placeholder: window.fiTranslate('For example: Yes, No, Not Applicable')}).val(state.options.join(', '));
         var continueOptions = function () {
           var values = [];
           $.each(String($input.val() || '').split(','), function (_, value) { value = $.trim(value); if (value && $.inArray(value, values) === -1) values.push(value); });
@@ -1047,38 +1047,38 @@
         $box.append($question).append($input);
         addChoice($choices, 'Continue', continueOptions, true);
       } else if (step === 'layout') {
-        $question.text('How should the checkboxes be displayed?');
+        $question.text(window.fiTranslate('How should the checkboxes be displayed?'));
         addChoice($choices, 'Vertical', function () { state.checkboxLayout = 'vertical'; next(); });
         addChoice($choices, 'Inline', function () { state.checkboxLayout = 'inline'; next(); });
       } else if (step === 'mandatory') {
-        $question.text('Is this field mandatory?');
+        $question.text(window.fiTranslate('Is this field mandatory?'));
         addChoice($choices, 'Mandatory', function () { state.mandatory = true; next(); });
         addChoice($choices, 'Optional', function () { state.mandatory = false; next(); });
       } else if (step === 'width') {
-        $question.text('How wide should the field be?');
+        $question.text(window.fiTranslate('How wide should the field be?'));
         $.each(question.widths || [4, 6, 12], function (_, width) {
           addChoice($choices, width + '/12', function () { state.width = parseInt(width, 10) || 12; next(); });
         });
       } else if (step === 'index') {
-        $question.text('Show this field on the form’s index/list page?');
-        addChoice($choices, 'Show on list', function () { state.indexShow = true; next(); });
-        addChoice($choices, 'Do not show', function () { state.indexShow = false; next(); });
+        $question.text(window.fiTranslate('Show this field on the form’s index/list page?'));
+        addChoice($choices, window.fiTranslate('Show on list'), function () { state.indexShow = true; next(); });
+        addChoice($choices, window.fiTranslate('Do not show'), function () { state.indexShow = false; next(); });
       } else {
-        $question.text('Review the selections before creating the field.');
+        $question.text(window.fiTranslate('Review the selections before creating the field.'));
         var $review = $('<dl/>', {'class': 'fi-ai-wizard-review'});
-        $review.append('<dt>Field</dt>').append($('<dd/>').text(state.label));
-        $review.append('<dt>Type</dt>').append($('<dd/>').text(typeLabels[state.type] || state.type));
-        if (state.linkedTo) $review.append('<dt>Linked to</dt>').append($('<dd/>').text(state.linkedTo));
-        if (state.options.length) $review.append('<dt>Choices</dt>').append($('<dd/>').text(state.options.join(', ')));
-        if (state.type === 'checkbox') $review.append('<dt>Layout</dt>').append($('<dd/>').text(state.checkboxLayout));
+        $review.append(window.fiTranslate('<dt>Field</dt>')).append($('<dd/>').text(state.label));
+        $review.append(window.fiTranslate('<dt>Type</dt>')).append($('<dd/>').text(typeLabels[state.type] || state.type));
+        if (state.linkedTo) $review.append(window.fiTranslate('<dt>Linked to</dt>')).append($('<dd/>').text(state.linkedTo));
+        if (state.options.length) $review.append(window.fiTranslate('<dt>Choices</dt>')).append($('<dd/>').text(state.options.join(', ')));
+        if (state.type === 'checkbox') $review.append(window.fiTranslate('<dt>Layout</dt>')).append($('<dd/>').text(state.checkboxLayout));
         if (hasStandardSettings()) {
-          $review.append('<dt>Required</dt>').append($('<dd/>').text(state.mandatory ? 'Yes' : 'No'));
-          $review.append('<dt>Width</dt>').append($('<dd/>').text(state.width + '/12'));
-          if (state.type !== 'hidden') $review.append('<dt>Show on list</dt>').append($('<dd/>').text(state.indexShow ? 'Yes' : 'No'));
+          $review.append(window.fiTranslate('<dt>Required</dt>')).append($('<dd/>').text(state.mandatory ? 'Yes' : 'No'));
+          $review.append(window.fiTranslate('<dt>Width</dt>')).append($('<dd/>').text(state.width + '/12'));
+          if (state.type !== 'hidden') $review.append(window.fiTranslate('<dt>Show on list</dt>')).append($('<dd/>').text(state.indexShow ? 'Yes' : 'No'));
         }
-        $review.append('<dt>Position</dt>').append($('<dd/>').text(state.insertAfter ? 'After ' + state.insertAfter : 'End of form'));
+        $review.append(window.fiTranslate('<dt>Position</dt>')).append($('<dd/>').text(state.insertAfter ? 'After ' + state.insertAfter : window.fiTranslate('End of form')));
         $box.append($question).append($review);
-        addChoice($choices, 'Create field', function () {
+        addChoice($choices, window.fiTranslate('Create field'), function () {
           $choices.find('button').prop('disabled', true);
           guidedAction = {
             action: 'add_field',
@@ -1133,9 +1133,9 @@
       var $answer = $('<input/>', {
         type: 'text',
         'class': 'fi-ai-clarification-input',
-        placeholder: question.placeholder || 'Type your answer'
+        placeholder: question.placeholder || window.fiTranslate('Type your answer')
       });
-      var $continue = $('<button/>', {type: 'button', 'class': 'fi-ai-clarification-continue'}).text('Continue');
+      var $continue = $('<button/>', {type: 'button', 'class': 'fi-ai-clarification-continue'}).text(window.fiTranslate('Continue'));
       function continueWithAnswer() {
         var answer = $.trim($answer.val());
         if (!answer) { $answer.focus(); return; }
@@ -1158,7 +1158,7 @@
       return $.Deferred().resolve().promise();
     }
 
-    var $status = appendMessage('system', 'Calling the FlinkISO API and rebuilding the form…');
+    var $status = appendMessage('system', window.fiTranslate('Calling the FlinkISO API and rebuilding the form…'));
     return $.ajax({
       url: response.apply_url,
       type: 'POST',
@@ -1166,15 +1166,15 @@
       timeout: 930000,
       data: {token: response.apply_token}
     }).done(function (result) {
-      $status.find('p').text(result && result.message ? result.message : 'Form rebuilt successfully. Reload this page to use the updated form.');
+      $status.find('p').text(result && result.message ? result.message : window.fiTranslate('Form rebuilt successfully. Reload this page to use the updated form.'));
       if (result && result.form_url) {
         $status.find('.fi-ai-message-content').append(
-          $('<a/>', {'class': 'fi-ai-form-link', href: result.form_url}).text('Open generated form')
+          $('<a/>', {'class': 'fi-ai-form-link', href: result.form_url}).text(window.fiTranslate('Open generated form'))
         );
       }
       if (result && result.design_url) {
         $status.find('.fi-ai-message-content').append(
-          $('<a/>', {'class': 'fi-ai-form-link fi-ai-design-link', href: result.design_url}).text('Go to Form Builder')
+          $('<a/>', {'class': 'fi-ai-form-link fi-ai-design-link', href: result.design_url}).text(window.fiTranslate('Go to Form Builder'))
         );
       }
     }).fail(function (xhr) {
@@ -1192,10 +1192,10 @@
       var $retry = $('<button/>', {
         type: 'button',
         'class': 'btn btn-default btn-xs fi-ai-retry-build',
-        text: 'Retry form creation'
+        text: window.fiTranslate('Retry form creation')
       });
       $retry.one('click', function () {
-        $(this).prop('disabled', true).text('Retrying…');
+        $(this).prop('disabled', true).text(window.fiTranslate('Retrying…'));
         rebuildForm(response);
       });
       $status.find('.fi-ai-message-content').append($retry);
@@ -1210,10 +1210,10 @@
         if (parsed.message) { return parsed.message; }
       } catch (ignore) {}
     }
-    if (xhr && xhr.status === 0) { return 'The request could not reach FlinkISO. Check the application and local AI service.'; }
+    if (xhr && xhr.status === 0) { return window.fiTranslate('The request could not reach FlinkISO. Check the application and local AI service.'); }
     return isFormsMode()
-      ? 'FlinkISO AI could not generate a form preview. Please try again.'
-      : 'The configured AI provider could not complete this chat request. Please try again.';
+      ? window.fiTranslate('FlinkISO AI could not generate a form preview. Please try again.')
+      : window.fiTranslate('The configured AI provider could not complete this chat request. Please try again.');
   }
 
   $(function () {
@@ -1279,7 +1279,7 @@
     $('#fi-ai-expand').on('click', function () {
       var isWide = $panel.toggleClass('is-wide').hasClass('is-wide');
       $('body').toggleClass('fi-ai-panel-wide', isWide);
-      $(this).attr('title', isWide ? 'Restore panel' : 'Expand panel');
+      $(this).attr('title', isWide ? window.fiTranslate('Restore panel') : window.fiTranslate('Expand panel'));
       $(this).find('.fa').toggleClass('fa-expand', !isWide).toggleClass('fa-compress', isWide);
       window.setTimeout(function () { $(window).trigger('resize'); }, 260);
     });
@@ -1408,17 +1408,17 @@
         activeAiId = '';
         $cancel.removeClass('is-visible').attr('aria-hidden', 'true');
         if (!response || response.success !== true) {
-          activity.fail(response && response.message ? response.message : 'The AI response was not valid.');
+          activity.fail(response && response.message ? response.message : window.fiTranslate('The AI response was not valid.'));
           setLoading(false);
           refreshInstanceStatus();
           $prompt.focus();
           return;
         }
         activity.complete(response.general_assistance
-          ? 'AI response complete.'
+          ? window.fiTranslate('AI response complete.')
           : (response.handled_locally
-          ? 'The selected field action was validated by FlinkISO.'
-          : 'AI analysis complete. The result was validated by FlinkISO.'));
+          ? window.fiTranslate('The selected field action was validated by FlinkISO.')
+          : window.fiTranslate('AI analysis complete. The result was validated by FlinkISO.')));
         renderPreview(response);
         rebuildForm(response).always(function () {
           setLoading(false);
@@ -1432,7 +1432,7 @@
         activeAiRequest = null;
         activeAiId = '';
         if (textStatus === 'abort') {
-          activity.fail('AI generation cancelled.');
+          activity.fail(window.fiTranslate('AI generation cancelled.'));
           $prompt.val(message);
           setLoading(false);
           $prompt.focus();

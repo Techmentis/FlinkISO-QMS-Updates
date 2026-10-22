@@ -3,7 +3,7 @@
 	<?php echo $this->Session->flash();?>	
 
 	<div class="clauses ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Clauses','modelClass'=>'Clause','options'=>array(),'pluralVar'=>'clauses'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Clauses'),'modelClass'=>'Clause','options'=>array(),'pluralVar'=>'clauses'))); ?>
 
 		<div class="nav panel panel-default panel-body">
 			<div class="clauses">
@@ -59,7 +59,7 @@
 			$().ready(function() {
 				jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 					return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';
-				}, "Please select the value");
+				}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 				$('#ClauseAddForm').validate({        	
 					rules: {

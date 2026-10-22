@@ -1,7 +1,7 @@
 <?php echo $this->element('checkbox-script'); ?><div  id="main">
 <?php echo $this->Session->flash();?>	
 <div class="approvalProcesses ">
-	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Approval Processes','modelClass'=>'ApprovalProcess','options'=>array("sr_no"=>"Sr No","title"=>"Title","process_description"=>"Process Description"),'pluralVar'=>'approvalProcesses'))); ?>
+	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Approval Processes'),'modelClass'=>'ApprovalProcess','options'=>array("sr_no"=>__("Sr No"),"title"=>__("Title"),"process_description"=>__("Process Description")),'pluralVar'=>'approvalProcesses'))); ?>
 
 	<script type="text/javascript">
 		$(document).ready(function(){
@@ -12,14 +12,14 @@
 		});
 	});
 	</script>	
-	<p class="text-right"><?php echo $this->Html->link('View All Approvals',array('controller'=>'approvals','action'=>'index','timestamp'=>date('Ymdhis')));?></p>
+	<p class="text-right"><?php echo $this->Html->link(__('View All Approvals'),array('controller'=>'approvals','action'=>'index','timestamp'=>date('Ymdhis')));?></p>
 	<div class="table-responsive">
 		<?php echo $this->Form->create(array('class'=>'no-padding no-margin no-background'));?>				
 			<table cellpadding="0" cellspacing="0" class="table table-bordered table table-striped table-hover">
 				<tr>					
 					<th><?php echo $this->Paginator->sort('title'); ?></th>
 					<th><?php echo $this->Paginator->sort('process_description'); ?></th>					
-					<th>Actions</th>
+					<th><?php echo h(__('Actions')); ?></th>
 				</tr>
 				<?php if($approvalProcesses){ ?>
 			<?php foreach ($approvalProcesses as $approvalProcess): ?>
@@ -30,7 +30,7 @@
 				</tr>
 			<?php endforeach; ?>
 		<?php }else{ ?>
-			<tr><td colspan=51>No results found</td></tr>
+			<tr><td colspan=51><?php echo h(__('No results found')); ?></td></tr>
 		<?php } ?>
 			</table>
 		<?php echo $this->Form->end();?>			

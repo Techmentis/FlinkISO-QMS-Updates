@@ -21,7 +21,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>Invoice</title>
+        <title><?php echo h(__('Invoice')); ?></title>
         <style>body{ 
             font-size:18px; color:#262626; font:"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif} 
             th, td.head-strong{font-weight: bold;}</style>

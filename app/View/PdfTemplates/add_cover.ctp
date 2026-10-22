@@ -20,7 +20,7 @@ echo $this->fetch('script');
 
 ?>
 
-<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'PDF Templates','modelClass'=>'PdfTemplate','options'=>array("sr_no"=>"Sr No","name"=>"Name"),'pluralVar'=>'pdfDepartments'))); ?>
+<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('PDF Templates'),'modelClass'=>'PdfTemplate','options'=>array("sr_no"=>__("Sr No"),"name"=>__("Name")),'pluralVar'=>'pdfDepartments'))); ?>
 <style type="text/css">
     .txtfld{width: 96%; border: none; margin: 5px 0}
     .childtables ul { list-style-type: none; margin: 0; padding: 0; margin-bottom: 10px; }
@@ -41,7 +41,7 @@ echo $this->fetch('script');
                 echo $this->element('onlyoffice',array(
                     'url'=>$url,
                     'placeholderid'=>'covertemp',
-                    'panel_title'=>'Template Viewer',
+                    'panel_title'=>__('Template Viewer'),
                     'mode'=>'edit',
                     'path'=>$file_path,
                     'file'=>$file,
@@ -64,10 +64,10 @@ echo $this->fetch('script');
                 ));
 
                 ?>  
-                <p><strong>View Only. You can edit this template from edit section, after saving the template.</strong></p>
-                <p>Do not add header and footer to the document. Header & Footer is generated seperatly and added in runtime</p>
+                <p><strong><?php echo h(__('View Only. You can edit this template from edit section, after saving the template.')); ?></strong></p>
+                <p><?php echo h(__('Do not add header and footer to the document. Header')); ?> & <?php echo h(__('Footer is generated seperatly and added in runtime')); ?></p>
             </div>  
-            <div class="col-md-12">Available Fields
+            <div class="col-md-12"><?php echo h(__('Available Fields')); ?>
                 <div class="row">
                     <?php if(!$customTable){ ?>
                         <div class="col-md-6">
@@ -103,7 +103,7 @@ echo $this->fetch('script');
                                     echo $this->Form->input('data.PdfTempate.IssuedBy.name',array('type'=>'text', 'id'=>'PdfTemplateIssuedByByName', 'class'=>'txtfld','div'=>false,'label'=>false, 'default'=>'$qcDocument["IssuedBy"]["name"]')) .'<i class="fa fa-copy" onclick="myFunction(\'PdfTemplateIssuedByByName\')"></i>';
                                     ?>                          
                                 </div>
-                                <div class="panel-footer"><strong>Note:</strong> You can fetch these values anywhere in a template.</div>
+                                <div class="panel-footer"><strong><?php echo h(__('Note:')); ?></strong> <?php echo h(__('You can fetch these values anywhere in a template.')); ?></div>
                             </div>
                         </div>
                     <?php } ?>
@@ -125,7 +125,7 @@ echo $this->fetch('script');
                             // echo  $this->Form->input('ApprovedBy.name',array('type'=>'text', 'class'=>'txtfld','div'=>false,'label'=>false, 'default'=>'$record["ApprovedBy"]["name"]')) .'<i class="fa fa-copy" onclick="myFunction(\'ApprovedByName\')"></i>';
                                     ?>                          
                                 </div>
-                                <div class="panel-footer"><strong>Note:</strong> You can fetch these values anywhere in a template.</div>
+                                <div class="panel-footer"><strong><?php echo h(__('Note:')); ?></strong> <?php echo h(__('You can fetch these values anywhere in a template.')); ?></div>
                             </div>
                         </div>              
 
@@ -144,7 +144,7 @@ echo $this->fetch('script');
                                             ?>                          
                                         </ul>
                                     </div>
-                                    <div class="panel-footer"><strong>Note:</strong> This is a looped table. Values of this table can not be fetched outside this table.
+                                    <div class="panel-footer"><strong><?php echo h(__('Note:')); ?></strong> This is a looped table. Values of this table can not be fetched outside this table.
                                         <?php echo $this->Form->hidden('PdfTemplate.child_table_fields.'.$c,array('type'=>'text'));?>
                                     </div>
                                 </div>
@@ -185,7 +185,7 @@ echo $this->fetch('script');
 
                 <div class="col-md-12">
                     <?php 
-                    echo $this->Form->submit('Save Template',array('class'=>'btn btn-lg btn-info pull-right'));
+                    echo $this->Form->submit(__('Save Template'),array('class'=>'btn btn-lg btn-info pull-right'));
                     echo $this->Form->end();
 
                 }

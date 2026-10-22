@@ -158,6 +158,10 @@ if ((strpos($aiController, 'tbl_') === 0 || strpos($aiController, 'chd_') === 0)
     <?php } ?>
   </div>
 
+  <?php if ($aiController === 'languages' && ($this->Session->read('User.is_mr') || $this->Session->read('User.is_super_user'))): ?>
+    <?php echo $this->element('language_ai'); ?>
+  <?php endif; ?>
+
   <div class="fi-ai-composer-wrap">
     <form id="fi-ai-form" class="fi-ai-form" novalidate>
       <textarea id="fi-ai-prompt" rows="2" maxlength="4000" placeholder="<?php echo __('Ask a question about QMS or using FlinkISO...'); ?>" aria-label="<?php echo __('Message FlinkISO AI'); ?>"></textarea>

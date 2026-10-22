@@ -72,7 +72,7 @@ if($filetype != null){
         <div id="newdoctitle<?php echo $docid;?>"></div>        
         <div class="box collapsed-box" id="ofdcontainer<?php echo $placeholderid;?>">
           <div class="box-header with-border data-header" data-widget="collapse">
-            <h3 class="box-title"><i class="fa <?php echo $icon;?>"></i>&nbsp;&nbsp;<?php echo $heading;?>&nbsp;&nbsp;<small>Your document is ready, click on + sign to load the document.</small></h3>
+            <h3 class="box-title"><i class="fa <?php echo $icon;?>"></i>&nbsp;&nbsp;<?php echo $heading;?>&nbsp;&nbsp;<small><?php echo h(__('Your document is ready, click on + sign to load the document.')); ?></small></h3>
             <div class="box-tools pull-right">
               <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus" id="ofccontainerbtn<?php echo $placeholderid;?>"></i></button>
           </div>            
@@ -130,7 +130,7 @@ if($filetype != null){
         "url" => $url,
         "fileType" => $filetype,
         "documentType" => $documentType,
-        "title" => 'Archived',
+        "title" => __('Archived'),
         ],                            
         "editorConfig"=>[
             "callbackUrl"=>$callbackUrl,
@@ -209,7 +209,7 @@ $().ready(function(){
 
 <div class="box collapsed-box">          
   <div class="box-header with-border">
-    <h3 class="box-title text-danger">Archived Document</h3>
+    <h3 class="box-title text-danger"><?php echo h(__('Archived Document')); ?></h3>
 
     <div class="box-tools pull-right">
       <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>

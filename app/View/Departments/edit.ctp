@@ -3,7 +3,7 @@
 	<?php echo $this->Session->flash();?>	
 
 	<div class="departments ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Departments','modelClass'=>'Department','options'=>array(),'pluralVar'=>'departments'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Departments'),'modelClass'=>'Department','options'=>array(),'pluralVar'=>'departments'))); ?>
 
 		<div class="nav panel panel-default">
 			<div class="departments form col-md-12">
@@ -49,7 +49,7 @@
 		$().ready(function() {
 			jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 				return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';
-			}, "Please select the value");
+			}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 			$('#DepartmentEditForm').validate({        	
 				rules: {
@@ -72,5 +72,5 @@
 	</script>
 <?php echo $this->element('master_duplicate_validation', array(
     'recordIdSelector'=>'#DepartmentId',
-    'fields'=>array('#DepartmentName'=>array('field'=>'name', 'message'=>'This department already exists.'))
+    'fields'=>array('#DepartmentName'=>array('field'=>'name', 'message'=>__('This department already exists.')))
 )); ?>

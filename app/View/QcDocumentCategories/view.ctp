@@ -2,7 +2,7 @@
 	<?php echo $this->Session->flash();?>	
 
 	<div class="qcDocumentCategories ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Qc Document Categories','modelClass'=>'QcDocumentCategory','options'=>array(),'pluralVar'=>'qcDocumentCategories'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Qc Document Categories'),'modelClass'=>'QcDocumentCategory','options'=>array(),'pluralVar'=>'qcDocumentCategories'))); ?>
 
 
 		<div class="nav panel panel-default">
@@ -56,8 +56,8 @@
 															&nbsp;</td></tr>
 															<tr>
 																<td colspan="2">
-																	<?php echo $this->Html->link('Delete This Record?', array('controller' => 'qc_document_categories', 'action' => 'delete', $qcDocumentCategory['ParentQcDocumentCategory']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
-																	<?php echo $this->Html->link('Edit This Record?', array('controller' => 'qc_document_categories', 'action' => 'delete', $qcDocumentCategory['ParentQcDocumentCategory']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
+																	<?php echo $this->Html->link(__('Delete This Record?'), array('controller' => 'qc_document_categories', 'action' => 'delete', $qcDocumentCategory['ParentQcDocumentCategory']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
+																	<?php echo $this->Html->link(__('Edit This Record?'), array('controller' => 'qc_document_categories', 'action' => 'delete', $qcDocumentCategory['ParentQcDocumentCategory']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
 																</td>
 															</tr>
 														</table>

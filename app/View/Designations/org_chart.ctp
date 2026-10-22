@@ -4,7 +4,7 @@
 <div  id="main">
     <?php echo $this->Session->flash(); ?>
     <div class="employees ">
-        <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Designations','modelClass'=>'Designation','options'=>array("sr_no"=>"Sr No","name"=>"Name","level"=>"Level"),'pluralVar'=>'designations'))); ?>
+        <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Designations'),'modelClass'=>'Designation','options'=>array("sr_no"=>__("Sr No"),"name"=>__("Name"),"level"=>__("Level")),'pluralVar'=>'designations'))); ?>
 
 
         <style type="text/css">
@@ -27,7 +27,7 @@
         echo $this->Html->script(array('jquery.orgchart'));
         echo $this->fetch('script');
         ?>
-        <h4 class="h4class">Designation Organizational Chart <br />
+        <h4 class="h4class"><?php echo h(__('Designation Organizational Chart')); ?> <br />
             <small><?php echo $this->Html->link(__('Employee'), array('controller' => 'employees', 'action' => 'org_chart', 'render'=>'h', 'timestamp'=>date('ymdhis'))); ?> | 
             <?php echo $this->Html->link(__('Designation'), array('controller' => 'designations', 'action' => 'org_chart', 'render'=>'h', 'timestamp'=>date('ymdhis'))); ?></small> 
             <br />
@@ -46,9 +46,9 @@
                       $hclass = ' btn-default';
                   }
                   ?>                  
-                  <?php echo $this->Html->link('Verticle',array('action'=>'org_chart','render'=>'v'),array('class'=>'btn' . $vclass));?>
-                  <?php echo $this->Html->link('Horizontal',array('action'=>'org_chart','render'=>'h'),array('class'=>'btn'. $hclass));?>
-                  <?php echo $this->Html->link('Download PNG', '#',array('class'=>'btn btn-default','id'=>'printBtn'));?>
+                  <?php echo $this->Html->link(__('Verticle'),array('action'=>'org_chart','render'=>'v'),array('class'=>'btn' . $vclass));?>
+                  <?php echo $this->Html->link(__('Horizontal'),array('action'=>'org_chart','render'=>'h'),array('class'=>'btn'. $hclass));?>
+                  <?php echo $this->Html->link(__('Download PNG'), '#',array('class'=>'btn btn-default','id'=>'printBtn'));?>
               </div>
           </small>
       </h4>

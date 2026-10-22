@@ -18,7 +18,7 @@
 				<div id="add-sign-2">	
 					<div class="row">							
 						<?php echo $this->Form->create('AddSignature',array('id'=>'addsignform'),array('default'=>false)); ?>
-						<div class="col-md-12"> <?php echo $this->Form->input('user_password',array('label'=>'Enter Password for '.$employee['Employee']['name'], 'class'=>'form-control','type'=>'password','required'=>'required'));?>
+						<div class="col-md-12"> <?php echo $this->Form->input('user_password',array('label'=>__('Enter Password for ').$employee['Employee']['name'], 'class'=>'form-control','type'=>'password','required'=>'required'));?>
 						<?php echo $this->Form->hidden('fieldid',array('class'=>'form-control','default'=>$fieldid, 'required'=>'required'));?>
 						<?php echo $this->Form->hidden('employee_id',array('class'=>'form-control','default'=>$employee_id, 'required'=>'required'));?>
 						<i class="fa fa-refresh fa-spin" id="sign-spin"></i>
@@ -41,7 +41,7 @@
 									}else if($employee['Employee']['signature']){
 										echo '<img src="' .$employee['Employee']['signature'].'" width="100">';
 					}else{
-							echo "Signature not available";
+							echo __("Signature not available");
 						}
 								?>
 							<br />
@@ -90,35 +90,35 @@
 					if(res == "Proceed"){
 						$("#add-sign-2").hide();
 						$("#<?php echo $fieldid;?>").val("<?php echo $employee_id;?>").trigger('chosen:updated');						
-						$("#response-message").html('Signature fetched successfully. It will be added in View pages.');
+						$("#response-message").html(<?php echo json_encode(__('Signature fetched successfully. It will be added in View pages.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 						$("input[type=submit]").show();
 						$("#loadsign").show();						
 					}
-					if(res == "Wrong password"){
+					if(res == <?php echo json_encode(__('Wrong password'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>){
 						$("#loadsign").hide();
 						$("#add-sign-3").show();
-						$("#response-message").html('Incorrect Password');
+						$("#response-message").html(<?php echo json_encode(__('Incorrect Password'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 						$("#<?php echo $fieldid;?>").val(-1).trigger('chosen:updated');
 					}
 
-					if(res == "Wrong user"){
+					if(res == <?php echo json_encode(__('Wrong user'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>){
 						$("#loadsign").hide();
 						$("#add-sign-3").show();
-						$("#response-message").html('User not found');
+						$("#response-message").html(<?php echo json_encode(__('User not found'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 						$("#<?php echo $fieldid;?>").val(-1).trigger('chosen:updated');
 					}
 
 					if(res == "invalid"){
 						$("#loadsign").hide();
 						$("#add-sign-3").show();
-						$("#response-message").html('Invalid Request');
+						$("#response-message").html(<?php echo json_encode(__('Invalid Request'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 						$("#<?php echo $fieldid;?>").val(-1).trigger('chosen:updated');
 					}
 
-					if(res == "Signature not available"){
+					if(res == <?php echo json_encode(__('Signature not available'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>){
 						$("#loadsign").hide();
 						$("#add-sign-3").show();
-						$("#response-message").html('Signature not available for this user.');
+						$("#response-message").html(<?php echo json_encode(__('Signature not available for this user.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 						$("#<?php echo $fieldid;?>").val(-1).trigger('chosen:updated');
 					}
 					

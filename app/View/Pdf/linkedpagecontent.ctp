@@ -50,15 +50,15 @@ $fields = $this->requestAction(array('action'=>'get_fields',$record[$linkedModel
 		</tr>
 	<?php } ?>
 	<tr>
-		<th>Prepared By</th>
+		<th><?php echo h(__('Prepared By')); ?></th>
 		<td><?php echo $record['PreparedBy']['name'];?></td>
 	</tr>
 	<tr>
-		<th>Approved By</th>
+		<th><?php echo h(__('Approved By')); ?></th>
 		<td><?php echo $record['ApprovedBy']['name'];?></td>
 	</tr>
 	<tr>
-		<th>Publish</th>
+		<th><?php echo h(__('Publish')); ?></th>
 		<td><?php echo $record[$linkedModel[0]]['publish']?'Yes':'No';?></td>
 	</tr>
 </table>

@@ -15,7 +15,7 @@
               <th><?php echo __("Document Title"); ?></th>
               <th><?php echo __("Date/Time"); ?></th>
               <th width="42"><?php echo __("Act"); ?></th>
-              <th>Issue</th>
+              <th><?php echo h(__('Issue')); ?></th>
             </tr>
             <?php foreach ($formatsforissues as $formatsforissue): ?>
               <tr id="tr-<?php echo $formatsforissue['MasterListOfFormat']['id']?>">
@@ -40,7 +40,7 @@
                   <?php 
                   echo $this->Form->input('id',array('default'=>$formatsforissue['MasterListOfFormat']['id']));
                   echo $this->Form->submit(__('Issue Document'), 
-                    array('label'=>'Issue', 'div' => false, 'class' => 'btn btn-xs btn-primary btn-success',
+                    array('label'=>__('Issue'), 'div' => false, 'class' => 'btn btn-xs btn-primary btn-success',
                       'id'=>'submit_id_'.$formatsforissue['MasterListOfFormat']['id']
                     ));?>
                     <?php echo $this->Html->image('indicator.gif', array('id' => 'submit-indicator-'.$formatsforissue['MasterListOfFormat']['id'])); ?>
@@ -76,11 +76,11 @@
                      complete: function() {
                      // $("#submit_id_<?php echo $formatsforissue['MasterListOfFormat']['id']?>").removeAttr("disabled");
                        $("#submit-indicator-<?php echo $formatsforissue['MasterListOfFormat']['id']?>").hide();
-                       $("#tr-<?php echo $formatsforissue['MasterListOfFormat']['id']?>").html('<td colspan="4">Document Issued</td>');
+                       $("#tr-<?php echo $formatsforissue['MasterListOfFormat']['id']?>").html(<?php echo json_encode(__('<td colspan="4">Document Issued</td>'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                      },
                      error: function(request, status, error) {
                       //alert(request.responseText);
-                      alert('Action failed!');
+                      alert(<?php echo json_encode(__('Action failed!'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                     }
                   });
                   });

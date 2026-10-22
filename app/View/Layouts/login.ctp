@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<?php echo $this->element('translation_strings'); ?>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -57,10 +58,10 @@ echo $this->fetch('script');
       <!-- /.content-wrapper -->
       <footer class="main-footer">  
         <div class="pull-right hidden-xs">
-          <b>Version</b> 2.4.42
+          <b><?php echo h(__('Version')); ?></b> 2.4.42
       </div>
-      <strong>Copyright &copy; 2013 <a href="http://www.techmentis.biz">Techmentis Global Services Pvt Ltd</a>.</strong> All rights
-      reserved.
+      <strong><?php echo h(__('Copyright')); ?> &copy; 2013 <a href="http://www.techmentis.biz"><?php echo h(__('Techmentis Global Services Pvt Ltd')); ?></a>.</strong> <?php echo h(__('All rights
+      reserved.')); ?>
   </footer>
 </div>
 <?php

@@ -3,7 +3,7 @@
 	<?php echo $this->Session->flash();?>	
 
 	<div class="employees ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Employees','modelClass'=>'Employee','options'=>array(),'pluralVar'=>'employees'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Employees'),'modelClass'=>'Employee','options'=>array(),'pluralVar'=>'employees'))); ?>
 
 		<div class="nav panel panel-default">
 			<div class="employees form col-md-12">
@@ -24,7 +24,7 @@ $str =
 					echo "<div class='col-md-3'>".$this->Form->input('designation_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>'; 
 					echo "<div class='col-md-3'>".$this->Form->input('parent_id',array('class'=>'form-control', 'style'=>'')) . '</div>';
 					echo "<div class='col-md-12'>".$this->Form->input('name',array('class'=>'form-control','type'=>'textarea','placeholder'=>$str)) . '</div>'; 
-					echo "<div class='col-md-12'>Employee Number,Employee Name,Employee Email,Hod,Approver</div>";
+					echo '<div class=\'col-md-12\'>' . h(__('Employee Number,Employee Name,Employee Email,Hod,Approver')) . '</div>';
 					?>
 					<?php
 					echo $this->Form->input('id');
@@ -47,21 +47,21 @@ $str =
 
 				<div class="row">
 					<div class="col-md-12">
-						<p><strong>Adding Users:</strong></p>
-						<p>When you add users from this page, users wlil be automatically inherit following:</p>
+						<p><strong><?php echo h(__('Adding Users:')); ?></strong></p>
+						<p><?php echo h(__('When you add users from this page, users wlil be automatically inherit following:')); ?></p>
 						<p>
 							<ul>
-								<li>Selected Branch</li>
-								<li>Selected Department</li>
-								<li>Username : Email Address</li>
-								<li>Password : Email Addresss</li>
-								<li>Admin : No</li>
-								<li>Approver : Yes</li>
-								<li>Can create custom tables : No</li>
-								<li>User who can see other user's records : Yes</li>
+								<li><?php echo h(__('Selected Branch')); ?></li>
+								<li><?php echo h(__('Selected Department')); ?></li>
+								<li><?php echo h(__('Username : Email Address')); ?></li>
+								<li><?php echo h(__('Password : Email Addresss')); ?></li>
+								<li><?php echo h(__('Admin : No')); ?></li>
+								<li><?php echo h(__('Approver : Yes')); ?></li>
+								<li><?php echo h(__('Can create custom tables : No')); ?></li>
+								<li><?php echo h(__('User who can see other user\'s records : Yes')); ?></li>
 							</ul>
 						</p>
-						<p>You can always change these user settings from user's page</p>
+						<p><?php echo h(__('You can always change these user settings from user\'s page')); ?></p>
 					</div>
 				</div>
 
@@ -96,7 +96,7 @@ $str =
 
 			jQuery.validator.addMethod("greaterThanZero", function(value, element) {				
 				return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';
-			}, "Please select the value");
+			}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 			
 			$('#EmployeeAddBulkForm').validate();

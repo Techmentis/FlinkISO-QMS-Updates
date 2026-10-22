@@ -16,7 +16,7 @@
                   'title'=> Inflector::Humanize($labelFields[$this->request->data['Reports'][$ccount]['lables']]),
                   'type'=>$chartTypes[$this->request->data['Reports'][$ccount]['chart_type']], 
                   'count'=>$ccount,
-                  'label'=>'Employee Data Entry', 
+                  'label'=>__('Employee Data Entry'), 
                   'labels'=>json_encode($formChart['labels']),
                   'data'=>json_encode($formChart['data'],JSON_NUMERIC_CHECK),
                   'backgroundColor'=>json_encode($formChart['backgroundColor']),
@@ -49,7 +49,7 @@
               'title'=> $pieChartKey,
               'type'=>$chartTypes[$this->request->data['Reports'][$ccount]['chart_type']], 
               'count'=>$ccount,
-              'label'=>'Employee Data Entry', 
+              'label'=>__('Employee Data Entry'), 
               'labels'=>json_encode($formChart['labels']),
               'data'=>json_encode($formChart['data'],JSON_NUMERIC_CHECK),
               'backgroundColor'=>json_encode($formChart['backgroundColor']),
@@ -80,7 +80,7 @@
               'title'=> $pieChartKey,
               'type'=>$chartTypes[$this->request->data['Reports'][$ccount]['chart_type']], 
               'count'=>$ccount,
-              'label'=>'Employee Data Entry', 
+              'label'=>__('Employee Data Entry'), 
               'labels'=>json_encode($formChart['labels']),
               'data'=>json_encode($formChart['data'],JSON_NUMERIC_CHECK),
               'backgroundColor'=>json_encode($formChart['backgroundColor']),
@@ -129,7 +129,7 @@
       complete: function() {           
       },
       error: function (request, status, error) {          
-        alert('Action failed!');
+        alert(<?php echo json_encode(__('Action failed!'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
       }
     });
   });

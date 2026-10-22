@@ -17,14 +17,14 @@
 
             <div class="row">
                 <div class="col-md-12">
-                    <p>Dear User, <br /><br/>
-                        This is you self-appraisal questioner. You are requested answer questions below as part of your appraisal process. <br />
-                        After answering all the questions, click on submit and your answers will be sent back to your Appraiser "\Mr.Appreser\" further action.<br/>
-                        This link will be active till \date\.
+                    <p><?php echo h(__('Dear User,')); ?> <br /><br/>
+                        <?php echo h(__('This is you self-appraisal questioner. You are requested answer questions below as part of your appraisal process.')); ?> <br />
+                        <?php echo h(__('After answering all the questions, click on submit and your answers will be sent back to your Appraiser "\\Mr.Appreser\\" further action.')); ?><br/>
+                        <?php echo h(__('This link will be active till \\date\\.')); ?>
                         <br /><br />
-                        <b>Good luck form FlinkISO!</b>
+                        <b><?php echo h(__('Good luck form FlinkISO!')); ?></b>
                         <br />
-                        -Warm Regards
+                        <?php echo h(__('-Warm Regards')); ?>
                         <br/>
                     </div>
                     <?php

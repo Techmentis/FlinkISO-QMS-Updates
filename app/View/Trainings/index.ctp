@@ -39,7 +39,7 @@
 					<th><?php echo $this->Paginator->sort('notes'); ?></th>
 					<th><?php echo $this->Paginator->sort('inoice_id'); ?></th>
 					<th><?php echo $this->Paginator->sort('training_status'); ?></th>
-					<th width="240">Actions</th>
+					<th width="240"><?php echo h(__('Actions')); ?></th>
 				</tr>
 				<?php if($trainings){ ?>
 					<?php foreach ($trainings as $training): ?>
@@ -53,9 +53,9 @@
 								<div class="btn-group">
 									<?php
 									if($training['Invoice']['status'] == 'draft'){
-										echo $this->Html->link('View Invoice',array('controller'=>'billing','action'=>'view_invoice',$training['Invoice']['id']),array('class'=>'btn btn-xs btn-success'));
-										echo $this->Html->link('Re-schedule',array('controller'=>'trainings','action'=>'edit',$training['Training']['id']),array('class'=>'btn btn-xs btn-info'));
-										echo $this->Html->link('Cancle',array('controller'=>'trainings','action'=>'edit',$training['Training']['id']),array('class'=>'btn btn-xs btn-warning'));
+										echo $this->Html->link(__('View Invoice'),array('controller'=>'billing','action'=>'view_invoice',$training['Invoice']['id']),array('class'=>'btn btn-xs btn-success'));
+										echo $this->Html->link(__('Re-schedule'),array('controller'=>'trainings','action'=>'edit',$training['Training']['id']),array('class'=>'btn btn-xs btn-info'));
+										echo $this->Html->link(__('Cancle'),array('controller'=>'trainings','action'=>'edit',$training['Training']['id']),array('class'=>'btn btn-xs btn-warning'));
 										;
 									}
 									?>
@@ -64,7 +64,7 @@
 						</tr>
 					<?php endforeach; ?>
 				<?php }else{ ?>
-					<tr><td colspan="7">No results found</td></tr>
+					<tr><td colspan="7"><?php echo h(__('No results found')); ?></td></tr>
 				<?php } ?>
 			</table>
 			<?php echo $this->Form->end();?>			

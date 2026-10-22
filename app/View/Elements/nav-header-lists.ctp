@@ -24,8 +24,8 @@ unset($postData['options']['publish']);
 <div class="row"> 
     <div class="col-md-12"><h4><small><?php echo $this->element('breadcrumbs',array('defaultTitle'=>$postData['defaultTitle'])); ?></small>
     <?php 
-    if($postData["friendlyName"])echo h($postData["friendlyName"]); 
-    else echo h($postData["pluralHumanName"]); 
+    if($postData["friendlyName"])echo h(__($postData["friendlyName"])); 
+    else echo h(__($postData["pluralHumanName"])); 
     
     if($postData['defaultTitle']){
         echo "<small> /</small> ". $postData['defaultTitle'];
@@ -42,7 +42,7 @@ unset($postData['options']['publish']);
         'timestamp'=>date('ymdhis')
     ),
     array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
-        'data-toggle'=>'tooltip', 'data-trigger'=>'hover',  'data-placement'=>'bottom', 'title'=> 'Index'
+        'data-toggle'=>'tooltip', 'data-trigger'=>'hover',  'data-placement'=>'bottom', 'title'=> __('Index')
     ));    
     
     if($this->request->controller != 'custom_tables'){
@@ -52,7 +52,7 @@ unset($postData['options']['publish']);
             'process_id' => $this->request->params['named']['process_id'],
             'timestamp'=>date('ymdhis')
         ),array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
-        'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Add'
+        'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Add')
         ));         
     }else{
         if($this->action == 'recreate_child' && isset($customTable['ParentTable']['id'])){
@@ -60,7 +60,7 @@ unset($postData['options']['publish']);
                 $customTable['ParentTable']['id'],                
                 'timestamp'=>date('ymdhis')
             ),array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
-            'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Add'
+            'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Add')
             )); 
         }
     }
@@ -74,7 +74,7 @@ unset($postData['options']['publish']);
         'timestamp'=>date('ymdhis')
     ),
      array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
-        'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Published'
+        'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Published')
     ));
      $unpublishedBadge = isset($toolbarUnpublishedCount)
          ? '<span class="badge record-unpublished-count">'.(int)$toolbarUnpublishedCount.'</span>'
@@ -86,7 +86,7 @@ unset($postData['options']['publish']);
         'timestamp'=>date('ymdhis')
     ),
      array('class'=>'tooltip1 btn btn-app btn-sm btn-default record-unpublished-button','escape'=>false,
-        'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Unpublished / Pending Approvals'
+        'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Unpublished / Pending Approvals')
     ));
 
  }
@@ -94,7 +94,7 @@ unset($postData['options']['publish']);
  if($this->request->controller == 'standards'){
     echo $this->Html->link('<i class="fa fa-trash-o"></i>',array('action'=>'index','soft_delete'=>1,'timestamp'=>date('ymdhis')),
         array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
-            'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Deleted'
+            'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Deleted')
         ));    
 }
 
@@ -109,7 +109,7 @@ if($this->action == 'view' || $this->action == 'user_access') {
             'timestamp'=>date('ymdhis')
         ),
         array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
-            'data-toggle'=>'tooltip', 'data-trigger'=>'hover',  'data-placement'=>'bottom', 'title'=> 'Edit Record'
+            'data-toggle'=>'tooltip', 'data-trigger'=>'hover',  'data-placement'=>'bottom', 'title'=> __('Edit Record')
         ));
     }
 
@@ -118,14 +118,14 @@ if($this->action == 'view' || $this->action == 'user_access') {
     if($this->request->controller != 'qc_documents' && $this->request->controller != 'custom_tables' && !in_array($this->request->controller,$skippdfarray)) {
         echo $this->Html->link('<i class="fa fa-file-pdf-o"></i>','#',
             array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
-                'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'onClick'=>'openpdf()' , 'data-placement'=>'bottom', 'title'=> 'Download PDF'
+                'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'onClick'=>'openpdf()' , 'data-placement'=>'bottom', 'title'=> __('Download PDF')
             ));
     }
 
     if($this->request->controller == 'qc_documents') {                
         echo $this->Html->link('<i class="fa fa-file-pdf-o"></i>','#',
             array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
-                'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'onClick'=>'openpdf()' , 'data-placement'=>'bottom', 'title'=> 'Download PDF'
+                'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'onClick'=>'openpdf()' , 'data-placement'=>'bottom', 'title'=> __('Download PDF')
             ));
     }            
 }
@@ -139,7 +139,7 @@ if($this->action == 'edit' || $this->action == 'recreate' || $this->action == 'r
         'timestamp'=>date('ymdhis')
     ),
     array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
-        'data-toggle'=>'tooltip', 'data-trigger'=>'hover',  'data-placement'=>'bottom', 'title'=> 'View Record'
+        'data-toggle'=>'tooltip', 'data-trigger'=>'hover',  'data-placement'=>'bottom', 'title'=> __('View Record')
     ));
 
     // echo $this->Html->link('<i class="fa fa-chain"></i>',array('controller'=>'approval_processes','action'=>'add','controller_name'=>Inflector::classify($this->request->controller), 'timestamp'=>date('ymdhis'),'custom_table_id'=>$this->request->params['named']['custom_table_id']),array('escape'=>false,'class'=>'tooltip1 btn btn-app btn-sm btn-default','data-toggle'=>'tooltip', 'data-trigger'=>'hover','data-placement'=>'bottom', 'title'=> 'Add Auto Approval Process'));    
@@ -151,14 +151,14 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
     echo $this->Html->link('<i class="fa fa-check-square"></i>',"#",
         array('class'=>'tooltip1 btn btn-app btn-sm btn-default fa-dark ','escape'=>false,
             'onClick'=>'selectaddtrs()',
-            'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Select All'
+            'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Select All')
         ));
     if(!in_array($this->request->controller, array('qc_documents','custom_tables','processes','standards'))){
     echo $this->Form->create(Inflector::classify($this->request->controller),array('action'=>'bulk_delete/custom_table_id:'.$this->request->params['named']['custom_table_id'].'/qc_document_id:'.$this->request->params['named']['qc_document_id'], 'style'=>'display:inline'),array('class'=>'in-line pull-left','style'=>'display:inline'));    
         
         echo '<label for="bulkDeleteSubmit" class="btn btn-app btn-default"><i class="fa fa-trash-o text-danger"></i></label>';
         
-        echo $this->Form->submit('&nbsp;',
+        echo $this->Form->submit(__('&nbsp;'),
             array(
                 'id'=>'bulkDeleteSubmit',
                 'onClick'=>'bulkdelete()',
@@ -174,7 +174,7 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
     if($this->action === 'index') {
         echo $this->Html->link('<i class="fa fa-search"></i>','#',
         array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
-            'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Search', 'id'=>'ad_src'
+            'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Search'), 'id'=>'ad_src'
         ));
     }
 
@@ -183,7 +183,7 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
             // array('controller'=>'document_downloads','action'=>'index','custom_table_id'=>$this->request->params['named']['custom_table_id'],'record_id'=>$this->request->params['pass'][0]),
             '#',
             array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
-            'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Download History',
+            'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Download History'),
             'onClick'=>'historyopen(\''.$this->request->params['named']['custom_table_id'].'\',\''. $this->request->params['pass'][0].'\')'
         ));
     }
@@ -195,7 +195,7 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
     <?php if(($this->action == 'index' || $this->action == 'quick_search' ) && $this->request->controller != 'usage_details'  && $this->request->controller != 'invoices') { ?>
         <div class=" btn-group" style="width:100%;">
             <?php 
-            echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_src_button', 'autocomplete'=>'off',  'label'=>false,'placeholder'=>'Quick search...','style'=>'margin-top: -12px'));
+            echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_src_button', 'autocomplete'=>'off',  'label'=>false,'placeholder'=>__('Quick search...'),'style'=>'margin-top: -12px'));
             ?>
         </div>
     <?php } } ?>
@@ -217,7 +217,7 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
                     }
                 }
                 $strict = isset($this->request->params['named']['strict']) ? $this->request->params['named']['strict'] : 0;
-                echo "<div class='col-md-3' ><div class='pull-left'>".$this->Form->input('strict',array('class'=>'', 'type'=>'radio', 'default'=>$strict,'options'=>array(0=>'Yes',1=>'No'))). "</div><div class='pull-right'><br />". $this->Form->submit('Go',array('class'=>'btn btn-sm btn-info','style'=>'margin-top:8px'))."</div></div>";
+                echo "<div class='col-md-3' ><div class='pull-left'>".$this->Form->input('strict',array('class'=>'', 'type'=>'radio', 'default'=>$strict,'options'=>array(0=>__('Yes'),1=>__('No')))). "</div><div class='pull-right'><br />". $this->Form->submit(__('Go'),array('class'=>'btn btn-sm btn-info','style'=>'margin-top:8px'))."</div></div>";
                 
             }
             echo $this->Form->end();

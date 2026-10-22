@@ -28,7 +28,7 @@ if(!empty($app_status['invoice_date'])){
   }else{ 
       // $cnt++;
     ?>
-    <a href="#" style="white-space:inherit;">No invoices are pending.</a>
+    <a href="#" style="white-space:inherit;"><?php echo h(__('No invoices are pending.')); ?></a>
   <?php }?>
 
   <?php if($cnt > 0){ ?>

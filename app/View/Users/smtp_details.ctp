@@ -47,7 +47,7 @@
 
         <?php if (!$this->Session->read('User.id')) { ?>
             <div class="col-md-12">
-                <h5><strong>Installation Progress</strong></h5>
+                <h5><strong><?php echo h(__('Installation Progress')); ?></strong></h5>
                 <div class="progress progress-striped active" style="background: #CCC">
                     <div class="progress-bar"  role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 90%">
                     </div>
@@ -59,14 +59,14 @@
 
             <?php
             if (isset($isSmtp)) {
-                echo $this->Form->input('is_smtp', array('type' => 'radio', 'legend' => '<h4>' . __('Email Server Setting') . '</h4>', 'options' => array(0 => 'Use Default', 1 => 'Use SMTP Server'), 'default' => $isSmtp, 'onClick' => 'Showdiv(this.value)'));
+                echo $this->Form->input('is_smtp', array('type' => 'radio', 'legend' => '<h4>' . __('Email Server Setting') . '</h4>', 'options' => array(0 => __('Use Default'), 1 => __('Use SMTP Server')), 'default' => $isSmtp, 'onClick' => 'Showdiv(this.value)'));
             } else {
-                echo $this->Form->input('is_smtp', array('type' => 'radio', 'legend' => __('Email Server Setting'), 'options' => array(0 => 'Use Default', 1 => 'Use SMTP Server'), 'onClick' => 'Showdiv(this.value)'));
+                echo $this->Form->input('is_smtp', array('type' => 'radio', 'legend' => __('Email Server Setting'), 'options' => array(0 => __('Use Default'), 1 => __('Use SMTP Server')), 'onClick' => 'Showdiv(this.value)'));
             }
             ?>
 
             <div class="installations form" id="smtp" style="display: none">
-                <div class="alert alert-info">Set this values if you are working on localhost that does not have an smtp server(email server) installed.</div>
+                <div class="alert alert-info"><?php echo h(__('Set this values if you are working on localhost that does not have an smtp server(email server) installed.')); ?></div>
                 <?php echo $this->Form->create(array('role' => 'form', 'class' => 'form')); ?>
                 <?php if ($transport != null) { ?>
                     <div class="row">
@@ -83,8 +83,8 @@
                 <?php } else { ?>
 
                     <div class="row">
-                        <div class="col-md-6"><?php echo $this->Form->input('smtp_host', array('placeholder' => 'ssl://smtp.gmail.com (if using SSL) or smtp.gmail.com', 'style' => 'width:100%', 'label' => __('Email Host Name'), 'required' => 'required')); ?></div>
-                        <div class="col-md-6"><?php echo $this->Form->input('port', array('placeholder' => '465 (if using SSL) or 587', 'style' => 'width:100%', 'label' => __('Email Port'), 'required' => 'required')); ?></div>
+                        <div class="col-md-6"><?php echo $this->Form->input('smtp_host', array('placeholder' => __('ssl://smtp.gmail.com (if using SSL) or smtp.gmail.com'), 'style' => 'width:100%', 'label' => __('Email Host Name'), 'required' => 'required')); ?></div>
+                        <div class="col-md-6"><?php echo $this->Form->input('port', array('placeholder' => __('465 (if using SSL) or 587'), 'style' => 'width:100%', 'label' => __('Email Port'), 'required' => 'required')); ?></div>
                         <div class="col-md-6 hidden"><?php echo $this->Form->input('is_smtp', array('default' => 1, 'id' => 'smtpfield')); ?></div>
                     </div>
 
@@ -98,7 +98,7 @@
                 <?php echo $this->Html->image('indicator.gif', array('id' => 'submit-indicator')); ?>
                 <?php echo $this->Html->link(__('Skip'), array('controller' => 'users', 'action' => 'login', $username), array('class' => 'btn btn-link')) ?>
                 <div class="clearfix">&nbsp;</div>
-                <?php echo $this->Html->link('For more information on \'SMTP Server settings\' click here', 'http://flinkiso.com/help/smtp-server-settings.html', array('class' => 'btn btn-link', 'target' => '_blank')); ?>
+                <?php echo $this->Html->link(__('For more information on \'SMTP Server settings\' click here'), 'http://flinkiso.com/help/smtp-server-settings.html', array('class' => 'btn btn-link', 'target' => '_blank')); ?>
                 <?php echo $this->Form->end(); ?>
                 <?php echo $this->Js->writeBuffer(); ?>
             </div>
@@ -107,7 +107,7 @@
                 <br/>
                 <div class="row">
                 </div>
-                <div class="alert alert-info">Set this values if your are on live web server or your web server already have an smtp server(email server) installed.</div>
+                <div class="alert alert-info"><?php echo h(__('Set this values if your are on live web server or your web server already have an smtp server(email server) installed.')); ?></div>
                 <?php echo $this->Form->create(array('role' => 'form', 'class' => 'form')); ?>
                 <div class="col-md-6 hidden"><?php echo $this->Form->input('is_smtp', array('default' => 0, 'id' => 'defaultfield')); ?></div>
                 <div class="row">

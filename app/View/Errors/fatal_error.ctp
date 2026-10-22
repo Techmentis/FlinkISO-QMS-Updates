@@ -15,7 +15,7 @@
  */
 
 ?>
-<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Error','modelClass'=>'Error','options'=>array(),'pluralVar'=>'errors'))); ?>
+<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Error'),'modelClass'=>'Error','options'=>array(),'pluralVar'=>'errors'))); ?>
 <h2><?php echo __d('cake_dev', 'Fatal Error'); ?></h2>
 <p class="error">
 	<strong><?php echo __d('cake_dev', 'Error'); ?>: </strong>

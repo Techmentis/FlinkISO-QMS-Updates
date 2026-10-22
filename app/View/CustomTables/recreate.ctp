@@ -22,7 +22,7 @@
 	<div id="customTables_ajax">
 		
 		<div class="customTables ">
-			<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Custom Tables','modelClass'=>'CustomTable','options'=>array(),'pluralVar'=>'customTables'))); ?>
+			<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Custom Tables'),'modelClass'=>'CustomTable','options'=>array(),'pluralVar'=>'customTables'))); ?>
 
 			<div class="nav panel panel-default">
 				<div class="customTables form col-md-12">
@@ -37,7 +37,7 @@
 						
 						<?php echo "<div class='col-md-4'>".$this->Form->input('name',array('class'=>'form-control','required')) . '</div>'; ?>						
 						<?php echo "<div class='col-md-3 hide'>".$this->Form->input('table_name',array('class'=>'form-control', 'readonly', 'default'=>$table_name)) . '</div>'; ?>
-						<?php echo "<div class='col-md-1'>".$this->Form->input('table_version',array('label'=>'Version', 'class'=>'form-control', 'readonly', 'default'=>$table_version)) . '</div>'; ?>
+						<?php echo "<div class='col-md-1'>".$this->Form->input('table_version',array('label'=>__('Version'), 'class'=>'form-control', 'readonly', 'default'=>$table_version)) . '</div>'; ?>
 						
 						<?php unset($this->request->data['CustomTable']['password']);?>
 						<?php echo "<div class='col-md-2'>".$this->Form->input('password',array('type'=>'password', 'class'=>'form-control','default'=>false)) . '</div>'; ?>
@@ -58,13 +58,13 @@
 					</div>
 					<?php 
 					if(!empty($qcDocument['ParentDocument']['title'])){
-						echo "<div class='row'><div class='col-md-12'><p><strong>Records in this table will be automatically linked with parent_document_id : ".$qcDocument['ParentDocument']['title'].". Users can add/update these records from ".$qcDocument['ParentDocument']['title']."'s View page only.</strong></p></div>";
+						echo '<div class=\'row\'><div class=\'col-md-12\'><p><strong>' . h(__('Records in this table will be automatically linked with parent_document_id :')) . ' '.$qcDocument['ParentDocument']['title'].". Users can add/update these records from ".$qcDocument['ParentDocument']['title']."'s View page only.</strong></p></div>";
 						?>
 						<?php 
 						echo "<div class='col-md-6'>".$this->Form->input('field_name',array('class'=>'form-control',)) . '</div>'; 
 						echo "<div class='col-md-6' id='get_data'>".$this->Form->input('field_value',array('class'=>'form-control','options'=>array())) . '</div>';
 						?>
-						<div class="col-md-12"><p><br />Select field name (from parent table) and field value against which you would like to load this form. This form will be loaded for Adding a record on this value.</p></div>
+						<div class="col-md-12"><p><br /><?php echo h(__('Select field name (from parent table) and field value against which you would like to load this form. This form will be loaded for Adding a record on this value.')); ?></p></div>
 					</div>
 				<?php } ?>	
 
@@ -113,7 +113,7 @@
 							echo $this->element('onlyoffice',array(
 								'url'=>$url,
 								'placeholderid'=>$placeholderid,
-								'panel_title'=>'Document Viewer',
+								'panel_title'=>__('Document Viewer'),
 								'mode'=>$mode,
 								'path'=>$file_path,
 								'file'=>$file,
@@ -167,7 +167,7 @@
 							echo $this->element('onlyoffice',array(
 								'url'=>$url,
 								'placeholderid'=>$placeholderid,
-								'panel_title'=>'Document Viewer',
+								'panel_title'=>__('Document Viewer'),
 								'mode'=>$mode,
 								'path'=>$file_path,
 								'file'=>$file,
@@ -216,13 +216,13 @@
 						<div class="box box-default">
 							<div class="box-header with-border">
 								<i class="fa fa-database"></i>
-								<h3 class="box-title">Document Data Entry</h3>
+								<h3 class="box-title"><?php echo h(__('Document Data Entry')); ?></h3>
 							</div>
 							<div class="box-body">
 								<div class="row">
 									<?php 
 									
-									echo "<div class='col-md-6'><br /><div class='nomargin-checkbox'><label>Do you want this document to be shared with users for scheduled data enrty? If yes, click YES below. You must define schedule.</label>".$this->Form->input('add_records',array('type'=>'checkbox', 'class'=>'chexkbox', 'label'=>'Yes')) . '</div></div>'; 
+									echo '<div class=\'col-md-6\'><br /><div class=\'nomargin-checkbox\'><label>' . h(__('Do you want this document to be shared with users for scheduled data enrty? If yes, click YES below. You must define schedule.')) . '</label>'.$this->Form->input('add_records',array('type'=>'checkbox', 'class'=>'chexkbox', 'label'=>__('Yes'))) . '</div></div>'; 
 									echo "<div class='col-md-3'>".$this->Form->input('schedule_id',array()) . '</div>'; 
 									echo "<div class='col-md-3'>".$this->Form->input('data_type',array('options'=>$customArray['dataTypes'])) . '</div>'; 
 								?>					</div>
@@ -234,8 +234,8 @@
 
 			<div class="col-md-12">	
 				<div class="btn-group pull-left">
-					<?php echo $this->Html->link('Back',array('action'=>'index',$this->request->params['pass'][0]),array('class'=>'btn btn-default btn-sm'));?>
-					<?php echo $this->Html->link('Cancel',array('action'=>'recreate',$this->request->params['pass'][0]),array('class'=>'btn btn-warning btn-sm'));?>
+					<?php echo $this->Html->link(__('Back'),array('action'=>'index',$this->request->params['pass'][0]),array('class'=>'btn btn-default btn-sm'));?>
+					<?php echo $this->Html->link(__('Cancel'),array('action'=>'recreate',$this->request->params['pass'][0]),array('class'=>'btn btn-warning btn-sm'));?>
 				</div>	
 				<?php echo $this->Form->submit(__('Submit'), array('div' => false, 'class' => 'btn btn-success pull-right','id'=>'submit_id')); ?>
 			</div>
@@ -319,7 +319,7 @@
 
 		if($("#"+id).val != ''){
 			$("#CustomTableFields"+f+"FieldType").prop("greaterThanZero", function(value, element) {
-			}, "Please select the value");
+			}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 
 			$("#CustomTableFields"+f+"Length").prop('required',true);			
@@ -358,7 +358,8 @@
 	}	
 
 	function dropalert(f){
-		var r = confirm("This change will delete the existing database table, resulting in data loss.\n Are you sure you wish to proceed with this change?");
+		var r = confirm(<?php echo json_encode(__('This change will delete the existing database table, resulting in data loss.
+ Are you sure you wish to proceed with this change?'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 		if (r == true) {
 		  // proceed
 			$("#CustomTableDropTable").prop("checked",true);
@@ -562,7 +563,7 @@
 		
 
 		if(i > 0 && i != 1){
-			alert('You must add one default field. Only one default field is allowed.');
+			alert(<?php echo json_encode(__('You must add one default field. Only one default field is allowed.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 			$("#"+ckid).prop('checked',false);
 			return false;		        	  
 		}else{
@@ -615,7 +616,7 @@
 		<?php } ?>
 		jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 			return this.optional(element) || (parseInt(value) != -1);
-		}, "This field is required.");
+		}, <?php echo json_encode(__('This field is required.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 		jQuery.validator.addMethod("varchar", function(value, element) {
 			return this.optional(element) || (parseFloat(value) < 256);

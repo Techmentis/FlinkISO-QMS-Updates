@@ -65,7 +65,7 @@
 					$("#submit-indicator").hide();
 				},
 				error: function(request, status, error) {                    
-					alert('Action failed!');
+					alert(<?php echo json_encode(__('Action failed!'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 				}
 			});
 		}

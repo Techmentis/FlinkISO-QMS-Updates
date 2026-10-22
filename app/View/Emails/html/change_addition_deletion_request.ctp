@@ -1,6 +1,6 @@
 <?php echo $this->element('Emails/email_header', array(
-    'emailTitle' => 'Change Request from ' . $companyName,
-    'emailPreheader' => 'A change request has been submitted.',
+    'emailTitle' => __('Change Request from ') . $companyName,
+    'emailPreheader' => __('A change request has been submitted.'),
     'environment' => isset($env) ? $env : null,
     'app_url' => isset($app_url) ? $app_url : null
 )); ?>

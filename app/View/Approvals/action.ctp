@@ -1,1 +1,1 @@
-Saved.
+<?php echo h(__('Saved.')); ?>

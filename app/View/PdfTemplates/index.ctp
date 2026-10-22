@@ -1,7 +1,7 @@
 <?php echo $this->element('checkbox-script'); ?><div  id="main">
 	<?php echo $this->Session->flash();?>	
 	<div class="pdfTempates ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'PDF Templates','modelClass'=>'PdfTemplate','options'=>array("sr_no"=>"Sr No","name"=>"Name"),'pluralVar'=>'pdfDepartments'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('PDF Templates'),'modelClass'=>'PdfTemplate','options'=>array("sr_no"=>__("Sr No"),"name"=>__("Name")),'pluralVar'=>'pdfDepartments'))); ?>
 
 		<script type="text/javascript">
 			$(document).ready(function(){
@@ -15,10 +15,10 @@
 		<div class="table-responsive">
 			<?php echo $this->Form->create(array('class'=>'no-padding no-margin no-background'));?>
 			<?php
-			if($headerFileExists == true)echo $this->Html->link('Update Default Header File',array('action'=>'add','HeaderTemplate'),array('class'=>'btn btn-sm btn-success pull-right'));
-			else echo $this->Html->link('Create Default Header File',array('action'=>'add','HeaderTemplate'),array('class'=>'btn btn-sm btn-warning pull-right'));
+			if($headerFileExists == true)echo $this->Html->link(__('Update Default Header File'),array('action'=>'add','HeaderTemplate'),array('class'=>'btn btn-sm btn-success pull-right'));
+			else echo $this->Html->link(__('Create Default Header File'),array('action'=>'add','HeaderTemplate'),array('class'=>'btn btn-sm btn-warning pull-right'));
 
-			echo $this->Html->link('Create QC Document Cover File',array('action'=>'add_cover','CoverTemplate'),array('class'=>'btn btn-sm btn-info pull-right')).'<br /><br />';	
+			echo $this->Html->link(__('Create QC Document Cover File'),array('action'=>'add_cover','CoverTemplate'),array('class'=>'btn btn-sm btn-info pull-right')).'<br /><br />';	
 			?>				
 			<table id="pdfTempates" cellpadding="0" cellspacing="0" class="table table-hover index" id="exportcsv">
 				<tr>
@@ -27,7 +27,7 @@
 					<th><?php echo $this->Paginator->sort('custom_table_id'); ?></th>
 					<th><?php echo $this->Paginator->sort('modified_by'); ?></th>
 					<th><?php echo $this->Paginator->sort('modified'); ?></th>
-					<th>Actions</th>
+					<th><?php echo h(__('Actions')); ?></th>
 				</tr>
 				<?php if($pdfTemplates){ ?>
 					<?php foreach ($pdfTemplates as $pdfTemplate): ?>
@@ -36,9 +36,9 @@
 							<!-- <td><?php echo h($pdfTemplate['PdfTemplate']['template_type']?'Header':'Content'); ?>&nbsp;</td> -->
 							<td>
 								<?php 
-									if($pdfTemplate['PdfTemplate']['template_type'] == 3)echo 'Cover';
-									if($pdfTemplate['PdfTemplate']['template_type'] == 0)echo 'Content';
-									if($pdfTemplate['PdfTemplate']['template_type'] == 1)echo 'Header';
+									if($pdfTemplate['PdfTemplate']['template_type'] == 3)echo __('Cover');
+									if($pdfTemplate['PdfTemplate']['template_type'] == 0)echo __('Content');
+									if($pdfTemplate['PdfTemplate']['template_type'] == 1)echo __('Header');
 								?>
 							</td>
 							<td><?php echo h($pdfTemplate['CustomTable']['name']); ?>&nbsp;</td>														
@@ -50,7 +50,7 @@
 							</tr>
 						<?php endforeach; ?>
 					<?php }else{ ?>
-						<tr><td colspan="7">No results found</td></tr>
+						<tr><td colspan="7"><?php echo h(__('No results found')); ?></td></tr>
 					<?php } ?>
 				</table>
 				<?php echo $this->Form->end();?>			

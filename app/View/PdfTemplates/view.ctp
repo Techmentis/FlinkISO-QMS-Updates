@@ -1,5 +1,5 @@
 <?php echo $this->Session->flash();?>	
-<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'PDF Templates','modelClass'=>'PdfTemplate','options'=>array("sr_no"=>"Sr No","name"=>"Name"),'pluralVar'=>'pdfDepartments'))); ?>
+<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('PDF Templates'),'modelClass'=>'PdfTemplate','options'=>array("sr_no"=>__("Sr No"),"name"=>__("Name")),'pluralVar'=>'pdfDepartments'))); ?>
 <style type="text/css">
 	.txtfld{width: 96%; border: none;}
 	.childtables ul { list-style-type: none; margin: 0; padding: 0; margin-bottom: 10px; }
@@ -14,7 +14,7 @@
 	<div class="row">
 		<div class="col-md-12">
 			<div class="panel panel-default">
-				<div class="panel-heading"><h4><?php echo $pdfTemplate['PdfTemplate']['name'];?> <small>If you do not see the latest changes here, wait a few seconds and refesh the page.</small></h4></div>
+				<div class="panel-heading"><h4><?php echo $pdfTemplate['PdfTemplate']['name'];?> <small><?php echo h(__('If you do not see the latest changes here, wait a few seconds and refesh the page.')); ?></small></h4></div>
 				<div class="panel-body preview"><?php echo $html;?></div>
 			</div>			
 		</div>

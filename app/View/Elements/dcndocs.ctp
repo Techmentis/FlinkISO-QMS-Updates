@@ -12,14 +12,14 @@
           <div class="table-responsive">
             <table class="table">
               <tr>
-                <th><?php echo $this->Paginator->sort('dcn_no','DCN No'); ?></th>
-                <th><?php echo $this->Paginator->sort('change_type','Type'); ?></th>
-                <th><?php echo $this->Paginator->sort('dcn_date','Date'); ?></th>
-                <th><?php echo $this->Paginator->sort('document','Document'); ?></th>
+                <th><?php echo $this->Paginator->sort('dcn_no',__('DCN No')); ?></th>
+                <th><?php echo $this->Paginator->sort('change_type',__('Type')); ?></th>
+                <th><?php echo $this->Paginator->sort('dcn_date',__('Date')); ?></th>
+                <th><?php echo $this->Paginator->sort('document',__('Document')); ?></th>
                 <th><?php echo $this->Paginator->sort('prepared_by'); ?></th>
                 <th><?php echo $this->Paginator->sort('reviewed_by'); ?></th>
                 <th><?php echo $this->Paginator->sort('approved_by'); ?></th>    
-                <th>Act</th>            
+                <th><?php echo h(__('Act')); ?></th>            
               </tr>
               <?php              
               foreach($dcndocs as $tblDocumentChangeControl0V1){ ?>

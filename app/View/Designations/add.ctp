@@ -3,8 +3,8 @@
 	<?php echo $this->Session->flash();?>	
 
 	<div class="designations ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Designations','modelClass'=>'Designation','options'=>array(),'pluralVar'=>'designations'))); ?>
-		<?php echo $this->Html->link('Add Bulk',array('action'=>'add_bulk'),array('class'=>'btn btn-sm btn-primary pull-right'));?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Designations'),'modelClass'=>'Designation','options'=>array(),'pluralVar'=>'designations'))); ?>
+		<?php echo $this->Html->link(__('Add Bulk'),array('action'=>'add_bulk'),array('class'=>'btn btn-sm btn-primary pull-right'));?>
 		<div class="nav panel panel-default">
 			<div class="designations form col-md-12">
 				<?php echo $this->Form->create('Designation',array('role'=>'form','class'=>'form')); ?>
@@ -73,5 +73,5 @@
 		</script>
 <?php echo $this->element('master_duplicate_validation', array(
     'recordIdSelector'=>'#DesignationId',
-    'fields'=>array('#DesignationName'=>array('field'=>'name', 'message'=>'This designation already exists.'))
+    'fields'=>array('#DesignationName'=>array('field'=>'name', 'message'=>__('This designation already exists.')))
 )); ?>

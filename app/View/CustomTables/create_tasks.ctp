@@ -41,7 +41,7 @@
 					},
 					error: function(request, status, error) {
                     //alert(request.responseText);
-						alert('Action failed!');
+						alert(<?php echo json_encode(__('Action failed!'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 					}
 				});
 			}
@@ -53,7 +53,7 @@
 
 			jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 				return this.optional(element) || (parseFloat(value) != -1);
-			}, "Please select the value");
+			}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 
 			$('#RecordLockAddForm').validate();
@@ -85,7 +85,7 @@
 
 	<!-- <div class="col-md-6"> -->
 		<div class="box box-default">
-			<div class="box-header with-border"><h3 class="box-title" style="width: 100%">Create Tasks <span class="pull-right"><i class="fa fa-calendar-check-o"></i></span> </h3></div>
+			<div class="box-header with-border"><h3 class="box-title" style="width: 100%"><?php echo h(__('Create Tasks')); ?> <span class="pull-right"><i class="fa fa-calendar-check-o"></i></span> </h3></div>
 			<div class="box-body">
 
 				<div class="table-responsive" style="overflow:scroll;">			

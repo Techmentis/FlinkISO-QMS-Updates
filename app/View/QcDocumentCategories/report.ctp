@@ -16,23 +16,23 @@
 	?>	<fieldset>
 		<div class="panel panel-default">
 			<div class="panel-body">
-				Below is the system generated report. You can modify this report and save it under report center. <br/>
-				Report is rendered in a Text Editor so that you can make the required changes.<br/>
-				You can either publish this report as it is or keep it ready in reports center.
+				<?php echo h(__('Below is the system generated report. You can modify this report and save it under report center.')); ?> <br/>
+				<?php echo h(__('Report is rendered in a Text Editor so that you can make the required changes.')); ?><br/>
+				<?php echo h(__('You can either publish this report as it is or keep it ready in reports center.')); ?>
 			</div>
 		</div>	
 		<textarea id="ReportDetails" name="data[Report][details]" style="float:left; clear:both">        
 			<table cellpadding="2" cellspacing="2" border="1" width="100%" style="font-size:10px">
 				<tr>
-					<td colspan="4"><h2>Company Name (ISO CERTFICATION DOCUMENTS) :</h2>Powered by : FlinkISO ™</td>
+					<td colspan="4"><h2><?php echo h(__('Company Name (ISO CERTFICATION DOCUMENTS) :')); ?></h2><?php echo h(__('Powered by : FlinkISO ™')); ?></td>
 				</tr>
 				<tr>
-					<td>Document Title </td><td>&nbsp;<?php echo h($qcDocumentCategory['MasterListOfFormat']['title']); ?></td>
-					<td>Document Number</td><td>&nbsp;<?php echo h($qcDocumentCategory['MasterListOfFormat']['document_number']); ?></td>
+					<td><?php echo h(__('Document Title')); ?> </td><td>&nbsp;<?php echo h($qcDocumentCategory['MasterListOfFormat']['title']); ?></td>
+					<td><?php echo h(__('Document Number')); ?></td><td>&nbsp;<?php echo h($qcDocumentCategory['MasterListOfFormat']['document_number']); ?></td>
 				</tr>
 				<tr>
-					<td>Revision Number </td><td>&nbsp;<?php echo h($qcDocumentCategory['MasterListOfFormat']['revision_number']); ?></td>
-					<td>Revision Date</td><td>&nbsp;<?php echo h($qcDocumentCategory['MasterListOfFormat']['revision_date']); ?></td>
+					<td><?php echo h(__('Revision Number')); ?> </td><td>&nbsp;<?php echo h($qcDocumentCategory['MasterListOfFormat']['revision_number']); ?></td>
+					<td><?php echo h(__('Revision Date')); ?></td><td>&nbsp;<?php echo h($qcDocumentCategory['MasterListOfFormat']['revision_date']); ?></td>
 				</tr>
 			</table>
 			<table cellpadding="2" cellspacing="2" border="1" width="100%" style="font-size:10px">
@@ -73,22 +73,22 @@
 				</table>
 				<table cellpadding="2" cellspacing="2" border="1" width="100%" style="font-size:10px">
 					<tr>
-						<td>Prepared By </td><td>&nbsp;</td>
-						<td>Approved By</td><td>&nbsp;</td>
+						<td><?php echo h(__('Prepared By')); ?> </td><td>&nbsp;</td>
+						<td><?php echo h(__('Approved By')); ?></td><td>&nbsp;</td>
 					</tr>
 				</table>
 			</textarea>
 			<?php echo $this->Form->input('title');?>
 			<?php echo $this->Form->input('branch_id',array('style'=>'width:90%','options'=>$PublishedBranchList));?>
-			<?php echo $this->Js->link('Add New',array('controller'=>'branchs','action'=>'add'),array('class'=>'label btn-info','update'=>'#reports_ajax'));?>
+			<?php echo $this->Js->link(__('Add New'),array('controller'=>'branchs','action'=>'add'),array('class'=>'label btn-info','update'=>'#reports_ajax'));?>
 			<?php echo $this->Form->input('department_id',array('style'=>'width:90%','options'=>$PublishedDepartmentList));?>
-			<?php echo $this->Js->link('Add New',array('controller'=>'departments','action'=>'add'),array('class'=>'label btn-info','update'=>'#reports_ajax'));?>
+			<?php echo $this->Js->link(__('Add New'),array('controller'=>'departments','action'=>'add'),array('class'=>'label btn-info','update'=>'#reports_ajax'));?>
 			<?php echo $this->Form->input('master_list_of_format_id',array('style'=>'width:90%'));?>
-			<?php echo $this->Js->link('Add New',array('controller'=>'master_list_of_formats','action'=>'add'),array('class'=>'label btn-info','update'=>'#reports_ajax'));?>
+			<?php echo $this->Js->link(__('Add New'),array('controller'=>'master_list_of_formats','action'=>'add'),array('class'=>'label btn-info','update'=>'#reports_ajax'));?>
 			<?php echo $this->Form->input('description');?>
 			<?php echo $this->Form->input('report_date');?>
 			<?php echo $this->Form->input('publish');?>
-			<?php echo $this->Form->submit('Submit',array('div'=>false,'class'=>'btn btn-primary btn-success'));?>
+			<?php echo $this->Form->submit(__('Submit'),array('div'=>false,'class'=>'btn btn-primary btn-success'));?>
 			<?php echo $this->Form->end();?>
 			<?php echo $this->Js->writeBuffer();?>
 
@@ -110,11 +110,11 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				<h4 class="modal-title">Advanced Search</h4>
+				<h4 class="modal-title"><?php echo h(__('Advanced Search')); ?></h4>
 			</div>
-			<div class="modal-body"><?php echo $this->element('advanced-search',array('postData'=>array("sr_no"=>"Sr No","name"=>"Name","short_name"=>"Short Name","record_status"=>"Record Status","branchid"=>"Branchid","departmentid"=>"Departmentid","approved_by"=>"Approved By","prepared_by"=>"Prepared By"),'PublishedBranchList'=>array($PublishedBranchList))); ?></div>
+			<div class="modal-body"><?php echo $this->element('advanced-search',array('postData'=>array("sr_no"=>__("Sr No"),"name"=>__("Name"),"short_name"=>__("Short Name"),"record_status"=>__("Record Status"),"branchid"=>__("Branchid"),"departmentid"=>__("Departmentid"),"approved_by"=>__("Approved By"),"prepared_by"=>__("Prepared By")),'PublishedBranchList'=>array($PublishedBranchList))); ?></div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-default" data-dismiss="modal"><?php echo h(__('Close')); ?></button>
 			</div></div></div></div>
 
 

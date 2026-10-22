@@ -1,7 +1,7 @@
 <?php echo $this->element('checkbox-script'); ?><div  id="main">
 	<?php echo $this->Session->flash();?>	
 	<div class="customFiles ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Custom Files','modelClass'=>'CustomFile','options'=>array("sr_no"=>"Sr No","model"=>"Model","controller"=>"Controller","record"=>"Record","file_name"=>"File Name","file_type"=>"File Type","action"=>"Action"),'pluralVar'=>'customFiles'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Custom Files'),'modelClass'=>'CustomFile','options'=>array("sr_no"=>__("Sr No"),"model"=>__("Model"),"controller"=>__("Controller"),"record"=>__("Record"),"file_name"=>__("File Name"),"file_type"=>__("File Type"),"action"=>__("Action")),'pluralVar'=>'customFiles'))); ?>
 
 		<script type="text/javascript">
 			$(document).ready(function(){
@@ -19,7 +19,7 @@
 					<th><?php echo $this->Paginator->sort('user_id'); ?></th>
 					<th><?php echo $this->Paginator->sort('employee_id'); ?></th>
 					<th><?php echo __('Date/time') ?></th>
-					<th>Actions</th>
+					<th><?php echo h(__('Actions')); ?></th>
 				</tr>
 				<?php if($customFiles){ ?>
 					<?php foreach ($customFiles as $customFile): ?>
@@ -30,7 +30,7 @@
 							<td><?php echo h($customFile['CustomFile']['created']); ?>&nbsp;</td>
 						<?php endforeach; ?>
 					<?php }else{ ?>
-						<tr><td colspan="4">No results found</td></tr>
+						<tr><td colspan="4"><?php echo h(__('No results found')); ?></td></tr>
 					<?php } ?>
 				</table>
 				<?php echo $this->Form->end();?>			

@@ -18,25 +18,25 @@
 			<br />
 			<br />
 			<div class="row">
-				<div class="col-md-3"><p>Prepared By</p><p>
+				<div class="col-md-3"><p><?php echo h(__('Prepared By')); ?></p><p>
 					<?php 
 					$sign = $this->requestAction(array('controller'=>'employees','action'=>'get_signatures',$qcDocument['PreparedBy']['id']));				
 					?>
 					<img src="<?php echo $sign;?>" height="60">
 				</p><p><?php echo $qcDocument['PreparedBy']['name'];?></p></div>
-				<div class="col-md-3"><p>Approved By</p><p>
+				<div class="col-md-3"><p><?php echo h(__('Approved By')); ?></p><p>
 					<?php 
 					$sign = $this->requestAction(array('controller'=>'employees','action'=>'get_signatures',$qcDocument['ApprovedBy']['id']));				
 					?>
 					<img src="<?php echo $sign;?>" height="60">
 				</p><p><?php echo $qcDocument['ApprovedBy']['name'];?></p></div>
-				<div class="col-md-3"><p>Issued By</p><p>
+				<div class="col-md-3"><p><?php echo h(__('Issued By')); ?></p><p>
 					<?php 
 					$sign = $this->requestAction(array('controller'=>'employees','action'=>'get_signatures',$qcDocument['IssuedBy']['id']));				
 					?>
 					<img src="<?php echo $sign;?>" height="60">
 				</p><p><?php echo $qcDocument['IssuedBy']['name'];?></p></div>
-				<div class="col-md-3"><p>Downloaded By</p><p>
+				<div class="col-md-3"><p><?php echo h(__('Downloaded By')); ?></p><p>
 					<?php 
 					$sign = $this->requestAction(array('controller'=>'employees','action'=>'get_signatures',$this->Session->read('User.employee_id')));
 					?>
@@ -52,30 +52,30 @@
 		<th colspan="8"><?php echo $qcDocument['QcDocument']['title'];?></th>
 	</tr>
 	<tr>
-		<th>Standard</th><td colspan="2"><?php echo $qcDocument['Standard']['name'];?></td>
-		<th>Document Category</th><td colspan="2"><?php echo $qcDocument['QcDocumentCategory']['name'];?></td>
-		<th>Clause</th><td colspan="2"><?php echo $qcDocument['Clause']['title'];?></td>
+		<th><?php echo h(__('Standard')); ?></th><td colspan="2"><?php echo $qcDocument['Standard']['name'];?></td>
+		<th><?php echo h(__('Document Category')); ?></th><td colspan="2"><?php echo $qcDocument['QcDocumentCategory']['name'];?></td>
+		<th><?php echo h(__('Clause')); ?></th><td colspan="2"><?php echo $qcDocument['Clause']['title'];?></td>
 	</tr>
 	<tr>
-		<th>Document No.</th><td><?php echo $qcDocument['QcDocument']['document_number'];?></td>
-		<th>Issue No.</th><td><?php echo $qcDocument['QcDocument']['issue_number'];?></td>
-		<th>Date Of Issue</th><td><?php echo $qcDocument['QcDocument']['date_of_issue'];?></td>
-		<th>Effective From Date</th><td><?php echo $qcDocument['QcDocument']['effective_from_date'];?></td>
+		<th><?php echo h(__('Document No.')); ?></th><td><?php echo $qcDocument['QcDocument']['document_number'];?></td>
+		<th><?php echo h(__('Issue No.')); ?></th><td><?php echo $qcDocument['QcDocument']['issue_number'];?></td>
+		<th><?php echo h(__('Date Of Issue')); ?></th><td><?php echo $qcDocument['QcDocument']['date_of_issue'];?></td>
+		<th><?php echo h(__('Effective From Date')); ?></th><td><?php echo $qcDocument['QcDocument']['effective_from_date'];?></td>
 	</tr>
 	<tr>
-		<th>Revision No.</th><td><?php echo $qcDocument['QcDocument']['revision_number'];?></td>
-		<th>Date Created.</th><td><?php echo $qcDocument['QcDocument']['date_created'];?></td>
-		<th>Revision Date</th><td><?php echo $qcDocument['QcDocument']['revision_date'];?></td>
-		<th>Date Of Review</th><td><?php echo $qcDocument['QcDocument']['date_of_review'];?></td>
+		<th><?php echo h(__('Revision No.')); ?></th><td><?php echo $qcDocument['QcDocument']['revision_number'];?></td>
+		<th><?php echo h(__('Date Created.')); ?></th><td><?php echo $qcDocument['QcDocument']['date_created'];?></td>
+		<th><?php echo h(__('Revision Date')); ?></th><td><?php echo $qcDocument['QcDocument']['revision_date'];?></td>
+		<th><?php echo h(__('Date Of Review')); ?></th><td><?php echo $qcDocument['QcDocument']['date_of_review'];?></td>
 	</tr>	
 	<tr>
-		<th>Prepared By</th><td><?php echo $qcDocument['PreparedBy']['name'];?></td>
-		<th>Approved By</th><td><?php echo $qcDocument['ApprovedBy']['name'];?></td>
-		<th>Issued By</th><td><?php echo $qcDocument['IssuedBy']['name'];?></td>
-		<th>Downloaded By</th><td><?php echo $this->Session->read('User.name');?></td>
+		<th><?php echo h(__('Prepared By')); ?></th><td><?php echo $qcDocument['PreparedBy']['name'];?></td>
+		<th><?php echo h(__('Approved By')); ?></th><td><?php echo $qcDocument['ApprovedBy']['name'];?></td>
+		<th><?php echo h(__('Issued By')); ?></th><td><?php echo $qcDocument['IssuedBy']['name'];?></td>
+		<th><?php echo h(__('Downloaded By')); ?></th><td><?php echo $this->Session->read('User.name');?></td>
 	</tr>
 </table>
-<h4>Record</h4>
+<h4><?php echo h(__('Record')); ?></h4>
 <table class="table table-responsive table-bordered">
 	<?php foreach(json_decode($customTable['CustomTable']['fields'],true) as $field){ ?>
 		<tr>
@@ -110,28 +110,28 @@
 		</tr>
 	<?php } ?>
 	<tr>
-		<th>Prepared By</th>
+		<th><?php echo h(__('Prepared By')); ?></th>
 		<td><?php echo $record['PreparedBy']['name'];?></td>
 	</tr>
 	<tr>
-		<th>Approved By</th>
+		<th><?php echo h(__('Approved By')); ?></th>
 		<td><?php echo $record['ApprovedBy']['name'];?></td>
 	</tr>
 	<tr>
-		<th>Publish</th>
+		<th><?php echo h(__('Publish')); ?></th>
 		<td><?php echo $record[$mainModel]['publish']?'Yes':'No';?></td>
 	</tr>
 </table>
-<h4>Approvals</h4>
+<h4><?php echo h(__('Approvals')); ?></h4>
 <?php if($approvals){ ?>
 	<table class="table table-responsive ">
 		<tr>
-			<th>Date/Time</th>
-			<th>From</th>
-			<th>To</th>
-			<th>Comments</th>
-			<th>Approver Comments/ Response</th>
-			<th>Status</th>
+			<th><?php echo h(__('Date/Time')); ?></th>
+			<th><?php echo h(__('From')); ?></th>
+			<th><?php echo h(__('To')); ?></th>
+			<th><?php echo h(__('Comments')); ?></th>
+			<th><?php echo h(__('Approver Comments/ Response')); ?></th>
+			<th><?php echo h(__('Status')); ?></th>
 		</tr>
 		<?php foreach($approvals as $approval){ ?>
 			<tr style="font-weight: 500;">
@@ -206,15 +206,15 @@
 					</tr>
 				<?php } ?>
 				<tr>
-					<th>Prepared By</th>
+					<th><?php echo h(__('Prepared By')); ?></th>
 					<td><?php echo $record['PreparedBy']['name'];?></td>
 				</tr>
 				<tr>
-					<th>Approved By</th>
+					<th><?php echo h(__('Approved By')); ?></th>
 					<td><?php echo $record['ApprovedBy']['name'];?></td>
 				</tr>
 				<tr>
-					<th>Publish</th>
+					<th><?php echo h(__('Publish')); ?></th>
 					<td><?php echo $record[$linkedModel[0]]['publish']?'Yes':'No';?></td>
 				</tr>
 			</table>

@@ -1,5 +1,5 @@
 <?php str_replace(' ','_', Inflector::Humanize($this->request->params['pass'][0])) ;?>
-<?php echo "<h4>&nbsp;&nbsp;" . __("Evidence Files") . "<small> ". $this->Html->link('Upload file with approval',array(
+<?php echo "<h4>&nbsp;&nbsp;" . __("Evidence Files") . "<small> ". $this->Html->link(__('Upload file with approval'),array(
     'controller'=>'evidences','action'=>'lists','model'=>'dashboard_files','record'=>$this->request->params['pass'][0]),array('class'=>'pull-right btn btn-xs btn-warning')) ."</small></h4>"; ?>
 
     <form id="live-search<?php echo str_replace(' ','_', Inflector::Humanize($this->request->params['pass'][0])) ;?>" action="" class="styled" method="post">
@@ -17,7 +17,7 @@
 
     <?php 
     if($this->request->params['pass'][0] != 'formats') echo $this->Element('files',array('filesData' => array('files'=>$files,'action'=>$this->request->params['pass'][0]))); 
-    else echo 'Data added to FlinkISO&trade; application will be considred as a "Records" & Forms are available under ' . $this->Html->link("MR Dashboard",array('controller'=>'dashboards','action'=>'mr#tabs')) ;
+    else echo __('Data added to FlinkISO&trade; application will be considred as a "Records" & Forms are available under ') . $this->Html->link(__("MR Dashboard"),array('controller'=>'dashboards','action'=>'mr#tabs')) ;
     ?>        
 </div>
 </form>

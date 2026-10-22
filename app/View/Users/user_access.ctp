@@ -22,10 +22,10 @@ echo $this->fetch('script');
 <style type="text/css">
 
 </style>
-<div><?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => 'Users', 'modelClass' => 'User', 'options' => array(), 'pluralVar' => 'users'))); ?>
+<div><?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => __('Users'), 'modelClass' => 'User', 'options' => array(), 'pluralVar' => 'users'))); ?>
 <div class="panel">
     <div class="panel-heading">
-        <h4><small><?php echo $this->Html->link('Users', array('action' => 'index')); ?> / </small> Set User Access for : <?php echo $this->Html->link($this->request->data['User']['username'],array(
+        <h4><small><?php echo $this->Html->link(__('Users'), array('action' => 'index')); ?> / </small> Set User Access for : <?php echo $this->Html->link($this->request->data['User']['username'],array(
             'action'=>'view',
             $this->request->data['User']['id'],
             'qc_document_id'=>$qc_document_id,'

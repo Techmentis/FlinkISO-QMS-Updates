@@ -6,7 +6,7 @@
 			<a href="<?php echo Router::url('/', true) . 'files/pdf/'. $this->Session->read('User.id'). '/' . $this->request->params['named']['id']  .'/'.$pdf;?>" target="_blank" onclick="add('<?php echo $this->request->params['named']['type'];?>','<?php echo $id?>','<?php echo $signature;?>','<?php echo $pdf;?>');"><?php echo $pdf;?></a></li>
 	<?php }?>
 <?php }else{ ?>
-	<li class="list-group-item">No documents found for this record</li>
+	<li class="list-group-item"><?php echo h(__('No documents found for this record')); ?></li>
 <?php } ?>
 <script type="text/javascript">
 	function add(t,id,s,n){

@@ -140,7 +140,7 @@ class AisController extends AppController {
                         header('X-Accel-Buffering: no');
                         header('Cache-Control: no-cache, no-store, must-revalidate');
                         echo json_encode(array('type' => 'status', 'data' => array(
-                        'message' => 'Loading the current form, sharing rules, and linked document.',
+                        'message' => __('Loading the current form, sharing rules, and linked document.'),
                         'request_id' => $this->_historyId
                         )))."\n";
                         if (ob_get_level() > 0) @ob_flush();
@@ -585,7 +585,7 @@ class AisController extends AppController {
         // Ollama's prompt-evaluation phase before its first generated token.
         if ($debugStream) {
             $emitStreamEvent('status', array(
-            'message' => 'Connected to FlinkISO AI API. Waiting for model output.',
+            'message' => __('Connected to FlinkISO AI API. Waiting for model output.'),
             'model' => $model,
             'request_id' => $this->_historyId,
             'document_characters' => $documentLength,
@@ -1208,7 +1208,7 @@ class AisController extends AppController {
         };
         if ($debugStream) {
             $emitStreamEvent('status', array(
-            'message' => 'Connected to the configured AI provider. Waiting for a response.',
+            'message' => __('Connected to the configured AI provider. Waiting for a response.'),
             'model' => $model,
             'request_id' => $this->_historyId
             ));

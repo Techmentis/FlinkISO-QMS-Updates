@@ -42,7 +42,7 @@
 					},
 					error: function(request, status, error) {
                     //alert(request.responseText);
-						alert('Action failed!');
+						alert(<?php echo json_encode(__('Action failed!'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 					}
 				});
 			}
@@ -54,7 +54,7 @@
 
 			jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 				return this.optional(element) || (parseFloat(value) != -1);
-			}, "Please select the value");
+			}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 
 			$('#RecordLockAddForm').validate();
@@ -87,7 +87,7 @@
 	<!-- <div class="col-md-6"> -->
 		<div class="box box-default  collapsed-box">
 			<div class="box-header data-header" data-widget="collapse">
-				<h3 class="box-title"><span class=""><i class="fa fa-random"></i></span> Locks </h3>
+				<h3 class="box-title"><span class=""><i class="fa fa-random"></i></span> <?php echo h(__('Locks')); ?> </h3>
 				<div class="box-tools pull-right"><button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button></div>
 			</div>
 			<div class="box-body">
@@ -142,7 +142,7 @@
 								</tr>
 							<?php endforeach; ?>
 						<?php }else{ ?>
-							<tr><td colspan=102>No results found</td></tr>
+							<tr><td colspan=102><?php echo h(__('No results found')); ?></td></tr>
 						<?php } ?>
 					</table>
 				</div>
@@ -188,7 +188,7 @@
 						</div>
 					</div>		
 				</div>
-				<div class="panel-footer">At certiain point you may want to disable a record which is dependent on current record you are adding. E.g, if you are adding Document Change Request, you may restrict the Document for which you are adding the chage request for. In such scenario, you can use this option. Select which table you want to lock and the add the condition. Once you add and save these details, a linked record for that table will be locked for editing.</div>
+				<div class="panel-footer"><?php echo h(__('At certiain point you may want to disable a record which is dependent on current record you are adding. E.g, if you are adding Document Change Request, you may restrict the Document for which you are adding the chage request for. In such scenario, you can use this option. Select which table you want to lock and the add the condition. Once you add and save these details, a linked record for that table will be locked for editing.')); ?></div>
 			</div>
 		</div>
 <?php } ?>		

@@ -12,7 +12,7 @@
 <div id="customTables_ajax">
 	<?php echo $this->Session->flash();?>
 	<div class="customTables ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Custom Tables','modelClass'=>'CustomTable','options'=>array(),'pluralVar'=>'customTables'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Custom Tables'),'modelClass'=>'CustomTable','options'=>array(),'pluralVar'=>'customTables'))); ?>
 
 		<div class="nav panel panel-default">
 			<div class="customTables form col-md-12">
@@ -27,7 +27,7 @@
 					
 					<?php echo "<div class='col-md-4'>".$this->Form->input('name',array('class'=>'form-control','required','default'=> Inflector::Humanize($qcDocument['QcDocument']['name']))) . '</div>'; ?>
 					<?php echo "<div class='col-md-3 hide'>".$this->Form->input('table_name',array('class'=>'form-control', 'readonly', 'default'=>$table_name)) . '</div>'; ?>
-					<?php echo "<div class='col-md-1'>".$this->Form->input('table_version',array('class'=>'form-control','label'=>'Version',  'readonly', 'default'=>$table_version)) . '</div>'; ?>
+					<?php echo "<div class='col-md-1'>".$this->Form->input('table_version',array('class'=>'form-control','label'=>__('Version'),  'readonly', 'default'=>$table_version)) . '</div>'; ?>
 					<?php echo "<div class='col-md-12 hide'>".$this->Form->hidden('fields',array('class'=>'form-control',)) . '</div>'; ?>
 					<?php echo "<div class='col-md-2'>".$this->Form->input('password',array('type'=>'password', 'class'=>'form-control',)) . '</div>'; ?>
 					<?php echo "<div class='col-md-2'>".$this->Form->input('re-password',array('type'=>'password', 'class'=>'form-control',)) . '</div>'; ?>				
@@ -43,13 +43,13 @@
 				</div>
 				<?php 
 				if(!empty($qcDocument['ParentDocument']['title'])){
-					echo "<div class='row'><div class='col-md-12'><p><strong>Records in this table will be automatically linked with parent_document_id : ".$qcDocument['ParentDocument']['title'].". Users can add/update these records from ".$qcDocument['ParentDocument']['title']."'s View page only.</strong></p></div>";
+					echo '<div class=\'row\'><div class=\'col-md-12\'><p><strong>' . h(__('Records in this table will be automatically linked with parent_document_id :')) . ' '.$qcDocument['ParentDocument']['title'].". Users can add/update these records from ".$qcDocument['ParentDocument']['title']."'s View page only.</strong></p></div>";
 					?>
 					<?php 
 					echo "<div class='col-md-6'>".$this->Form->input('field_name',array('class'=>'form-control',)) . '</div>'; 
 					echo "<div class='col-md-6' id='get_data'>".$this->Form->input('field_value',array('class'=>'form-control','options'=>array())) . '</div>';
 					?>
-					<div class="col-md-12"><p><br />Select field name (from parent table) and field value against which you would like to load this form. This form will be loaded for Adding a record on this value.</p></div>
+					<div class="col-md-12"><p><br /><?php echo h(__('Select field name (from parent table) and field value against which you would like to load this form. This form will be loaded for Adding a record on this value.')); ?></p></div>
 				</div>
 			<?php } ?>	
 			<div class="row">
@@ -93,7 +93,7 @@
 						echo $this->element('onlyoffice',array(
 							'url'=>$url,
 							'placeholderid'=>$placeholderid,
-							'panel_title'=>'Document Viewer',
+							'panel_title'=>__('Document Viewer'),
 							'mode'=>$mode,
 							'path'=>$file_path,
 							'file'=>$file,
@@ -138,7 +138,7 @@
 						echo $this->element('onlyoffice',array(
 							'url'=>$url,
 							'placeholderid'=>$placeholderid,
-							'panel_title'=>'Document Viewer',
+							'panel_title'=>__('Document Viewer'),
 							'mode'=>$mode,
 							'path'=>$file_path,
 							'file'=>$file,
@@ -174,7 +174,7 @@
 				<div class="box box-default">
 					<div class="box-header with-border">
 						<i class="fa fa-database"></i>
-						<h3 class="box-title">Data Entry</h3>
+						<h3 class="box-title"><?php echo h(__('Data Entry')); ?></h3>
 					</div>
 					<div class="box-body">
 						<div class="row">
@@ -202,7 +202,7 @@
 					<div class="box box-default">
 						<div class="box-header with-border">
 							<i class="fa fa-share-alt"></i>
-							<h3 class="box-title">Table Sharing</h3>
+							<h3 class="box-title"><?php echo h(__('Table Sharing')); ?></h3>
 						</div>
 						<div class="box-body">
 							<div class="row">
@@ -211,14 +211,14 @@
 									echo "<div class='col-md-12'>".$this->Form->input('share_with_branches',array('name'=>'data[QcDocument][share_with_branches][]', 'multiple','options'=>$branches, 'selected'=>json_decode($qcDocument["QcDocument"]["branches"],false), 'class'=>'form-control',)) . '</div>'; 
 									echo "<div class='col-md-12'>".$this->Form->input('share_with_departments',array('name'=>'data[QcDocument][share_with_departments][]','multiple', 'options'=>$departments, 'selected'=>json_decode($qcDocument["QcDocument"]["departments"],false), 'class'=>'form-control',)) . '</div>'; 
 									echo "<div class='col-md-12'>".$this->Form->input('share_with_designations',array('name'=>'data[QcDocument][share_with_designations][]','multiple', 'options'=>$designations, 'selected'=>json_decode($qcDocument["QcDocument"]["designations"],false), 'class'=>'form-control chosen',)) . '</div>'; 
-									echo "<div class='col-md-12'>".$this->Form->input('user_id',array('name'=>'data[QcDocument][user_id][]','label'=>'Share with Users','multiple', 'options'=>$usernames, 'selected'=>json_decode($qcDocument["QcDocument"]["user_id"],false), 'class'=>'form-control', 'style'=>'')) . '</div>'; 
+									echo "<div class='col-md-12'>".$this->Form->input('user_id',array('name'=>'data[QcDocument][user_id][]','label'=>__('Share with Users'),'multiple', 'options'=>$usernames, 'selected'=>json_decode($qcDocument["QcDocument"]["user_id"],false), 'class'=>'form-control', 'style'=>'')) . '</div>'; 
 								}
 
 								if($this->request->params['named']['process_id']){
 									echo "<div class='col-md-12'>".$this->Form->input('share_with_branches',array('name'=>'data[QcDocument][share_with_branches][]', 'multiple','options'=>$branches, 'selected'=>json_decode($process["Process"]["applicable_to_branches"],false), 'class'=>'form-control',)) . '</div>'; 
 									echo "<div class='col-md-12'>".$this->Form->input('share_with_departments',array('name'=>'data[QcDocument][share_with_departments][]','multiple', 'options'=>$departments, 'selected'=>json_decode($process["Process"]["process_owners"],false), 'class'=>'form-control',)) . '</div>'; 
 									echo "<div class='col-md-12'>".$this->Form->input('share_with_designations',array('name'=>'data[QcDocument][share_with_designations][]','multiple', 'options'=>$designations,'class'=>'form-control chosen',)) . '</div>'; 
-									echo "<div class='col-md-12'>".$this->Form->input('user_id',array('name'=>'data[QcDocument][user_id][]','label'=>'Share with Users','multiple', 'options'=>$usernames, 'class'=>'form-control', 'style'=>'')) . '</div>'; 
+									echo "<div class='col-md-12'>".$this->Form->input('user_id',array('name'=>'data[QcDocument][user_id][]','label'=>__('Share with Users'),'multiple', 'options'=>$usernames, 'class'=>'form-control', 'style'=>'')) . '</div>'; 
 								}
 								?>
 
@@ -226,7 +226,7 @@
 						</div>
 					</div>
 				</div>
-				<?php echo "<div class='col-md-12'>".$this->Form->input('description',array('class'=>'form-control','label'=>'Notes/Description')) . '</div>'; ?>	
+				<?php echo "<div class='col-md-12'>".$this->Form->input('description',array('class'=>'form-control','label'=>__('Notes/Description'))) . '</div>'; ?>	
 			</div>
 
 
@@ -300,7 +300,7 @@
 
 		if($("#"+id).val != ''){
 			$("#CustomTableFields"+f+"FieldType").prop("greaterThanZero", function(value, element) {
-			}, "Please select the value");
+			}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 
 			$("#CustomTableFields"+f+"Length").prop('required',true);			
@@ -390,7 +390,7 @@
 		
 
 		if(i != 1){
-			alert('You must add one default field. Only one default field is allowed.');
+			alert(<?php echo json_encode(__('You must add one default field. Only one default field is allowed.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 			$("#"+ckid).prop('checked',false);
 			return false;                
 		}else{
@@ -441,7 +441,7 @@
 
 		jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 			return this.optional(element) || (parseInt(value) != -1);
-		}, "This field is required.");
+		}, <?php echo json_encode(__('This field is required.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 		jQuery.validator.addMethod("varchar", function(value, element) {
 			return this.optional(element) || (parseFloat(value) < 256);

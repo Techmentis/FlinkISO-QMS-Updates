@@ -1,21 +1,21 @@
 <?php echo $this->element('Emails/email_header', array(
-    'emailTitle' => 'Summary of Open Tasks',
-    'emailPreheader' => 'Your weekly FlinkISO open-task summary is ready.',
+    'emailTitle' => __('Summary of Open Tasks'),
+    'emailPreheader' => __('Your weekly FlinkISO open-task summary is ready.'),
     'environment' => isset($env) ? $env : null,
     'app_url' => isset($app_url) ? $app_url : null
 )); ?>
 <table role="presentation" width="100%" cellpadding="6" cellspacing="0" border="0" style="width:100%; border:1px solid #d9d9d9; border-collapse:collapse; font-size:11px; line-height:1.35;">
     <thead>
         <tr style="background-color:#1769aa; color:#ffffff;">
-            <th align="left">Task</th>
-            <th align="center">Completion</th>
+            <th align="left"><?php echo h(__('Task')); ?></th>
+            <th align="center"><?php echo h(__('Completion')); ?></th>
             <?php $headerDate = $start_date; ?>
             <?php while (strtotime($headerDate) <= strtotime($end_date)): ?>
             <th align="center">W<?php echo date('W', strtotime($headerDate)); ?><br><span style="font-weight:normal;"><?php echo date('d M', strtotime($headerDate)); ?>&ndash;<?php echo date('d M', strtotime('+7 days', strtotime($headerDate))); ?></span></th>
             <?php $headerDate = date('Y-m-d', strtotime('+7 days', strtotime($headerDate))); ?>
             <?php endwhile; ?>
-            <th align="center">RAG</th>
-            <th align="left">Assigned To</th>
+            <th align="center"><?php echo h(__('RAG')); ?></th>
+            <th align="left"><?php echo h(__('Assigned To')); ?></th>
         </tr>
     </thead>
     <tbody>
@@ -35,7 +35,7 @@
                     }
                 }
                 ?>
-                <td align="center" style="border-top:1px solid #e5e5e5; color:<?php echo $performed ? '#398439' : '#c9302c'; ?>;"><?php echo $performed ? 'Performed' : 'Not performed'; ?></td>
+                <td align="center" style="border-top:1px solid #e5e5e5; color:<?php echo $performed ? '#398439' : '#c9302c'; ?>;"><?php echo $performed ? __('Performed') : __('Not performed'); ?></td>
                 <?php $weekDate = date('Y-m-d', strtotime('+7 days', strtotime($weekDate))); ?>
             <?php endwhile; ?>
             <?php
@@ -48,7 +48,7 @@
         </tr>
         <?php endforeach; ?>
     <?php else: ?>
-        <tr><td colspan="20" style="padding:18px; text-align:center; color:#777777;">No open tasks found.</td></tr>
+        <tr><td colspan="20" style="padding:18px; text-align:center; color:#777777;"><?php echo h(__('No open tasks found.')); ?></td></tr>
     <?php endif; ?>
     </tbody>
 </table>

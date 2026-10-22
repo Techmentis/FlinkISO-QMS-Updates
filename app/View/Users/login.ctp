@@ -18,27 +18,27 @@
             <div class="col-md-6 col-xs-12 hidden-xs">
 
                 <div class="panel">
-                    <div class="box-header with-border"><h3 class="box-title">Thank you for downloading FlinkISO&trade; <small>2.4.x</small> : Quality Management System</h3></div>
+                    <div class="box-header with-border"><h3 class="box-title"><?php echo h(__('Thank you for downloading FlinkISO')); ?>&trade; <small><?php echo h(__('2.4.x')); ?></small> <?php echo h(__(': Quality Management System')); ?></h3></div>
                     <div class="panel-body">
                         <div class="row">
                             <div class="col-md-12">
-                                <p>You may want to consider following services: </p>
+                                <p><?php echo h(__('You may want to consider following services:')); ?> </p>
                                 <ul>
-                                    <li><a href="https://www.flinkiso.com/services/training.html" class="link" target="_blank">QMS Training</a></li>
-                                    <li><a href="https://www.flinkiso.com/services/customization.html" class="link" target="_blank">Software Customization</a></li>
-                                    <li><a href="https://www.flinkiso.com/services/application-support.html"  class="link" target="_blank">Enterprise Support</a> </li>
-                                    <li><a href="https://www.flinkiso.com/pricing/on-premise.html"  class="link" target="_blank">Compare Editions</a> </li>
-                                    <li><a href="https://www.flinkiso.com/pricing/quote-for-enterprise-edition.html" class="link" target="_blank" >Quote Request For Enterprise Edition</a></li>
+                                    <li><a href="https://www.flinkiso.com/services/training.html" class="link" target="_blank"><?php echo h(__('QMS Training')); ?></a></li>
+                                    <li><a href="https://www.flinkiso.com/services/customization.html" class="link" target="_blank"><?php echo h(__('Software Customization')); ?></a></li>
+                                    <li><a href="https://www.flinkiso.com/services/application-support.html"  class="link" target="_blank"><?php echo h(__('Enterprise Support')); ?></a> </li>
+                                    <li><a href="https://www.flinkiso.com/pricing/on-premise.html"  class="link" target="_blank"><?php echo h(__('Compare Editions')); ?></a> </li>
+                                    <li><a href="https://www.flinkiso.com/pricing/quote-for-enterprise-edition.html" class="link" target="_blank" ><?php echo h(__('Quote Request For Enterprise Edition')); ?></a></li>
                                 </ul>
                             </div>
                             <div class="col-md-12">
                                 <hr />
-                                <h4><?php echo $this->Html->link('Free Vs Paid?','https://www.flinkiso.com/pricing/free-vs-paid.html',array('class'=>'link','target'=>'_blank'));?></h4>
-                                <h5>For rapid End-to-End application deployment, try our <a href="https://www.flinkiso.com/pricing/startup-plan.html" target="_blank" class="link" > Startup Plan!</a></h5>
-                                <h5>For top priority annual cupport, try our <a href="https://www.flinkiso.com/pricing/enterprise-support.html" target="_blank" class="link" > Annual Enterptise Support</a></h5>
+                                <h4><?php echo $this->Html->link(__('Free Vs Paid?'),'https://www.flinkiso.com/pricing/free-vs-paid.html',array('class'=>'link','target'=>'_blank'));?></h4>
+                                <h5><?php echo h(__('For rapid End-to-End application deployment, try our')); ?> <a href="https://www.flinkiso.com/pricing/startup-plan.html" target="_blank" class="link" > <?php echo h(__('Startup Plan!')); ?></a></h5>
+                                <h5><?php echo h(__('For top priority annual cupport, try our')); ?> <a href="https://www.flinkiso.com/pricing/enterprise-support.html" target="_blank" class="link" > <?php echo h(__('Annual Enterptise Support')); ?></a></h5>
                             </div>
                             <div class="col-md-12">
-                                <p><strong>Training:</strong> Contact sale@flinkiso.com for one time training @USD.150.</p>
+                                <p><strong><?php echo h(__('Training:')); ?></strong> <?php echo h(__('Contact sale@flinkiso.com for one time training @USD.150.')); ?></p>
                             </div>
                         </div>
                     </div>
@@ -47,7 +47,7 @@
             <div class="col-md-6 col-xs-12">
                 <?php echo $this->Form->create('User', array('controller' => 'login','role' => 'form','class' => ''))?>
                 <div class="box">
-                    <div class="box-header with-border"><h3 class="box-title">Login</h3></div>
+                    <div class="box-header with-border"><h3 class="box-title"><?php echo h(__('Login')); ?></h3></div>
                     <div class="box-body">
 
                         <?php
@@ -72,7 +72,7 @@
     <div class="row">
         <?php if(Configure::read('PDFTkPath') == ''){ ?>
             <div class="col-md-12">
-                <div class="alert alert-danger">For manual installation: You must install PDFTk Server and update its binary path in core.php for PDF export to function properly.</div>
+                <div class="alert alert-danger"><?php echo h(__('For manual installation: You must install PDFTk Server and update its binary path in core.php for PDF export to function properly.')); ?></div>
             </div>
         <?php } ?>
     </div>

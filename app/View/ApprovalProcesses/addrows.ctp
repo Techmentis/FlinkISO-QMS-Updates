@@ -19,10 +19,10 @@
 	<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.send_to_publishers',array('checkbox'=>'checkbox','label'=>false,
 	'onchange'=>'udpatecheck('.$i.',"publisher",this);')) ?></td>			
 
-	<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.approval_mode',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>'View Only',1=>'Edit'),'default'=>1)) ?></td>
-	<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.approval_type',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>'All',1=>'Any'),'default'=>1));?></td>
+	<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.approval_mode',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>__('View Only'),1=>__('Edit')),'default'=>1)) ?></td>
+	<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.approval_type',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>__('All'),1=>__('Any')),'default'=>1));?></td>
 
-	<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.ignore_department',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>'Yes',1=>'No'),'default'=>1));?></td>
-	<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.ignore_branch',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>'Yes',1=>'No'),'default'=>1));?></td>
-	<td>Remove</td>
+	<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.ignore_department',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>__('Yes'),1=>__('No')),'default'=>1));?></td>
+	<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.ignore_branch',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>__('Yes'),1=>__('No')),'default'=>1));?></td>
+	<td><?php echo h(__('Remove')); ?></td>
 </tr>

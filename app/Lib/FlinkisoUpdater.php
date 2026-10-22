@@ -24,14 +24,14 @@ class FlinkisoUpdater {
             if (!isset($c[$key]) || !is_string($c[$key]) || trim($c[$key]) === '') $missing[] = $key;
         }
         if ($missing) {
-            throw new RuntimeException('Incomplete paid repository configuration. Missing or empty: ' . implode(', ', $missing) . '.');
+            throw new RuntimeException(__('Incomplete paid repository configuration. Missing or empty: ') . implode(', ', $missing) . '.');
         }
         $c['url'] = trim($c['url']);
         $c['folder'] = trim($c['folder']);
         $c['pat'] = trim($c['pat']);
         $this->validateUrl($c['url']);
         if (!preg_match('/^[A-Za-z0-9_-][A-Za-z0-9_.-]*$/D', $c['folder']) || strpos($c['folder'], '..') !== false || preg_match('/[\r\n]/', $c['pat'])) {
-            throw new RuntimeException('Invalid repository folder or PAT configuration.');
+            throw new RuntimeException(__('Invalid repository folder or PAT configuration.'));
         }
         // GitHub browser archive URLs do not reliably accept PATs; use its API.
         if (preg_match('~^https://github.com/([^/]+)/([^/]+)/archive/(?:refs/heads/)?(.+)\.zip$~', $c['url'], $m)) {
@@ -46,7 +46,7 @@ class FlinkisoUpdater {
         if (!$u || empty($u['scheme']) || $u['scheme'] !== 'https' || empty($u['host']) ||
             !in_array(strtolower($u['host']), array('github.com', 'api.github.com', 'codeload.github.com'), true) ||
             isset($u['user']) || isset($u['pass']) || (isset($u['port']) && $u['port'] != 443)) {
-            throw new RuntimeException('Update downloads and redirects must use HTTPS on GitHub.');
+            throw new RuntimeException(__('Update downloads and redirects must use HTTPS on GitHub.'));
         }
     }
 
@@ -59,13 +59,13 @@ class FlinkisoUpdater {
         if (!empty($this->config['pat'])) $message = str_replace($this->config['pat'], '[REDACTED]', $message);
         $row = array('step' => $step, 'percent' => $percent, 'message' => $message, 'error' => $error, 'warning' => $warning);
         if ($this->log && file_put_contents($this->log, json_encode($row) . "\n", FILE_APPEND | LOCK_EX) === false) {
-            throw new RuntimeException('Cannot write updater log: ' . $this->log);
+            throw new RuntimeException(__('Cannot write updater log: ') . $this->log);
         }
         if ($display && $this->emit) call_user_func($this->emit, $row);
     }
 
     private function mkdirChecked($path) {
-        if (!is_dir($path) && !mkdir($path, 0700, true)) throw new RuntimeException('Cannot create directory: ' . $path);
+        if (!is_dir($path) && !mkdir($path, 0700, true)) throw new RuntimeException(__('Cannot create directory: ') . $path);
     }
 
     private function writableErrors($path, &$errors) {
@@ -103,7 +103,7 @@ class FlinkisoUpdater {
 
     private function copyChecked($from, $to) {
         $this->mkdirChecked(dirname($to));
-        if (!copy($from, $to)) throw new RuntimeException('Copy failed: ' . $from . ' -> ' . $to);
+        if (!copy($from, $to)) throw new RuntimeException(__('Copy failed: ') . $from . ' -> ' . $to);
     }
 
     public function run($repeatBackup, $confirmedDate, $executeSql) {
@@ -111,11 +111,11 @@ class FlinkisoUpdater {
         $step = 'connect';
         try {
             $repo = $this->repository();
-            if (!extension_loaded('curl')) throw new RuntimeException('Missing required PHP extension: cURL (php-curl).');
-            if (!function_exists('exec')) throw new RuntimeException('PHP exec() is required to run command-line unzip.');
+            if (!extension_loaded('curl')) throw new RuntimeException(__('Missing required PHP extension: cURL (php-curl).'));
+            if (!function_exists('exec')) throw new RuntimeException(__('PHP exec() is required to run command-line unzip.'));
             $unzipCheck = array(); $unzipCheckStatus = 0;
             exec('command -v unzip 2>/dev/null', $unzipCheck, $unzipCheckStatus);
-            if ($unzipCheckStatus !== 0 || !$unzipCheck) throw new RuntimeException('Command-line unzip is required.');
+            if ($unzipCheckStatus !== 0 || !$unzipCheck) throw new RuntimeException(__('Command-line unzip is required.'));
             $errors = array();
             $this->writableErrors($this->root . '/backup', $errors);
             $this->writableErrors($this->root . '/app/webroot/updates', $errors);
@@ -123,7 +123,7 @@ class FlinkisoUpdater {
             $this->mkdirChecked($this->root . '/backup');
             $this->mkdirChecked($this->root . '/backup/.updater');
             $lock = fopen($this->root . '/backup/.updater/lock', 'c');
-            if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) throw new RuntimeException('Another update is running.');
+            if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) throw new RuntimeException(__('Another update is running.'));
             $this->work = $this->root . '/backup/.updater/' . date('Ymd-His') . '-' . bin2hex(openssl_random_pseudo_bytes(8));
             $this->mkdirChecked($this->work);
             $this->log = $this->work . '/run.jsonl';
@@ -131,7 +131,7 @@ class FlinkisoUpdater {
             register_shutdown_function(function () use ($fatalLog) {
                 $error = error_get_last();
                 if ($error && in_array($error['type'], array(E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR), true)) {
-                    file_put_contents($fatalLog, json_encode(array('error' => true, 'message' => 'PHP terminated unexpectedly. Review the PHP error log and recovery marker before retrying.')) . "\n", FILE_APPEND);
+                    file_put_contents($fatalLog, json_encode(array('error' => true, 'message' => __('PHP terminated unexpectedly. Review the PHP error log and recovery marker before retrying.'))) . "\n", FILE_APPEND);
                 }
             });
             // Do not make a separate HEAD request. GitHub/codeload can return a
@@ -145,9 +145,9 @@ class FlinkisoUpdater {
             $reuseBackup = false;
             if (is_dir($backup)) {
                 if (!$repeatBackup) {
-                    if ($confirmedDate !== $today) throw new RuntimeException('The backup choice expired. Reload and try again.');
+                    if ($confirmedDate !== $today) throw new RuntimeException(__('The backup choice expired. Reload and try again.'));
                     $reuseBackup = $this->findCompletedBackup($backup);
-                    if (!$reuseBackup) throw new RuntimeException('Today has no completed backup to reuse. Choose another backup.');
+                    if (!$reuseBackup) throw new RuntimeException(__('Today has no completed backup to reuse. Choose another backup.'));
                     $backup = $reuseBackup;
                 } else {
                     $backup .= '/' . date(DIRECTORY_SEPARATOR === '\\' ? 'H-i' : 'H:i');
@@ -167,7 +167,7 @@ class FlinkisoUpdater {
                     $this->copyChecked($path, $backup . '/' . $rel);
                     if (++$i % 100 === 0) $this->event($step, (int)($i * 99 / max(1, $count)), 'Backed up ' . $i . ' / ' . $count . ' files.');
                 }
-                if (file_put_contents($backup . '/.complete', date('c')) === false) throw new RuntimeException('Cannot record completed backup: ' . $backup);
+                if (file_put_contents($backup . '/.complete', date('c')) === false) throw new RuntimeException(__('Cannot record completed backup: ') . $backup);
                 $this->event($step, 100, 'Backup complete: ' . $backup);
             }
 
@@ -182,10 +182,10 @@ class FlinkisoUpdater {
             // Deny HTTP access to SQL, archives and extracted PHP on Apache/IIS.
             if (file_put_contents($updates . '/.htaccess', "Require all denied\n") === false ||
                 file_put_contents($updates . '/web.config', '<configuration><system.webServer><security><authorization><remove users="*" roles="" verbs=""/><add accessType="Deny" users="*"/></authorization></security></system.webServer></configuration>') === false) {
-                throw new RuntimeException('Cannot protect updates directory.');
+                throw new RuntimeException(__('Cannot protect updates directory.'));
             }
             foreach ($old as $rel => $path) {
-                if ($rel !== '.htaccess' && $rel !== 'web.config' && !unlink($path)) throw new RuntimeException('Cannot remove previous download: ' . $path);
+                if ($rel !== '.htaccess' && $rel !== 'web.config' && !unlink($path)) throw new RuntimeException(__('Cannot remove previous download: ') . $path);
             }
             $archive = $updates . '/update.zip';
             $this->download($repo, $archive);
@@ -196,7 +196,7 @@ class FlinkisoUpdater {
             $stage = $updates . '/stage-' . basename($this->work);
             $this->extract($archive, $stage, $repo);
             $source = $stage . '/' . $repo['folder'] . '/app';
-            if (!is_dir($source)) throw new RuntimeException('Archive does not contain the configured folder/app directory.');
+            if (!is_dir($source)) throw new RuntimeException(__('Archive does not contain the configured folder/app directory.'));
             $this->event($step, 100, 'Archive extracted.');
 
             $step = 'validate';
@@ -235,7 +235,7 @@ class FlinkisoUpdater {
                 $this->copyChecked($path, $this->work . '/new/' . $rel);
                 if (is_file($this->root . '/app/' . $rel)) $this->copyChecked($this->root . '/app/' . $rel, $this->work . '/old/' . $rel);
             }
-            if (file_put_contents($this->work . '/manifest.json', json_encode(array_keys($incoming))) === false) throw new RuntimeException('Cannot write recovery manifest.');
+            if (file_put_contents($this->work . '/manifest.json', json_encode(array_keys($incoming))) === false) throw new RuntimeException(__('Cannot write recovery manifest.'));
             $this->event($step, 100, 'Update files prepared.');
 
             $step = 'sql';
@@ -244,7 +244,7 @@ class FlinkisoUpdater {
             if ($sqlMissing) $this->event($step, 100, 'updates.sql is absent; continuing with application files.', false, true, false);
             foreach ($statements as $index => $statement) {
                 try {
-                    if (call_user_func($executeSql, $statement) === false) throw new RuntimeException('Database rejected statement.');
+                    if (call_user_func($executeSql, $statement) === false) throw new RuntimeException(__('Database rejected statement.'));
                 } catch (Throwable $e) {
                     $sqlWarnings++;
                     $this->event($step, (int)(($index + 1) * 100 / max(1, count($statements))), 'SQL statement ' . ($index + 1) . ' skipped: ' . $e->getMessage(), false, true, false);
@@ -284,7 +284,7 @@ class FlinkisoUpdater {
             $this->validateUrl($url);
             $location = null;
             $file = $path ? fopen($path, 'wb') : null;
-            if ($path && !$file) throw new RuntimeException('Cannot write archive: ' . $path);
+            if ($path && !$file) throw new RuntimeException(__('Cannot write archive: ') . $path);
             $ch = curl_init($url);
             $headers = array('Accept: application/vnd.github+json');
             // Never forward the PAT to a signed codeload redirect.
@@ -303,7 +303,7 @@ class FlinkisoUpdater {
             if ($ok === false) {
                 if ($path && is_file($path)) @unlink($path);
                 if (++$attempt < 4) { sleep($attempt); $redirect--; continue; }
-                throw new RuntimeException('GitHub transfer failed after 4 attempts (cURL ' . $errno . '). Check network/TLS and disk write permissions.');
+                throw new RuntimeException(__('GitHub transfer failed after 4 attempts (cURL ') . $errno . '). Check network/TLS and disk write permissions.');
             }
             if ($code >= 300 && $code < 400 && $location) { $url = $location; $attempt = 0; continue; }
             if (($code === 429 || $code >= 500) && ++$attempt < 4) {
@@ -312,11 +312,11 @@ class FlinkisoUpdater {
                 $redirect--;
                 continue;
             }
-            if ($code !== 200) throw new RuntimeException('GitHub returned HTTP ' . $code . '. Check repository URL and PAT access.');
-            if ($path && filesize($path) === 0) throw new RuntimeException('GitHub returned an empty archive.');
+            if ($code !== 200) throw new RuntimeException(__('GitHub returned HTTP ') . $code . '. Check repository URL and PAT access.');
+            if ($path && filesize($path) === 0) throw new RuntimeException(__('GitHub returned an empty archive.'));
             return;
         }
-        throw new RuntimeException('Too many GitHub redirects.');
+        throw new RuntimeException(__('Too many GitHub redirects.'));
     }
 
     private function extract($archive, $stage, $repo) {
@@ -325,7 +325,7 @@ class FlinkisoUpdater {
         exec('unzip -oq ' . escapeshellarg($archive) . ' -d ' . escapeshellarg($stage) . ' 2>&1', $output, $status);
         if ($status !== 0) {
             $details = trim(implode("\n", array_slice($output, -20)));
-            throw new RuntimeException('Could not unzip the update archive.' . ($details !== '' ? "\n" . $details : ''));
+            throw new RuntimeException(__('Could not unzip the update archive.') . ($details !== '' ? "\n" . $details : ''));
         }
 
         $expected = $stage . '/' . $repo['folder'];
@@ -334,7 +334,7 @@ class FlinkisoUpdater {
                 return $name !== '.' && $name !== '..';
             }));
             if (count($entries) !== 1 || !is_dir($stage . '/' . $entries[0]) || !rename($stage . '/' . $entries[0], $expected)) {
-                throw new RuntimeException('Cannot normalize GitHub archive folder.');
+                throw new RuntimeException(__('Cannot normalize GitHub archive folder.'));
             }
         }
     }
@@ -366,14 +366,14 @@ class FlinkisoUpdater {
                 $dest = $this->root . '/app/' . $rel;
                 $dir = dirname($dest); $missing = array();
                 while (!is_dir($dir)) { $missing[] = $dir; $dir = dirname($dir); }
-                foreach (array_reverse($missing) as $dir) { if (!mkdir($dir, 0755)) throw new RuntimeException('Cannot create: ' . $dir); $dirs[] = $dir; }
+                foreach (array_reverse($missing) as $dir) { if (!mkdir($dir, 0755)) throw new RuntimeException(__('Cannot create: ') . $dir); $dirs[] = $dir; }
                 $ownedTemporary = false;
                 $temporary = $dest . '.flinkiso-new';
-                if ((file_exists($temporary) || is_link($temporary)) && !unlink($temporary)) throw new RuntimeException('Cannot replace temporary file: ' . $temporary);
+                if ((file_exists($temporary) || is_link($temporary)) && !unlink($temporary)) throw new RuntimeException(__('Cannot replace temporary file: ') . $temporary);
                 $ownedTemporary = true;
                 $this->copyChecked($this->work . '/new/' . $rel, $temporary);
                 $mode = is_file($dest) ? (fileperms($dest) & 0777) : 0644;
-                if (!chmod($temporary, $mode) || !rename($temporary, $dest)) { unlink($temporary); throw new RuntimeException('Cannot publish: ' . $dest); }
+                if (!chmod($temporary, $mode) || !rename($temporary, $dest)) { unlink($temporary); throw new RuntimeException(__('Cannot publish: ') . $dest); }
                 $ownedTemporary = false;
                 $written[] = $rel;
                 if (function_exists('opcache_invalidate')) opcache_invalidate($dest, true);
@@ -434,7 +434,7 @@ class FlinkisoUpdater {
 
     /** SQL lexer: semicolons inside strings/comments do not terminate statements. */
     public static function splitSql($sql) {
-        if (preg_match('/^\s*DELIMITER\b/im', $sql)) throw new RuntimeException('DELIMITER scripts are not supported. Supply ordinary SQL statements.');
+        if (preg_match('/^\s*DELIMITER\b/im', $sql)) throw new RuntimeException(__('DELIMITER scripts are not supported. Supply ordinary SQL statements.'));
         $out = array(); $buffer = ''; $quote = null; $comment = null; $n = strlen($sql);
         for ($i = 0; $i < $n; $i++) {
             $c = $sql[$i]; $next = $i + 1 < $n ? $sql[$i + 1] : '';
@@ -449,12 +449,12 @@ class FlinkisoUpdater {
             if ($c === "'" || $c === '"' || $c === '`') { $quote = $c; $buffer .= $c; }
             elseif ($c === '#' || ($c === '-' && $next === '-' && ($i + 2 === $n || ctype_space($sql[$i + 2])))) $comment = 'line';
             elseif ($c === '/' && $next === '*') {
-                if ($i + 2 < $n && $sql[$i + 2] === '!') throw new RuntimeException('Executable SQL comments are not supported.');
+                if ($i + 2 < $n && $sql[$i + 2] === '!') throw new RuntimeException(__('Executable SQL comments are not supported.'));
                 $comment = 'block'; $i++;
             } elseif ($c === ';') { if (trim($buffer) !== '') $out[] = trim($buffer); $buffer = ''; }
             else $buffer .= $c;
         }
-        if ($quote !== null || $comment === 'block') throw new RuntimeException('Unterminated SQL quote or comment.');
+        if ($quote !== null || $comment === 'block') throw new RuntimeException(__('Unterminated SQL quote or comment.'));
         if (trim($buffer) !== '') $out[] = trim($buffer);
         return $out;
     }

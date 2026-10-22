@@ -36,7 +36,7 @@
 					</tr>
 				<?php endforeach; ?>
 			<?php }else{ ?>
-				<tr><td colspan="9">No child document found</td></tr>
+				<tr><td colspan="9"><?php echo h(__('No child document found')); ?></td></tr>
 			<?php } ?>
 		</table>
 	</div>

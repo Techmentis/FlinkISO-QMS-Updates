@@ -9,15 +9,15 @@
             <div class="box box-warning">
                 <div class="box-header with-border data-header" data-widget="collapse">
                     <h3 class="box-title"><span class="text-black"><?php echo $approvalPanelTitle;?></span>
-                        <span class="text-gray-dark"> Approvals/ Sharing/ Collaboration</span>
+                        <span class="text-gray-dark"> <?php echo h(__('Approvals/ Sharing/ Collaboration')); ?></span>
                     </h3>
                 </div>
                 <div class="box-body">
                     <div class="row">
                         <div class="col-md-11">
-                            <p>Approval process is not available for this form.</p>
-                            <p>You can add approvalapproval process to this form by adding this form under exsting approvalapproval process, or you can create a new process.</p>
-                            <p>Once you add this from under any approval process, you must update the form using FlinkISO APIs.</p>
+                            <p><?php echo h(__('Approval process is not available for this form.')); ?></p>
+                            <p><?php echo h(__('You can add approvalapproval process to this form by adding this form under exsting approvalapproval process, or you can create a new process.')); ?></p>
+                            <p><?php echo h(__('Once you add this from under any approval process, you must update the form using FlinkISO APIs.')); ?></p>
                         </div>
                     </div>
                 </div>
@@ -78,7 +78,7 @@
                         if(isset($customTable))$approvalPanelTitle = $customTable['CustomTable']['name'];
                         else $approvalPanelTitle = Inflector::humanize($this->request->controller);
                         ?>
-                        <div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title"><span class="text-black"”""><?php echo h($approvalStepTitle !== '' ? $approvalStepTitle : $approvalPanelTitle);?></span><?php if($approvalStepTitle === ''){ ?><span class="text-gray-dark"> Approvals/ Sharing/ Collaboration</span><?php } ?>
+                        <div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title"><span class="text-black"”""><?php echo h($approvalStepTitle !== '' ? $approvalStepTitle : $approvalPanelTitle);?></span><?php if($approvalStepTitle === ''){ ?><span class="text-gray-dark"> <?php echo h(__('Approvals/ Sharing/ Collaboration')); ?></span><?php } ?>
                             </h3>
                             <div class="box-tools pull-right"><button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button></div>
                         </div>
@@ -95,20 +95,20 @@
 
                                     ?>
                                 </div>
-                                <div class="col-md-2"><?php echo $this->Html->link('Load All Users','javascript:void(0);',array(
+                                <div class="col-md-2"><?php echo $this->Html->link(__('Load All Users'),'javascript:void(0);',array(
                                     'onClick'=>'loadallusers("Approval'.Inflector::Classify($this->request->controller).'UserId_remove")', 'class'=>'btn btn-sm btn-info','style'=>'margin-top:28px'));?> </div>
                                 <div class="col-md-12"><?php echo $this->Form->input('Approval.'.$approvalModel.'.comments',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Comments','type'=>'textarea', 'rows'=>2, 'class'=>'form-control'));?></div>
-                                <div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_mode',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalMode','type'=>'radio','class'=>'','options'=>array(0=>'View Only',1=>'Edit'),'default'=>1));?></div>
-                                <div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_type',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalType','type'=>'radio','class'=>'','options'=>array(0=>'All',1=>'Any'),'default'=>0));?></div>
+                                <div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_mode',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalMode','type'=>'radio','class'=>'','options'=>array(0=>__('View Only'),1=>__('Edit')),'default'=>1));?></div>
+                                <div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_type',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalType','type'=>'radio','class'=>'','options'=>array(0=>__('All'),1=>__('Any')),'default'=>0));?></div>
                                 <div class="col-md-4"><?php
-                                    if($approval['Approval']['user_id'] == $this->Session->read('User.id'))	echo $this->Form->input('ApprovalComment.stauts',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Stauts','type'=>'radio','class'=>'','options'=>array(0=>'Pending',1=>'Approved',2=>'Not Approved'),'default'=>0));
+                                    if($approval['Approval']['user_id'] == $this->Session->read('User.id'))	echo $this->Form->input('ApprovalComment.stauts',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Stauts','type'=>'radio','class'=>'','options'=>array(0=>__('Pending'),1=>__('Approved'),2=>__('Not Approved')),'default'=>0));
 
                                     echo $this->Form->hidden('Approval.'.$approvalModel.'.approval_step_id',array('type'=>'text', 'default'=>$currentStep['ApprovalStep']['id']))
                                     ?></div>
                             </div>
                         </div>
                         <div class="box-footer">
-                            <p>Note: If you are sending this record to a non-admin user, make sure that user has proper permission to access this table. Non-admin users must have access to "View records added by other users" plus the branch from which this record is added.</p>
+                            <p><?php echo h(__('Note: If you are sending this record to a non-admin user, make sure that user has proper permission to access this table. Non-admin users must have access to "View records added by other users" plus the branch from which this record is added.')); ?></p>
                         </div>
                     </div>
                 <?php } ?>
@@ -122,7 +122,7 @@
                 else $approvalPanelTitle = Inflector::humanize($this->request->controller);
                 echo $this->Form->create('Approval',array('role'=>'form','class'=>'form')); ?>
                 <div class="box box-warning">
-                    <div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title"><span class="text-black"><?php echo h($approvalStepTitle !== '' ? $approvalStepTitle : $approvalPanelTitle);?></span><?php if($approvalStepTitle === ''){ ?><span class="text-gray-dark"> Approvals/ Sharing/ Collaboration</span><?php } ?>
+                    <div class="box-header with-border data-header" data-widget="collapse"><h3 class="box-title"><span class="text-black"><?php echo h($approvalStepTitle !== '' ? $approvalStepTitle : $approvalPanelTitle);?></span><?php if($approvalStepTitle === ''){ ?><span class="text-gray-dark"> <?php echo h(__('Approvals/ Sharing/ Collaboration')); ?></span><?php } ?>
                         </h3>
                         <div class="box-tools pull-right"><button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button></div>
                     </div>
@@ -165,14 +165,14 @@
                                 echo $this->Form->hidden('Approval.'.$approvalModel.'.model_name', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ModelName','default'=>Inflector::classify($this->request->controller)));
                                 ?>
                             </div>
-                            <div class="col-md-2"><?php echo $this->Html->link('Load All Users','javascript:void(0);',array(
+                            <div class="col-md-2"><?php echo $this->Html->link(__('Load All Users'),'javascript:void(0);',array(
                                 'onClick'=>'loadallusers("Approval'.Inflector::Classify($this->request->controller).'UserId_remove")', 'class'=>'btn btn-sm btn-info','style'=>'margin-top:28px'));?> </div>
                             <div class="col-md-12"><?php echo $this->Form->input('Approval.'.$approvalModel.'.comments',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Comments','type'=>'textarea', $approvalFieldsDispabed, 'rows'=>2, 'class'=>'form-control'));?></div>
-                            <div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_mode',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalMode','type'=>'radio','class'=>'','options'=>array(0=>'View Only',1=>'Edit'), 'readonly', 'default'=>$currentStep['ApprovalStep']['approval_mode']));?></div>
+                            <div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_mode',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalMode','type'=>'radio','class'=>'','options'=>array(0=>__('View Only'),1=>__('Edit')), 'readonly', 'default'=>$currentStep['ApprovalStep']['approval_mode']));?></div>
 
-                            <div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_type',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalType','type'=>'radio','class'=>'', 'readonly', 'options'=>array(0=>'All',1=>'Any'),'default'=>$currentStep['ApprovalStep']['approval_type']));?></div>
+                            <div class="col-md-4"><?php echo $this->Form->input('Approval.'.$approvalModel.'.approval_type',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalType','type'=>'radio','class'=>'', 'readonly', 'options'=>array(0=>__('All'),1=>__('Any')),'default'=>$currentStep['ApprovalStep']['approval_type']));?></div>
                             <div class="col-md-4"><?php
-                                if($approval['Approval']['user_id'] == $this->Session->read('User.id'))	echo $this->Form->input('ApprovalComment.Stauts',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'stauts','type'=>'radio','class'=>'','options'=>array(0=>'Pending',1=>'Approved',2=>'Not Approved'),'default'=>0));
+                                if($approval['Approval']['user_id'] == $this->Session->read('User.id'))	echo $this->Form->input('ApprovalComment.Stauts',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'stauts','type'=>'radio','class'=>'','options'=>array(0=>__('Pending'),1=>__('Approved'),2=>__('Not Approved')),'default'=>0));
                                 ?></div>
                         </div>
                     </div>
@@ -191,10 +191,10 @@
                                     echo "<div class='col-md-12 approval_checkbox_div'>" . $this->Form->input('Approval.'.$approvalModel.'.publish',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Publish','class'=>'checkbox'))."</div>";
                                     $pubshow = true;
                                 }else{
-                                    echo "<div class='col-md-12 text-warning'><strong>Note:</strong> You are not an Approver, you must send this record for approval and approvers will publish the record after varification. Record will not reflect in any reports or dropsowns unless its approved and published.</div>";
+                                    echo '<div class=\'col-md-12 text-warning\'><strong>' . h(__('Note:')) . '</strong> ' . h(__('You are not an Approver, you must send this record for approval and approvers will publish the record after varification. Record will not reflect in any reports or dropsowns unless its approved and published.')) . '</div>';
                                 }
 
-                                echo "<div class='col-md-12'><br />" . $this->Form->submit('Submit',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Submit','class'=>'btn btn-md btn-success')) . "</div>";
+                                echo "<div class='col-md-12'><br />" . $this->Form->submit(__('Submit'),array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Submit','class'=>'btn btn-md btn-success')) . "</div>";
                                 echo "</div>";
                             echo $this->Form->end();
                         }else{
@@ -229,13 +229,13 @@
                                 }else{
 
                                     echo "<div class='col-md-12 hide'>".$this->Form->input('Approval.'.$approvalModel.'.prepared_by',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'PreparedBy','selected'=>$prepared_by, 'readonly'=>'readonly' , 'class'=>'form-control select'))."</div>";
-                                    echo "<div class='col-md-12 text-warning'><strong>Note:</strong> You are not an Approver, you must send this record for approval and approvers will publish the record after varification. Record will not reflect in any reports or dropsowns unless its approved and published.</div>";
+                                    echo '<div class=\'col-md-12 text-warning\'><strong>' . h(__('Note:')) . '</strong> ' . h(__('You are not an Approver, you must send this record for approval and approvers will publish the record after varification. Record will not reflect in any reports or dropsowns unless its approved and published.')) . '</div>';
                                 }
 
                                 echo "</div>";
                         }?>
                         <br /><hr />
-                        <p>Note: If you are sending this record to a non-admin user, make sure that user has proper permission to access this table. Non-admin users must have access to "View records added by other users" plus the branch from which this record is added.</p>
+                        <p><?php echo h(__('Note: If you are sending this record to a non-admin user, make sure that user has proper permission to access this table. Non-admin users must have access to "View records added by other users" plus the branch from which this record is added.')); ?></p>
 
                     </div>
                 </div>

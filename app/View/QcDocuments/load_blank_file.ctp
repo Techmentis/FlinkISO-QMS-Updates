@@ -45,7 +45,7 @@ if($filetype != null){
         </script>
         <div class="box collapsed-box" id="ofdcontainer<?php echo $placeholderid;?>" style="margin: 0;">
           <div class="box-header with-border">
-            <h3 class="box-title"><i class="fa <?php echo $icon;?>"></i> Document</h3>
+            <h3 class="box-title"><i class="fa <?php echo $icon;?>"></i> <?php echo h(__('Document')); ?></h3>
             <div class="box-tools pull-right">
               <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus" id="ofccontainerbtn<?php echo $placeholderid;?>"></i></button>
           </div>            
@@ -336,7 +336,7 @@ if($filetype != null){
     </script>
     <div class="box collapsed-box">          
       <div class="box-header with-border">
-        <h3 class="box-title text-danger">Document</h3>
+        <h3 class="box-title text-danger"><?php echo h(__('Document')); ?></h3>
 
         <div class="box-tools pull-right">
           <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
@@ -347,7 +347,7 @@ if($filetype != null){
     <?php 
     if(($this->request->controller == 'qc_documents' || $this->request->controller == 'processes') && $this->action == 'edit'){ ?>
         <div class="row">
-            <div class="col-md-12"><p class="text-danger">System could not load the document. Uplaod Document.</p></div>
+            <div class="col-md-12"><p class="text-danger"><?php echo h(__('System could not load the document. Uplaod Document.')); ?></p></div>
             <div class="col-md-12">
                 <div class="box box-default">
                     <div class="box-body">
@@ -355,7 +355,7 @@ if($filetype != null){
                             <div class="col-md-6 col-sm-6 col-12">
                                 <div class="info-box">
                                   <div class="box-content">
-                                    <span class="info-box-text">Upload Document</span>
+                                    <span class="info-box-text"><?php echo h(__('Upload Document')); ?></span>
                                     <span class="info-box-number">
                                       <?php echo $this->Form->input('file',array('type'=>'file'));?>
                                   </span>
@@ -369,7 +369,7 @@ if($filetype != null){
                                 <i class="fa fa-file-word-o fa-lg" style="color:#3f628a; font-size:40px; margin:2px 10px 10px 2px;"></i> 
                                 <i class="fa fa-file-excel-o fa-lg" style="color:#387951; font-size:40px; margin:2px 10px 10px 2px;"></i> 
                                 <i class="fa fa-file-powerpoint-o fa-lg" style="color:#a5494a; font-size:40px; margin:2px 10px 10px 2px;"></i></p>
-                                <p>You can upload doc, docx, txt, odt, xls, xlsx, ppt files</p>
+                                <p><?php echo h(__('You can upload doc, docx, txt, odt, xls, xlsx, ppt files')); ?></p>
                             </div>
                         </div>
                     </div>
@@ -379,11 +379,11 @@ if($filetype != null){
     </div>
     <dlv class="col-md-12" style="min-height: auto;">
         <?php echo "<div class='hide'>".$this->Form->hidden('file_type',array('class'=>'form-control')) . '</div>'; ?>
-        <div id="filetypediv" class="text-danger">Select file type.</div>
+        <div id="filetypediv" class="text-danger"><?php echo h(__('Select file type.')); ?></div>
     </dlv>
 </div>
 <?php }else{ ?>
-    <p class="text-danger">System could not load the document.</p>
+    <p class="text-danger"><?php echo h(__('System could not load the document.')); ?></p>
 <?php } ?>
 </div>
 </div>

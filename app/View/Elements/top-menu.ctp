@@ -43,9 +43,6 @@
           </div>
         </p>
     </li>    
-    <?php if (!empty($languagePreferenceAvailable)): ?>
-    <li><?php echo $this->Html->link(__('Language'), array('controller' => 'users', 'action' => 'language_preferences')); ?></li>
-    <?php endif; ?>
     <li class="user-footer">
       <div class="pull-left">
         <?php echo $this->Html->link(__('Reset Password'),array('controller'=>'users','action'=>'change_password','timestamp'=>date('ymdhis')),array('class'=>'btn btn-default btn-flat')); ?>

@@ -22,15 +22,15 @@ if(($user != null && $user == $this->Session->read('User.id')) || $showform == t
 		$approversList[$from['id']] = $from['name'];
 		unset($approversList[$this->Session->read('User.id')]);
 		if($reType == 'ApprovalComment'){
-			echo $this->Form->input($reType.'.'.$approvalModel.'.user_id', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'UserId','label'=>'Add your response/ comments',
+			echo $this->Form->input($reType.'.'.$approvalModel.'.user_id', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'UserId','label'=>__('Add your response/ comments'),
 			'name'=>'data['.$reType.']['.$approvalModel.'][user_id]', 'class'=>'form-control select', $toRequired, 'options' => $approversList,'selected'=>$from['id']));
 			
 			echo $this->Form->hidden($reType.'.'.$approvalModel.'.approval_id', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Id','default'=>$approval['id']));
 			echo $this->Form->hidden($reType.'.'.$approvalModel.'.id', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Id','default'=>$approvalComment['id']));
 			echo $this->Form->hidden($reType.'.'.$approvalModel.'.approval_id', array('id'=>false,'default'=>$approval['id']));
 		}else{
-			echo "here";
-			echo $this->Form->input($reType.'.'.$approvalModel.'.user_id', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'UserId','label'=>'Select user',
+			echo __("here");
+			echo $this->Form->input($reType.'.'.$approvalModel.'.user_id', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'UserId','label'=>__('Select user'),
 			'name'=>'data['.$reType.']['.$approvalModel.'][user_id][]', 'class'=>'form-control select', $toRequired, 'options' => $approversList,'selected'=>$from['id']));
 
 			echo $this->Form->hidden($reType.'.'.$approvalModel.'.id', array('id'=>'Approval'.Inflector::Classify($this->request->controller).'Id','default'=>$approval['id']));
@@ -75,7 +75,7 @@ if($approval['from'] == $this->Session->read('User.id')){
 	'id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalMode',
 	'type'=>'radio',
 	'class'=>'',
-	'options'=>array(0=>'View Only',1=>'Edit'),
+	'options'=>array(0=>__('View Only'),1=>__('Edit')),
 	'default'=>$approvalMode,
 	$approvalModeStatus
 ));?>						
@@ -88,13 +88,13 @@ echo $this->Form->input($reType.'.'.$approvalModel.'.approval_type',array(
 	'id'=>'Approval'.Inflector::Classify($this->request->controller).'ApprovalType',
 	'type'=>'radio',
 	'class'=>'',
-	'options'=>array(0=>'All',1=>'Any'),
+	'options'=>array(0=>__('All'),1=>__('Any')),
 	'default'=>$approvalType,
 	$approvalTypeStatus
 ));?>						
 </div>
 <div class="col-md-4"><?php 
-$approvalStatuses = array(0=>'Pending',1=>'Approved',2=>'Not Approved');
+$approvalStatuses = array(0=>__('Pending'),1=>__('Approved'),2=>__('Not Approved'));
 
 if($approval['from'] == $this->Session->read('User.id')){
 	unset($approvalStatuses[1]);
@@ -109,11 +109,11 @@ if($this->action == 'add'){
 	echo $this->Form->input($reType.'.'.$approvalModel.'.stauts',array(
 		'id'=>'Approval'.Inflector::Classify($this->request->controller).'stauts',
 		'type'=>'radio',
-		'legend'=>'Status',
+		'legend'=>__('Status'),
 		'class'=>'',
 		'options'=>$approvalStatuses,'default'=>0));	
 }else{
-	if($user == $this->Session->read('User.id'))	echo $this->Form->input($reType.'.'.$approvalModel.'.stauts',array('id'=>'Approval'.Inflector::Classify($this->request->controller).'stauts','type'=>'radio','class'=>'','options'=>$approvalStatuses,'default'=>0));
+	if($user == $this->Session->read('User.id'))	echo $this->Form->input($reType.'.'.$approvalModel.'.stauts',array('id'=>__('Approval').Inflector::Classify($this->request->controller).'stauts','type'=>__('radio'),'class'=>'','options'=>$approvalStatuses,'default'=>0));
 }
 
 ?>

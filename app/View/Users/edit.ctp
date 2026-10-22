@@ -22,7 +22,7 @@
             $('select').chosen();
             jQuery.validator.addMethod("greaterThanZero", function(value, element) {
                 return (value != -1);
-            }, "Please select the value");
+            }, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
             $('#UserEditForm').validate(
             {
@@ -91,7 +91,7 @@
             }
         });
     </script>
-    <?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => 'Users', 'modelClass' => 'User', 'options' => array(), 'pluralVar' => 'users'))); ?>
+    <?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => __('Users'), 'modelClass' => 'User', 'options' => array(), 'pluralVar' => 'users'))); ?>
     <?php echo $this->Form->create('User', array('role' => 'form', 'class' => 'form')); ?>
     <?php echo $this->Form->input('id'); ?>
     <div class="nav panel panel-default">
@@ -115,9 +115,9 @@
                     <?php echo $this->Form->input('is_super_user', array('type'=>'checkbox', 'label'=>__('Super User — create/re-create forms and use Form Creation AI'))); ?>
                 <?php } ?>
                 <?php
-                echo $this->Form->input('assigned_branches', array('name'=>'data[User][assigned_branches][]', 'type'=>'select', 'label' => 'Select Branches', 'id' => 'AssignedBranches', 'multiple', 'options' => $PublishedBranchList, 'selected' => json_decode($this->request->data['User']['assigned_branches'],true)));
+                echo $this->Form->input('assigned_branches', array('name'=>'data[User][assigned_branches][]', 'type'=>'select', 'label' => __('Select Branches'), 'id' => 'AssignedBranches', 'multiple', 'options' => $PublishedBranchList, 'selected' => json_decode($this->request->data['User']['assigned_branches'],true)));
                 ?>            
-                    <p>If the user is non-admin user, and if "User who can see other user's records" clicked, then user can only see records added by users from his/ her own branch. You can select addtional branched fron "Select Branches" field to give that user access to other braches.</p>
+                    <p><?php echo h(__('If the user is non-admin user, and if "User who can see other user\'s records" clicked, then user can only see records added by users from his/ her own branch. You can select addtional branched fron "Select Branches" field to give that user access to other braches.')); ?></p>
                 </div>
             </div>
             <?php echo $this->Form->hidden('benchmark', array('value' => $this->data['User']['benchmark'])); ?>
@@ -134,7 +134,7 @@
 <?php echo $this->element('master_duplicate_validation', array(
     'recordIdSelector'=>'#UserId',
     'fields'=>array(
-        '#UserEmployeeId'=>array('field'=>'employee_id', 'message'=>'This employee already has another user account.')
+        '#UserEmployeeId'=>array('field'=>'employee_id', 'message'=>__('This employee already has another user account.'))
     )
 )); ?>
 <div id="loaddoclist"></div>

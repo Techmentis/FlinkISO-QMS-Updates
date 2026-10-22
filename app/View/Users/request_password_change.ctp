@@ -20,7 +20,7 @@
                 
                 <?php
                 echo $this->Form->create('User', array('controller' => 'user', 'action' => 'reset_password', 'role' => 'form', 'class' => 'form-signin', 'type' => 'post'));
-                echo $this->Form->input('username', array('label' => __('User Name'), 'placeholder' => 'Please Enter Username','class'=>'form-control'));
+                echo $this->Form->input('username', array('label' => __('User Name'), 'placeholder' => __('Please Enter Username'),'class'=>'form-control'));
                 ?>
                 <div style="clear:both"> <br/> </div> 
                 <?php echo $this->Form->submit(__('Submit'), array('div' => false, 'class' => 'btn btn-primary btn-success','id'=>'submit_id'));

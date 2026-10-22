@@ -4,7 +4,7 @@ if(!$currentStep['ApprovalStep']['id'])$approval_step_id = $this->request->param
 else $approval_step_id = $currentStep['ApprovalStep']['id'];
 ?>
 <div class="row">
-    <?php $approvalStatuses = array(0=>'Pending',1=>'Approved',2=>'Not Approved'); if(!empty($previousApprovalStep['ApprovalStep'])) $approvalStatuses[3] = 'Return to Previous Step'; ?>
+    <?php $approvalStatuses = array(0=>__('Pending'),1=>__('Approved'),2=>__('Not Approved')); if(!empty($previousApprovalStep['ApprovalStep'])) $approvalStatuses[3] = __('Return to Previous Step'); ?>
     <?php if($approvalComments){ ?>
         <div class="col-md-12">
             <ul class="timeline">
@@ -16,7 +16,7 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
                                 <span class="time">
                                     <?php
                                     if($approvalComment['Approval']['status'] != 1 && empty($approvalComment['ApprovalComment']['response']) && $approvalComment['ApprovalComment']['response_status'] != 1){
-                                        echo "<span class='text-danger'><strong><i>Response pending from ".$approvalComment['User']['name']."</i>.</strong></span>";
+                                        echo '<span class=\'text-danger\'><strong><i>' . h(__('Response pending from')) . ' '.$approvalComment['User']['name']."</i>.</strong></span>";
                                     }else{ ?>
                                         <i class="fa fa-clock-o"></i> <?php echo h($approvalComment['ApprovalComment']['created']); ?>
                                     <?php } ?>&nbsp;
@@ -46,7 +46,7 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
                     <span class="time">
                         <?php
                         if($approvalComment['Approval']['status'] != 1 && empty($approvalComment['ApprovalComment']['response']) && $approvalComment['ApprovalComment']['response_status'] != 1){
-                            echo "<span class='text-danger'><strong><i>Response pending from ".$approvalComment['User']['name']."</i>.</strong></span>";
+                            echo '<span class=\'text-danger\'><strong><i>' . h(__('Response pending from')) . ' '.$approvalComment['User']['name']."</i>.</strong></span>";
                         }else{ ?>
                             <i class="fa fa-clock-o"></i> <?php echo h($approvalComment['ApprovalComment']['created']); ?>
                         <?php } ?>&nbsp;
@@ -75,7 +75,7 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
                                 <?php echo $this->Form->hidden('comments',
                                 array(
                                 'div'=>false,
-                                'placeholder'=>'add comments for accept/reject',
+                                'placeholder'=>__('add comments for accept/reject'),
                                 'class'=>'form-control',
                                 'label'=>false,
                                 'type'=>'text',
@@ -134,7 +134,7 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
                                         'type'=>'select','multiple'=>true,'options'=>$nextApproversList,'data-placeholder'=>'Select next approvers',
                                         'label'=>$nextApprovalUserLabel,'class'=>'form-control'
                                         ));
-                                        if(empty($nextApproversList)) echo '<small class="text-danger">No eligible users are configured for the next step.</small>';
+                                        if(empty($nextApproversList)) echo '<small class="text-danger">' . h(__('No eligible users are configured for the next step.')) . '</small>';
                                         echo '</div>';
                                 }?>
                             </div>
@@ -161,7 +161,7 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 
                             <?php
                             if($approvalComment['ApprovalComment']['response_status'] == 0  && ($approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.id') || $approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.employee_id'))){
-                                echo '</div><div class="col-md-12">'. $this->Html->link('Respond','javascript:void(0);',array('id'=>$approvalComment['ApprovalComment']['id'].'_link','class'=>'btn badge-sm btn-success','style'=>'margin-top:15px', 'escape'=>false));
+                                echo '</div><div class="col-md-12">'. $this->Html->link(__('Respond'),'javascript:void(0);',array('id'=>$approvalComment['ApprovalComment']['id'].'_link','class'=>'btn badge-sm btn-success','style'=>'margin-top:15px', 'escape'=>false));
 
                                 echo "<i class='' id='".$approvalComment['ApprovalComment']['id']."_fa'></i>";
                             }else{
@@ -188,14 +188,14 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
                             $(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>+":checked").trigger('change');
                             $("#<?php echo $approvalComment['ApprovalComment']['id'];?>_link").on('click',function(){
                                 if($("#<?php echo $approvalComment['ApprovalComment']['id']?>ResponseTxt").val() ==''){
-                                    alert('Add Response');
+                                    alert(<?php echo json_encode(__('Add Response'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                                     return false;
                                 }
                                 if($("input[name='data[ApprovalComment][<?php echo $approvalComment['ApprovalComment']['id'];?>][approval_status]']:checked").val() == '1' && $("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverWrap").is(':visible') && !$("#<?php echo $approvalComment['ApprovalComment']['id'];?>NextApproverId").val()){
-                                    alert('Select one or more next approvers.');
+                                    alert(<?php echo json_encode(__('Select one or more next approvers.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                                     return false;
                                 }
-                                if($(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>+":checked").val() == '3' && !confirm('Return this record to the previous approval step?')) return false;
+                                if($(approvalStatusSelector<?php echo str_replace('-', '', $approvalComment['ApprovalComment']['id']);?>+":checked").val() == '3' && !confirm(<?php echo json_encode(__('Return this record to the previous approval step?'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>)) return false;
 
                                 $.ajax({
                                     url: "<?php echo Router::url('/', true); ?>approval_comments/add_response/id:<?php echo $approvalComment['ApprovalComment']['id']?>/response:" + $("#<?php echo $approvalComment['ApprovalComment']['id'];?>ResponseTxt").val()+"/to:" + $("#<?php echo $approvalComment['ApprovalComment']['id'];?>UserTo").val(),
@@ -272,7 +272,7 @@ if($approvalComment['Approval']['status'] != 1 && empty($approvalComment['Approv
                                 }?>
                             </div>
                             <div class="col-md-12">
-                                <?php if(empty($approval['Approval']['response']) && $approval['Approval']['response_status'] != 1)echo "<small><span class='text-danger'>pending ...</span></small>";?>&nbsp;
+                                <?php if(empty($approval['Approval']['response']) && $approval['Approval']['response_status'] != 1)echo '<small><span class=\'text-danger\'>' . h(__('pending ...')) . '</span></small>';?>&nbsp;
                             </div>
                             <div class="col-md-12">
 
@@ -332,14 +332,14 @@ if($approvalComment['Approval']['status'] != 1 && empty($approvalComment['Approv
                                         'type'=>'select','multiple'=>true,'options'=>$nextApproversList,'data-placeholder'=>'Select next approvers',
                                         'label'=>$nextApprovalUserLabel,'class'=>'form-control'
                                         ));
-                                        if(empty($nextApproversList)) echo '<small class="text-danger">No eligible users are configured for the next step.</small>';
+                                        if(empty($nextApproversList)) echo '<small class="text-danger">' . h(__('No eligible users are configured for the next step.')) . '</small>';
                                         echo '</div>';
                                 }?>
                             </div>
                             <div class="col-md-12">
                                 <div id="<?php echo $approval['Approval']['id']?>_td_to_update"><?php
                                 if($approval['Approval']['user_id'] == $this->Session->read('User.id') || $approval['Approval']['user_id'] == $this->Session->read('User.employee_id')){
-                                    echo $this->Html->link('Reply','javascript:void(0);',array('id'=>$approval['Approval']['id'].'_link_new','class'=>'btn btn-sm btn-success','escape'=>false));
+                                    echo $this->Html->link(__('Reply'),'javascript:void(0);',array('id'=>$approval['Approval']['id'].'_link_new','class'=>'btn btn-sm btn-success','escape'=>false));
 
                                     echo "<i class='' id='".$approval['Approval']['id']."_fa'></i>";
                                 }else{
@@ -368,14 +368,14 @@ if($approvalComment['Approval']['status'] != 1 && empty($approvalComment['Approv
                             $(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>+":checked").trigger('change');
                             $("#<?php echo $approval['Approval']['id'];?>_link_new").on('click',function(){
                                 if($("#<?php echo $approval['Approval']['id']?>ResponseTxt").val() ==''){
-                                    alert('Add Response');
+                                    alert(<?php echo json_encode(__('Add Response'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                                     return false;
                                 }
                                 if($("input[name='data[ApprovalComment][<?php echo $approval['Approval']['id'];?>][approval_status]']:checked").val() == '1' && $("#<?php echo $approval['Approval']['id'];?>NextApproverWrap").is(':visible') && !$("#<?php echo $approval['Approval']['id'];?>NextApproverId").val()){
-                                    alert('Select one or more next approvers.');
+                                    alert(<?php echo json_encode(__('Select one or more next approvers.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                                     return false;
                                 }
-                                if($(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>+":checked").val() == '3' && !confirm('Return this record to the previous approval step?')) return false;
+                                if($(approvalStatusSelector<?php echo str_replace('-', '', $approval['Approval']['id']);?>+":checked").val() == '3' && !confirm(<?php echo json_encode(__('Return this record to the previous approval step?'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>)) return false;
 
                                 $.ajax({
                                     url: "<?php echo Router::url('/', true); ?>approval_comments/add_response/approval_id:<?php echo $approval['Approval']['id']?>/response:" + $("#<?php echo $approval['Approval']['id'];?>ResponseTxt").val()+"/to:" + $("#<?php echo $approval['Approval']['id'];?>UserTo").val(),

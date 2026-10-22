@@ -3,8 +3,8 @@
 	<?php echo $this->Session->flash();?>	
 
 	<div class="qcDocumentCategories ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Qc Document Categories','modelClass'=>'QcDocumentCategory','options'=>array(),'pluralVar'=>'qcDocumentCategories'))); ?>
-		<?php echo $this->Html->link('Add Bulk',array('action'=>'add_bulk'),array('class'=>'btn btn-sm btn-primary pull-right'));?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Qc Document Categories'),'modelClass'=>'QcDocumentCategory','options'=>array(),'pluralVar'=>'qcDocumentCategories'))); ?>
+		<?php echo $this->Html->link(__('Add Bulk'),array('action'=>'add_bulk'),array('class'=>'btn btn-sm btn-primary pull-right'));?>
 		<div class="nav panel panel-default">
 			<div class="qcDocumentCategories form col-md-12">
 				<?php echo $this->Form->create('QcDocumentCategory',array('role'=>'form','class'=>'form')); ?>
@@ -56,7 +56,7 @@
 			$().ready(function() {
 				jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 					return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';
-				}, "Please select the value");
+				}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 				$('#QcDocumentCategoryAddForm').validate({        	
 					rules: {

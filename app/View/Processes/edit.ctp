@@ -4,7 +4,7 @@
 <div id="Process_div">	
 	<?php echo $this->Session->flash();?>	
 	<div class="Process">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('friendlyName'=>'Processes','pluralHumanName'=>'Processes','modelClass'=>'Process','options'=>array(),'pluralVar'=>'processes'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('friendlyName'=>__('Processes'),'pluralHumanName'=>__('Processes'),'modelClass'=>'Process','options'=>array(),'pluralVar'=>'processes'))); ?>
 
 		<?php echo $this->Form->create('Process',array('role'=>'form','class'=>'form','type'=>'file')); ?>
 
@@ -64,7 +64,7 @@
 					if($this->request->data[Inflector::classify($linkedTable['CustomTable']['table_name'])]){
 						if($linkedTable['CustomTable']['form_layout'] == 2){
 							echo "<div class='panel panel-default'><div class='panel-body no-padding'>";
-							echo "<table class='table table-responsive table-bordered'><tr><th>Name/title</th>";
+							echo '<table class=\'table table-responsive table-bordered\'><tr><th>' . h(__('Name/title')) . '</th>';
 							foreach(json_decode($linkedTable['CustomTable']['fields'],true) as $field){
 								echo "<th>" . Inflector::humanize($field['field_name']) . "</th>";
 							}
@@ -132,7 +132,7 @@
 
 								jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 									return this.optional(element) || (parseFloat(value) != -1);
-								}, "Please select the value");
+								}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 								$('#ProcessEditForm').validate();
 
@@ -195,18 +195,18 @@
 										<div class="btn-group">
 											<?php 
 											if($customTable['publish'] == 1 && $customTable['table_locked'] == 0){
-												echo $this->Html->link('<i class="fa fa-plus-square-o fa-lg text-info"></i>',array('controller'=>$customTable['table_name'], 'action'=>'add', 'custom_table_id'=>$customTable['id'],'qc_document_id'=>$customTable['qc_document_id'],'process_id'=>$customTable['process_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Goto Add page'));
+												echo $this->Html->link('<i class="fa fa-plus-square-o fa-lg text-info"></i>',array('controller'=>$customTable['table_name'], 'action'=>'add', 'custom_table_id'=>$customTable['id'],'qc_document_id'=>$customTable['qc_document_id'],'process_id'=>$customTable['process_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Goto Add page')));
 											}?>
 
-											<?php echo $this->Html->link('<i class="fa fa-table fa-lg text-info"></i>',array('controller'=>$customTable['table_name'],'action'=>'index','custom_table_id'=>$customTable['id'],'qc_document_id'=>$customTable['qc_document_id'],'process_id'=>$customTable['process_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Goto index page'));?>
+											<?php echo $this->Html->link('<i class="fa fa-table fa-lg text-info"></i>',array('controller'=>$customTable['table_name'],'action'=>'index','custom_table_id'=>$customTable['id'],'qc_document_id'=>$customTable['qc_document_id'],'process_id'=>$customTable['process_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Goto index page')));?>
 											
 											
-											<?php echo $this->Html->link('<i class="fa fa-gears fa-lg text-success"></i>',array('action'=>'view',$customTable['id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View'));?>
+											<?php echo $this->Html->link('<i class="fa fa-gears fa-lg text-success"></i>',array('action'=>'view',$customTable['id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('View')));?>
 											
 											
 											<?php
 											echo $this->Html->link('<i class="fa fa-bar-chart fa-lg text-info"></i>',array('controller'=>$customTable['table_name'], 'action'=>'reports','custom_table_id'=>$customTable['id']),
-												array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false,'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Reports'));
+												array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false,'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Reports')));
 												?>
 											</div>
 											

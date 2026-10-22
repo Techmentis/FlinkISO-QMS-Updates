@@ -1,21 +1,17 @@
-# FlinkISO languages
+# FlinkISO languages and translations
 
-Run `app/Config/Schema/languages.sql` once for an existing installation, or run the normal updater (the same migration is included in `app/webroot/updates/updates.sql`). It creates English and German entries in `languages`. The existing `users.language_id` field stores each user’s preference.
+Run the normal updater: `app/webroot/updates/updates.sql` creates the language table and inserts English (`eng`) and German (`deu`) only when missing. The same language migration is available in `app/Config/Schema/languages.sql`. Existing language rows and user preferences remain intact. The existing `users.language_id` field stores each user's selection. No `core.php` change is required.
 
-Users select their language using **Profile → Language** or **user menu → Language**. Saving takes effect immediately after redirect and survives login. Missing, disabled, or unselected preferences use English. No core.php edits are required.
+All users choose an available language from the globe menu after the database icon. Administrators and super users also have Add language and Update PO file actions there. Language controls are no longer part of the profile menu.
 
-Administrators and super users can open **Settings → Languages** (or `/languages`) to add a language and edit translations. Other users can only change their own preference. Language codes are recognized three-letter CakePHP codes such as `deu`, `fra`, or `spa`. The name, availability and plural rule can be edited. Codes are fixed after creation so existing folders retain their identity. English remains available as the fallback.
+The language editor shows original text on the left and translations on the right, with search and a Save action. Empty translations fall back to English. Keep placeholders and plural forms intact. Catalog saves retain unchanged entries and reject edits based on an older catalog version.
 
-`default.pot` is the source template. Each language’s translations live in `Locale/<code>/LC_MESSAGES/default.po`; separate translated views are unnecessary. The editor merges source messages into the existing catalog, provides 40 entries per page, checks placeholders and rejects a stale catalog version. PHP needs write permission on the selected language’s `LC_MESSAGES` folder. It removes stale `default.mo` files and invalidates the matching CakePHP translation cache when saving.
+The language reference includes known three-letter codes and plural rules. Use this code fills name, code and the available rule together. Other unique three-letter codes are allowed. Supply a plural rule manually when none is known. ApplicationL10n registers custom locale folders, including Marathi (`mar`), without altering CakePHP's core files.
 
-The updater preserves existing PO/MO catalogs while updating POT templates. New bundled catalogs can be installed when absent. Preserve and deploy customer catalogs separately if making manual file copies.
+On the Languages page, administrators can use the configured AI provider to translate a catalog. Select the target language and Share application POT file with AI. ApplicationPotExtractor generates `Locale/default.pot` directly in PHP using CakePHP's extractor. No server upload or console command is needed. Accepted batches are saved to `Locale/<code>/LC_MESSAGES/default.po`; Retry continues a failed batch. At completion, translation stays disabled for that language on the current page, and Save PO file downloads a copy. AI can replace existing translations; retain a copy before retranslating.
 
-To refresh templates from a full CakePHP installation, run from the project root:
+The bundled German PO is the translated catalog from the working instance, copied without regenerating or retranslating it. The updater preserves installed customer PO/MO files and updates the shared POT. A bundled language catalog is installed only if absent. Existing customers can review new entries through the editor and AI workflow. Customer configuration, uploads and runtime files are not part of this migration.
 
-```sh
-app/Console/cake i18n extract --paths app/Controller,app/Model,app/View --output app/Locale --merge no --extract-core no --overwrite
-```
+The web-server account needs write access to Locale folders and the application's tmp directory. Saving through the editor removes stale compiled MO files and clears the catalog cache. Application JavaScript uses TranslationMessages through translation_strings; vendor source files remain unchanged. Database records and uploaded documents are not automatically translated.
 
-The update repository is a partial application; use a full installation’s CakePHP console to run extraction against these source folders. Review extraction warnings for dynamic strings. The browser editor edits translations rather than rewriting application source or the POT template. The default domain is supported by the editor; separate `cake` and `cake_dev` domains can be managed with gettext editors.
-
-German coverage remains partial. Shared navigation and common labels are translated. Unwrapped HTML, explicit labels, JavaScript messages, generated templates and database-defined field labels still need conversion/collection. Empty translations fall back to English; they do not imply that all application text is covered.
+Help: https://www.flinkiso.com/manual/languages-and-translations.html

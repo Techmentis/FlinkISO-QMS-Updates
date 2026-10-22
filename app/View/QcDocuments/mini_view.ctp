@@ -49,7 +49,7 @@
 			echo $this->element('onlyoffice',array(
 				'url'=>$url,
 				'placeholderid'=>0,
-				'panel_title'=>'Document Viewer',
+				'panel_title'=>__('Document Viewer'),
 				'mode'=>'view',
 				'path'=>$file_path,
 				'file'=>$file,
@@ -68,8 +68,8 @@
 		</div>
 		<div class="col-md-12">
 			<div class="btn-group">
-				<?php echo $this->Html->link('View',array('controller'=>'qc_documents','action'=>'view',$qcDocument['QcDocument']['id']),array('class'=>'btn btn-sm btn-info','target'=>'_blank'));?>
-				<?php echo $this->Html->link('Edit',array('controller'=>'qc_documents','action'=>'edit',$qcDocument['QcDocument']['id']),array('class'=>'btn btn-sm btn-warning','target'=>'_blank'));?>
+				<?php echo $this->Html->link(__('View'),array('controller'=>'qc_documents','action'=>'view',$qcDocument['QcDocument']['id']),array('class'=>'btn btn-sm btn-info','target'=>'_blank'));?>
+				<?php echo $this->Html->link(__('Edit'),array('controller'=>'qc_documents','action'=>'edit',$qcDocument['QcDocument']['id']),array('class'=>'btn btn-sm btn-warning','target'=>'_blank'));?>
 			</div>
 		</div>
 	</div>

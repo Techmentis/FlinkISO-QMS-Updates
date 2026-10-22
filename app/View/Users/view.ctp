@@ -2,7 +2,7 @@
     <style type="text/css">
         .link:hover{cursor: pointer;}
     </style>
-    <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Users','modelClass'=>'User','options'=>array(),'pluralVar'=>'users'))); ?>
+    <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Users'),'modelClass'=>'User','options'=>array(),'pluralVar'=>'users'))); ?>
     <?php echo $this->Session->flash(); ?>
     <div class="nav panel panel-default">
         <div class="users form col-md-12">
@@ -26,9 +26,9 @@
                         <?php
                         $status = $user['User']['status'];
                         switch ($status){
-                            case 0: echo 'Inactive'; break;
-                            case 1: echo 'Active'; break;
-                            case 2: echo 'Blocked';break;
+                            case 0: echo __('Inactive'); break;
+                            case 1: echo __('Active'); break;
+                            case 2: echo __('Blocked');break;
                         }
                         ?>
                         &nbsp;

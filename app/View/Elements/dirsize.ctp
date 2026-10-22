@@ -15,7 +15,7 @@ else $dbdirclass = 'danger';
     <div class="col-md-6">
         <div class="box box-<?php echo $dirclass;?>">
             <div class="box-header with-border">
-                <h3 class="box-title">Storage Usage</h3>
+                <h3 class="box-title"><?php echo h(__('Storage Usage')); ?></h3>
                 <i class="glyphicon glyphicon-hdd pull-right text-<?php echo $dirclass;?>" style="font-size:15px"></i>
             </div>
             <div class="box-body">
@@ -33,7 +33,7 @@ else $dbdirclass = 'danger';
     <div class="col-md-6">
         <div class="box box-<?php echo $dbdirclass;?>">
             <div class="box-header with-border">
-                <h3 class="box-title">Database Usage</h3>
+                <h3 class="box-title"><?php echo h(__('Database Usage')); ?></h3>
                 <i class="glyphicon glyphicon-hdd pull-right text-<?php echo $dbdirclass;?>" style="font-size:15px"></i>
             </div>
             <div class="box-body">

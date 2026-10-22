@@ -501,12 +501,12 @@ public function download_record_bundle(){
 			$recordId = isset($recordSpec['id']) ? trim($recordSpec['id']) : '';
 			$customTableId = isset($recordSpec['custom_table_id']) ? trim($recordSpec['custom_table_id']) : '';
 			if($recordId === '' || $customTableId === ''){
-				throw new InvalidArgumentException('An invalid record selection was received.');
+				throw new InvalidArgumentException(__('An invalid record selection was received.'));
 			}
 
 			$pdf = $this->_generate_record_only_pdf($customTableId, $recordId);
 			if(!$pdf || !file_exists($pdf)){
-				throw new RuntimeException('PDF generation failed for record '.$recordId.'.');
+				throw new RuntimeException(__('PDF generation failed for record ').$recordId.'.');
 			}
 			$generatedPdfs[] = $pdf;
 		}
@@ -514,7 +514,7 @@ public function download_record_bundle(){
 		$tempOutput = $bundlePath.DS.'-remove-pdf-records-'.date('Ymd-His').'.pdf';
 		$pdftk = trim((string)Configure::read('PDFTkPath'));
 		if($pdftk === '' || !is_executable($pdftk)){
-			throw new RuntimeException('pdftk is not configured or is not executable.');
+			throw new RuntimeException(__('pdftk is not configured or is not executable.'));
 		}
 
 		$command = escapeshellarg($pdftk);
@@ -526,7 +526,7 @@ public function download_record_bundle(){
 		$mergeCode = 0;
 		exec($command.' 2>&1', $mergeOutput, $mergeCode);
 		if($mergeCode !== 0 || !file_exists($tempOutput)){
-			throw new RuntimeException('pdftk could not combine the record PDFs: '.implode("\n", $mergeOutput));
+			throw new RuntimeException(__('pdftk could not combine the record PDFs: ').implode("\n", $mergeOutput));
 		}
 
 		// Apply the user's password and permission choices once, to the final file.
@@ -534,7 +534,7 @@ public function download_record_bundle(){
 		$password = isset($originalDocumentDownload['password']) ? $originalDocumentDownload['password'] : null;
 		$finalOutput = $this->add_password($tempOutput, $password, $bundleId);
 		if(!$finalOutput || !file_exists($finalOutput)){
-			throw new RuntimeException('Unable to secure the combined record PDF.');
+			throw new RuntimeException(__('Unable to secure the combined record PDF.'));
 		}
 
 		$this->set('bundle', array(
@@ -599,7 +599,7 @@ protected function _generate_record_only_pdf($customTableId, $recordId){
 		'recursive' => -1,
 	));
 	if(empty($customTable['CustomTable']['table_name'])){
-		throw new NotFoundException('The selected record type was not found.');
+		throw new NotFoundException(__('The selected record type was not found.'));
 	}
 
 	$model = Inflector::classify($customTable['CustomTable']['table_name']);
@@ -612,7 +612,7 @@ protected function _generate_record_only_pdf($customTableId, $recordId){
 		'recursive' => 0,
 	));
 	if(empty($record[$model])){
-		throw new NotFoundException('A selected record was not found.');
+		throw new NotFoundException(__('A selected record was not found.'));
 	}
 	$record['CustomTable'] = $customTable['CustomTable'];
 
@@ -687,7 +687,7 @@ protected function _generate_record_only_pdf($customTableId, $recordId){
 			$templateFile = Configure::read('files').DS.'pdf_template'.DS
 				.$pdfTemplate['PdfTemplate']['id'].DS.'template.html';
 			if(!is_file($templateFile)){
-				throw new NotFoundException('The selected PDF template file was not found.');
+				throw new NotFoundException(__('The selected PDF template file was not found.'));
 			}
 			$contents = file_get_contents($templateFile);
 			$generatedPdf = $this->_generate_template_content(
@@ -833,7 +833,7 @@ public function _write_html_file($filename = null, $content = null, $record_id =
 	$folder = new Folder();
 	if ($folder->create($path,0777)) {
 	} else {
-		echo "Folder creation failed";
+		echo __("Folder creation failed");
 		exit;
 	}
 
@@ -1178,7 +1178,7 @@ public function _generate_pdf_file($header_file = null,$content = null,$fileName
 
 	protected function _generate_onlyoffice_record_pdf($header_file = null, $content = null, $fileName = null, $record_id = null){
 		if(empty($record_id)){
-			throw new InvalidArgumentException('A record id is required to generate the PDF.');
+			throw new InvalidArgumentException(__('A record id is required to generate the PDF.'));
 		}
 
 		if(isset($this->viewVars['header_file'])){

@@ -3,7 +3,7 @@
 	<?php echo $this->Session->flash();?>	
 
 	<div class="departments ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Departments','modelClass'=>'Department','options'=>array(),'pluralVar'=>'departments'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Departments'),'modelClass'=>'Department','options'=>array(),'pluralVar'=>'departments'))); ?>
 
 		<div class="nav panel panel-default">
 			<div class="departments form col-md-12">
@@ -19,8 +19,8 @@ Department 4
 .
 .
 ";
-					echo "<div class='col-md-12'>" . $this->Form->input('name', array('type'=>'textarea', 'class' => 'form-control','label'=>'Add multiple departments','placeholder'=>$str)) . '</div>';
-					echo "<div class='col-md-12 help-text'>Add departments with < enter > as new record.</div>";
+					echo "<div class='col-md-12'>" . $this->Form->input('name', array('type'=>'textarea', 'class' => 'form-control','label'=>__('Add multiple departments'),'placeholder'=>$str)) . '</div>';
+					echo '<div class=\'col-md-12 help-text\'>' . h(__('Add departments with')) . ' < ' . h(__('enter > as new record.')) . '</div>';
 					?>
 					<?php
 					echo $this->Form->input('id');
@@ -58,7 +58,7 @@ Department 4
 		$().ready(function() {
 			jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 				return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';
-			}, "Please select the value");
+			}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 			$('#DepartmentAddBulkForm').validate({        	
 				rules: {

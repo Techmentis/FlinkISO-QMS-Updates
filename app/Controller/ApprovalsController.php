@@ -168,15 +168,15 @@ class ApprovalsController extends AppController {
                     $this->Approval->save($app['Approval']);
 
                     $this->_sent_approval_email($this->request->data['Approval']['approver_id'],date('Y-m-d'),$this->Session->read('User.name'),'FlinkISO: New approval is assigned to you from.');
-                    echo "Record saved";
+                    echo __("Record saved");
                     exit;
                 }else{
-                    echo "Record could not be saved";
+                    echo __("Record could not be saved");
                     exit;
 
                 }
             }else{
-                echo "Recored could not be saved. Please try again";
+                echo __("Recored could not be saved. Please try again");
                 exit;
             }
 
@@ -251,15 +251,15 @@ class ApprovalsController extends AppController {
                                 $rec[$model]['approved_by'] = $this->Session->read('User.employee_id');
                                 $this->$model->create();
                                 if ($this->$model->save($rec)) {
-                                    echo "Recod saved";
+                                    echo __("Recod saved");
                                 } else {
-                                    echo "Recod could not be published";
+                                    echo __("Recod could not be published");
                                 }
                             } else {
-                                echo "Recod could not be published";
+                                echo __("Recod could not be published");
                             }
                         } else {
-                            echo "Changed saved";
+                            echo __("Changed saved");
                         }
                     } else {
                         // publish the record
@@ -271,19 +271,19 @@ class ApprovalsController extends AppController {
                             $rec[$model]['approved_by'] = $this->Session->read('User.employee_id');
                             $this->$model->create();
                             if ($this->$model->save($rec)) {
-                                echo "Recod saved";
+                                echo __("Recod saved");
                             } else {
-                                echo "Recod could not be published";
+                                echo __("Recod could not be published");
                             }
                         } else {
-                            echo "Changed saved";
+                            echo __("Changed saved");
                         }
                     }
                 } else {
-                    echo "Changed could not be saved";
+                    echo __("Changed could not be saved");
                 }
             } else {
-                echo "You are not authorized to make these changes";
+                echo __("You are not authorized to make these changes");
             }
         } else {
             $id = $this->request->params['named']['id'];
@@ -296,10 +296,10 @@ class ApprovalsController extends AppController {
                 $approval['Approval']['status'] = 1;
                 $this->Approval->create();
                 if ($this->Approval->save($approval)) {
-                    echo "Rejection saved";
+                    echo __("Rejection saved");
                 }
             } else {
-                echo "You are not authorized to make these changes";
+                echo __("You are not authorized to make these changes");
             }
         }
     }

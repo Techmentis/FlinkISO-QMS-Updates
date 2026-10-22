@@ -19,19 +19,19 @@
 </style>
 
 <div class="">
-	<?php echo $this->Form->create($this->name, array('action' => 'advance_search/custom_table_id:'.$this->request->params['named']['custom_table_id'].'/qc_document_id:'.$this->request->params['named']['qc_document_id'].'/process_id:'.$this->request->params['named']['process_id'], 'role' => 'form', 'class' => 'advanced-search-form', 'id' => 'advance-search-form', 'type' => 'post')); ?>
+	<?php echo $this->Form->create($this->name, array('action' => __('advance_search/custom_table_id:').$this->request->params['named']['custom_table_id'].'/qc_document_id:'.$this->request->params['named']['qc_document_id'].'/process_id:'.$this->request->params['named']['process_id'], 'role' => __('form'), 'class' => __('advanced-search-form'), 'id' => __('advance-search-form'), 'type' => __('post'))); ?>
 	<div class="panel">
 
 			<div class="panel-heading">
 				<h4 class="modal-title"><?php echo __('Advanced Search'); ?></h4>
-			<small>Set your required conditions and click submit to search.</small>
+			<small><?php echo h(__('Set your required conditions and click submit to search.')); ?></small>
 		</div>
 		<div class="panel-body">
 			<div>
 				<ul class="nav nav-tabs" role="tablist">
-					<li role="presentation" class=""  ><a href="#sectionone" aria-controls="sectionone" role="tab" data-toggle="tab">Basic</a></li>
-					<li role="presentation" class="active"><a href="#sectiontwo" aria-controls="sectiontwo" role="tab" data-toggle="tab">Advanced</a></li>
-					<li role="presentation" class=""><a href="#sectionthree" aria-controls="sectionthree" role="tab" data-toggle="tab">Order</a></li>                        
+					<li role="presentation" class=""  ><a href="#sectionone" aria-controls="sectionone" role="tab" data-toggle="tab"><?php echo h(__('Basic')); ?></a></li>
+					<li role="presentation" class="active"><a href="#sectiontwo" aria-controls="sectiontwo" role="tab" data-toggle="tab"><?php echo h(__('Advanced')); ?></a></li>
+					<li role="presentation" class=""><a href="#sectionthree" aria-controls="sectionthree" role="tab" data-toggle="tab"><?php echo h(__('Order')); ?></a></li>                        
 				</ul>
 				<div class="tab-content">
 					<div role="tabpanel" class="tab-pane" id="sectionone">
@@ -44,7 +44,7 @@
 							<?php foreach ($src as $fieldName => $oprators) { ?>
 								<tr>
 									<td><?php echo Inflector::Humanize($fieldName);?></td>
-									<td><?php echo $this->Form->input($fieldName,array('id'=>Inflector::Classify($modal.$fieldName), 'name'=>'data[basic]['.$modal.']['.$fieldName.'][oprator]', 'options'=>$oprators,'default'=>'==', 'label'=>false,'onChange'=>'checkdate(this)','class'=>'form-control'));?></td>
+									<td><?php echo $this->Form->input($fieldName,array('id'=>Inflector::Classify($modal.$fieldName), 'name'=>__('data[basic][').$modal.']['.$fieldName.'][oprator]', 'options'=>$oprators,'default'=>'==', 'label'=>false,'onChange'=>__('checkdate(this)'),'class'=>__('form-control')));?></td>
 									<td><?php echo $this->Form->input($fieldName.'_value',array('id'=>Inflector::Classify($modal.$fieldName).'_Value','name'=>'data[basic]['.$modal.']['.$fieldName.'][value]','label'=>false,'class'=>'form-control'));?></td>
 								</tr>
 							<?php } ?>
@@ -56,11 +56,11 @@
 								<th><?php echo __('Field');?></th>
 								<th><?php echo __('Condition');?></th>                        
 							</tr>
-							<?php $oprators = array('=='=>'Equal To','!='=>'Not Equal To');?>
+							<?php $oprators = array('=='=>__('Equal To'),'!='=>__('Not Equal To'));?>
 							<?php foreach ($belongsToModels as $fieldName => $records) { ?>
 								<tr>
 									<td><?php echo Inflector::Humanize($fieldName);?></td>
-									<td><?php echo $this->Form->input($fieldName,array('name'=>'data[advance]['.$modal.']['.$records['field_name'].'][oprator]','options'=>$oprators,'default'=>'==', 'label'=>false,'class'=>'form-control'));?></td>
+									<td><?php echo $this->Form->input($fieldName,array('name'=>__('data[advance][').$modal.']['.$records['field_name'].'][oprator]','options'=>$oprators,'default'=>'==', 'label'=>false,'class'=>__('form-control')));?></td>
 									<td><?php echo $this->Form->input($fieldName.'_value',array('name'=>'data[advance]['.$modal.']['.$records['field_name'].'][value][]','options'=>$records['records'],'multiple', 'label'=>false,'class'=>'form-control'));?></td>
 								</tr>
 							<?php } ?>
@@ -75,10 +75,10 @@
 							<?php foreach ($src as $fieldName => $oprators) { ?>
 								<tr>
 									<td><?php echo Inflector::Humanize($fieldName);?></td>
-									<!-- <td><?php echo $this->Form->input($fieldName,array('name'=>'data[basic]['.$modal.']['.$fieldName.'][oprator]', 'options'=>$oprators,'default'=>'==', 'label'=>false,'onChange'=>'checkdate(this)'));?></td> -->
+									<!-- <td><?php echo $this->Form->input($fieldName,array('name'=>__('data[basic][').$modal.']['.$fieldName.'][oprator]', 'options'=>$oprators,'default'=>'==', 'label'=>false,'onChange'=>__('checkdate(this)')));?></td> -->
 									<td><?php 
-									$oredrOptions = array(0=>'Ascending Order',1=>'Desending Order');
-									echo $this->Form->input($fieldName.'_value',array('name'=>'data[order]['.$modal.']['.$fieldName.'][value]','label'=>false, 'options'=>$oredrOptions,'class'=>'form-control'));?></td>
+									$oredrOptions = array(0=>__('Ascending Order'),1=>__('Desending Order'));
+									echo $this->Form->input($fieldName.'_value',array('name'=>__('data[order][').$modal.']['.$fieldName.'][value]','label'=>false, 'options'=>$oredrOptions,'class'=>__('form-control')));?></td>
 								</tr>
 							<?php } ?>
 						</table>

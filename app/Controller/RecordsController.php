@@ -138,7 +138,7 @@ class RecordsController extends AppController {
         
         $file = Configure::read('path') . DS . $this->request->data['Record']['id'] . DS . $file_name;
         if (!file_exists($qcfile)) {
-            echo "This document does not exists.";            
+            echo __("This document does not exists.");            
             
         } else {
             $from = $qcfile;
@@ -155,7 +155,7 @@ class RecordsController extends AppController {
                         $this->Record->create();
                         $this->Record->save($rec['Record']);
                     } else {
-                        echo "failed folder - 1" . Configure::read('path');
+                        echo __("failed folder - 1") . Configure::read('path');
                     }
                 } else {
                     // echo "failed folder -2 " . Configure::read('path');

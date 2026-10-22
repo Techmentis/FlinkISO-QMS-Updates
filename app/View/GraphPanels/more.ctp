@@ -2,7 +2,7 @@
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<button type="button" class="close" data-dismiss="modal" aria-label="<?php echo h(__('Close')); ?>"><span aria-hidden="true">&times;</span></button>
 				<h4 class="modal-title" id="<?php echo $graphPanel['GraphPanel']['id'];?>_modal"><?php echo $graphPanel['CustomTable']['name'];?>
 				<br /><small><?php echo $graphPanel['GraphPanel']['field_name'];?></small>
 			</h4>
@@ -14,7 +14,7 @@
 				.chosen-container, .chosen-container-multi{width: 100%;}
 			</style> 
 			<div class="row">
-				<div class="col-md-12"><p>Show graphs/panels on following conditions:</p></div>
+				<div class="col-md-12"><p><?php echo h(__('Show graphs/panels on following conditions:')); ?></p></div>
 				<div class="col-md-12"><?php echo $this->Form->input('title',array('class'=>'form-control','default'=>$graphPanel['GraphPanel']['title']));?></div>
 				<div class="col-md-12"><?php echo $this->Form->input('admin_only',array('class'=>'checkbox','type'=>'checkbox'));?></div>
 				<div class="col-md-12"><?php echo $this->Form->input('branches',array('name'=>'data[GraphPanel][branches][]', 'options'=>$branches, 'default'=>json_decode($graphPanel['GraphPanel']['branches'],true), 'class'=>'form-control','multiple'));?></div>
@@ -27,7 +27,7 @@
 			</div>
 		</div>
 		<div class="modal-footer">      	
-			<button type="button" class="btn btn-default" data-dismiss="modal" id="close_btn">Close</button>        
+			<button type="button" class="btn btn-default" data-dismiss="modal" id="close_btn"><?php echo h(__('Close')); ?></button>        
 			<?php echo $this->Form->submit(__('Submit'), array('div' => array('id'=>'submit_id_div'), 'class' => 'btn btn-primary btn-success','id'=>'panel_submit_id')); ?>
 			<?php echo $this->Form->end();?>
 		</div>

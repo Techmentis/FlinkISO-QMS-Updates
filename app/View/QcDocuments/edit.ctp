@@ -1,7 +1,7 @@
 <?php echo $this->Html->script(array('jquery.validate.min', 'jquery-form.min')); ?>
 <?php echo $this->fetch('script'); ?><div id="qcDocuments_ajax">
 	<?php echo $this->Session->flash();?>	
-	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Edit Document','modelClass'=>'QcDocument','options'=>array("sr_no"=>"Sr No","document_number"=>"Document Number","reference_number"=>"Reference Number","issue_number"=>"Issue Number","date_of_next_issue"=>"Date Of Next Issue","date_of_issue"=>"Date Of Issue","effective_from_date"=>"Effective From Date","revision_number"=>"Revision Number","date_of_review"=>"Date Of Review","revision_date"=>"Revision Date","document_type"=>"Document Type","it_categories"=>"It Categories","document_status"=>"Document Status","issued_by"=>"Issued By","archived"=>"Archived","change_history"=>"Change History","cr_status"=>"Cr Status","mark_for_cr_update"=>"Mark For Cr Update","temp_date_of_issue"=>"Temp Date Of Issue","temp_effective_from_date"=>"Temp Effective From Date","linked_formats"=>"Linked Formats","cover_page"=>"Cover Page","page_orientation"=>"Page Orientation"),'pluralVar'=>'qcDocuments'))); 
+	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Edit Document'),'modelClass'=>'QcDocument','options'=>array("sr_no"=>__("Sr No"),"document_number"=>__("Document Number"),"reference_number"=>__("Reference Number"),"issue_number"=>__("Issue Number"),"date_of_next_issue"=>__("Date Of Next Issue"),"date_of_issue"=>__("Date Of Issue"),"effective_from_date"=>__("Effective From Date"),"revision_number"=>__("Revision Number"),"date_of_review"=>__("Date Of Review"),"revision_date"=>__("Revision Date"),"document_type"=>__("Document Type"),"it_categories"=>__("It Categories"),"document_status"=>__("Document Status"),"issued_by"=>__("Issued By"),"archived"=>__("Archived"),"change_history"=>__("Change History"),"cr_status"=>__("Cr Status"),"mark_for_cr_update"=>__("Mark For Cr Update"),"temp_date_of_issue"=>__("Temp Date Of Issue"),"temp_effective_from_date"=>__("Temp Effective From Date"),"linked_formats"=>__("Linked Formats"),"cover_page"=>__("Cover Page"),"page_orientation"=>__("Page Orientation")),'pluralVar'=>'qcDocuments'))); 
 	?>
 
 	<div class="nav panel panel-default">
@@ -9,9 +9,9 @@
 		<div class="qcDocuments form col-md-12">
 			<?php echo $this->Form->create('QcDocument',array('role'=>'form','class'=>'form')); ?>
 			<div class="row">
-				<div class="col-md-6"><h3><small>Document Name:</small><br /><?php echo $this->data['QcDocument']['name'] ?></h3></div>
-				<div class="col-md-3"><h3><small>Number:</small><br /><?php echo $this->data['QcDocument']['document_number'] ?></h3></div>
-				<div class="col-md-3"><h3><small>Revision:</small><br /><?php echo $this->data['QcDocument']['revision_number'] ?></h3></div>
+				<div class="col-md-6"><h3><small><?php echo h(__('Document Name:')); ?></small><br /><?php echo $this->data['QcDocument']['name'] ?></h3></div>
+				<div class="col-md-3"><h3><small><?php echo h(__('Number:')); ?></small><br /><?php echo $this->data['QcDocument']['document_number'] ?></h3></div>
+				<div class="col-md-3"><h3><small><?php echo h(__('Revision:')); ?></small><br /><?php echo $this->data['QcDocument']['revision_number'] ?></h3></div>
 
 			</div>
 			<div class="row onlyofficedivshow">
@@ -67,7 +67,7 @@
 					echo $this->element('onlyoffice',array(
 						'url'=>$url,
 						'placeholderid'=>$placeholderid,
-						'panel_title'=>'Document Viewer',
+						'panel_title'=>__('Document Viewer'),
 						'mode'=>$mode,
 						'path'=>$file_path,
 						'file'=>$file,
@@ -105,18 +105,18 @@
 				if($this->data['QcDocument']['name']){
 					echo "<div class='col-md-12'>".$this->Form->input('name',
 						array(
-							'label'=>'<strong>Name:</strong> Do not add document extension (doc,docx,elxs etc) in this field',
+							'label'=>'<strong>' . h(__('Name:')) . '</strong> ' . h(__('Do not add document extension (doc,docx,elxs etc) in this field')),
 							'class'=>'form-control', 'readonly'=>'readonly')) . '</div>'; 	
 				}else{
 					echo "<div class='col-md-12'>".$this->Form->input('name',
 						array(
-							'label'=>'<strong>Name:</strong> Do not add document extension (doc,docx,elxs etc) in this field',
+							'label'=>'<strong>' . h(__('Name:')) . '</strong> ' . h(__('Do not add document extension (doc,docx,elxs etc) in this field')),
 							'class'=>'form-control', 'value'=>$this->data['QcDocument']['title'])) . '</div>'; 	
 				}
 				
 				echo "<div class='col-md-6 hide'>".$this->Form->hidden('title',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
-				echo "<div class='col-md-3 hide'>".$this->Form->hidden('document_number',array('class'=>'form-control','label'=>'Document Number')) . '</div>'; 
-				echo "<div class='col-md-3 hide'>".$this->Form->hidden('revision_number',array('class'=>'form-control','label'=>'Revision/Version')) . '</div>'; 
+				echo "<div class='col-md-3 hide'>".$this->Form->hidden('document_number',array('class'=>'form-control','label'=>__('Document Number'))) . '</div>'; 
+				echo "<div class='col-md-3 hide'>".$this->Form->hidden('revision_number',array('class'=>'form-control','label'=>__('Revision/Version'))) . '</div>'; 
 				
 				echo "</div><div class='row'>";
 				
@@ -141,13 +141,13 @@
 				echo "</div><div class='row'>";
 				
 				echo "<div class='col-md-12'>".$this->Form->input('document_type',array('default'=>0, 'type'=>'radio', 'class'=>'','options'=>$customArray['documentTypes'])) . '</div>'; 
-				echo "<div class='col-md-12'>".$this->Form->input('it_categories',array('legend'=>'Document Security','type'=>'radio', 'class'=>'','options'=>$customArray['itCategories'])) . '</div>';
+				echo "<div class='col-md-12'>".$this->Form->input('it_categories',array('legend'=>__('Document Security'),'type'=>'radio', 'class'=>'','options'=>$customArray['itCategories'])) . '</div>';
 				
 				$updateCustomTableDocuments = array(
-					0=>'Yes, Update Custom HTML Form Document when any changes are made to this document',
-					1=>'No, Custom HTML Form Document will be updated manually',
+					0=>__('Yes, Update Custom HTML Form Document when any changes are made to this document'),
+					1=>__('No, Custom HTML Form Document will be updated manually'),
 				);
-				echo "<div class='col-md-12 hide'>".$this->Form->input('update_custom_table_document',array('legend'=>'Update Custom HTML From Document','type'=>'radio', 'class'=>'','options'=>$updateCustomTableDocuments)) . '</div>'; 
+				echo "<div class='col-md-12 hide'>".$this->Form->input('update_custom_table_document',array('legend'=>__('Update Custom HTML From Document'),'type'=>'radio', 'class'=>'','options'=>$updateCustomTableDocuments)) . '</div>'; 
 
 				echo "</div><div class='row'>";
 				
@@ -168,11 +168,11 @@
 						<div class="box box-default">
 							<div class="box-header with-border">
 								<i class="fa fa-share-alt"></i>
-								<h3 class="box-title">Document Sharing  
+								<h3 class="box-title"><?php echo h(__('Document Sharing')); ?>  
 								</h3>
 									<br />
-									<p><?php echo $this->Form->input('and_or_condition',array('label'=>'Check for strict sharing','class'=>'checkbox'));?> </p>									
-									<small>If strict shareing is checked, only users beloging to selected Branches/ Departments/ Designations will be able to view the document. It not checked, then users belonging to either of any will be able to view the documents.</small>
+									<p><?php echo $this->Form->input('and_or_condition',array('label'=>__('Check for strict sharing'),'class'=>'checkbox'));?> </p>									
+									<small><?php echo h(__('If strict shareing is checked, only users beloging to selected Branches/ Departments/ Designations will be able to view the document. It not checked, then users belonging to either of any will be able to view the documents.')); ?></small>
 							</div>
 							<div class="box-body">
 								<div class="">
@@ -193,13 +193,13 @@
 									echo "</div>";
 									
 									echo "<div class='row'>";
-									echo "<div class='col-md-10'>".$this->Form->input('user_id',array('name'=>'data[QcDocument][user_id][]','label'=>'Share with Users','multiple', 'options'=>$usernames, 'class'=>'form-control', 'style'=>'','selected'=>json_decode($this->request->data['QcDocument']['user_id'],true))) . '</div>'; 
+									echo "<div class='col-md-10'>".$this->Form->input('user_id',array('name'=>'data[QcDocument][user_id][]','label'=>__('Share with Users'),'multiple', 'options'=>$usernames, 'class'=>'form-control', 'style'=>'','selected'=>json_decode($this->request->data['QcDocument']['user_id'],true))) . '</div>'; 
 									echo "<div class='col-md-2'><br />".$this->Form->input('select_all_users',array('type'=>'checkbox','class'=>'checkbox','onClick'=>'selectall("QcDocumentUserId",this)'))."</div>";
 									echo "</div>";
 
 									echo "<div class='row'>";
 									echo "<div class='col-md-12'><hr /></div>";
-									echo "<div class='col-md-12'>".$this->Form->input('editors',array('name'=>'data[QcDocument][editors][]','label'=>'Who can edit this document?','multiple', 'options'=>$usernames, 'class'=>'form-control', 'required',  'style'=>'','selected'=>json_decode($this->request->data['QcDocument']['editors']))) . '</div>'; 
+									echo "<div class='col-md-12'>".$this->Form->input('editors',array('name'=>'data[QcDocument][editors][]','label'=>__('Who can edit this document?'),'multiple', 'options'=>$usernames, 'class'=>'form-control', 'required',  'style'=>'','selected'=>json_decode($this->request->data['QcDocument']['editors']))) . '</div>'; 
 									echo "<div class='hide'><br />".$this->Form->input('select_all_editors',array('type'=>'checkbox','class'=>'checkbox','onClick'=>'selectall("QcDocumentEditors",this)'))."</div>";
 									echo "</div>";
 
@@ -208,7 +208,7 @@
 								</div>
 							</div>
 							<div class="box-footer">
-								<p>Checking <strong>Select All</strong> will disable the field & exiting values and will override these values on save.</p>
+								<p><?php echo h(__('Checking')); ?> <strong><?php echo h(__('Select All')); ?></strong> <?php echo h(__('will disable the field')); ?> & <?php echo h(__('exiting values and will override these values on save.')); ?></p>
 							</div>
 						</div>
 					</div>
@@ -239,7 +239,7 @@
 				echo "<div class='hide'>".$this->Form->hidden('old_cr_i`d',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
 				echo "<div class='hide'>".$this->Form->hidden('parent_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
 				// echo "<div class='hide'>".$this->Form->hidden('parent_document_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
-				echo "<div class='col-md-12'>".$this->Form->input('linked_document_ids',array('label'=>'Linked Documents', 'name'=>'data[QcDocument][linked_document_id][]','class'=>'form-control','multiple','options'=>$parentQcDocuments)) . '</div>'; 
+				echo "<div class='col-md-12'>".$this->Form->input('linked_document_ids',array('label'=>__('Linked Documents'), 'name'=>'data[QcDocument][linked_document_id][]','class'=>'form-control','multiple','options'=>$parentQcDocuments)) . '</div>'; 
 				
 				
 				?>
@@ -254,10 +254,10 @@
 			</div>
 			<div class="row hide">
 				<div class="col-md-12">
-					<?php echo $this->Form->input('update_version',array('options'=>array(0=>'No',1=>'Yes'),'type'=>'radio','class'=>0,'default'=>0));?>
+					<?php echo $this->Form->input('update_version',array('options'=>array(0=>__('No'),1=>__('Yes')),'type'=>'radio','class'=>0,'default'=>0));?>
 				</div>
 				<div class="col-md-12">
-					<p><strong>Note:</strong> By default, update version in set to NO. If you want to update the version, click yes. It will create a copy of this document and store it as a older version. This may affect your billing.</p>		
+					<p><strong><?php echo h(__('Note:')); ?></strong> <?php echo h(__('By default, update version in set to NO. If you want to update the version, click yes. It will create a copy of this document and store it as a older version. This may affect your billing.')); ?></p>		
 				</div>
 			</div>			
 			<div class="row">
@@ -325,7 +325,7 @@
 
 		jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 			return this.optional(element) || (parseFloat(value) != -1);
-		}, "Please select the value");
+		}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 		$('#QcDocumentEditForm').validate({}); 
 

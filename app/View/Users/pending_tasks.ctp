@@ -1,4 +1,4 @@
-<h3><small><?php echo $this->Html->link('Dashboard',array('controller'=>'users','action'=>'dashboard'));?> / </small><?php echo __('Pending Tasks');?></h3>
+<h3><small><?php echo $this->Html->link(__('Dashboard'),array('controller'=>'users','action'=>'dashboard'));?> / </small><?php echo __('Pending Tasks');?></h3>
 <div id="pending-task-tabs" class="nav-tabs-info">
 	<ul class="nav nav-tabs">
 		<?php foreach ($results as $model_name => $value) { ?>

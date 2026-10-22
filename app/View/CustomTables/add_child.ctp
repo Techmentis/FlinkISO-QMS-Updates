@@ -11,29 +11,29 @@
 <div id="customTables_ajax">
 	<?php echo $this->Session->flash();?>
 	<div class="customTables ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Custom Tables','modelClass'=>'CustomTable','options'=>array(),'pluralVar'=>'customTables'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Custom Tables'),'modelClass'=>'CustomTable','options'=>array(),'pluralVar'=>'customTables'))); ?>
 
 		<div class="row">
 			<div class="col-md-12">
 				<div class="box box-default collapsed-box">
-					<div class="box-header with-border"><h3 class="box-title" style="width:100%">Parent Table Details</h3>
+					<div class="box-header with-border"><h3 class="box-title" style="width:100%"><?php echo h(__('Parent Table Details')); ?></h3>
 						<div class="box-tools pull-right">
 							<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button>
 						</div>
 					</div>
 					<div class="box-body">		
 						<table class="table table-responsive">
-							<tr><th>Name</th><td><?php echo $customTable['CustomTable']['name']?></td></tr>
-							<tr><th>Table Name</th><td><?php echo $customTable['CustomTable']['table_name']?></td></tr>
-							<tr><th>Table Version</th><td><?php echo $customTable['CustomTable']['table_version']?></td></tr>
-							<tr><th>Fields</th><td>
+							<tr><th><?php echo h(__('Name')); ?></th><td><?php echo $customTable['CustomTable']['name']?></td></tr>
+							<tr><th><?php echo h(__('Table Name')); ?></th><td><?php echo $customTable['CustomTable']['table_name']?></td></tr>
+							<tr><th><?php echo h(__('Table Version')); ?></th><td><?php echo $customTable['CustomTable']['table_version']?></td></tr>
+							<tr><th><?php echo h(__('Fields')); ?></th><td>
 								<ul><?php 
 								$fields = json_decode($customTable['CustomTable']['fields'],true);
 								foreach($fields as $field){
 									echo "<li>" . $field['field_name'] . "</li>";
 								}
 							?></ul></td></tr>
-							<tr><th>Linked To</th><td><ul><?php 
+							<tr><th><?php echo h(__('Linked To')); ?></th><td><ul><?php 
 							
 							$fields = json_decode($customTable['CustomTable']['fields'],true);
 							foreach($fields as $field){
@@ -43,7 +43,7 @@
 								
 							}				
 						?></ul></td></tr>
-						<tr><th>Status</th><td><?php echo $customTable['CustomTable']['table_locked']? 'Unlocked':'Locked';?></td></tr>					
+						<tr><th><?php echo h(__('Status')); ?></th><td><?php echo $customTable['CustomTable']['table_locked']? 'Unlocked':'Locked';?></td></tr>					
 					</table>
 				</div>
 			</div>
@@ -63,7 +63,7 @@
 				
 				<?php echo "<div class='col-md-4'>".$this->Form->input('name',array('class'=>'form-control','required','default'=>Inflector::Humanize($table_name))) . '</div>'; ?>
 				<?php echo "<div class='col-md-3'>".$this->Form->input('table_name',array('class'=>'form-control', 'readonly', 'default'=>$table_name)) . '</div>'; ?>
-				<?php echo "<div class='col-md-1'>".$this->Form->input('table_version',array('label'=>'Version', 'class'=>'form-control', 'readonly', 'default'=>$table_version)) . '</div>'; ?>
+				<?php echo "<div class='col-md-1'>".$this->Form->input('table_version',array('label'=>__('Version'), 'class'=>'form-control', 'readonly', 'default'=>$table_version)) . '</div>'; ?>
 				<?php echo "<div class='col-md-12 hide'>".$this->Form->hidden('fields',array('class'=>'form-control',)) . '</div>'; ?>
 				
 				<?php echo "<div class='col-md-2'>".$this->Form->input('password',array('type'=>'password', 'class'=>'form-control',)) . '</div>'; ?>
@@ -112,7 +112,7 @@
 
 			<div class="">
 				<div class="col-md-4">
-					<?php echo $this->Form->input('form_layout',array('type'=>'radio','options'=>array(1=>'Regular',2=>'Table'),'default'=>2));?>
+					<?php echo $this->Form->input('form_layout',array('type'=>'radio','options'=>array(1=>__('Regular'),2=>__('Table')),'default'=>2));?>
 				</div>
 				<div class="col-md-4">
 					<?php echo $this->Form->input('publish', array('label' => __('Publish')));?>
@@ -191,7 +191,7 @@
 
 		if($("#"+id).val != ''){
 			$("#CustomTableFields"+f+"FieldType").prop("greaterThanZero", function(value, element) {
-			}, "Please select the value");
+			}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 
 			$("#CustomTableFields"+f+"Length").prop('required',true);			
@@ -237,7 +237,7 @@
 
 		jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 			return this.optional(element) || (parseInt(value) != -1);
-		}, "This field is required.");
+		}, <?php echo json_encode(__('This field is required.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 		jQuery.validator.addMethod("varchar", function(value, element) {
 			return this.optional(element) || (parseFloat(value) < 256);
@@ -281,7 +281,7 @@
 			
 
 			if(i != 1){
-				alert('You must add one default field. Only one default field is allowed.');
+				alert(<?php echo json_encode(__('You must add one default field. Only one default field is allowed.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 				$("#"+ckid).prop('checked',false);
 				return false;
 			}else{

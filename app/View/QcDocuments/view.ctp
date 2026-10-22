@@ -9,7 +9,7 @@
         }
     </style>
     <?php echo $this->Session->flash();?>
-    <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'View Qc Documents','modelClass'=>'QcDocument','options'=>array("sr_no"=>"Sr No","document_number"=>"Document Number","reference_number"=>"Reference Number","issue_number"=>"Issue Number","date_of_next_issue"=>"Date Of Next Issue","date_of_issue"=>"Date Of Issue","effective_from_date"=>"Effective From Date","revision_number"=>"Revision Number","date_of_review"=>"Date Of Review","revision_date"=>"Revision Date","document_type"=>"Document Type","it_categories"=>"It Categories","document_status"=>"Document Status","issued_by"=>"Issued By","archived"=>"Archived","change_history"=>"Change History","cr_status"=>"Cr Status","mark_for_cr_update"=>"Mark For Cr Update","temp_date_of_issue"=>"Temp Date Of Issue","temp_effective_from_date"=>"Temp Effective From Date","linked_formats"=>"Linked Formats","cover_page"=>"Cover Page","page_orientation"=>"Page Orientation"),'pluralVar'=>'qcDocuments'))); ?>
+    <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('View Qc Documents'),'modelClass'=>'QcDocument','options'=>array("sr_no"=>__("Sr No"),"document_number"=>__("Document Number"),"reference_number"=>__("Reference Number"),"issue_number"=>__("Issue Number"),"date_of_next_issue"=>__("Date Of Next Issue"),"date_of_issue"=>__("Date Of Issue"),"effective_from_date"=>__("Effective From Date"),"revision_number"=>__("Revision Number"),"date_of_review"=>__("Date Of Review"),"revision_date"=>__("Revision Date"),"document_type"=>__("Document Type"),"it_categories"=>__("It Categories"),"document_status"=>__("Document Status"),"issued_by"=>__("Issued By"),"archived"=>__("Archived"),"change_history"=>__("Change History"),"cr_status"=>__("Cr Status"),"mark_for_cr_update"=>__("Mark For Cr Update"),"temp_date_of_issue"=>__("Temp Date Of Issue"),"temp_effective_from_date"=>__("Temp Effective From Date"),"linked_formats"=>__("Linked Formats"),"cover_page"=>__("Cover Page"),"page_orientation"=>__("Page Orientation")),'pluralVar'=>'qcDocuments'))); ?>
     <div class="btn-group">
         <?php
         foreach($standards as $standard_id => $standard){
@@ -27,13 +27,13 @@
             <div class="col-md-8">
                 <h3><?php echo h($qcDocument['QcDocument']['name']); ?> <small>.<?php echo h($qcDocument['QcDocument']['file_type']); ?></small><br />
                     <small><?php echo $qcDocument['Standard']['name']; ?> / <?php echo h($qcDocument['Clause']['title']); ?> / <?php echo h($qcDocument['QcDocument']['document_number']); ?>  / Rev.No.<?php echo h($qcDocument['QcDocument']['revision_number']); ?> |
-                        <?php echo $this->Html->link('Rename',array('action'=>'rename',$qcDocument['QcDocument']['id'])) ;?>
+                        <?php echo $this->Html->link(__('Rename'),array('action'=>'rename',$qcDocument['QcDocument']['id'])) ;?>
                     </small>
                 </h3>
             </div>
             <div class="col-md-4 text-right hide"><br /><br />
                 <div id="downloadpdf">
-                    <div class="btn btn-sm btn-info" id="generate_pdf"><i class="fa fa-file-pdf-o"></i>&nbsp;&nbsp;&nbsp;Generate PDF <i class="fa fa-refresh fa-spin hide"></i></div>
+                    <div class="btn btn-sm btn-info" id="generate_pdf"><i class="fa fa-file-pdf-o"></i>&nbsp;&nbsp;&nbsp;<?php echo h(__('Generate PDF')); ?> <i class="fa fa-refresh fa-spin hide"></i></div>
                     <script type="text/javascript">
                         $("#generate_pdf").on('click',function(){
                             $(".fa-spin").removeClass('hide').addClass('show').addClass('pull-right');
@@ -53,22 +53,22 @@
             <ul class="nav nav-tabs docs" role="tablist">
                 <!-- <li class="active"><a href="#document" data-toggle="tab">Details</a></li> -->
                 <?php if($qcDocument['QcDocument']['file_type']){ ?>
-                    <li class="active"><a href="#view_document" data-toggle="tab">Document</a></li>
+                    <li class="active"><a href="#view_document" data-toggle="tab"><?php echo h(__('Document')); ?></a></li>
                 <?php }else{ ?>
-                    <li class="active"><a style="background-color: #ff6060 !important;" href="#view_document" data-toggle="tab">Add Document</a></li>
+                    <li class="active"><a style="background-color: #ff6060 !important;" href="#view_document" data-toggle="tab"><?php echo h(__('Add Document')); ?></a></li>
                 <?php } ?>
-                <?php if($qcDocument['QcDocument']['childDoc'] > 0){;?><li ><a href="#childdocument" data-toggle="tab">Child Documents <span class="badge"><?php echo count($childDocs)?></span></a></li><?php } ?>
-                <li><a href="#tab_3" onclick="loadchangehistory()" data-toggle="tab">Change Requests <span class="badge"><?php echo $crs?></span></a></li>
-                <li><a href="#tab_2" onclick="loadrevisions()" data-toggle="tab">Revisions <span class="badge"><?php echo $crs?></span></a></li>
-                <li><a href="#tab_4" data-toggle="tab">Upload Additional Docs</a></li>
-                <li><a href="#tab_5" data-toggle="tab">Read Receipts</a></li>
-                <li><a href="#tab_6" data-toggle="tab">Downloads</a></li>
+                <?php if($qcDocument['QcDocument']['childDoc'] > 0){;?><li ><a href="#childdocument" data-toggle="tab"><?php echo h(__('Child Documents')); ?> <span class="badge"><?php echo count($childDocs)?></span></a></li><?php } ?>
+                <li><a href="#tab_3" onclick="loadchangehistory()" data-toggle="tab"><?php echo h(__('Change Requests')); ?> <span class="badge"><?php echo $crs?></span></a></li>
+                <li><a href="#tab_2" onclick="loadrevisions()" data-toggle="tab"><?php echo h(__('Revisions')); ?> <span class="badge"><?php echo $crs?></span></a></li>
+                <li><a href="#tab_4" data-toggle="tab"><?php echo h(__('Upload Additional Docs')); ?></a></li>
+                <li><a href="#tab_5" data-toggle="tab"><?php echo h(__('Read Receipts')); ?></a></li>
+                <li><a href="#tab_6" data-toggle="tab"><?php echo h(__('Downloads')); ?></a></li>
                 <?php
                 $documentTableCount = count($documentTables['main']) + count($documentTables['child']) + count($documentTables['linked']);
                 if ($documentTableCount) { ?>
-                    <li><a href="#document_tables" data-toggle="tab">Tables <span class="badge"><?php echo $documentTableCount; ?></span></a></li>
+                    <li><a href="#document_tables" data-toggle="tab"><?php echo h(__('Tables')); ?> <span class="badge"><?php echo $documentTableCount; ?></span></a></li>
                 <?php } ?>
-                <li ><?php echo $this->Html->link('Add Child&nbsp;&nbsp;<i class="fa fa-external-link"></i>',array('action'=>'add','parent_id'=>$qcDocument['QcDocument']['id']),array('escape'=>false));?></li>
+                <li ><?php echo $this->Html->link(h(__('Add Child')) . '&nbsp;&nbsp;<i class="fa fa-external-link"></i>',array('action'=>'add','parent_id'=>$qcDocument['QcDocument']['id']),array('escape'=>false));?></li>
             </ul>
             <div class="tab-content">
                 <div class="tab-pane" id="childdocument">
@@ -76,10 +76,10 @@
                 </div>
 
                 <div class="tab-pane" id="tab_2">
-                    <h4>Document Revision Hstory</h4>
+                    <h4><?php echo h(__('Document Revision Hstory')); ?></h4>
                 </div>
                 <div class="tab-pane" id="tab_3">
-                    <h4>Document Change Requestes</h4>
+                    <h4><?php echo h(__('Document Change Requestes')); ?></h4>
                 </div>
                 <div class="tab-pane" id="tab_4">
                     <?php echo $this->element('fileuploads',array('id'=>$qcDocument['QcDocument']['id']));?>
@@ -107,14 +107,14 @@
                     <div class="row">
                         <div class="col-md-12">
                             <table class="table table-responsive table-bordered">
-                                <thead><h4>Document Details</h4></thead>
+                                <thead><h4><?php echo h(__('Document Details')); ?></h4></thead>
                                 <tbody>
                                     <tr>
-                                        <th>Document Name</th>
+                                        <th><?php echo h(__('Document Name')); ?></th>
                                         <td><?php echo $qcDocument['QcDocument']['name'];?></td>
-                                        <th>Document Number</th>
+                                        <th><?php echo h(__('Document Number')); ?></th>
                                         <td><?php echo $qcDocument['QcDocument']['document_number'];?></td>
-                                        <th>Standard</th>
+                                        <th><?php echo h(__('Standard')); ?></th>
                                         <td><?php echo $qcDocument['Standard']['name'];?></td>
                                     </tr>
                                     <tr>
@@ -202,10 +202,10 @@
 
                             $mode = 'view';
 
-                            echo '<div class="col-md-12"><h4>Loading Archived Document</h4>'. $this->element('onlyoffice_load_archived',array(
+                            echo '<div class="col-md-12"><h4>' . h(__('Loading Archived Document')) . '</h4>'. $this->element('onlyoffice_load_archived',array(
                                 'url'=>$url,
                                 'placeholderid'=>0,
-                                'panel_title'=>'Document Viewer',
+                                'panel_title'=>__('Document Viewer'),
                                 'mode'=>$mode,
                                 'path'=>$file_path,
                                 'file'=>$file,
@@ -259,7 +259,7 @@
                                 echo '<div class="col-md-12">'. $this->element('onlyoffice',array(
                                     'url'=>$url,
                                     'placeholderid'=>0,
-                                    'panel_title'=>'Document Viewer',
+                                    'panel_title'=>__('Document Viewer'),
                                     'mode'=>$mode,
                                     'path'=>$file_path,
                                     'file'=>$file,
@@ -286,11 +286,11 @@
                                     echo '<div class="col-md-8">'.$this->Form->hidden('file_type',array()).'</div>';?>
                                     <div class="col-md-8">
                                         <span class='control-fileupload'><i class='fa fa-file-o'></i>
-                                            <?php echo $this->Form->input('file',array('type'=>'file', 'label'=>'Upload Document', 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));'));?>
+                                            <?php echo $this->Form->input('file',array('type'=>'file', 'label'=>__('Upload Document'), 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));'));?>
                                         </span>
                                     </div>
                                     <?php
-                                    echo '<div class="col-md-4">'. $this->Form->submit('Upload File',array('class'=>'btn btn-sm btn-info')).'</div>';
+                                    echo '<div class="col-md-4">'. $this->Form->submit(__('Upload File'),array('class'=>'btn btn-sm btn-info')).'</div>';
                                     echo $this->Form->input('id',array('default'=>$qcDocument['QcDocument']['id']));
                                     echo $this->Form->end();
                                 }
@@ -324,7 +324,7 @@
                                     if($.inArray(ext,earr) > -1){
 
                                     }else{
-                                        alert('This file type is not allowed : ' + ext);
+                                        alert(<?php echo json_encode(__('This file type is not allowed : '), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?> + ext);
                                         location.reload(true);
                                     }
 
@@ -336,7 +336,7 @@
 
                                     if (!isNaN(str[0]) && !isNaN(str[str.length - 1])) {
                                         this.value = "";
-                                        alert('File with onlynumbers is not allowed.');
+                                        alert(<?php echo json_encode(__('File with onlynumbers is not allowed.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                                         location.reload(true);
                                     } else {
 
@@ -352,27 +352,27 @@
                         <div class="col-md-12">
                             <p>
                                 <table class="table table-responsive table-bordered">
-                                    <thead><h4>Document Sharing</h4></thead>
+                                    <thead><h4><?php echo h(__('Document Sharing')); ?></h4></thead>
                                     <tbody>
                                         <tr>
-                                            <th>Strict Shareing</th>
+                                            <th><?php echo h(__('Strict Shareing')); ?></th>
                                             <td><strong><?php echo $qcDocument['QcDocument']['and_or_condition']?'Yes':'No';?> </strong></td>
                                         </tr>
                                         <tr>
-                                            <th>Schedule</th>
+                                            <th><?php echo h(__('Schedule')); ?></th>
                                             <td><strong><?php echo $qcDocument['Schedule']['name'];?></strong></td>
                                         </tr>
                                         <tr>
-                                            <th>Data Type</th>
+                                            <th><?php echo h(__('Data Type')); ?></th>
                                             <td><strong><?php echo $customArray['dataTypes'][$qcDocument['QcDocument']['data_type']];?></strong></td>
                                         </tr>
                                         <tr>
-                                            <th>Data Updated Type</th>
+                                            <th><?php echo h(__('Data Updated Type')); ?></th>
                                             <td><strong><?php echo $customArray['dataUpdateTypes'][$qcDocument['QcDocument']['data_update_type']];?></strong></td>
                                         </tr>
                                         <?php if($qcDocument['QcDocument']['branches'] != 'null'){ ?>
                                             <tr>
-                                                <th>Shared with Branches</th>
+                                                <th><?php echo h(__('Shared with Branches')); ?></th>
                                                 <td><?php
                                                     $branches = json_decode($qcDocument['QcDocument']['branches'],true);
                                                     foreach($branches as $branch){
@@ -383,7 +383,7 @@
                                         <?php } ?>
                                         <?php if($qcDocument['QcDocument']['departments'] != 'null'){ ?>
                                             <tr>
-                                                <th>Shared with Departments</th>
+                                                <th><?php echo h(__('Shared with Departments')); ?></th>
                                                 <td><?php
                                                     $departments = json_decode($qcDocument['QcDocument']['departments'],true);
                                                     foreach($departments as $department){
@@ -394,7 +394,7 @@
                                         <?php } ?>
                                         <?php if($qcDocument['QcDocument']['designations'] != 'null'){ ?>
                                             <tr>
-                                                <th>Shared with Designations</th>
+                                                <th><?php echo h(__('Shared with Designations')); ?></th>
                                                 <td><?php
                                                     $designations = json_decode($qcDocument['QcDocument']['designations'],true);
                                                     foreach($designations as $designation){
@@ -405,7 +405,7 @@
                                         <?php } ?>
                                         <?php if($qcDocument['QcDocument']['user_id'] != 'null'){ ?>
                                             <tr>
-                                                <th>Shared with Users/ Employees</th>
+                                                <th><?php echo h(__('Shared with Users/ Employees')); ?></th>
                                                 <td><?php
                                                     $users = json_decode($qcDocument['QcDocument']['user_id'],true);
                                                     foreach($users as $user){
@@ -416,7 +416,7 @@
                                         <?php } ?>
                                         <?php if($qcDocument['QcDocument']['editors'] != 'null'){ ?>
                                             <tr>
-                                                <th>Document Editors</th>
+                                                <th><?php echo h(__('Document Editors')); ?></th>
                                                 <td><?php
                                                     $editors = json_decode($qcDocument['QcDocument']['editors'],true);
                                                     foreach($editors as $editor){
@@ -432,13 +432,13 @@
                     </div>
                     <div class="col-md-6 text-left">
                         <?php
-                        echo "&nbsp;" . $this->Html->link('<i class="fa fa-edit fa-lg"></i>',array('action'=>'edit',$qcDocument['QcDocument']['id']),array('class'=>'btn btn-lg btn-warning tooltip1','data-original-title'=>'Edit Document','data-toggle'=>'tooltip','data-trigger'=>'hover','data-placement'=>'bottom','escape'=>false));
-                        if($this->Session->read('User.is_super_user')) echo "&nbsp;" . $this->Html->link('<i class="fa fa-database fa-lg"></i>',array('controller'=>'custom_tables', 'action'=>'add', 'qc_document_id'=> $qcDocument['QcDocument']['id']),array('class'=>'btn btn-lg btn-info tooltip1','data-original-title'=>'Create table using FlinkISO APIs','data-toggle'=>'tooltip','data-trigger'=>'hover','data-placement'=>'bottom','escape'=>false));
+                        echo "&nbsp;" . $this->Html->link('<i class="fa fa-edit fa-lg"></i>',array('action'=>'edit',$qcDocument['QcDocument']['id']),array('class'=>'btn btn-lg btn-warning tooltip1','data-original-title'=>__('Edit Document'),'data-toggle'=>'tooltip','data-trigger'=>'hover','data-placement'=>'bottom','escape'=>false));
+                        if($this->Session->read('User.is_super_user')) echo "&nbsp;" . $this->Html->link('<i class="fa fa-database fa-lg"></i>',array('controller'=>'custom_tables', 'action'=>'add', 'qc_document_id'=> $qcDocument['QcDocument']['id']),array('class'=>'btn btn-lg btn-info tooltip1','data-original-title'=>__('Create table using FlinkISO APIs'),'data-toggle'=>'tooltip','data-trigger'=>'hover','data-placement'=>'bottom','escape'=>false));
                         ?>
                     </div>
                     <div class="col-md-6 text-right">
                         <?php
-                        echo $this->Html->link('<i class="fa fa-trash-o fa-lg"></i>',array('action'=>'delete',$qcDocument['QcDocument']['id']),array('confirm'=>'You are about to delete this document?. This action can not be reversed. Do you want to procced?', 'class'=>'btn btn-lg btn-danger pull-right tooltip1','data-original-title'=>'Delete?','data-toggle'=>'tooltip','data-trigger'=>'hover','data-placement'=>'bottom','escape'=>false));
+                        echo $this->Html->link('<i class="fa fa-trash-o fa-lg"></i>',array('action'=>'delete',$qcDocument['QcDocument']['id']),array('confirm'=>__('You are about to delete this document?. This action can not be reversed. Do you want to procced?'), 'class'=>'btn btn-lg btn-danger pull-right tooltip1','data-original-title'=>__('Delete?'),'data-toggle'=>'tooltip','data-trigger'=>'hover','data-placement'=>'bottom','escape'=>false));
                         ?>
                     </div>
                     <div class="col-md-12">

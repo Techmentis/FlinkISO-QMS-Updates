@@ -19,44 +19,44 @@
 					<div class="btn-group">
 						<?php 
 						if($customTable['CustomTable']['publish'] == 1){
-							echo $this->Html->link('<i class="fa fa-minus-square-o fa-lg"></i>',array('action'=>'hold',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Ubnpublish this table'));
+							echo $this->Html->link('<i class="fa fa-minus-square-o fa-lg"></i>',array('action'=>'hold',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Ubnpublish this table')));
 						}
 						if($customTable['CustomTable']['publish'] == 0){
-							echo $this->Html->link('<i class="fa fa-check-square-o fa-lg text-success"></i>',array('action'=>'publish',$customTable['CustomTable']['id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Publish this table'));
+							echo $this->Html->link('<i class="fa fa-check-square-o fa-lg text-success"></i>',array('action'=>'publish',$customTable['CustomTable']['id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Publish this table')));
 						}?>
 						
 						<?php 
 						?>
 						<?php  
-						if($customTable['CustomTable']['table_locked'] == 0)echo $this->Html->link('<i class="fa fa-lock fa-lg text-danger"></i>',array('action'=>'unlock',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Unlock table'));
-						else if($customTable['CustomTable']['table_locked'] == 1) echo $this->Html->link('<i class="fa fa-unlock fa-lg text-danger"></i>',array('action'=>'lock',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Lock table'));
+						if($customTable['CustomTable']['table_locked'] == 0)echo $this->Html->link('<i class="fa fa-lock fa-lg text-danger"></i>',array('action'=>'unlock',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Unlock table')));
+						else if($customTable['CustomTable']['table_locked'] == 1) echo $this->Html->link('<i class="fa fa-unlock fa-lg text-danger"></i>',array('action'=>'lock',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Lock table')));
 						?>
 						
 						<?php 
 		// if($customTable['CustomTable']['publish'] == 0){
 						if($customTable['CustomTable']['custom_table_id'] == ''){
-							echo $this->Html->link('<i class="fa fa-refresh fa-lg text-warning"></i>',array('action'=>'recreate',$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id'],'process_id'=>$customTable['CustomTable']['process_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Recreate this table'));	
+							echo $this->Html->link('<i class="fa fa-refresh fa-lg text-warning"></i>',array('action'=>'recreate',$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id'],'process_id'=>$customTable['CustomTable']['process_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Recreate this table')));	
 						}else{
-							echo $this->Html->link('<i class="fa fa-refresh fa-lg text-warning"></i>',array('action'=>'recreate_child',$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id'],'process_id'=>$customTable['CustomTable']['process_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Recreate this table'));
+							echo $this->Html->link('<i class="fa fa-refresh fa-lg text-warning"></i>',array('action'=>'recreate_child',$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id'],'process_id'=>$customTable['CustomTable']['process_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Recreate this table')));
 			// }									
 						}?>
 						
 						<?php  if($customTable['CustomTable']['table_locked'] == 1){
 							if($customTable['CustomTable']['custom_table_id'] == ''){
-								echo $this->Html->link('<i class="fa fa-trash-o fa-lg text-danger"></i>',array('action'=>'delete',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Delete this table'));
+								echo $this->Html->link('<i class="fa fa-trash-o fa-lg text-danger"></i>',array('action'=>'delete',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Delete this table')));
 							}else{
-								echo $this->Html->link('<i class="fa fa-trash-o fa-lg text-danger"></i>',array('action'=>'delete_child',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Delete this table'));
+								echo $this->Html->link('<i class="fa fa-trash-o fa-lg text-danger"></i>',array('action'=>'delete_child',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Delete this table')));
 							}
 							
 						}?>					
 
-						<?php if($customTable['CustomTable']['custom_table_id'] == '') echo $this->Html->link('<i class="fa fa-link text-info"></i>',array('action'=>'add_child','custom_table_id'=> $customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id']),array('class'=>'btn btn-sm tooltip1 btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Link new table to this table'));?>
+						<?php if($customTable['CustomTable']['custom_table_id'] == '') echo $this->Html->link('<i class="fa fa-link text-info"></i>',array('action'=>'add_child','custom_table_id'=> $customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id']),array('class'=>'btn btn-sm tooltip1 btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Link new table to this table')));?>
 					</div>
 				</td>						
 			</tr>
 		<?php endforeach; ?>
 	<?php }else{ ?>
-		<tr><td colspan=48>No results found</td></tr>
+		<tr><td colspan=48><?php echo h(__('No results found')); ?></td></tr>
 	<?php } ?>
 </table>
 <script>$.ajaxSetup({beforeSend:function(){$("#busy-indicator").show();},complete:function(){$("#busy-indicator").hide();}});</script>

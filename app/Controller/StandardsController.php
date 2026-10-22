@@ -179,7 +179,7 @@ class StandardsController extends AppController {
                 }else if(strpos($this->request->data['Standard']['clauses'], "\r") !== false){                
                     $clauses = explode("\r",$this->request->data['Standard']['clauses']);    
                 }else{
-                    echo "error";
+                    echo __("error");
                 }
 
                 foreach ($clauses as $clause) {

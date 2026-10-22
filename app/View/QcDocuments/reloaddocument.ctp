@@ -43,7 +43,7 @@
         echo $this->element('onlyoffice',array(
             'url'=>$url,
             'placeholderid'=>$placeholderid,
-            'panel_title'=>'Document Viewer',
+            'panel_title'=>__('Document Viewer'),
             'mode'=>$mode,
             'path'=>$file_path,
             'file'=>$file,

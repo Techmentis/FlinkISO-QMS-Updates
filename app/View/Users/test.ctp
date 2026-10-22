@@ -18,7 +18,7 @@
                                     </a>
 
                                     <?php
-                                    echo "<span style='float:right;margin-top:-20px;margin-right:10px'>" . $this->Form->input('select_all_' . str_replace(' ', '', ucfirst($value)), array('type' => 'checkbox', 'class' => $fkey . '_view', 'style' => 'float:left', 'label' => "Select All " . $value)) . "</span>";
+                                    echo "<span style='float:right;margin-top:-20px;margin-right:10px'>" . $this->Form->input('select_all_' . str_replace(' ', '', ucfirst($value)), array('type' => 'checkbox', 'class' => $fkey . '_view', 'style' => 'float:left', 'label' => __("Select All ") . $value)) . "</span>";
                                     ?>
                                 </h6>
                             </div>

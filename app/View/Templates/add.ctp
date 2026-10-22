@@ -18,7 +18,7 @@
 		}else if(filetype == 'xls' || filetype == 'xlsx'){
 			$("#TemplateFileType1").prop('checked',true);
 		}else if (filetype == 'ppt' || filetype == 'pptx'){
-			alert('Only doc, docx, xls & xlsx formats are allowed');
+			alert(<?php echo json_encode(__('Only doc, docx, xls & xlsx formats are allowed'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 			$("#TemplateFileType2").prop('checked',true);
 		}		
 	}
@@ -35,7 +35,8 @@
 			if($.inArray(ext,earr) > -1){
 				
 			}else{
-				alert('This file type is not allowed : ' + ext + '\nAllowed file types are "doc","docx","xls","xlsx","pdf","ppt","odt","txt","pptx","pptm"');
+				alert(<?php echo json_encode(__('This file type is not allowed : '), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?> + ext + <?php echo json_encode(__('
+Allowed file types are "doc","docx","xls","xlsx","pdf","ppt","odt","txt","pptx","pptm"'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 				location.reload(true);
 			}
 			let name = pathext.split('.' + ext);
@@ -57,7 +58,7 @@
 				success: function(data, result) {						    		
 					if(data == 1){
 						$("#TemplateName").val('');
-						$("#duplicate_name").html('Template with this name already exists. Chose another name');
+						$("#duplicate_name").html(<?php echo json_encode(__('Template with this name already exists. Chose another name'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 					}else{
 						$("#duplicate_name").html('');
 					}
@@ -69,16 +70,16 @@
 
 </script>				
 <div id="qcDocuments_ajax">
-	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Template','modelClass'=>'Template','options'=>array(),'pluralVar'=>'templates'))); ?>
+	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Template'),'modelClass'=>'Template','options'=>array(),'pluralVar'=>'templates'))); ?>
 	<?php echo $this->Form->create('Template',array('role'=>'form','class'=>'form','type'=>'file')); ?>
 	<div class="nav panel panel-default">
 		<div class="qcDocuments form col-md-12">			
 			<div class="row">		
 				<?php
 				$filesTypes = array('docx'=>'Document','xlsx'=>'Spreadsheet');
-				echo "<div class='col-md-4'><span class='control-fileupload' style='margin-top:28px'><i class='fa fa-file'></i>". $this->Form->input('file',array('class'=>$block_class ,  'type'=>'file', 'label'=>'Upload Document', 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));')) . "</div>";
-				echo "<div class='col-md-4'>".$this->Form->input('name',array('required'=>'required', 'label'=>'Template Name', 'class'=>'form-control',)) . '</div>';
-				echo "<div class='col-md-4'>".$this->Form->input('file_type',array('required'=>'required','class'=>'', 'type'=>'radio', 'options'=>array(0=>'Document',1=>'Spreadsheet',2=>'Presentation'))) . '</div>';
+				echo "<div class='col-md-4'><span class='control-fileupload' style='margin-top:28px'><i class='fa fa-file'></i>". $this->Form->input('file',array('class'=>$block_class ,  'type'=>'file', 'label'=>__('Upload Document'), 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));')) . "</div>";
+				echo "<div class='col-md-4'>".$this->Form->input('name',array('required'=>'required', 'label'=>__('Template Name'), 'class'=>'form-control',)) . '</div>';
+				echo "<div class='col-md-4'>".$this->Form->input('file_type',array('required'=>'required','class'=>'', 'type'=>'radio', 'options'=>array(0=>__('Document'),1=>__('Spreadsheet'),2=>__('Presentation')))) . '</div>';
 				echo "<div class='col-md-4'>".$this->Form->hidden('model',array('default'=>'Template',)) . '</div>';
 				echo "<div class='col-md-4'>".$this->Form->hidden('controller',array('default'=>'templates',)) . '</div>';
 				echo "<div class='col-md-4'>".$this->Form->hidden('record_id',array('default'=>'template',)) . '</div>';
@@ -86,8 +87,8 @@
 				<div class="col-md-12" id="duplicate_name"></div>
 				<div class="col-md-12"><div class="show_comments">
 					<i class="fa hide fa-exclamation-triangle"></i>
-					<strong>Option-1: </strong>Add template name & file type and save the record, it will redirect you to the template creation page. You can then create a template from scratch and save it for future use. If you select Document, system will load blank document, if you select Spreadsheet, system will load blank spreadsheet. You can then add/ edit containt to the newly created document.<br />
-					<strong>Option-2: </strong>Upload exising template from your local machine (allowed file types: "doc","docx","xls","xlsx","pdf","ppt","odt","txt","pptx","pptm" and click submit. (Do not change File Type).<br />
+					<strong><?php echo h(__('Option-1:')); ?> </strong><?php echo h(__('Add template name')); ?> & <?php echo h(__('file type and save the record, it will redirect you to the template creation page. You can then create a template from scratch and save it for future use. If you select Document, system will load blank document, if you select Spreadsheet, system will load blank spreadsheet. You can then add/ edit containt to the newly created document.')); ?><br />
+					<strong><?php echo h(__('Option-2:')); ?> </strong><?php echo h(__('Upload exising template from your local machine (allowed file types: "doc","docx","xls","xlsx","pdf","ppt","odt","txt","pptx","pptm" and click submit. (Do not change File Type).')); ?><br />
 				</div></div>
 			</div>
 			<br />
@@ -124,7 +125,7 @@
 			str2 = str1.replace(/\s/g,' ');
 			str = str2.replace('/\//','/');
 		}else if(field == "n"){
-			name = "Document Number";
+			name = <?php echo json_encode(__('Document Number'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 				// clean_document_number(value);
 			var path = value;
 			str1 = path.replace(/[`~!@#$%^&*()|+\=?;:'",.<>\{\}\[\]\\]/gi,'');
@@ -142,12 +143,12 @@
 					if(field == "t"){
 						name = "Title";
 					}else if(field == "n"){
-						name = "Document Number";
+						name = <?php echo json_encode(__('Document Number'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 							// clean_document_number(value);
 					}
 
 					$("#"+id).val('');
-					$("#duplicate_errors").html(name + " already exists");
+					$("#duplicate_errors").html(name + <?php echo json_encode(__(' already exists'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 				}else{
 					$("#duplicate_errors").html("");
 						// clean_document_number(value);
@@ -160,7 +161,7 @@
 
 		jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 			return this.optional(element) || (parseFloat(value) != -1);
-		}, "Please select the value");
+		}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 		$('#TemplateAddForm').validate(); 
 		

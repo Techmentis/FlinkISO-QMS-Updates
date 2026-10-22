@@ -15,13 +15,13 @@
                     <tr><th colspan="4"><h4><?php echo $key ?></h4></th></tr>
                     <tr>
                         <th width="1%">#</th>
-                        <th width="39%">Title</th>
-                        <th width="15%">Prepared By</th>                        
-                        <th width="15%">Approved By</th>                        
-                        <th width="10%">Document No</th>
-                        <th width="5%">Issue No</th>
-                        <th width="6%">Rev No</th>
-                        <th width="9%">Rev Date</th>
+                        <th width="39%"><?php echo h(__('Title')); ?></th>
+                        <th width="15%"><?php echo h(__('Prepared By')); ?></th>                        
+                        <th width="15%"><?php echo h(__('Approved By')); ?></th>                        
+                        <th width="10%"><?php echo h(__('Document No')); ?></th>
+                        <th width="5%"><?php echo h(__('Issue No')); ?></th>
+                        <th width="6%"><?php echo h(__('Rev No')); ?></th>
+                        <th width="9%"><?php echo h(__('Rev Date')); ?></th>
                     </tr>
                     <?php foreach ($value as $masterlist): ?>
                         <tr>

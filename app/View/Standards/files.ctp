@@ -26,7 +26,7 @@
                     <?php echo $clause['Clause']['details'] ?> 
 
                     <?php if($clause['additional_details']){ ?>                  
-                        <h3 class="box-title">Notes</h3><?php echo $clause['Clause']['additional_details'] ?>
+                        <h3 class="box-title"><?php echo h(__('Notes')); ?></h3><?php echo $clause['Clause']['additional_details'] ?>
                     <?php } ?>
                 </div>
                 <div class="box-footer">
@@ -67,8 +67,8 @@
                   beforeLoad: function( event, ui ) {
                     ui.jqXHR.error(function() {
                       ui.panel.html(
-                        "Error Loading ... " +
-                        "Please contact administrator." );
+                        <?php echo json_encode(__('Error Loading ... '), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?> +
+                        <?php echo json_encode(__('Please contact administrator.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?> );
                   });
                 }
             });
@@ -85,7 +85,7 @@
         <div class="col-md-12">
             <div class="box box-success">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Custom Tables</h3>
+                    <h3 class="box-title"><?php echo h(__('Custom Tables')); ?></h3>
                 </div>
                 <div class="box-body">
                     <div class="btn-group">

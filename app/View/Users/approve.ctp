@@ -24,7 +24,7 @@
         $().ready(function() {
             jQuery.validator.addMethod("greaterThanZero", function(value, element) {
                 return (value != -1);
-            }, "Please select the value");
+            }, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
             $('#UserApproveForm').validate(
             {
@@ -141,10 +141,10 @@
         <div class="row"><br />
             <fieldset><legend><h5><?php echo __('Benchmark:'); ?></h5></legend>
                 <div class="col-md-12">
-                    <strong>Note</strong>
+                    <strong><?php echo h(__('Note')); ?></strong>
                     <br />
-                    <p>Benchmarking helps you to track your day-to-day activities linked with each user, department and branch.
-                        <br />System prepares its's reports based on the benchmarks you have added for each user & department.
+                    <p><?php echo h(__('Benchmarking helps you to track your day-to-day activities linked with each user, department and branch.')); ?>
+                        <br /><?php echo h(__('System prepares its\'s reports based on the benchmarks you have added for each user')); ?> & <?php echo h(__('department.')); ?>
                     </p>
                 </div>
 
@@ -179,15 +179,15 @@
         <div class="row"><br />
             <fieldset><legend><h5><?php echo __('Copy permission from available user'); ?></h5></legend>
                 <div class="col-md-12">
-                    <strong>Note:</strong>
+                    <strong><?php echo h(__('Note:')); ?></strong>
                     <br />
                     <ul>
-                        <li>Each user created has permissions to access the system with specified limitations.</li>
-                        <li>You will need to exclusively provide access to each user based on his/her role.</li>
-                        <li>If you have already a user to whom you have provided access, and if you are creating a user with identical access you can select that user from the drop-down and the new user will automatically have those access.</li>
-                        <li>You can later either assign more access or limit the new user by manually changing the access.</li>
-                        <li>You can manually add user access from Users/View page by clicking <span class="label btn-danger">Manage Access Control</span>.</li>
-                        <li><strong>MR users are excluded from following list as MRs have complete access to application.</strong></li>
+                        <li><?php echo h(__('Each user created has permissions to access the system with specified limitations.')); ?></li>
+                        <li><?php echo h(__('You will need to exclusively provide access to each user based on his/her role.')); ?></li>
+                        <li><?php echo h(__('If you have already a user to whom you have provided access, and if you are creating a user with identical access you can select that user from the drop-down and the new user will automatically have those access.')); ?></li>
+                        <li><?php echo h(__('You can later either assign more access or limit the new user by manually changing the access.')); ?></li>
+                        <li><?php echo h(__('You can manually add user access from Users/View page by clicking')); ?> <span class="label btn-danger"><?php echo h(__('Manage Access Control')); ?></span>.</li>
+                        <li><strong><?php echo h(__('MR users are excluded from following list as MRs have complete access to application.')); ?></strong></li>
                     </ul>
                 </div>
 

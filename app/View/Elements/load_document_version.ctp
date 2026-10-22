@@ -28,7 +28,7 @@ $config  = array();
         "url" => $url,
         "fileType" => $this->data['fileType'],
         "documentType" => $this->data['documentType'],
-        "title" => ' Ver- ' . $this->data['version'] . ' By: '. str_replace($this->Session->read('User.company_name'),'',$this->data['user']) .' Updated:' . $this->data['created'],
+        "title" => __(' Ver- ') . $this->data['version'] . ' By: '. str_replace($this->Session->read('User.company_name'),'',$this->data['user']) .' Updated:' . $this->data['created'],
         ],                            
         "editorConfig"=>[
             "callbackUrl"=>$callbackUrl,

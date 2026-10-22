@@ -30,7 +30,7 @@
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 				<h4 class="modal-title"><?php echo __('Download PDF'); ?></h4>
-				<small>Securly generate and download PDF</small>
+				<small><?php echo h(__('Securly generate and download PDF')); ?></small>
 			</div>
 			<div class="modal-body" id="show-download">
 				<div class="col-md-12 text-center hide">
@@ -53,26 +53,26 @@
 							<div class="col-md-6">
 								<div class="row">
 									<div class="col-md-12 ">
-										<label style="margin:8px 20px" >Draw/ fetch Your Signature Below</label>
+										<label style="margin:8px 20px" ><?php echo h(__('Draw/ fetch Your Signature Below')); ?></label>
 										<div class="col-md-12">
 											<div id="signed"></div>
 											<div class="wrapper1" style="margin:0px">
 												<canvas id="signature-pad" class="signature-pad" width=350 height=150></canvas>					        
 											</div>
 											<div class="btn-group ">
-												<div class="btn tooltip1" onclick="copysign();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Copy Signature"><i class="fa fa-copy "></i></div>
-												<div class="btn tooltip1" onclick="getsignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Fetch Saved Signature"><i class="fa fa-folder-open"></i></div>
-												<div class="btn tooltip1" onclick="savesignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Save Signature"><i class="fa fa-save"></i></div>
-												<div class="btn tooltip1" onclick="clearCanvas();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Clear Signature"><i class="fa fa-eraser"></i></div>							
+												<div class="btn tooltip1" onclick="copysign();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "<?php echo h(__('Copy Signature')); ?>"><i class="fa fa-copy "></i></div>
+												<div class="btn tooltip1" onclick="getsignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "<?php echo h(__('Fetch Saved Signature')); ?>"><i class="fa fa-folder-open"></i></div>
+												<div class="btn tooltip1" onclick="savesignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "<?php echo h(__('Save Signature')); ?>"><i class="fa fa-save"></i></div>
+												<div class="btn tooltip1" onclick="clearCanvas();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "<?php echo h(__('Clear Signature')); ?>"><i class="fa fa-eraser"></i></div>							
 											</div>
 											<?php echo $this->Form->hidden('signature',array('id'=>'digital-signature'));?>
 										</div>
 										<div class="col-md-12">
 											<ul class="list-group">
-												<li class="list-group-item"><i class="fa fa-copy"></i> : Copy signature from earlier uploaded png file.</li>
-												<li class="list-group-item"><i class="fa fa-folder-open"></i> : Copy signature from earlier saved image.</li>
-												<li class="list-group-item"><i class="fa fa-save"></i> : Save current signature image.</li>
-												<li class="list-group-item"><i class="fa fa-eraser"></i> : Clear Canvas.</li>
+												<li class="list-group-item"><i class="fa fa-copy"></i> <?php echo h(__(': Copy signature from earlier uploaded png file.')); ?></li>
+												<li class="list-group-item"><i class="fa fa-folder-open"></i> <?php echo h(__(': Copy signature from earlier saved image.')); ?></li>
+												<li class="list-group-item"><i class="fa fa-save"></i> <?php echo h(__(': Save current signature image.')); ?></li>
+												<li class="list-group-item"><i class="fa fa-eraser"></i> <?php echo h(__(': Clear Canvas.')); ?></li>
 											</ul>
 										</div>
 									</div>
@@ -90,13 +90,13 @@
 									<div class="col-md-12">
 										<?php
 										if(isset($qcDocument) && $qcDocument['QcDocument']['it_categories'] == 3){
-											echo "Add password to protect your PDF file. Leave blank if you do not wish to. This password will not be stored.";
+											echo __("Add password to protect your PDF file. Leave blank if you do not wish to. This password will not be stored.");
 										}else{
-											echo "This is a confidential document. Password is mandatory. This password will not be stored.";
+											echo __("This is a confidential document. Password is mandatory. This password will not be stored.");
 										}
 										?>
 									</div>
-									<div class="col-md-12"><hr /><label>Advance PDF options</label></div>
+									<div class="col-md-12"><hr /><label><?php echo h(__('Advance PDF options')); ?></label></div>
 									<div class="col-md-6"><?php echo $this->Form->input('printing',array('class'=>'checkbox', 'type'=>'checkbox', 'multiple'=>'checkbox'));?></div>
 									<div class="col-md-6"><?php echo $this->Form->input('degraded_printing',array('class'=>'checkbox', 'type'=>'checkbox', 'multiple'=>'checkbox'));?></div>
 									<div class="col-md-6"><?php echo $this->Form->input('modify_contents',array('class'=>'checkbox', 'type'=>'checkbox', 'multiple'=>'checkbox'));?></div>
@@ -140,10 +140,10 @@
 											<div class="col-md-12"><?php echo $this->Form->input('pdf_template_id',array('options'=>$pdfTemplates,'class'=>'select'));?></div>
 											<div class="col-md-12 text-center"><p><br /><?php 
 											if($pdfTemplates){
-												echo $this->Html->link('View Templates',array('controller'=>'pdf_templates','action'=>'index',$this->request->params['named']['custom_table_id'])) . ' | ';
-												echo $this->Html->link('Add New Template',array('controller'=>'pdf_templates','action'=>'add',$this->request->params['named']['custom_table_id']));
+												echo $this->Html->link(__('View Templates'),array('controller'=>'pdf_templates','action'=>'index',$this->request->params['named']['custom_table_id'])) . ' | ';
+												echo $this->Html->link(__('Add New Template'),array('controller'=>'pdf_templates','action'=>'add',$this->request->params['named']['custom_table_id']));
 											}else{
-												echo $this->Html->link('Add Template',array('controller'=>'pdf_templates','action'=>'add',$this->request->params['named']['custom_table_id']));	
+												echo $this->Html->link(__('Add Template'),array('controller'=>'pdf_templates','action'=>'add',$this->request->params['named']['custom_table_id']));	
 											} ?></p>
 											<?php } ?>
 											</div>
@@ -278,10 +278,10 @@
 				},
 				complete: function(data) {
 					$("#pdf-spin").hide();
-					$(".modal-title").html("Your PDFs files are ready for download.");
+					$(".modal-title").html(<?php echo json_encode(__('Your PDFs files are ready for download.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 				},
 				error: function(request, status, error) {
-					alert('Action failed!');
+					alert(<?php echo json_encode(__('Action failed!'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 				}
 			});
 		}

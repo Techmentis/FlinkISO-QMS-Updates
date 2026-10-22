@@ -6,7 +6,7 @@
 <div class="main">
     <?php echo $this->Form->create($this->request->controller,array('controller'=>$this->request->controller, 'action'=>'sign_pdf'),array('class'=>'form-control'));?>
     <div class="row">
-        <div class="col-md-12"><h4>Add your signature here before downloading the PDF</h4></div>
+        <div class="col-md-12"><h4><?php echo h(__('Add your signature here before downloading the PDF')); ?></h4></div>
         <div class="col-md-12"><?php echo $this->Form->input('add_cover_page',array('class'=>'form-control'));?></div>
         <div class="col-md-12"><?php echo $this->Form->input('add_parent_records',array('class'=>'form-control'));?></div>
         <div class="col-md-12"><?php echo $this->Form->input('add_child_records',array('class'=>'form-control'));?></div>
@@ -23,7 +23,7 @@
             <div class="pull-right" ><input type="button" value="Clear Sketchpad" id="clearbutton" onclick="clearCanvas();"></div>          
         </div>
     </div>
-    <?php echo $this->Form->submit('Create and Download PDF',array('class'=>'btn btn-sm btn-success'));?>
+    <?php echo $this->Form->submit(__('Create and Download PDF'),array('class'=>'btn btn-sm btn-success'));?>
     <?php echo $this->Form->end();?>
 </div>
 <script type="text/javascript">

@@ -74,7 +74,7 @@ class TemplatesController extends AppController {
                     if ($pathfolder->create(Configure::read('path') . DS . $id)) {
                         chmod(Configure::read('path') . DS . $id,0777);
                     } else {
-                        echo "failed folder" . Configure::read('path');
+                        echo __("failed folder") . Configure::read('path');
                         exit;
                     }
                 }
@@ -162,13 +162,13 @@ class TemplatesController extends AppController {
         
         if(file_exists($from)){
             if(copy($from,$to)){
-                echo "File Copied";
+                echo __("File Copied");
             }else{
-                echo "Unable to copy file";
+                echo __("Unable to copy file");
             }
 
         }else{
-            echo "File does not exists";
+            echo __("File does not exists");
         }
     } 
 
@@ -177,7 +177,7 @@ class TemplatesController extends AppController {
         $local = $this->request->params['named'];
         
         if (($body_stream = file_get_contents("php://input")) === FALSE) {
-            echo "Bad Request";
+            echo __("Bad Request");
         }
         $data = json_decode($body_stream, TRUE);
         $this->log('data received : ' . json_encode($data));
@@ -233,6 +233,6 @@ class TemplatesController extends AppController {
             }
             
         }
-        echo "{\"error\":0}";  
+        echo __("{\"error\":0}");  
     }
 }

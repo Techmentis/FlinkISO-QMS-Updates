@@ -2,7 +2,7 @@
 <div  id="main">
 	<?php echo $this->Session->flash();?>	
 	<div class="employees ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Employees','modelClass'=>'Employee','options'=>array("sr_no"=>"Sr No","name"=>"Name","employee_number"=>"Employee Number","identification_number"=>"Identification Number","qualification"=>"Qualification","joining_date"=>"Joining Date","date_of_birth"=>"Date Of Birth","pancard_number"=>"Pancard Number","personal_telephone"=>"Personal Telephone","office_telephone"=>"Office Telephone","mobile"=>"Mobile","personal_email"=>"Personal Email","office_email"=>"Office Email","residence_address"=>"Residence Address","permenant_address"=>"Permenant Address","maritial_status"=>"Maritial Status","driving_license"=>"Driving License","employment_status"=>"Employment Status","is_approver"=>"Is Approvar"),'pluralVar'=>'employees'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Employees'),'modelClass'=>'Employee','options'=>array("sr_no"=>__("Sr No"),"name"=>__("Name"),"employee_number"=>__("Employee Number"),"identification_number"=>__("Identification Number"),"qualification"=>__("Qualification"),"joining_date"=>__("Joining Date"),"date_of_birth"=>__("Date Of Birth"),"pancard_number"=>__("Pancard Number"),"personal_telephone"=>__("Personal Telephone"),"office_telephone"=>__("Office Telephone"),"mobile"=>__("Mobile"),"personal_email"=>__("Personal Email"),"office_email"=>__("Office Email"),"residence_address"=>__("Residence Address"),"permenant_address"=>__("Permenant Address"),"maritial_status"=>__("Maritial Status"),"driving_license"=>__("Driving License"),"employment_status"=>__("Employment Status"),"is_approver"=>__("Is Approvar")),'pluralVar'=>'employees'))); ?>
 
 
 		<div class="table-responsive" style="overflow:scroll">
@@ -15,10 +15,10 @@
 					<th><?php echo $this->Paginator->sort('department_id'); ?></th>
 					<th><?php echo $this->Paginator->sort('designation_id'); ?></th>					
 					<th><?php echo $this->Paginator->sort('employment_status'); ?></th>
-					<th><?php echo $this->Paginator->sort('is_hod','HOD'); ?></th>
-					<th><?php echo $this->Paginator->sort('is_approver','Approver'); ?></th>
+					<th><?php echo $this->Paginator->sort('is_hod',__('HOD')); ?></th>
+					<th><?php echo $this->Paginator->sort('is_approver',__('Approver')); ?></th>
 					<th><?php echo $this->Paginator->sort('publish'); ?></th>
-					<th>Action</th>				
+					<th><?php echo h(__('Action')); ?></th>				
 				</tr>
 				<?php if($employees){ ?>
 					<?php foreach ($employees as $employee): ?>
@@ -53,7 +53,7 @@
 									</tr>
 								<?php endforeach; ?>
 							<?php }else{ ?>
-								<tr><td colspan=114>No results found</td></tr>
+								<tr><td colspan=114><?php echo h(__('No results found')); ?></td></tr>
 							<?php } ?>
 						</table>
 						<?php echo $this->Form->end();?>			

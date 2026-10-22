@@ -6,7 +6,7 @@
 <div  id="main">
 	<?php echo $this->Session->flash();?>	
 	<div class="graph_panels ">
-		<h3>Adjust Dashboard Graphs <small>(BETA)</small></h3>
+		<h3><?php echo h(__('Adjust Dashboard Graphs')); ?> <small><?php echo h(__('(BETA)')); ?></small></h3>
 
 		<script type="text/javascript">
 			$(document).ready(function(){
@@ -21,7 +21,7 @@
 			<?php echo $this->Form->create(array('class'=>'no-padding no-margin no-background'));?>				
 			<table id="graphs" cellpadding="0" cellspacing="0" class="table table-hover index" id="exportcsv">
 				<tr>
-					<th><?php echo $this->Paginator->sort('title'); ?>/ <?php echo $this->Paginator->sort('custom_table_id','Table Name'); ?></th>
+					<th><?php echo $this->Paginator->sort('title'); ?>/ <?php echo $this->Paginator->sort('custom_table_id',__('Table Name')); ?></th>
 					<th><?php echo $this->Paginator->sort('field_name'); ?></th>
 					<th><?php echo $this->Paginator->sort('date_condition'); ?></th>
 					<th><?php echo $this->Paginator->sort('graph_type'); ?></th>
@@ -227,7 +227,7 @@
 					$cnt++;
 				endforeach; ?>
 			<?php }else{ ?>
-				<tr><td colspan="7">No results found</td></tr>
+				<tr><td colspan="7"><?php echo h(__('No results found')); ?></td></tr>
 			<?php } ?>
 		</table>
 		<?php echo $this->Form->end();?>			
@@ -253,15 +253,15 @@
 <div class="row">
 	<div class="col-md-12">
 		<div class="panel panel-default panel-body">
-		<h5>Note</h5>
+		<h5><?php echo h(__('Note')); ?></h5>
 		<ul>
-			<li>When you create any HTML Table, system will identify fields for which system can generate graphs. You can see those fields in "Graphs & Panel" section on HTML Form Builder's View Page.</li>
-			<li>You can Click Check icon against a field for which you would like to generate the charts.</li>
-			<li>Once checked, you will see multiple available options related to that field on this page.</li>
-			<li>As of now you can select Pie, Dount, Bar & Line charts.</li>
-			<li>Bydefault, system will generate graph based on Count (# of records available against selected field).</li>
-			<li>Do not select Data Type as "Sum" or "Avg" for non-numerical fields. Graphs will fail to load.</li>
-			<li>For numarical field, you can select either "Sum" or "Avg" and system will display either Sum or Avg of the field's numarical values.</li>
+			<li><?php echo h(__('When you create any HTML Table, system will identify fields for which system can generate graphs. You can see those fields in "Graphs')); ?> & <?php echo h(__('Panel" section on HTML Form Builder\'s View Page.')); ?></li>
+			<li><?php echo h(__('You can Click Check icon against a field for which you would like to generate the charts.')); ?></li>
+			<li><?php echo h(__('Once checked, you will see multiple available options related to that field on this page.')); ?></li>
+			<li><?php echo h(__('As of now you can select Pie, Dount, Bar')); ?> & <?php echo h(__('Line charts.')); ?></li>
+			<li><?php echo h(__('Bydefault, system will generate graph based on Count (# of records available against selected field).')); ?></li>
+			<li><?php echo h(__('Do not select Data Type as "Sum" or "Avg" for non-numerical fields. Graphs will fail to load.')); ?></li>
+			<li><?php echo h(__('For numarical field, you can select either "Sum" or "Avg" and system will display either Sum or Avg of the field\'s numarical values.')); ?></li>
 		</ul>
 	</div>
 	</div>

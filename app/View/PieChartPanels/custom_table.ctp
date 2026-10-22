@@ -1,9 +1,9 @@
 <div class="box box-default">
-	<div class="box-header with-border"><h3 class="box-title" style="width: 100%">Show Piechart on dashboard <span class="pull-right"><i class="fa fa-pie-chart"></i></span> </h3></div>
+	<div class="box-header with-border"><h3 class="box-title" style="width: 100%"><?php echo h(__('Show Piechart on dashboard')); ?> <span class="pull-right"><i class="fa fa-pie-chart"></i></span> </h3></div>
 	<div class="box-body">
 		<table class="table table-striped">
 			<tr>
-				<th>Field Name</th>
+				<th><?php echo h(__('Field Name')); ?></th>
 				<th width="12"></th>
 			</tr>
 			<?php foreach($radioaFields as $field => $name){ ?>

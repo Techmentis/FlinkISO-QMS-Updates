@@ -3,7 +3,7 @@
 	<?php echo $this->Session->flash();?>	
 
 	<div class="designations ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Designations','modelClass'=>'Designation','options'=>array(),'pluralVar'=>'designations'))); ?>		
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Designations'),'modelClass'=>'Designation','options'=>array(),'pluralVar'=>'designations'))); ?>		
 		<div class="nav panel panel-default">
 			<div class="designations form col-md-12">
 				<?php echo $this->Form->create('Designation',array('role'=>'form','class'=>'form')); ?>
@@ -20,7 +20,7 @@ Designation 4
 ";
 					echo "<div class='col-md-12'>".$this->Form->input('parent_id',array('class'=>'form-control', 'style'=>'','options'=>$parentDesignations)) . '</div>';
 					echo "<div class='col-md-12'>".$this->Form->input('name',array('type'=>'textarea' ,'class'=>'form-control', 'placeholder'=>$str )) . '</div>'; 		
-					echo "<div class='col-md-12 help-text'>Add departments with < enter > as new record.</div>";
+					echo '<div class=\'col-md-12 help-text\'>' . h(__('Add departments with')) . ' < ' . h(__('enter > as new record.')) . '</div>';
 					?>
 					<?php
 					echo $this->Form->input('id');

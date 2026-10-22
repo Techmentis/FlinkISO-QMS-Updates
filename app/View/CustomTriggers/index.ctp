@@ -1,8 +1,8 @@
 <?php echo $this->element('checkbox-script'); ?><div  id="main">
 	<?php echo $this->Session->flash();?>	
 	<div class="customTriggers ">
-		<p class="text-right"><?php echo $this->Html->link('<i class="fa fa-envelope"></i> Delivery log', array('action'=>'deliveries'), array('class'=>'btn btn-default', 'escape'=>false)); ?></p>
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Custom Triggers','modelClass'=>'CustomTrigger','options'=>array("sr_no"=>"Sr No","name"=>"Name","details"=>"Details","file_name"=>"File Name","changed_field_value"=>"Changed Field Value","notify_user"=>"Notify User","notify_users"=>"Notify Users","if_added"=>"If Added","if_edited"=>"If Edited","if_publish"=>"If Publish","if_approved"=>"If Approved","if_soft_delete"=>"If Soft Delete","recipents"=>"Recipents","cc"=>"Cc","bcc"=>"Bcc","subject"=>"Subject","message"=>"Message"),'pluralVar'=>'customTriggers'))); ?>
+		<p class="text-right"><?php echo $this->Html->link('<i class="fa fa-envelope"></i> ' . h(__('Delivery log')), array('action'=>'deliveries'), array('class'=>'btn btn-default', 'escape'=>false)); ?></p>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Custom Triggers'),'modelClass'=>'CustomTrigger','options'=>array("sr_no"=>__("Sr No"),"name"=>__("Name"),"details"=>__("Details"),"file_name"=>__("File Name"),"changed_field_value"=>__("Changed Field Value"),"notify_user"=>__("Notify User"),"notify_users"=>__("Notify Users"),"if_added"=>__("If Added"),"if_edited"=>__("If Edited"),"if_publish"=>__("If Publish"),"if_approved"=>__("If Approved"),"if_soft_delete"=>__("If Soft Delete"),"recipents"=>__("Recipents"),"cc"=>__("Cc"),"bcc"=>__("Bcc"),"subject"=>__("Subject"),"message"=>__("Message")),'pluralVar'=>'customTriggers'))); ?>
 
 		<script type="text/javascript">
 			$(document).ready(function(){
@@ -18,13 +18,13 @@
 			<table cellpadding="0" cellspacing="0" class="table table-hover">
 				<tr>
 					<th><?php echo $this->Paginator->sort('custom_table_id'); ?></th>
-					<th><?php echo $this->Paginator->sort('event_name', 'When'); ?></th>
+					<th><?php echo $this->Paginator->sort('event_name', __('When')); ?></th>
 					<th><?php echo $this->Paginator->sort('name'); ?></th>
 					<th><?php echo $this->Paginator->sort('field_name'); ?></th>
 					<th><?php echo $this->Paginator->sort('changed_field_value'); ?></th>
 					<th><?php echo $this->Paginator->sort('notify_user'); ?></th>
 					<th><?php echo $this->Paginator->sort('enabled'); ?></th>
-					<th>Actions</th>
+					<th><?php echo h(__('Actions')); ?></th>
 				</tr>
 				<?php if($customTriggers){ ?>
 					<?php foreach ($customTriggers as $customTrigger): ?>
@@ -44,7 +44,7 @@
 						</tr>
 					<?php endforeach; ?>
 				<?php }else{ ?>
-					<tr><td colspan="8">No results found</td></tr>
+					<tr><td colspan="8"><?php echo h(__('No results found')); ?></td></tr>
 				<?php } ?>
 			</table>
 			<?php echo $this->Form->end();?>			

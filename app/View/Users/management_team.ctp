@@ -4,7 +4,7 @@
 <div  id="main">
     <?php echo $this->Session->flash(); ?>
     <div class="users ">
-        <?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => 'Management Team', 'modelClass' => 'User', 'options' => array("sr_no" => "Sr No", "name" => "Name", "username" => "Username", "is_mr" => "Is Mr", "is_view_all" => "Is View All", "is_approver" => "Is Approvar", "status" => "Status", "login_status" => "Login Status", "last_login" => "Last Login", "last_activity" => "Last Activity", "user_access" => "User Access", "email_token_expires" => "Email Token Expires"), 'pluralVar' => 'users'))); ?>
+        <?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => __('Management Team'), 'modelClass' => 'User', 'options' => array("sr_no" => __("Sr No"), "name" => __("Name"), "username" => __("Username"), "is_mr" => __("Is Mr"), "is_view_all" => __("Is View All"), "is_approver" => __("Is Approvar"), "status" => __("Status"), "login_status" => __("Login Status"), "last_login" => __("Last Login"), "last_activity" => __("Last Activity"), "user_access" => __("User Access"), "email_token_expires" => __("Email Token Expires")), 'pluralVar' => 'users'))); ?>
 
         <script type="text/javascript">
             $(document).ready(function() {
@@ -100,7 +100,7 @@
             </div>
 
             <?php echo $this->element('export'); ?>
-            <?php echo $this->element('advanced-search', array('postData' => array("name" => "Name", "username" => "Username", "is_mr" => "Is Mr", "is_view_all" => "Is View All", "is_approver" => "Is Approvar", "status" => "Status", "login_status" => "Login Status", "last_login" => "Last Login", "last_activity" => "Last Activity", "user_access" => "User Access", "email_token_expires" => "Email Token Expires"), 'PublishedBranchList' => array($PublishedBranchList))); ?>
+            <?php echo $this->element('advanced-search', array('postData' => array("name" => __("Name"), "username" => __("Username"), "is_mr" => __("Is Mr"), "is_view_all" => __("Is View All"), "is_approver" => __("Is Approvar"), "status" => __("Status"), "login_status" => __("Login Status"), "last_login" => __("Last Login"), "last_activity" => __("Last Activity"), "user_access" => __("User Access"), "email_token_expires" => __("Email Token Expires")), 'PublishedBranchList' => array($PublishedBranchList))); ?>
             <?php echo $this->element('import', array('postData' => array("sr_no" => "Sr No", "name" => "Name", "username" => "Username", "is_mr" => "Is Mr", "is_view_all" => "Is View All", "is_approver" => "Is Approvar", "status" => "Status", "login_status" => "Login Status", "last_login" => "Last Login", "last_activity" => "Last Activity", "user_access" => "User Access", "email_token_expires" => "Email Token Expires"))); ?>
             <?php echo $this->element('approvals'); ?>
             <?php echo $this->element('common'); ?>

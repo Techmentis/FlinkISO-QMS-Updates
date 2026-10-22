@@ -1,7 +1,7 @@
 <div id="branches_ajax">
 	<?php echo $this->Session->flash();?>	
 	<div class="branches ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Branches','modelClass'=>'Branch','options'=>array(),'pluralVar'=>'branches'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Branches'),'modelClass'=>'Branch','options'=>array(),'pluralVar'=>'branches'))); ?>
 		<div class="nav panel panel-default">
 			<div class="branches form col-md-12">
 				<table class="table table-responsive">
@@ -50,8 +50,8 @@
 						</tr>
 						<tr>
 							<td colspan="2">
-								<?php echo $this->Html->link('Delete This Record?', array('controller' => 'branches', 'action' => 'delete', $branch['Branch']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
-								<?php echo $this->Html->link('Edit This Record?', array('controller' => 'branches', 'action' => 'edit', $branch['Branch']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
+								<?php echo $this->Html->link(__('Delete This Record?'), array('controller' => 'branches', 'action' => 'delete', $branch['Branch']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
+								<?php echo $this->Html->link(__('Edit This Record?'), array('controller' => 'branches', 'action' => 'edit', $branch['Branch']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
 							</td>
 						</tr>
 					</table>

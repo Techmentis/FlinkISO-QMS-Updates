@@ -2,12 +2,12 @@
 	<?php echo $this->Session->flash(); ?>
 	<div class="box box-default">
 		<div class="box-header">
-			<h3 class="box-title"><i class="fa fa-envelope"></i> Email Trigger Deliveries</h3>
+			<h3 class="box-title"><i class="fa fa-envelope"></i> <?php echo h(__('Email Trigger Deliveries')); ?></h3>
 			<div class="box-tools pull-right"><?php echo $this->Html->link(__('All rules'), array('action'=>'index'), array('class'=>'btn btn-default btn-sm')); ?></div>
 		</div>
 		<div class="box-body table-responsive">
 			<table class="table table-hover">
-				<thead><tr><th>Created</th><th>Event</th><th>Record</th><th>Recipient</th><th>Subject</th><th>Status</th><th>Attempts</th><th>Error</th><th></th></tr></thead>
+				<thead><tr><th><?php echo h(__('Created')); ?></th><th><?php echo h(__('Event')); ?></th><th><?php echo h(__('Record')); ?></th><th><?php echo h(__('Recipient')); ?></th><th><?php echo h(__('Subject')); ?></th><th><?php echo h(__('Status')); ?></th><th><?php echo h(__('Attempts')); ?></th><th><?php echo h(__('Error')); ?></th><th></th></tr></thead>
 				<tbody>
 				<?php foreach ((array)$deliveries as $delivery): $row = $delivery['EmailTriggerOutbox']; ?>
 					<tr>
@@ -22,7 +22,7 @@
 						<td><?php if ($row['status'] === 'failed') echo $this->Form->postLink(__('Retry'), array('action'=>'retry_delivery', $row['id']), array('class'=>'btn btn-xs btn-warning')); ?></td>
 					</tr>
 				<?php endforeach; ?>
-				<?php if (empty($deliveries)): ?><tr><td colspan="9">No deliveries found.</td></tr><?php endif; ?>
+				<?php if (empty($deliveries)): ?><tr><td colspan="9"><?php echo h(__('No deliveries found.')); ?></td></tr><?php endif; ?>
 				</tbody>
 			</table>
 			<ul class="pagination">

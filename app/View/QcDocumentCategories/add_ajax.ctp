@@ -3,7 +3,7 @@
 <div id="qcDocumentCategories_ajax">
 	<?php echo $this->Session->flash();?>	<div class="nav">
 		<div class="qcDocumentCategories form col-md-12">
-			<h4>Add Qc Document Category</h4>
+			<h4><?php echo h(__('Add Qc Document Category')); ?></h4>
 			<?php echo $this->Form->create('QcDocumentCategory',array('role'=>'form','class'=>'form','default'=>false)); ?>
 			<div class="row">
 				<fieldset>
@@ -28,7 +28,7 @@
 				} else {
 					echo $this->Form->input('publish', array('label' => __('Publish')));
 				}?>
-				<?php echo $this->Form->submit('Submit',array('div'=>false,'class'=>'btn btn-primary btn-success','update'=>'#qcDocumentCategories_ajax','async' => 'false')); ?>
+				<?php echo $this->Form->submit(__('Submit'),array('div'=>false,'class'=>'btn btn-primary btn-success','update'=>'#qcDocumentCategories_ajax','async' => 'false')); ?>
 				<?php echo $this->Form->end(); ?>
 				<?php echo $this->Js->writeBuffer();?>
 			</div>
@@ -72,7 +72,7 @@
 						$("#submit-indicator").hide();
 					},
 					error: function(request, status, error) {                    
-						alert('Action failed!');
+						alert(<?php echo json_encode(__('Action failed!'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 					}
 				});
 			}
@@ -81,7 +81,7 @@
 			$("#submit-indicator").hide();
 			jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 				return this.optional(element) || (parseFloat(value) > 0);
-			}, "Please select the value");
+			}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 			
 			$('#QcDocumentCategoryAddAjaxForm').validate({
 				rules: {

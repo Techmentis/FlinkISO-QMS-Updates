@@ -27,12 +27,12 @@
 	<?php echo $this->Form->Create('QcDocument', array('action'=>'add'), array('id'=>'QcDocumentAddChildForm', 'role'=>'form','class'=>'form')); ?>
 	<div class="nav panel panel-default">	
 		<div class="row">
-			<div class="col-md-12"><h4>Add Child Document : Step - I</h4></div>
+			<div class="col-md-12"><h4><?php echo h(__('Add Child Document : Step - I')); ?></h4></div>
 			<div class="col-md-12">
 				<div class="box box-default">
 					<div class="box-header with-border">
 						<i class="fa fa-question-circle"></i>
-						<h3 class="box-title">Select Document Type</h3>
+						<h3 class="box-title"><?php echo h(__('Select Document Type')); ?></h3>
 					</div>
 					<div class="box-body">
 						<div class="row">
@@ -41,10 +41,10 @@
 									<span class="info-box-icon bg-yellow"><i class="fa fa-file-word-o" aria-hidden="true"></i></span>
 
 									<div class="info-box-content">
-										<span class="info-box-text">Word</span>
+										<span class="info-box-text"><?php echo h(__('Word')); ?></span>
 										<span class="info-box-number">
-											<?php echo $this->Html->link('.doc','#',array('onClick'=>'addfiletype("doc")')); ?>,
-											<?php echo $this->Html->link('.docx','#',array('onClick'=>'addfiletype("docx")')); ?>,
+											<?php echo $this->Html->link(__('.doc'),'#',array('onClick'=>'addfiletype("doc")')); ?>,
+											<?php echo $this->Html->link(__('.docx'),'#',array('onClick'=>'addfiletype("docx")')); ?>,
 											otd,txt
 										</span>
 									</div>
@@ -55,10 +55,10 @@
 								<div class="info-box">
 									<span class="info-box-icon bg-yellow"><i class="fa fa-file-excel-o" aria-hidden="true"></i></span>
 									<div class="info-box-content">
-										<span class="info-box-text">Spreed Sheet</span>
+										<span class="info-box-text"><?php echo h(__('Spreed Sheet')); ?></span>
 										<span class="info-box-number">
-											<?php echo $this->Html->link('.xls','#',array('onClick'=>'addfiletype("xls")')); ?>,
-											<?php echo $this->Html->link('.xlsx','#',array('onClick'=>'addfiletype("xlsx")')); ?>,
+											<?php echo $this->Html->link(__('.xls'),'#',array('onClick'=>'addfiletype("xls")')); ?>,
+											<?php echo $this->Html->link(__('.xlsx'),'#',array('onClick'=>'addfiletype("xlsx")')); ?>,
 											ods,csv,
 										</span>
 									</div>
@@ -69,8 +69,8 @@
 								<div class="info-box">
 									<span class="info-box-icon bg-yellow"><i class="fa fa-file-powerpoint-o" aria-hidden="true"></i></span>
 									<div class="info-box-content">
-										<span class="info-box-text">Presentation</span>
-										<span class="info-box-number">ppt</span>
+										<span class="info-box-text"><?php echo h(__('Presentation')); ?></span>
+										<span class="info-box-number"><?php echo h(__('ppt')); ?></span>
 									</div>
 								</div>
 							</div>					  
@@ -81,9 +81,9 @@
 									<span class="info-box-icon bg-disabled"><i class="fa fa-external-link" aria-hidden="true"></i></span>
 
 									<div class="info-box-content">
-										<span class="info-box-text">Other</span>
+										<span class="info-box-text"><?php echo h(__('Other')); ?></span>
 										<span class="info-box-number">
-											These documents can not be created with in syetem. Upload them directly.
+											<?php echo h(__('These documents can not be created with in syetem. Upload them directly.')); ?>
 										</span>
 									</div>
 								</div>
@@ -95,15 +95,15 @@
 			</div>
 			<dlv class="col-md-12">
 				<?php echo "<div class='col-md-12'>".$this->Form->hidden('file_type',array('class'=>'form-control')) . '</div>'; ?>
-				<div id="filetypediv" class="text-danger">Select file type.</div>
+				<div id="filetypediv" class="text-danger"><?php echo h(__('Select file type.')); ?></div>
 			</dlv>
 		</div>
 		<div class="row">		
 			<?php
 			echo "<div class='col-md-12'>".$this->Form->input('parent_document_id',array('class'=>'form-control', 'style'=>'','default'=>$parent_document_id)) . '</div>'; 
 			echo "<div class='col-md-6'>".$this->Form->input('title',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
-			echo "<div class='col-md-3'>".$this->Form->input('document_number',array('class'=>'form-control','label'=>'Document Number')) . '</div>'; 
-			echo "<div class='col-md-3'>".$this->Form->input('revision_number',array('class'=>'form-control','label'=>'Rivision/Version')) . '</div>'; 			
+			echo "<div class='col-md-3'>".$this->Form->input('document_number',array('class'=>'form-control','label'=>__('Document Number'))) . '</div>'; 
+			echo "<div class='col-md-3'>".$this->Form->input('revision_number',array('class'=>'form-control','label'=>__('Rivision/Version'))) . '</div>'; 			
 			?>
 		</div>			
 		<div class="row">
@@ -128,7 +128,7 @@
 			echo "</div><div class='row'>";
 			
 			echo "<div class='col-md-12'>".$this->Form->input('document_type',array('default'=>0, 'type'=>'radio', 'class'=>'','options'=>$customArray['documentTypes'])) . '</div>'; 
-			echo "<div class='col-md-12'>".$this->Form->input('it_categories',array('legend'=>'Document Security', 'default'=>0,'type'=>'radio', 'class'=>'','options'=>$customArray['itCategories'])) . '</div>'; 
+			echo "<div class='col-md-12'>".$this->Form->input('it_categories',array('legend'=>__('Document Security'), 'default'=>0,'type'=>'radio', 'class'=>'','options'=>$customArray['itCategories'])) . '</div>'; 
 
 			echo "</div><div class='row'>";
 			
@@ -151,7 +151,7 @@
 					<div class="box box-default">
 						<div class="box-header with-border">
 							<i class="fa fa-share-alt"></i>
-							<h3 class="box-title">Document Sharing</h3>
+							<h3 class="box-title"><?php echo h(__('Document Sharing')); ?></h3>
 						</div>
 						<div class="box-body">
 							<div class="row">
@@ -159,7 +159,7 @@
 								echo "<div class='col-md-12'>".$this->Form->input('share_with_branches',array('name'=>'data[QcDocument][share_with_branches][]', 'multiple','options'=>$branches, 'class'=>'form-control',)) . '</div>'; 
 								echo "<div class='col-md-12'>".$this->Form->input('share_with_departments',array('name'=>'data[QcDocument][share_with_departments][]','multiple', 'options'=>$departments, 'class'=>'form-control',)) . '</div>'; 
 								echo "<div class='col-md-12'>".$this->Form->input('share_with_designations',array('name'=>'data[QcDocument][share_with_designations][]','multiple', 'options'=>$designations, 'class'=>'form-control chosen',)) . '</div>'; 
-								echo "<div class='col-md-12'>".$this->Form->input('user_id',array('name'=>'data[QcDocument][user_id][]','label'=>'Share with Users','multiple', 'options'=>$usernames, 'class'=>'form-control', 'style'=>'')) . '</div>'; 
+								echo "<div class='col-md-12'>".$this->Form->input('user_id',array('name'=>'data[QcDocument][user_id][]','label'=>__('Share with Users'),'multiple', 'options'=>$usernames, 'class'=>'form-control', 'style'=>'')) . '</div>'; 
 								?>
 
 							</div>
@@ -173,13 +173,13 @@
 					<div class="box box-default">
 						<div class="box-header with-border">
 							<i class="fa fa-database"></i>
-							<h3 class="box-title">Document Data Entry</h3>
+							<h3 class="box-title"><?php echo h(__('Document Data Entry')); ?></h3>
 						</div>
 						<div class="box-body">
 							<div class="row">
 								<?php 
 								
-								echo "<div class='col-md-9'><br /><div class='nomargin-checkbox'><label>Do you want this document to be shared with users for scheduled data enrty? If yes, click YES below. You must define schedule.</label>".$this->Form->input('add_records',array('type'=>'checkbox','label'=>'Yes')) . '</div></div>'; 
+								echo '<div class=\'col-md-9\'><br /><div class=\'nomargin-checkbox\'><label>' . h(__('Do you want this document to be shared with users for scheduled data enrty? If yes, click YES below. You must define schedule.')) . '</label>'.$this->Form->input('add_records',array('type'=>'checkbox','label'=>__('Yes'))) . '</div></div>'; 
 								echo "<div class='col-md-3'>".$this->Form->input('schedule_id',array()) . '</div>'; 
 							?>					</div>
 						</div>
@@ -197,7 +197,7 @@
 			echo "<div class='col-md-4'>".$this->Form->hidden('old_cr_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
 			echo "<div class='col-md-4'>".$this->Form->hidden('parent_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
 			echo "<div class='col-md-4'>".$this->Form->hidden('parent_document_id',array('class'=>'form-control', 'style'=>'')) . '</div>'; 
-			echo "<div class='col-md-12'>".$this->Form->input('linked_document_ids',array('label'=>'Linked Documents', 'name'=>'data[QcDocument][linked_document_id][]','class'=>'form-control','multiple','options'=>$parentQcDocuments)) . '</div>'; 
+			echo "<div class='col-md-12'>".$this->Form->input('linked_document_ids',array('label'=>__('Linked Documents'), 'name'=>'data[QcDocument][linked_document_id][]','class'=>'form-control','multiple','options'=>$parentQcDocuments)) . '</div>'; 
 			
 			echo $this->Form->hidden('step',array('default'=>2));						
 			echo $this->Form->input('id');
@@ -254,7 +254,7 @@
 
 		jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 			return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';
-		}, "Please select the value");
+		}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 		$('#QcDocumentAddChildForm').validate({        	
 			rules: {

@@ -5,18 +5,18 @@ echo $this->Session->flash();?>
     canvas{width: 100%;min-height: 150px;max-height: 250px;}
 </style>
 <div class="custom_tables">
-    <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Reports','modelClass'=>'CustomTable','options'=>array("sr_no"=>"Sr No","name"=>"Name","fields"=>"Fields"),'pluralVar'=>'customTables'))); ?>    
+    <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Reports'),'modelClass'=>'CustomTable','options'=>array("sr_no"=>__("Sr No"),"name"=>__("Name"),"fields"=>__("Fields")),'pluralVar'=>'customTables'))); ?>    
     <div id='manualcharttabs'>
         <ul>
-            <li><a href="#employee-compliance">Employee Compliance</a></li>
-            <li><a href="#intro">Charts</a></li>            
-            <li class="pull-right"><a href="#" onclick="loadTabs($('#manualcharttabs ul li .ui-tabs-anchor').length);">Add Chart</a></li>
+            <li><a href="#employee-compliance"><?php echo h(__('Employee Compliance')); ?></a></li>
+            <li><a href="#intro"><?php echo h(__('Charts')); ?></a></li>            
+            <li class="pull-right"><a href="#" onclick="loadTabs($('#manualcharttabs ul li .ui-tabs-anchor').length);"><?php echo h(__('Add Chart')); ?></a></li>
         </ul>
         <div id="intro">
             <div class="row">
                 <div class="col-md-12">
                     <i class="fa fa-pie-chart fa-5x pull-left " style="color:#0094ff"></i>
-                    <h3>Click on <strong>Add Chart</strong> to create new chart</h3>
+                    <h3><?php echo h(__('Click on')); ?> <strong><?php echo h(__('Add Chart')); ?></strong> <?php echo h(__('to create new chart')); ?></h3>
                 </div>
             </div>
             <div class="row">
@@ -33,7 +33,7 @@ echo $this->Session->flash();?>
                                             'title'=> $pieChartKey,
                                             'type'=>'pie',
                                             'count'=>$ccount,
-                                            'label'=>'Employee Data Entry',
+                                            'label'=>__('Employee Data Entry'),
                                             'labels'=>json_encode($pieChartValues['labels']),
                                             'data'=>json_encode($pieChartValues['data'],JSON_NUMERIC_CHECK),
                                             'backgroundColor'=>json_encode($pieChartValues['backgroundColor']),
@@ -45,13 +45,13 @@ echo $this->Session->flash();?>
                             <?php $ccount++; } ?>
                         </div>
                         <div class="box box-default">
-                            <div class="box-header"><h3 class="box-title">Employee Data Entry Chart</h3></div>
+                            <div class="box-header"><h3 class="box-title"><?php echo h(__('Employee Data Entry Chart')); ?></h3></div>
                             <div class="box-body with-border">
                                 <?php echo $this->element('linechart',array(
-                                    'title'=>'Employee Data Entry',
+                                    'title'=>__('Employee Data Entry'),
                                     'type'=>'bar',
                                     'count'=>$ccount,
-                                    'label'=>'Employee Data Entry',
+                                    'label'=>__('Employee Data Entry'),
                                     'labels'=>json_encode($employeeDataEntry['labels']),
                                     'data'=>json_encode($employeeDataEntry['data'],JSON_NUMERIC_CHECK),
                                     'backgroundColor'=>json_encode($employeeDataEntry['backgroundColor']),
@@ -60,13 +60,13 @@ echo $this->Session->flash();?>
                             </div>
                         </div>
                         <div class="box box-default">
-                            <div class="box-header"><h3 class="box-title">Department Chart</h3></div>
+                            <div class="box-header"><h3 class="box-title"><?php echo h(__('Department Chart')); ?></h3></div>
                             <div class="box-body with-border">
                                 <?php echo $this->element('linechart',array(
-                                    'title'=>'Department Data Entry',
+                                    'title'=>__('Department Data Entry'),
                                     'type'=>'bar',
                                     'count'=>$ccount,
-                                    'label'=>'Department Data Entry',
+                                    'label'=>__('Department Data Entry'),
                                     'labels'=>json_encode($departmentDataEntry['labels']),
                                     'data'=>json_encode($departmentDataEntry['data'],JSON_NUMERIC_CHECK),
                                     'backgroundColor'=>json_encode($departmentDataEntry['backgroundColor']),
@@ -75,13 +75,13 @@ echo $this->Session->flash();?>
                             </div>
                         </div>
                         <div class="box box-default">
-                            <div class="box-header"><h3 class="box-title">Branch Chart</h3></div>
+                            <div class="box-header"><h3 class="box-title"><?php echo h(__('Branch Chart')); ?></h3></div>
                             <div class="box-body with-border">
                                 <?php echo $this->element('linechart',array(
-                                    'title'=>'Branch Data Entry',
+                                    'title'=>__('Branch Data Entry'),
                                     'type'=>'bar',
                                     'count'=>$ccount,
-                                    'label'=>'Branch Data Entry',
+                                    'label'=>__('Branch Data Entry'),
                                     'labels'=>json_encode($branchDataEntry['labels']),
                                     'data'=>json_encode($branchDataEntry['data'],JSON_NUMERIC_CHECK),
                                     'backgroundColor'=>json_encode($branchDataEntry['borderColor']),

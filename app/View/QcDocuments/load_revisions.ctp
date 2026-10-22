@@ -3,12 +3,12 @@
 		<div class="table-responsive">
 			<table class="table">
 				<tr>
-					<th>Document Revision Number</th>
-					<th>Document Revision Date</th>
-					<th>Effective From Date</th>					
-					<th>Last Modified Date</th>
-					<th>Last Modified By</th>					
-					<th>View</th>
+					<th><?php echo h(__('Document Revision Number')); ?></th>
+					<th><?php echo h(__('Document Revision Date')); ?></th>
+					<th><?php echo h(__('Effective From Date')); ?></th>					
+					<th><?php echo h(__('Last Modified Date')); ?></th>
+					<th><?php echo h(__('Last Modified By')); ?></th>					
+					<th><?php echo h(__('View')); ?></th>
 				</tr>
 				<?php if($qcDocuments){
 					foreach($qcDocuments as $qcDocument){ ?>
@@ -18,13 +18,13 @@
 							<td><?php echo $qcDocument['QcDocument']['effective_from_date'];?></td>							
 							<td><?php echo $qcDocument['QcDocument']['modified'];?></td>
 							<td><?php echo $qcDocument['ModifiedBy']['name'];?></td>
-							<td><?php echo $this->Html->link('View',array('action'=>'view_archived',$qcDocument['QcDocument']['id']),array('class'=>'btn btn-xs btn-success','target'=>'_blank'));?></td>
+							<td><?php echo $this->Html->link(__('View'),array('action'=>'view_archived',$qcDocument['QcDocument']['id']),array('class'=>'btn btn-xs btn-success','target'=>'_blank'));?></td>
 						</tr>
 					<?php } ?>
 
 				<?php }else{ ?>
 					<tr>
-						<td colspan="7">No records found.</td>
+						<td colspan="7"><?php echo h(__('No records found.')); ?></td>
 					</tr>
 				<?php }?>
 			</table>

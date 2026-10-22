@@ -2,7 +2,7 @@
 <?php echo $this->Session->flash();?>	
 
 	<div class="approvals ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Approvals','modelClass'=>'Approval','options'=>array(),'pluralVar'=>'approvals'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Approvals'),'modelClass'=>'Approval','options'=>array(),'pluralVar'=>'approvals'))); ?>
 
 
 <div class="nav panel panel-default">
@@ -86,8 +86,8 @@
 &nbsp;</td></tr>
 <tr>
 	<td colspan="2">
-			<?php echo $this->Html->link('Delete This Record?', array('controller' => 'users', 'action' => 'delete', $approval['ModifiedBy']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
-	<?php echo $this->Html->link('Edit This Record?', array('controller' => 'users', 'action' => 'delete', $approval['ModifiedBy']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
+			<?php echo $this->Html->link(__('Delete This Record?'), array('controller' => 'users', 'action' => 'delete', $approval['ModifiedBy']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
+	<?php echo $this->Html->link(__('Edit This Record?'), array('controller' => 'users', 'action' => 'delete', $approval['ModifiedBy']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
 	</td>
 </tr>
 </table>

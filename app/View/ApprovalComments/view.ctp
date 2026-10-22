@@ -1,7 +1,7 @@
 <div id="approvalComments_ajax">
     <?php echo $this->Session->flash();?>
     <div class="approvalComments ">
-        <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Approval Comments','modelClass'=>'ApprovalComment','options'=>array(),'pluralVar'=>'approvalComments'))); ?>
+        <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Approval Comments'),'modelClass'=>'ApprovalComment','options'=>array(),'pluralVar'=>'approvalComments'))); ?>
         <div class="nav panel panel-default">
             <div class="approvalComments form col-md-12">
                 <table class="table table-responsive">
@@ -40,8 +40,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="2"><?php echo $this->Html->link('Delete This Record?', array('controller' => 'users', 'action' => 'delete', $approvalComment['ModifiedBy']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
-                            <?php echo $this->Html->link('Edit This Record?', array('controller' => 'users', 'action' => 'delete', $approvalComment['ModifiedBy']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
+                        <td colspan="2"><?php echo $this->Html->link(__('Delete This Record?'), array('controller' => 'users', 'action' => 'delete', $approvalComment['ModifiedBy']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
+                            <?php echo $this->Html->link(__('Edit This Record?'), array('controller' => 'users', 'action' => 'delete', $approvalComment['ModifiedBy']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
                         </td>
                     </tr>
                 </table>

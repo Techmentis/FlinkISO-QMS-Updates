@@ -41,7 +41,7 @@ App::uses('ConnectionManager', 'Model');
 App::import('Sanitize');
 class AppController  extends Controller {
     public $components = array('RequestHandler', 'Session','Gzip.Gzip');
-    public $helpers = array('Js', 'Session', 'Paginator');
+    public $helpers = array('Js', 'Session', 'Paginator', 'Form' => array('className' => 'TranslationForm'));
     public $user = null;
     public $userids = null;
     public $message_count = null;
@@ -94,7 +94,7 @@ class AppController  extends Controller {
         $ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date', 'login', 'logout', 'forgot_password', 'reset_password', 'save_doc','onlyofficechk','save_template','save_rec_doc','save_custom_docs','save_file','get_password_change_remind','opt_check','json','xml','return_user_list');
 
         if (empty($this->Session->read('User.id')) && !in_array($this->action, $ignore)) {
-            if($this->request->is('ajax'))echo "Session expired. Please login again.";
+            if($this->request->is('ajax'))echo __("Session expired. Please login again.");
             if($this->request->action != 'dashboard') $this->Session->setFlash(__('Login to continue.'));
             $this->redirect(array('controller' => 'users', 'action' => 'login'));
         }else{
@@ -128,10 +128,6 @@ class AppController  extends Controller {
     }
 
     public function beforeRender() {
-        if ($this->request->controller === 'users' && $this->action === 'language_preferences') {
-            $this->set('menus', array());
-            return;
-        }
         $this->_check_login();
         if($this->Session->read('User')){
             $this->_table_menu();
@@ -171,7 +167,7 @@ class AppController  extends Controller {
                         $this->response->statusCode(401);
                         $this->response->type('json');
                         $this->set('_serialize', ['error']);
-                        $this->set('error', ['message' => 'Unauthorized']);
+                        $this->set('error', ['message' => __('Unauthorized')]);
                         $this->response->send();
                         exit;
                     }
@@ -179,7 +175,7 @@ class AppController  extends Controller {
                     $this->response->statusCode(401);
                     $this->response->type('json');
                     $this->set('_serialize', ['error']);
-                    $this->set('error', ['message' => 'Unauthorized']);
+                    $this->set('error', ['message' => __('Unauthorized')]);
                     $this->response->send();
                     exit;
                 }
@@ -187,7 +183,7 @@ class AppController  extends Controller {
                 $this->response->statusCode(401);
                 $this->response->type('json');
                 $this->set('_serialize', ['error']);
-                $this->set('error', ['message' => 'Unauthorized']);
+                $this->set('error', ['message' => __('Unauthorized')]);
                 $this->response->send();
                 exit;
             }
@@ -217,7 +213,7 @@ class AppController  extends Controller {
                         $this->response->statusCode(401);
                         $this->response->type('json');
                         $this->set('_serialize', ['error']);
-                        $this->set('error', ['message' => 'Unauthorized']);
+                        $this->set('error', ['message' => __('Unauthorized')]);
                         $this->response->send();
                         exit;
                     }
@@ -225,7 +221,7 @@ class AppController  extends Controller {
                     $this->response->statusCode(401);
                     $this->response->type('json');
                     $this->set('_serialize', ['error']);
-                    $this->set('error', ['message' => 'Unauthorized']);
+                    $this->set('error', ['message' => __('Unauthorized')]);
                     $this->response->send();
                     exit;
                 }
@@ -233,7 +229,7 @@ class AppController  extends Controller {
                 $this->response->statusCode(401);
                 $this->response->type('json');
                 $this->set('_serialize', ['error']);
-                $this->set('error', ['message' => 'Unauthorized']);
+                $this->set('error', ['message' => __('Unauthorized')]);
                 $this->response->send();
                 exit;
             }
@@ -295,7 +291,7 @@ class AppController  extends Controller {
                 }
             }
             if($parentCustomTable && $this->request->is('ajax') == false){
-                $this->Session->setFlash('You can not add data directly to this table. Redirecting parent table.');
+                $this->Session->setFlash(__('You can not add data directly to this table. Redirecting parent table.'));
                 $this->redirect(array('controller' => $parentCustomTable['CustomTable']['table_name'], 'action' => 'index','custom_table_id'=>$parentCustomTable['CustomTable']['id'],'qc_document_id'=>$parentCustomTable['CustomTable']['qc_document_id']));
             }
         }
@@ -385,6 +381,10 @@ class AppController  extends Controller {
                 $this->loadModel('Language');
                 if ($this->Language->available()) {
                     $this->set('languagePreferenceAvailable', true);
+                    $this->set('availableLanguages', $this->Language->find('all', array('recursive' => -1,
+                        'conditions' => array('Language.enabled' => 1), 'order' => array('Language.name' => 'ASC'))));
+                    if (!$this->Session->read('Languages.token')) $this->Session->write('Languages.token', bin2hex(openssl_random_pseudo_bytes(32)));
+                    $this->set('languageToken', $this->Session->read('Languages.token'));
                     $this->loadModel('User');
                     $user = $this->User->find('first', array('recursive' => -1,
                         'fields' => array('User.language_id'), 'conditions' => array('User.id' => $userId)));
@@ -400,12 +400,14 @@ class AppController  extends Controller {
         }
         $this->Session->write('Config.language', $code);
         Configure::write('Config.language', $code);
+        App::uses('ApplicationL10n', 'Lib');
+        ApplicationL10n::apply($code);
     }
 
     public function beforeFilter() {
         $this->_check_login();
         $this->_applyUserLanguage();
-        if ($this->request->controller === 'users' && $this->action === 'language_preferences') return;
+        if ($this->request->controller === 'users' && $this->action === 'change_language') return;
         $this->_loadAiConfiguration();
         if($this->Session->read('User')){
             Configure::write("files", WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id'));
@@ -516,7 +518,7 @@ class AppController  extends Controller {
         if ($plainText === '') return '';
         $cipher = 'aes-256-gcm';
         if (!function_exists('openssl_encrypt') || !in_array($cipher, openssl_get_cipher_methods(), true)) {
-            throw new RuntimeException('OpenSSL AES-256-GCM is unavailable.');
+            throw new RuntimeException(__('OpenSSL AES-256-GCM is unavailable.'));
         }
 
         $key = hash('sha256', (string)Configure::read('Security.salt'), true);
@@ -534,7 +536,7 @@ class AppController  extends Controller {
             16
         );
         if ($cipherText === false || strlen($tag) !== 16) {
-            throw new RuntimeException('The AI credential could not be encrypted.');
+            throw new RuntimeException(__('The AI credential could not be encrypted.'));
         }
         return 'v1:'.base64_encode($iv.$tag.$cipherText);
     }
@@ -1228,7 +1230,7 @@ class AppController  extends Controller {
                 // later add
                 if ($this->ApprovalComment->Approval->save($appRec, false)) {
                 } else {
-                    echo "failed";
+                    echo __("failed");
                     exit;
                 }
                 // if approved
@@ -1504,13 +1506,13 @@ class AppController  extends Controller {
             $path = ltrim(rtrim(str_replace(' ', '_', $this->request->data['path'])));
             $path = Configure::read('path') . DS . $this->request->data['id'] . DS . 'addtional_documents' . DS . $path;
             if (file_exists($path)) {
-                echo "path exits";
+                echo __("path exits");
             } else {
                 $folder = new Folder($path);
                 if ($folder->create($path)) {
-                    echo "new Folder Created";
+                    echo __("new Folder Created");
                 } else {
-                    echo "folder creation failed";
+                    echo __("folder creation failed");
                 }
             }
             move_uploaded_file($this->request['data']['file']['tmp_name'], $path . DS . $this->request['data']['file']['name']);
@@ -1535,7 +1537,7 @@ class AppController  extends Controller {
             $path = new Folder($folder);
             $path->delete($folder);
         } else {
-            echo "Folder not found";
+            echo __("Folder not found");
         }
     }
 
@@ -1831,7 +1833,7 @@ class AppController  extends Controller {
         $err = curl_error($curl);
         curl_close($curl);
         if ($err) {
-            echo "cURL Error #:" . $err;
+            echo __("cURL Error #:") . $err;
         } else {
             $xmlString = $response;
             $xmlArray = Xml::toArray(Xml::build($xmlString));
@@ -1839,7 +1841,7 @@ class AppController  extends Controller {
             $folder = new Folder();
             if ($folder->create($path)) {
             } else {
-                echo "Folder creation failed";
+                echo __("Folder creation failed");
                 exit;
             }
             $pdffile = $path . DS . $pdffilename;
@@ -1858,7 +1860,7 @@ class AppController  extends Controller {
         $this->autoRender = false;
         $file_id = $this->request->params['named']['file_id'];
         if (($body_stream = file_get_contents("php://input")) === FALSE) {
-            echo "Bad Request";
+            echo __("Bad Request");
         }
         $data = json_decode($body_stream, TRUE);
         if ($data["status"] == 2) {
@@ -1911,7 +1913,7 @@ class AppController  extends Controller {
                 }
             }
         }
-        echo "{\"error\":0}";
+        echo __("{\"error\":0}");
     }
 
     public function get_child_select($parent_id = null, $model = null, $field = null) {
@@ -2786,7 +2788,7 @@ class AppController  extends Controller {
         $this->autoRender = false;
         $local = $this->request->params['named'];
         if (($body_stream = file_get_contents("php://input")) === FALSE) {
-            echo "Bad Request";
+            echo __("Bad Request");
         }
         $data = json_decode($body_stream, TRUE);
         if ($data["status"] == 2) {
@@ -2979,14 +2981,14 @@ class AppController  extends Controller {
                 }
             }
         }
-        echo "{\"error\":0}";
+        echo __("{\"error\":0}");
     }
 
     public function save_file() {
         $this->autoRender = false;
         $local = $this->request->params['named'];
         if (($body_stream = file_get_contents("php://input")) === FALSE) {
-            echo "Bad Request";
+            echo __("Bad Request");
         }
         $data = json_decode($body_stream, TRUE);
         if ($data["status"] == 2) {
@@ -3028,7 +3030,7 @@ class AppController  extends Controller {
                 }
             }
         }
-        echo "{\"error\":0}";
+        echo __("{\"error\":0}");
     }
 
     public function curl($type = null, $api_controller = null, $path = null,$data = null,$linkedTosWithDisplay = null){
@@ -3105,7 +3107,7 @@ class AppController  extends Controller {
         $err = curl_error($curl);
         curl_close($curl);
         if($err){
-            echo "Error";
+            echo __("Error");
         }
         if($response){
             return $response;
@@ -5325,23 +5327,23 @@ class AppController  extends Controller {
         $context = stream_context_create($opts);
         $response_data = @file_get_contents($path, false, $context);
         if($response_data === false){
-            throw new RuntimeException('ONLYOFFICE conversion service could not be reached.');
+            throw new RuntimeException(__('ONLYOFFICE conversion service could not be reached.'));
         }
 
         $response = json_decode($response_data, true);
         if(!is_array($response)){
-            throw new RuntimeException('Invalid response received from ONLYOFFICE conversion service.');
+            throw new RuntimeException(__('Invalid response received from ONLYOFFICE conversion service.'));
         }
         if(!empty($response['error'])){
-            throw new RuntimeException('ONLYOFFICE conversion failed. Error code: ' . $response['error']);
+            throw new RuntimeException(__('ONLYOFFICE conversion failed. Error code: ') . $response['error']);
         }
         if(empty($response['fileUrl'])){
-            throw new RuntimeException('ONLYOFFICE conversion did not return a file URL.');
+            throw new RuntimeException(__('ONLYOFFICE conversion did not return a file URL.'));
         }
 
         $new_data = @file_get_contents($response['fileUrl']);
         if($new_data === false){
-            throw new RuntimeException('Unable to download the converted PDF from ONLYOFFICE.');
+            throw new RuntimeException(__('Unable to download the converted PDF from ONLYOFFICE.'));
         }
 
         $savepath = WWW_ROOT . 'files' . DS . 'pdf' . DS .
@@ -5350,7 +5352,7 @@ class AppController  extends Controller {
         if(!file_exists($savepath)){
             $folder = new Folder();
             if(!$folder->create($savepath, 0777)){
-                throw new RuntimeException('PDF folder creation failed.');
+                throw new RuntimeException(__('PDF folder creation failed.'));
             }
         }
 
@@ -5359,7 +5361,7 @@ class AppController  extends Controller {
                 $title . '-' . date('His') . '.' . $outputtype;
 
             if(file_put_contents($file_for_save, $new_data, LOCK_EX) === false){
-                throw new RuntimeException('Unable to save the ONLYOFFICE generated PDF.');
+                throw new RuntimeException(__('Unable to save the ONLYOFFICE generated PDF.'));
             }
 
             // Password comes from the existing DocumentDownload form when present.
@@ -5373,7 +5375,7 @@ class AppController  extends Controller {
         // Compatibility path for callers that separately generate a cover.
         $file_for_save = $savepath . DS . 'cover-pdf.' . $outputtype;
         if(file_put_contents($file_for_save, $new_data, LOCK_EX) === false){
-            throw new RuntimeException('Unable to save the ONLYOFFICE generated cover PDF.');
+            throw new RuntimeException(__('Unable to save the ONLYOFFICE generated cover PDF.'));
         }
 
         $template = $savepath . DS . 'template.html';
@@ -5453,10 +5455,10 @@ class AppController  extends Controller {
         // space in PDFTkPath. Normalize it here so both forms are supported.
         $pdftk = trim((string)Configure::read('PDFTkPath'));
         if(empty($pdftk)){
-            throw new RuntimeException('PDFTkPath is not configured.');
+            throw new RuntimeException(__('PDFTkPath is not configured.'));
         }
         if(!is_executable($pdftk)){
-            throw new RuntimeException('pdftk executable not found or not executable: ' . $pdftk);
+            throw new RuntimeException(__('pdftk executable not found or not executable: ') . $pdftk);
         }
 
         $command = escapeshellarg($pdftk) . ' ' . escapeshellarg($pdf) . ' output ' . escapeshellarg($output);
@@ -5478,7 +5480,7 @@ class AppController  extends Controller {
 
         if($returnCode !== 0 || !file_exists($output)){
             throw new RuntimeException(
-                'pdftk failed to apply PDF security: ' . implode("\n", $stderr)
+                __('pdftk failed to apply PDF security: ') . implode("\n", $stderr)
             );
         }
 

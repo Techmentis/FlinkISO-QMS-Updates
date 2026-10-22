@@ -1,7 +1,7 @@
 <?php echo $this->element('checkbox-script'); ?><div  id="main">
 	<?php echo $this->Session->flash();?>	
 	<div class="branches ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Branches','modelClass'=>'Branch','options'=>array("sr_no"=>"Sr No","name"=>"Name","details"=>"Details","departments"=>"Departments"),'pluralVar'=>'branches'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Branches'),'modelClass'=>'Branch','options'=>array("sr_no"=>__("Sr No"),"name"=>__("Name"),"details"=>__("Details"),"departments"=>__("Departments")),'pluralVar'=>'branches'))); ?>
 
 		<script type="text/javascript">
 			$(document).ready(function(){
@@ -22,7 +22,7 @@
 					<th><?php echo $this->Paginator->sort('employees'); ?></th>
 					<th><?php echo $this->Paginator->sort('users'); ?></th>
 					<th><?php echo $this->Paginator->sort('publish'); ?></th>
-					<th>Actions</th>
+					<th><?php echo h(__('Actions')); ?></th>
 				</tr>
 				<?php if($branches){ ?>
 					<?php foreach ($branches as $branch): ?>
@@ -49,7 +49,7 @@
 							</tr>
 						<?php endforeach; ?>
 					<?php }else{ ?>
-						<tr><td colspan="7">No results found</td></tr>
+						<tr><td colspan="7"><?php echo h(__('No results found')); ?></td></tr>
 					<?php } ?>
 				</table>
 				<?php echo $this->Form->end();?>			

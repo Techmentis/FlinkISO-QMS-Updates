@@ -3,7 +3,7 @@
     <div class="col-md-12">
       <div class="box box-warning">
         <div class="box-header with-border">
-          <h3 class="box-title">Tasks Assigned To You</h3>
+          <h3 class="box-title"><?php echo h(__('Tasks Assigned To You')); ?></h3>
           <div class="box-tools">
             
           </div>
@@ -12,11 +12,11 @@
           <div class="table-responsive">            
             <table cellpadding="0" cellspacing="0" class="table table-responsive table-hover">
               <tbody><tr>
-                <th>Custom Form</th>
-                <th>Record</th>
-                <th>Message</th>                
-                <th>From</th>
-                <th>Target Date</th>
+                <th><?php echo h(__('Custom Form')); ?></th>
+                <th><?php echo h(__('Record')); ?></th>
+                <th><?php echo h(__('Message')); ?></th>                
+                <th><?php echo h(__('From')); ?></th>
+                <th><?php echo h(__('Target Date')); ?></th>
                 <th></th>
               </tr>
               <?php 
@@ -52,7 +52,7 @@
                       echo $this->Form->create($formName,array('controller'=>$controllerName,'action'=>'edit'. '/'.$recid.$names));
                       echo $this->Form->hidden('Access.skip_access_check',array('default'=>1));
                       echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Session->read('User.id')));
-                      echo $this->Form->submit('Act',array('class'=>'btn btn-xs btn-danger'));
+                      echo $this->Form->submit(__('Act'),array('class'=>'btn btn-xs btn-danger'));
                       echo $this->Form->end();
                       ?>
                     </td>

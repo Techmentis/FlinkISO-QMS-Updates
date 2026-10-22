@@ -1,6 +1,6 @@
 <?php if($prompt == false){ ?>
 	<div class="row">
-		<div class="col-md-12"><h4><?php echo "Fetching data from " . $table;?></h4></div>
+		<div class="col-md-12"><h4><?php echo __("Fetching data from ") . $table;?></h4></div>
 		<div class="col-md-12">
 			<div class="table-responsive">
 				<table class="table">
@@ -8,9 +8,9 @@
 					<?php foreach($fields as $field){ ?>
 						<th><?php echo Inflector::humanize($field);?></th>
 					<?php }?>
-					<th>Prepared By</th>
-					<th>Approved By</th>
-					<th>Action</th>
+					<th><?php echo h(__('Prepared By')); ?></th>
+					<th><?php echo h(__('Approved By')); ?></th>
+					<th><?php echo h(__('Action')); ?></th>
 					</tr>
 					<?php 				
 					foreach($records as $record){ ?>
@@ -46,7 +46,7 @@
 	</div>
 <?php } else {?>
 	<div class="row">
-		<div class="col-md-12"><h4 class="text-danger">You have not defined Change Management Custom Table.</h4></div>
-		<div class="col-md-12">Click <?php echo $this->Html->link('Here',array('action'=>'define_change_history_table'));?> to link you change manahement custom table.</div>
+		<div class="col-md-12"><h4 class="text-danger"><?php echo h(__('You have not defined Change Management Custom Table.')); ?></h4></div>
+		<div class="col-md-12">Click <?php echo $this->Html->link(__('Here'),array('action'=>'define_change_history_table'));?> to link you change manahement custom table.</div>
 	</div>
 <?php }?>

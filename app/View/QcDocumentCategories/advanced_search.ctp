@@ -27,13 +27,13 @@
 					<div class="input-group pull-left">
 						<?php echo $this->Form->create('QcDocumentCategory',array('role'=>'form','class'=>'no-padding no-margin','id'=>'search-form','action'=>'search')); ?>
 						
-						<?php echo $this->Form->input(__('search'),array('label'=>false,'placeholder'=>'search','role'=>'form','class'=>'form-control','action'=>'search')); ?>
+						<?php echo $this->Form->input(__('search'),array('label'=>false,'placeholder'=>__('search'),'role'=>'form','class'=>'form-control','action'=>'search')); ?>
 						
 						<div class="input-group-btn">
-							<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">Select Fields <span class="caret"></span></button>
+							<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"><?php echo h(__('Select Fields')); ?> <span class="caret"></span></button>
 							<ul class="dropdown-menu pull-right">
-								<li class="search-dropdown"><?php echo $this->Form->input('search_field',array('multiple'=>'checkbox','options'=>array("sr_no"=>"Sr No","name"=>"Name","short_name"=>"Short Name","record_status"=>"Record Status","branchid"=>"Branchid","departmentid"=>"Departmentid","approved_by"=>"Approved By","prepared_by"=>"Prepared By")));?></li>		
-								<li><?php echo $this->Js->submit('Submit',array('url'=>'search','div'=>false,'class'=>'btn btn-primary btn-success','update' => '#qcDocumentCategories_ajax','type'=>'data','method'=>'post')); ?>
+								<li class="search-dropdown"><?php echo $this->Form->input('search_field',array('multiple'=>'checkbox','options'=>array("sr_no"=>__("Sr No"),"name"=>__("Name"),"short_name"=>__("Short Name"),"record_status"=>__("Record Status"),"branchid"=>__("Branchid"),"departmentid"=>__("Departmentid"),"approved_by"=>__("Approved By"),"prepared_by"=>__("Prepared By"))));?></li>		
+								<li><?php echo $this->Js->submit(__('Submit'),array('url'=>'search','div'=>false,'class'=>'btn btn-primary btn-success','update' => '#qcDocumentCategories_ajax','type'=>'data','method'=>'post')); ?>
 								;									<?php echo $this->Form->end(); ?></li>
 							</ul>
 						</div><!-- /btn-group -->
@@ -129,7 +129,7 @@
 						</tr>
 					<?php endforeach; ?>
 				<?php }else{ ?>
-					<tr><td colspan=20>No results found</td></tr>
+					<tr><td colspan=20><?php echo h(__('No results found')); ?></td></tr>
 				<?php } ?>
 			</table>
 			<?php echo $this->Form->end();?>			
@@ -172,16 +172,16 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				<h4 class="modal-title">Export Data</h4>
+				<h4 class="modal-title"><?php echo h(__('Export Data')); ?></h4>
 			</div>
 			<div class="modal-body">
 				<?php echo $this->Form->create('qcDocumentCategories',array('action'=>'report','target'=>'_blank','class'=>'no-padding no-margin no-background zero-height'));?>
 				<?php echo $this->Form->hidden('rec_selected',array('id'=>'recs_selected'));?>
-				<?php echo $this->Form->submit('Export selcted records in pdf format',array('div'=>false,'class'=>'btn btn-link'));?>
+				<?php echo $this->Form->submit(__('Export selcted records in pdf format'),array('div'=>false,'class'=>'btn btn-link'));?>
 				<?php echo $this->Form->end(); ?>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-default" data-dismiss="modal"><?php echo h(__('Close')); ?></button>
 			</div></div></div></div>
 
 			<div class="modal fade" id="advanced_search" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -189,22 +189,22 @@
 					<div class="modal-content">
 						<div class="modal-header">
 							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-							<h4 class="modal-title">Select Date range</h4>
+							<h4 class="modal-title"><?php echo h(__('Select Date range')); ?></h4>
 						</div>
-						<div class="modal-body"><?php echo $this->element('advanced-search',array('postData'=>array("sr_no"=>"Sr No","name"=>"Name","short_name"=>"Short Name","record_status"=>"Record Status","branchid"=>"Branchid","departmentid"=>"Departmentid","approved_by"=>"Approved By","prepared_by"=>"Prepared By"),'PublishedBranchList'=>array($PublishedBranchList))); ?></div>
+						<div class="modal-body"><?php echo $this->element('advanced-search',array('postData'=>array("sr_no"=>__("Sr No"),"name"=>__("Name"),"short_name"=>__("Short Name"),"record_status"=>__("Record Status"),"branchid"=>__("Branchid"),"departmentid"=>__("Departmentid"),"approved_by"=>__("Approved By"),"prepared_by"=>__("Prepared By")),'PublishedBranchList'=>array($PublishedBranchList))); ?></div>
 						<div class="modal-footer">
-							<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+							<button type="button" class="btn btn-default" data-dismiss="modal"><?php echo h(__('Close')); ?></button>
 						</div></div></div></div>
 						<div class="modal fade" id="makerchecker" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 							<div class="modal-dialog">
 								<div class="modal-content">
 									<div class="modal-header">
 										<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-										<h4 class="modal-title">Send for Approval</h4>
+										<h4 class="modal-title"><?php echo h(__('Send for Approval')); ?></h4>
 									</div>
 									<div class="modal-body"><?php echo $this->element('makerchecker'); ?></div>
 									<div class="modal-footer">
-										<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+										<button type="button" class="btn btn-default" data-dismiss="modal"><?php echo h(__('Close')); ?></button>
 									</div></div></div></div>
 
 									<div class="modal fade" id="uploadevidance" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -212,11 +212,11 @@
 											<div class="modal-content">
 												<div class="modal-header">
 													<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-													<h4 class="modal-title">Send for Approval</h4>
+													<h4 class="modal-title"><?php echo h(__('Send for Approval')); ?></h4>
 												</div>
 												<div class="modal-body"><?php echo $this->element('makerchecker'); ?></div>
 												<div class="modal-footer">
-													<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+													<button type="button" class="btn btn-default" data-dismiss="modal"><?php echo h(__('Close')); ?></button>
 												</div></div></div></div>
 
 
@@ -225,11 +225,11 @@
 														<div class="modal-content">
 															<div class="modal-header">
 																<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-																<h4 class="modal-title">Import from file (excel & csv formats only)</h4>
+																<h4 class="modal-title"><?php echo h(__('Import from file (excel')); ?> & <?php echo h(__('csv formats only)')); ?></h4>
 															</div>
 															<div class="modal-body"><?php echo $this->element('import'); ?></div>
 															<div class="modal-footer">
-																<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+																<button type="button" class="btn btn-default" data-dismiss="modal"><?php echo h(__('Close')); ?></button>
 															</div></div></div></div>
 
 														</div>

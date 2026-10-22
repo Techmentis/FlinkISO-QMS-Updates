@@ -334,7 +334,7 @@ class EmployeesController extends AppController {
                 echo $path;
                 if ($folder->create($path)) {
                 } else {
-                    echo "Folder creation failed";
+                    echo __("Folder creation failed");
                     exit;
                 }
 
@@ -343,7 +343,7 @@ class EmployeesController extends AppController {
                 echo $path;
                 if ($folder->create($path)) {
                 } else {
-                    echo "Folder creation failed";
+                    echo __("Folder creation failed");
                     exit;
                 }
 
@@ -352,7 +352,7 @@ class EmployeesController extends AppController {
                 echo $path;
                 if ($folder->create($path)) {
                 } else {
-                    echo "Folder creation failed";
+                    echo __("Folder creation failed");
                     exit;
                 }
                 $to = $path . DS . 'sign.png';
@@ -382,7 +382,7 @@ class EmployeesController extends AppController {
                 $path = WWW_ROOT . 'img' . DS . $this->Session->read('User.company_id') . DS . 'profile' . DS . $this->Session->read('User.employee_id');
                 if ($folder->create($path)) {
                 } else {
-                    echo "Folder creation failed";
+                    echo __("Folder creation failed");
                     exit;
                 }
                 $to = $path . DS . 'profile.png';

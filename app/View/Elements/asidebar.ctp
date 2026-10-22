@@ -15,7 +15,7 @@
         </div>
         <div class="pull-left info">
           <p><?php echo $this->Session->read('User.name');?></p>
-          <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+          <a href="#"><i class="fa fa-circle text-success"></i> <?php echo h(__('Online')); ?></a>
         </div>
       </div>
       <ul class="sidebar-menu">
@@ -82,7 +82,7 @@
             <span><?php echo __('Graph Panels'); ?> </span> <i class="fa fa-angle-left pull-right"></i>
           </a>
           <ul class="treeview-menu">
-            <li><?php echo $this->Html->link('Graphs',
+            <li><?php echo $this->Html->link(__('Graphs'),
             array('controller' => 'graph_panels', 'action' => 'graphs','timestamp'=>date('ymdhis'))); ?>                  
           </li>
         </ul>

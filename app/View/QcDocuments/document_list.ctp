@@ -2,11 +2,11 @@
     <?php if (isset($hide) && $hide == false) { ?>
     <div class="row">
         <div class="col-md-12">
-                <h4>Document Access</h4>
-                <p>You can enable/ disable document access to this user by clicking on the check or remove icon.</p>
+                <h4><?php echo h(__('Document Access')); ?></h4>
+                <p><?php echo h(__('You can enable/ disable document access to this user by clicking on the check or remove icon.')); ?></p>
             </div>            
         <div class="col-md-12">
-                <?php echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_doc_src_button', 'autocomplete'=>'off',  'label'=>false,'placeholder'=>'Quick search with sorting.','style'=>'margin-top: -12px'));?>
+                <?php echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_doc_src_button', 'autocomplete'=>'off',  'label'=>false,'placeholder'=>__('Quick search with sorting.'),'style'=>'margin-top: -12px'));?>
         </div>
     </div>
     <?php } ?>     
@@ -15,12 +15,12 @@
             <div class="col-md-12">
                 <table class="table table-responsive table-bordered">
                     <tr>
-                        <th>Document</th>
-                        <th>Document Numner</th>
-                        <th>Prepared By</th>
-                        <th>Approved By</th>
-                        <th>View</th>
-                        <th>Edit</th>
+                        <th><?php echo h(__('Document')); ?></th>
+                        <th><?php echo h(__('Document Numner')); ?></th>
+                        <th><?php echo h(__('Prepared By')); ?></th>
+                        <th><?php echo h(__('Approved By')); ?></th>
+                        <th><?php echo h(__('View')); ?></th>
+                        <th><?php echo h(__('Edit')); ?></th>
                     </tr>
                     <?php foreach($qcDocuments as $qcDocument){ ?>
                         <tr>
@@ -178,13 +178,13 @@
                 search: search
             },
             beforeSend: function () {
-                $('#doclist').html('Searching...');
+                $('#doclist').html(<?php echo json_encode(__('Searching...'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
             },
             success: function (response) {
                 $('#doclist').html(response);
             },
             error: function () {
-                $('#doclist').html('Error while searching.');
+                $('#doclist').html(<?php echo json_encode(__('Error while searching.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
             }
         });
 

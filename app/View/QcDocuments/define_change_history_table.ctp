@@ -1,8 +1,8 @@
 <div class="row">
-	<div class="col-md-12"><h4>Select your Change Control table from the dropdown</h4></div>
+	<div class="col-md-12"><h4><?php echo h(__('Select your Change Control table from the dropdown')); ?></h4></div>
 	<?php echo $this->Form->create('QcDocument',array('action'=>'define_change_history_table'),array('type'=>'post'));?>
 	<div class="col-md-12">
-		<p class="show_comments">Note : Only text, date and radio fields are allowed. System will automatically add Prepred By & Approved By fields. To link the table, select the table from the dropdown and then select the fields you want to display on "Change Request" tab and click submit.</p>
+		<p class="show_comments"><?php echo h(__('Note : Only text, date and radio fields are allowed. System will automatically add Prepred By')); ?> & <?php echo h(__('Approved By fields. To link the table, select the table from the dropdown and then select the fields you want to display on "Change Request" tab and click submit.')); ?></p>
 	</div>
 	<?php 
 	if(isset($company) && ($company['Company']['change_management_table'] != null || $company['Company']['change_management_table'] != '')){
@@ -29,7 +29,7 @@
 
 	?>	
 	<?php
-		echo $this->Form->submit('Submit',array('div'=>array('class'=>'col-md-12'), 'class'=>'btn btn-primary btn-sm'));
+		echo $this->Form->submit(__('Submit'),array('div'=>array('class'=>'col-md-12'), 'class'=>'btn btn-primary btn-sm'));
 		echo $this->Form->end();
 	?>	
 </div>

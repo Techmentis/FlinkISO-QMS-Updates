@@ -6,14 +6,14 @@ $accessListSearchUrl = Router::url(array('controller'=>'custom_tables', 'action'
     <?php if (isset($hide) && $hide == false) { ?>
     <div class="row">
         <div class="col-md-12">
-            <h4>Custom HTML Forms Access</h4>
-            <p>You can enable/ disable custom HTML Form's access to this user by clicking on the check or remove icon.
-            <br />Make sure that the relevent document access is given to a user before allowing the Custom HTML Form access based on that Document.
-            <br />If you allow any action for the HTML table, system will automatically add View permission for a linked document if the permission is missng.</p>
+            <h4><?php echo h(__('Custom HTML Forms Access')); ?></h4>
+            <p><?php echo h(__('You can enable/ disable custom HTML Form\'s access to this user by clicking on the check or remove icon.')); ?>
+            <br /><?php echo h(__('Make sure that the relevent document access is given to a user before allowing the Custom HTML Form access based on that Document.')); ?>
+            <br /><?php echo h(__('If you allow any action for the HTML table, system will automatically add View permission for a linked document if the permission is missng.')); ?></p>
         </div>
         
         <div class="col-md-12">
-                <?php echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_ct_src_button', 'autocomplete'=>'off',  'label'=>false,'placeholder'=>'Quick search with sorting.','style'=>'margin-top: -12px'));?>
+                <?php echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_ct_src_button', 'autocomplete'=>'off',  'label'=>false,'placeholder'=>__('Quick search with sorting.'),'style'=>'margin-top: -12px'));?>
         </div>
     </div>
     <?php } ?>
@@ -22,11 +22,11 @@ $accessListSearchUrl = Router::url(array('controller'=>'custom_tables', 'action'
         <div class="col-md-12">
             <table class="table table-responsive table-bordered">
                 <tr>
-                    <th>Table</th>
-                    <th>Add</th>
-                    <th>Viewer</th>
-                    <th>Editor</th>
-                    <th>Approver</th>
+                    <th><?php echo h(__('Table')); ?></th>
+                    <th><?php echo h(__('Add')); ?></th>
+                    <th><?php echo h(__('Viewer')); ?></th>
+                    <th><?php echo h(__('Editor')); ?></th>
+                    <th><?php echo h(__('Approver')); ?></th>
                 </tr>
                 <?php foreach($customTables as $customTable){ ?>
                     <tr>
@@ -196,13 +196,13 @@ $accessListSearchUrl = Router::url(array('controller'=>'custom_tables', 'action'
                 search: search
             },
             beforeSend: function () {
-                $('#tbllist').html('Searching...');
+                $('#tbllist').html(<?php echo json_encode(__('Searching...'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
             },
             success: function (response) {
                 $('#tbllist').html(response);
             },
             error: function () {
-                $('#tbllist').html('Error while searching.');
+                $('#tbllist').html(<?php echo json_encode(__('Error while searching.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
             }
         });
 

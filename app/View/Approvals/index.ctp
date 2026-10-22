@@ -8,7 +8,7 @@
 <div id="main">
 	<?php echo $this->Session->flash(); ?>
 	<div class="branches ">
-		<h4>Approvals (Pending for approvals) <small class="pull-right"><?php echo $this->Html->link('View Approved Records',array('action'=>'approved')); ?></small></h4>		
+		<h4><?php echo h(__('Approvals (Pending for approvals)')); ?> <small class="pull-right"><?php echo $this->Html->link(__('View Approved Records'),array('action'=>'approved')); ?></small></h4>		
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$("#ApprovalDates").daterangepicker({
@@ -47,11 +47,11 @@
 			<div class="col-md-4"><?php echo $this->Form->input('record_status',array('class'=>''))?></div>
 			<div class="col-md-4"><?php echo $this->Form->input('publish_status',array('class'=>''))?></div>
 			<div class="col-md-4"><?php echo $this->Form->input('dates',array('class'=>'form-control'))?></div>        		
-			<div class="col-md-3"><br /><?php echo $this->Form->submit('Submit',array('class'=>'btn btn-sm btn-success'));?></div>
+			<div class="col-md-3"><br /><?php echo $this->Form->submit(__('Submit'),array('class'=>'btn btn-sm btn-success'));?></div>
 			<?php echo $this->Form->end();?>
 		</div>
 		<div class="row">
-			<div class="col-md-12"><h2>Result</h2></div>
+			<div class="col-md-12"><h2><?php echo h(__('Result')); ?></h2></div>
 			<div class="col-md-12">
 				<div class="table table-responsive" style="min-height: 400px;">   
 					<?php echo $this->Form->create(array('class' => 'no-padding no-margin no-background')); ?>
@@ -97,28 +97,28 @@
 											<!-- <span class="btn btn-xs btn-danger"><span class=" glyphicon glyphicon-remove"></span></span> -->
 											<?php } else { ?> 
 											<?php } ?>
-											<?php if($approval['Approval']['status'] == 'Approved'){ echo "Approved"; }else{?>
+											<?php if($approval['Approval']['status'] == 'Approved'){ echo __("Approved"); }else{?>
 											<?php if($this->Session->read('User.is_mr') == true){ ?>
 												<div class="dropdown">
 													<?php  if(!$approval['Approval']['app_record_status'] or !$approval['Approval']['record_published'] or $approval['Approval']['app_record_status'] == 1 or $approval['Approval']['record_published'] == 1){ ?> 
 													
 													<button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu<?php echo $approval['Approval']['id'];?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-														Pending...
+														<?php echo h(__('Pending...')); ?>
 														<span class="caret"></span>
 													</button>
 													<ul class="dropdown-menu pull-right" aria-labelledby="dropdownMenu<?php echo $approval['Approval']['id'];?>">
-														<li><?php echo $this->Html->link("view", array('controller' => $approval['Approval']['controller_name'], 'action' => 'view', $approval['Approval']['record']), array('target'=>'_blank')); ?></li>
-														<li><?php echo $this->Html->Link('Send Reminder to ' . $froms[$approval['Approval']['user_id']],array('controller'=>'approvals','action'=>'send_reminder',$approval['Approval']['id']), array('target'=>'_blank')); ?></li>
-														<li><?php echo $this->Html->Link('Unlock Record',array('controller'=>'approvals','action'=>'unlock_record',$approval['Approval']['id']), array('target'=>'_blank')); ?></li>
-														<li><?php echo $this->Html->Link('Assign to Another User',array('controller'=>'approvals','action'=>'change_user',$approval['Approval']['id'],'modal'=>1), array('class'=>'approval-modal-link', 'data-modal-title'=>__('Change Approver'))); ?></li>
-														<li><?php echo $this->Html->Link('Delete Record',array('controller'=>'approvals','action'=>'delete_approval',$approval['Approval']['id']), array('target'=>'_blank')); ?></li>
+														<li><?php echo $this->Html->link(__("view"), array('controller' => $approval['Approval']['controller_name'], 'action' => 'view', $approval['Approval']['record']), array('target'=>'_blank')); ?></li>
+														<li><?php echo $this->Html->Link(__('Send Reminder to ') . $froms[$approval['Approval']['user_id']],array('controller'=>'approvals','action'=>'send_reminder',$approval['Approval']['id']), array('target'=>'_blank')); ?></li>
+														<li><?php echo $this->Html->Link(__('Unlock Record'),array('controller'=>'approvals','action'=>'unlock_record',$approval['Approval']['id']), array('target'=>'_blank')); ?></li>
+														<li><?php echo $this->Html->Link(__('Assign to Another User'),array('controller'=>'approvals','action'=>'change_user',$approval['Approval']['id'],'modal'=>1), array('class'=>'approval-modal-link', 'data-modal-title'=>__('Change Approver'))); ?></li>
+														<li><?php echo $this->Html->Link(__('Delete Record'),array('controller'=>'approvals','action'=>'delete_approval',$approval['Approval']['id']), array('target'=>'_blank')); ?></li>
 													</ul>	
 													
 													<?php } else { ?>
-														<button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu<?php echo $approval['Approval']['id'];?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Approved<span class="caret"></span>
+														<button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu<?php echo $approval['Approval']['id'];?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><?php echo h(__('Approved')); ?><span class="caret"></span>
 														</button>
 														<ul class="dropdown-menu pull-right" aria-labelledby="dropdownMenu<?php echo $approval['Approval']['id'];?>">
-															<li><?php echo $this->Html->link("view", array('controller' => $approval['Approval']['controller_name'], 'action' => 'view', $approval['Approval']['record']), array('target'=>'_blank', 'class'=>'')); ?>																
+															<li><?php echo $this->Html->link(__("view"), array('controller' => $approval['Approval']['controller_name'], 'action' => 'view', $approval['Approval']['record']), array('target'=>'_blank', 'class'=>'')); ?>																
 															</li>
 														</ul>
 													<?php } ?>
@@ -129,8 +129,8 @@
 											<span class="badge"><?php if($x == 0) echo count($apps)?></span>
 											<?php if(count($apps) > 1 && $x == 0){ ?>
 												<div class="btn-group">
-													<span class="btn btn-xs btn-success" id="<?php echo $rec?>">Show</span> 
-													<span class="btn btn-xs btn-danger" id="<?php echo $rec?>hide">Hide</span>
+													<span class="btn btn-xs btn-success" id="<?php echo $rec?>"><?php echo h(__('Show')); ?></span> 
+													<span class="btn btn-xs btn-danger" id="<?php echo $rec?>hide"><?php echo h(__('Hide')); ?></span>
 												</div>
 													<script type="text/javascript">
 														$("#<?php echo $rec?>").on('click',function(){

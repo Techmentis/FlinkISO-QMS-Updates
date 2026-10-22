@@ -3,7 +3,7 @@
 	<?php echo $this->Session->flash();?>	
 
 	<div class="records ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Records','modelClass'=>'Record','options'=>array(),'pluralVar'=>'records'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Records'),'modelClass'=>'Record','options'=>array(),'pluralVar'=>'records'))); ?>
 
 		<div class="nav panel panel-default">
 			<div class="records form col-md-12">
@@ -49,7 +49,7 @@
 						echo $this->element('onlyoffice',array(
 							'url'=>$url,
 							'placeholderid'=>$placeholderid,
-							'panel_title'=>'Document Viewer',
+							'panel_title'=>__('Document Viewer'),
 							'mode'=>$mode,
 							'path'=>$file_path,
 							'file'=>$file,
@@ -118,7 +118,7 @@
 		$().ready(function() {
 			jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 				return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';
-			}, "Please select the value");
+			}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 			$('#RecordEditForm').validate({        	
 				

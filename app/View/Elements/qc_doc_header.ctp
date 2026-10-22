@@ -5,19 +5,19 @@
 		<div class="table-responsive">
 			<table class="table table-bordered">
 				<tr>
-					<th>Document Number</th>
+					<th><?php echo h(__('Document Number')); ?></th>
 					<td><?php echo $document['QcDocument']['document_number']?></td>
-					<th>Revision Number</th>
+					<th><?php echo h(__('Revision Number')); ?></th>
 					<td><?php echo $document['QcDocument']['revision_number']?></td>
-					<th>Date Of Issue</th>
+					<th><?php echo h(__('Date Of Issue')); ?></th>
 					<td><?php echo $document['QcDocument']['date_of_issue']?></td>
 				</tr>
 				<tr>
-					<th>Prepared By</th>
+					<th><?php echo h(__('Prepared By')); ?></th>
 					<td><?php echo $document['PreparedBy']['name']?></td>
-					<th>Approved By</th>
+					<th><?php echo h(__('Approved By')); ?></th>
 					<td><?php echo $document['ApprovedBy']['name']?></td>
-					<th>Issued By</th>
+					<th><?php echo h(__('Issued By')); ?></th>
 					<td><?php echo $document['IssuedBy']['name']?></td>
 				</tr>
 			</table>

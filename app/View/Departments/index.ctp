@@ -1,7 +1,7 @@
 <?php echo $this->element('checkbox-script'); ?><div  id="main">
 	<?php echo $this->Session->flash();?>	
 	<div class="departments ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Departments','modelClass'=>'Department','options'=>array("sr_no"=>"Sr No","name"=>"Name","clauses"=>"Clauses","details"=>"Details"),'pluralVar'=>'departments'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Departments'),'modelClass'=>'Department','options'=>array("sr_no"=>__("Sr No"),"name"=>__("Name"),"clauses"=>__("Clauses"),"details"=>__("Details")),'pluralVar'=>'departments'))); ?>
 
 		<script type="text/javascript">
 			$(document).ready(function(){
@@ -22,7 +22,7 @@
 					<th><?php echo $this->Paginator->sort('employees'); ?></th>		
 					<th><?php echo $this->Paginator->sort('users'); ?></th>		
 					<th><?php echo $this->Paginator->sort('publish'); ?></th>
-					<th>Actions</th>
+					<th><?php echo h(__('Actions')); ?></th>
 				</tr>
 				<?php if($departments){ ?>
 					<?php foreach ($departments as $department): ?>
@@ -45,7 +45,7 @@
 					<td class=" actions">	<?php echo $this->element('actions', array('created' => $department['Department']['created_by'], 'postVal' => $department['Department']['id'], 'softDelete' => $department['Department']['soft_delete'])); ?>	</td>	</tr>
 				<?php endforeach; ?>
 			<?php }else{ ?>
-				<tr><td colspan=54>No results found</td></tr>
+				<tr><td colspan=54><?php echo h(__('No results found')); ?></td></tr>
 			<?php } ?>
 		</table>
 		<?php echo $this->Form->end();?>		

@@ -8,6 +8,6 @@
 	</div>
 <?php }else{ ?>
 	<div class="alert alert-danger">
-		<?php echo h(!empty($bundleError) ? $bundleError : 'The combined PDF could not be generated.'); ?>
+		<?php echo h(!empty($bundleError) ? $bundleError : __('The combined PDF could not be generated.')); ?>
 	</div>
 <?php } ?>

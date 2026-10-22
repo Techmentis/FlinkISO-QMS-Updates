@@ -12,7 +12,7 @@ $formSearchUrl = Router::url($formSearchRoute, true);
 <div  id="main">
 		<?php echo $this->Session->flash();?>	
 		<div class="customTables ">
-			<h4>Forms</h4>
+			<h4><?php echo h(__('Forms')); ?></h4>
 			<style type="text/css">
 				.btn .badge{
 					position: absolute;
@@ -41,26 +41,26 @@ $formSearchUrl = Router::url($formSearchRoute, true);
 					<div class="btn-group">
 			<?php 
 				if($this->request->params['named']['table_type'] == 1 || !isset($this->request->params['named']['table_type'])){
-					echo $this->Html->link('Documents',array('action'=>'index','table_type'=>1),array('class'=>'btn btn-sm btn-bold  btn-info'));
+					echo $this->Html->link(__('Documents'),array('action'=>'index','table_type'=>1),array('class'=>'btn btn-sm btn-bold  btn-info'));
 				}else{
-					echo $this->Html->link('Documents',array('action'=>'index','table_type'=>1),array('class'=>'btn btn-sm btn-bold  btn-default'));
+					echo $this->Html->link(__('Documents'),array('action'=>'index','table_type'=>1),array('class'=>'btn btn-sm btn-bold  btn-default'));
 				}
 				
 				if($this->request->params['named']['table_type'] == 5){
-					echo $this->Html->link('Child Documents',array('action'=>'index','table_type'=>5),array('class'=>'btn btn-sm btn-bold  btn-info'));
+					echo $this->Html->link(__('Child Documents'),array('action'=>'index','table_type'=>5),array('class'=>'btn btn-sm btn-bold  btn-info'));
 				}else{
-					echo $this->Html->link('Child Documents',array('action'=>'index','table_type'=>5),array('class'=>'btn btn-sm btn-bold  btn-default'));
+					echo $this->Html->link(__('Child Documents'),array('action'=>'index','table_type'=>5),array('class'=>'btn btn-sm btn-bold  btn-default'));
 				}
 
 				if($this->request->params['named']['table_type'] == 3){
-					echo $this->Html->link('Masters',array('action'=>'index','table_type'=>3),array('class'=>'btn btn-sm btn-bold  btn-info'));
+					echo $this->Html->link(__('Masters'),array('action'=>'index','table_type'=>3),array('class'=>'btn btn-sm btn-bold  btn-info'));
 				}else{
-					echo $this->Html->link('Masters',array('action'=>'index','table_type'=>3),array('class'=>'btn btn-sm btn-bold  btn-default'));
+					echo $this->Html->link(__('Masters'),array('action'=>'index','table_type'=>3),array('class'=>'btn btn-sm btn-bold  btn-default'));
 				}
 				if($this->request->params['named']['table_type'] == 4 && !isset($this->request->params['named']['standard_id'])){
-					echo $this->Html->link('All',array('action'=>'index','table_type'=>4),array('class'=>'btn btn-sm btn-bold  btn-info'));
+					echo $this->Html->link(__('All'),array('action'=>'index','table_type'=>4),array('class'=>'btn btn-sm btn-bold  btn-info'));
 				}else{
-					echo $this->Html->link('All',array('action'=>'index','table_type'=>4),array('class'=>'btn btn-sm btn-bold  btn-default'));
+					echo $this->Html->link(__('All'),array('action'=>'index','table_type'=>4),array('class'=>'btn btn-sm btn-bold  btn-default'));
 				}				
 				foreach($standards as $standard_id => $standard){
 					$standardTitle = $standard .'&nbsp;&nbsp;<div class="badge">'.$cTableCount[$standard_id].'</div>';
@@ -74,7 +74,7 @@ $formSearchUrl = Router::url($formSearchRoute, true);
 					</div>
 				</div>
 				<div class="col-md-4 col-sm-4 col-xs-12 custom-table-search">
-					<?php echo $this->Form->input('form_search', array('class'=>'form-control', 'id'=>'form_search', 'label'=>false, 'placeholder'=>'Form Search...', 'autocomplete'=>'off')); ?>
+					<?php echo $this->Form->input('form_search', array('class'=>'form-control', 'id'=>'form_search', 'label'=>false, 'placeholder'=>__('Form Search...'), 'autocomplete'=>'off')); ?>
 				</div>
 			</div>
 <div id="searchResults">		
@@ -85,7 +85,7 @@ $formSearchUrl = Router::url($formSearchRoute, true);
 			$tblcount = 0; ?>
 			<div class="row">
 				<div class="col-md-12">
-					<h4>HTML Forms Shared With You</h4>					
+					<h4><?php echo h(__('HTML Forms Shared With You')); ?></h4>					
 					<table cellpadding="0" cellspacing="0" class="table table-striped table-hover index" id="customTablesTable">					
 						<thead>
 							<tr>
@@ -94,7 +94,7 @@ $formSearchUrl = Router::url($formSearchRoute, true);
 								<th><?php echo $this->Paginator->sort('qc_document_id'); ?></th>
 								<!-- <th><?php echo $this->Paginator->sort('table_version'); ?></th> -->
 								<!-- <th><?php echo $this->Paginator->sort('publish'); ?></th> -->
-								<th width="280">Action</th>
+								<th width="280"><?php echo h(__('Action')); ?></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -109,31 +109,31 @@ $formSearchUrl = Router::url($formSearchRoute, true);
 									<div class="btn-group btn-no-border">
 										<?php
 										if($customTable['CustomTable']['publish'] == 1 && $customTable['CustomTable']['table_locked'] == 0 && $customTable['QcDocument']['parent_document_id'] == -1){
-											echo $this->Html->link('<i class="fa fa-plus-square-o fa-lg text-default"></i>',array('controller'=>$customTable['CustomTable']['table_name'], 'action'=>'add', 'custom_table_id'=>$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Goto Add page'));
+											echo $this->Html->link('<i class="fa fa-plus-square-o fa-lg text-default"></i>',array('controller'=>$customTable['CustomTable']['table_name'], 'action'=>'add', 'custom_table_id'=>$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Goto Add page')));
 										}
 										if($this->request->params['named']['table_type'] == 3){
-											echo $this->Html->link('<i class="fa fa-plus-square-o fa-lg text-default"></i>',array('controller'=>$customTable['CustomTable']['table_name'], 'action'=>'add', 'custom_table_id'=>$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Goto Add page'));
+											echo $this->Html->link('<i class="fa fa-plus-square-o fa-lg text-default"></i>',array('controller'=>$customTable['CustomTable']['table_name'], 'action'=>'add', 'custom_table_id'=>$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Goto Add page')));
 										}?>												
 										
-										<?php echo $this->Html->link('<i class="fa fa-table fa-lg text-default"></i>',array('controller'=>$customTable['CustomTable']['table_name'],'action'=>'index','custom_table_id'=>$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Goto index page'));?>
+										<?php echo $this->Html->link('<i class="fa fa-table fa-lg text-default"></i>',array('controller'=>$customTable['CustomTable']['table_name'],'action'=>'index','custom_table_id'=>$customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id']),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Goto index page')));?>
 										
 										<?php
 										if($this->Session->read('User.is_hod') || $this->Session->read('User.is_mr') || ($customTable['CustomTable']['created_by'] == $this->Session->read('User.id')))echo $this->Html->link('<i class="fa fa-bar-chart fa-lg text-default"></i>',array('controller'=>$customTable['CustomTable']['table_name'], 'action'=>'reports','custom_table_id'=>$customTable['CustomTable']['id']),
-										array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false,'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Reports'));
+										array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false,'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Reports')));
 										?>
 										
 										<?php 
-										if($this->Session->read('User.is_super_user'))echo $this->Html->link('<i class="fa fa-television fa-lg text-default"></i>',array('action'=>'view',$customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View/ Recreate'));?>
+										if($this->Session->read('User.is_super_user'))echo $this->Html->link('<i class="fa fa-television fa-lg text-default"></i>',array('action'=>'view',$customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('View/ Recreate')));?>
 
 										
 										<?php 
-											if($this->Session->read('User.is_super_user'))echo $this->Html->link('<i class="fa fa-refresh fa-lg text-default"></i>',array('action'=>'unlock' ,'next_action'=>'recreate', $customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View/ Recreate'));?>
+											if($this->Session->read('User.is_super_user'))echo $this->Html->link('<i class="fa fa-refresh fa-lg text-default"></i>',array('action'=>'unlock' ,'next_action'=>'recreate', $customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('View/ Recreate')));?>
 										
 										<?php 
-											if($this->Session->read('User.is_super_user'))echo $this->Html->link('<i class="fa fa-file-pdf-o fa-lg text-default"></i>',array('controller'=>'pdf_templates', 'action'=>'add' ,$customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Create PDF Template'));?>
+											if($this->Session->read('User.is_super_user'))echo $this->Html->link('<i class="fa fa-file-pdf-o fa-lg text-default"></i>',array('controller'=>'pdf_templates', 'action'=>'add' ,$customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm btn-default', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Create PDF Template')));?>
 
 										<?php if($customTable['CustomTable']['custom_table_id'] == '' && ($this->Session->read('User.is_super_user'))){
-											echo $this->Html->link('<i class="fa fa-chain fa-lg "></i>',array('action'=>'add_child','custom_table_id'=> $customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id'],'process_id'=>$customTable['CustomTable']['process_id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> 'Link new table to this table'));
+											echo $this->Html->link('<i class="fa fa-chain fa-lg "></i>',array('action'=>'add_child','custom_table_id'=> $customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id'],'process_id'=>$customTable['CustomTable']['process_id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> __('Link new table to this table')));
 											
 										} 	
 										?>
@@ -171,7 +171,7 @@ $formSearchUrl = Router::url($formSearchRoute, true);
 <script>$.ajaxSetup({beforeSend:function(){$("#busy-indicator").show();},complete:function(){$("#busy-indicator").hide();}});</script>
 <script type="text/javascript">	$().ready(function(){$(".tooltip1").tooltip();});</script>
 <?php }else{ ?>	
-	<p>Forms are not added for this section.</p>
+	<p><?php echo h(__('Forms are not added for this section.')); ?></p>
 <?php } ?>
 </div>
 <script>
@@ -197,11 +197,11 @@ $formSearchUrl = Router::url($formSearchRoute, true);
 							$('#searchResults').html(results.html());
 							$('.tooltip1').tooltip();
 						} else {
-							$('#searchResults').html('Error while searching.');
+							$('#searchResults').html(<?php echo json_encode(__('Error while searching.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 						}
 					},
 					error: function () {
-						$('#searchResults').html('Error while searching.');
+						$('#searchResults').html(<?php echo json_encode(__('Error while searching.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 					},
 					complete: function () {
 						$('#busy-indicator').hide();

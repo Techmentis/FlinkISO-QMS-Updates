@@ -1,7 +1,7 @@
 <?php echo $this->element('checkbox-script'); ?><div  id="main">
 	<?php echo $this->Session->flash();?>	
 	<div class="qcDocumentCategories ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Qc Document Categories','modelClass'=>'QcDocumentCategory','options'=>array("sr_no"=>"Sr No","name"=>"Name","short_name"=>"Short Name"),'pluralVar'=>'qcDocumentCategories'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Qc Document Categories'),'modelClass'=>'QcDocumentCategory','options'=>array("sr_no"=>__("Sr No"),"name"=>__("Name"),"short_name"=>__("Short Name")),'pluralVar'=>'qcDocumentCategories'))); ?>
 
 		<script type="text/javascript">
 			$(document).ready(function(){
@@ -26,7 +26,7 @@
 					<th><?php echo $this->Paginator->sort('approved_by'); ?></th>		
 					<th><?php echo $this->Paginator->sort('publish'); ?></th>		
 
-					<th>Actions</th>
+					<th><?php echo h(__('Actions')); ?></th>
 				</tr>
 				<?php if($qcDocumentCategories){ ?>
 					<?php foreach ($qcDocumentCategories as $qcDocumentCategory): ?>
@@ -52,7 +52,7 @@
 									<td class=" actions">	<?php echo $this->element('actions', array('created' => $qcDocumentCategory['QcDocumentCategory']['created_by'], 'postVal' => $qcDocumentCategory['QcDocumentCategory']['id'], 'softDelete' => $qcDocumentCategory['QcDocumentCategory']['soft_delete'])); ?>	</td>	</tr>
 								<?php endforeach; ?>
 							<?php }else{ ?>
-								<tr><td colspan=60>No results found</td></tr>
+								<tr><td colspan=60><?php echo h(__('No results found')); ?></td></tr>
 							<?php } ?>
 						</table>
 						<?php echo $this->Form->end();?>			

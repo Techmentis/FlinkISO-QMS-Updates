@@ -2,7 +2,7 @@
 <?php echo $this->fetch('script'); ?>
 <?php
 if( isset($doc_not_found) && $doc_not_found == true){
-	echo "<div class='alert alert-danger'><i class='fa fa-warning'></i> Document not found for this table</div>";
+	echo '<div class=\'alert alert-danger\'><i class=\'fa fa-warning\'></i> ' . h(__('Document not found for this table')) . '</div>';
 }
 echo $this->Html->css(array('code-input-main/code-input.min','prism'));
 echo $this->fetch('css');
@@ -162,7 +162,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 <?php echo $this->Session->flash();?>
 <div class="row">
 	<div class="col-md-12">
-		<?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => 'Custom Tables', 'modelClass' => 'CustomTable', 'options' => array(), 'pluralVar' => 'customTables'))); ?>
+		<?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => __('Custom Tables'), 'modelClass' => 'CustomTable', 'options' => array(), 'pluralVar' => 'customTables'))); ?>
 	</div>
 </div>
 <?php if($qcDocument){
@@ -180,7 +180,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 			<?php echo $this->element('onlyoffice', array(
 				'url' => $url,
 				'placeholderid' => $placeholderid,
-				'panel_title' => 'Document: '.$qcDocument['QcDocument']['title'],
+				'panel_title' => __('Document: ').$qcDocument['QcDocument']['title'],
 				'mode' => 'view',
 				'path' => $customTable['CustomTable']['id'],
 				'file' => $documentFile,
@@ -202,17 +202,17 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 	<div class="col-md-12">
 		<div id="custom-table-configuration-tabs" class="custom-table-configuration-tabs">
 			<ul>
-				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'main')); ?>">Main Form</a></li>
-				<?php if($formTabs || $childs){ ?><li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'tab_configuration')); ?>">Tab Configuration</a></li><?php } ?>
-				<?php if($childs){ ?><li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'child_tables')); ?>">Child Forms</a></li><?php } ?>
-				<?php if($childDocumentForms){ ?><li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'child_document_forms')); ?>">Child Document Forms</a></li><?php } ?>
-				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'rebuild_module')); ?>">Rebuild Module</a></li>
-				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'data_entry')); ?>">Data Entry</a></li>
-				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'permissions')); ?>">Table Permissions</a></li>
-				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'charts_panels')); ?>">Charts and Panels</a></li>
-				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'email_triggers')); ?>">Email Triggers</a></li>
-				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'create_tasks')); ?>">Create Tasks</a></li>
-				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'javascript')); ?>">Add JavaScript</a></li>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'main')); ?>"><?php echo h(__('Main Form')); ?></a></li>
+				<?php if($formTabs || $childs){ ?><li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'tab_configuration')); ?>"><?php echo h(__('Tab Configuration')); ?></a></li><?php } ?>
+				<?php if($childs){ ?><li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'child_tables')); ?>"><?php echo h(__('Child Forms')); ?></a></li><?php } ?>
+				<?php if($childDocumentForms){ ?><li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'child_document_forms')); ?>"><?php echo h(__('Child Document Forms')); ?></a></li><?php } ?>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'rebuild_module')); ?>"><?php echo h(__('Rebuild Module')); ?></a></li>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'data_entry')); ?>"><?php echo h(__('Data Entry')); ?></a></li>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'permissions')); ?>"><?php echo h(__('Table Permissions')); ?></a></li>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'charts_panels')); ?>"><?php echo h(__('Charts and Panels')); ?></a></li>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'email_triggers')); ?>"><?php echo h(__('Email Triggers')); ?></a></li>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'create_tasks')); ?>"><?php echo h(__('Create Tasks')); ?></a></li>
+				<li><a href="<?php echo Router::url(array('action' => 'view_tab', $customTable['CustomTable']['id'], 'javascript')); ?>"><?php echo h(__('Add JavaScript')); ?></a></li>
 			</ul>
 		</div>
 	</div>
@@ -232,7 +232,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 				var target = $(this);
 				if(target.data('nested-loaded')) return;
 				target.data('nested-loaded', true).load(target.attr('data-load-url'), function(response, status){
-					if(status === 'error') target.html('<div class="alert alert-danger">Unable to load this panel. Please refresh the page and try again.</div>');
+					if(status === 'error') target.html(<?php echo json_encode(__('<div class="alert alert-danger">Unable to load this panel. Please refresh the page and try again.</div>'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 					else initialiseChosen(target);
 				});
 			});
@@ -240,7 +240,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 		$('#custom-table-configuration-tabs').tabs({
 			beforeLoad: function(event, ui){
 				ui.jqXHR.fail(function(){
-					ui.panel.html('<div class="alert alert-danger">Unable to load this configuration panel. Please refresh the page and try again.</div>');
+					ui.panel.html(<?php echo json_encode(__('<div class="alert alert-danger">Unable to load this configuration panel. Please refresh the page and try again.</div>'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 				});
 			},
 			load: function(event, ui){
@@ -253,7 +253,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 <?php return; ?>
 <div class="row">
 	<div class="col-md-12">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Custom Tables','modelClass'=>'CustomTable','options'=>array(),'pluralVar'=>'customTables'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Custom Tables'),'modelClass'=>'CustomTable','options'=>array(),'pluralVar'=>'customTables'))); ?>
 		
 
 		<div class="row">
@@ -309,7 +309,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 					echo $this->element('onlyoffice',array(
 						'url'=>$url,
 						'placeholderid'=>$placeholderid,
-						'panel_title'=>'Document Viewer',
+						'panel_title'=>__('Document Viewer'),
 						'mode'=>$mode,
 						'path'=>$file_path,
 						'file'=>$file,
@@ -356,7 +356,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 					echo $this->element('onlyoffice',array(
 						'url'=>$url,
 						'placeholderid'=>$placeholderid,
-						'panel_title'=>'Document Viewer',
+						'panel_title'=>__('Document Viewer'),
 						'mode'=>$mode,
 						'path'=>$file_path,
 						'file'=>$file,
@@ -377,26 +377,26 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 		<div class="row">
 			<div class="col-md-6 no-margin-bottom">
 				<div class="box box-default">
-					<div class="box-header"><h3 class="box-title" style="width:100%">Table Details <span class="pull-right"><i class="fa fa-database"></i></span></h3></div>
+					<div class="box-header"><h3 class="box-title" style="width:100%"><?php echo h(__('Table Details')); ?> <span class="pull-right"><i class="fa fa-database"></i></span></h3></div>
 					<div class="box-body" id="table-body-div">
 
 						<table class="table">
-							<tr><th width="120">Name</th><td><?php echo $customTable['CustomTable']['name']?></td></tr>
-							<tr><th>Table Name</th><td><?php echo $customTable['CustomTable']['table_name']?></td></tr>
-							<tr><th>Version</th><td><?php echo $customTable['CustomTable']['table_version']?></td></tr>
-							<tr><th>Description</th><td><?php echo $customTable['CustomTable']['description']?></td></tr>
-							<tr><th>Status</th><td><?php echo $customTable['CustomTable']['table_locked']? 'Unlocked':'Locked';?></td></tr>
-							<tr><th>Schedule</th><td><?php echo $schedules[$customTable['QcDocument']['schedule_id']];?></td></tr>							
-							<tr><th>Class</th><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']);?> (_tbl/ _div)</td></tr>								
+							<tr><th width="120"><?php echo h(__('Name')); ?></th><td><?php echo $customTable['CustomTable']['name']?></td></tr>
+							<tr><th><?php echo h(__('Table Name')); ?></th><td><?php echo $customTable['CustomTable']['table_name']?></td></tr>
+							<tr><th><?php echo h(__('Version')); ?></th><td><?php echo $customTable['CustomTable']['table_version']?></td></tr>
+							<tr><th><?php echo h(__('Description')); ?></th><td><?php echo $customTable['CustomTable']['description']?></td></tr>
+							<tr><th><?php echo h(__('Status')); ?></th><td><?php echo $customTable['CustomTable']['table_locked']? 'Unlocked':'Locked';?></td></tr>
+							<tr><th><?php echo h(__('Schedule')); ?></th><td><?php echo $schedules[$customTable['QcDocument']['schedule_id']];?></td></tr>							
+							<tr><th><?php echo h(__('Class')); ?></th><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']);?> (_tbl/ _div)</td></tr>								
 						</table>
 
 						<div class="table-body-div">
-							<h4>Table Fields</h4>
+							<h4><?php echo h(__('Table Fields')); ?></h4>
 							<table class="table table-bordered">
 								<tr>
-									<th>Field Name</th>
-									<th>Field Id</th>
-									<th>Linked To (Model)</th>
+									<th><?php echo h(__('Field Name')); ?></th>
+									<th><?php echo h(__('Field Id')); ?></th>
+									<th><?php echo h(__('Linked To (Model)')); ?></th>
 								</tr>									
 								<?php 
 								$fields = json_decode($customTable['CustomTable']['fields'],true);
@@ -411,7 +411,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 									}else{
 										echo "<tr>";
 										echo "<td>".base64_decode($field['field_label']).".".$field['linked_to_field_name']."</td>";
-										echo "<td>belongsTos".Inflector::classify(base64_decode($field['field_label']).Inflector::classify($field['linked_to_field_name']))."</td>";
+										echo '<td>' . h(__('belongsTos')).Inflector::classify(base64_decode($field['field_label']).Inflector::classify($field['linked_to_field_name']))."</td>";
 										if($field['linked_to'] != -1)echo "<td><strong>".Inflector::classify($field['linked_to_field_name'])."</strong></td>";
 										else echo "<td>-</td>";
 										echo "</tr>";
@@ -419,18 +419,18 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 								}
 
 								?>
-								<tr><th colspan="2">Default Fields</th></tr>
-								<tr><td>qc_document_id</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('qc_document_id');?></td><td><strong>Document</strong></td></tr>
-								<tr><td>process_id</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('process_id');?></td><td><strong>Process</strong></td></tr>
-								<tr><td>custom_table_id</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('custom_table_id');?></td><td><strong>Table</strong></td></tr>
-								<tr><td>file_id</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('file_id');?></td><td><strong>Files</strong></td></tr>
-								<tr><td>prepared_by</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('prepared_by');?></td><td><strong>Employee</strong></td></tr>
-								<tr><td>approved_by</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('approved_by');?></td><td><strong>Employee</strong></td></tr>
-								<tr><td>created_by</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('created_by');?></td><td><strong>User</strong></td></tr>
-								<tr><td>modified_by</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('modified_by');?></td><td><strong>User</strong></td></tr>
-								<tr><td>created</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('created');?></td><td></td></tr>
-								<tr><td>modified</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('modified');?></td><td></td></tr>
-								<tr><td>publish</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('publish');?></td><td></td></tr>
+								<tr><th colspan="2"><?php echo h(__('Default Fields')); ?></th></tr>
+								<tr><td>qc_document_id</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('qc_document_id');?></td><td><strong><?php echo h(__('Document')); ?></strong></td></tr>
+								<tr><td>process_id</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('process_id');?></td><td><strong><?php echo h(__('Process')); ?></strong></td></tr>
+								<tr><td>custom_table_id</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('custom_table_id');?></td><td><strong><?php echo h(__('Table')); ?></strong></td></tr>
+								<tr><td>file_id</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('file_id');?></td><td><strong><?php echo h(__('Files')); ?></strong></td></tr>
+								<tr><td>prepared_by</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('prepared_by');?></td><td><strong><?php echo h(__('Employee')); ?></strong></td></tr>
+								<tr><td>approved_by</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('approved_by');?></td><td><strong><?php echo h(__('Employee')); ?></strong></td></tr>
+								<tr><td>created_by</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('created_by');?></td><td><strong><?php echo h(__('User')); ?></strong></td></tr>
+								<tr><td>modified_by</td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('modified_by');?></td><td><strong><?php echo h(__('User')); ?></strong></td></tr>
+								<tr><td><?php echo h(__('created')); ?></td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('created');?></td><td></td></tr>
+								<tr><td><?php echo h(__('modified')); ?></td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('modified');?></td><td></td></tr>
+								<tr><td><?php echo h(__('publish')); ?></td><td><?php echo Inflector::classify($customTable['CustomTable']['table_name']).Inflector::classify('publish');?></td><td></td></tr>
 							</table>
 							<br /><br />
 						</div>
@@ -438,7 +438,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 							<?php 
 							if($customTable['CustomTable']['publish'] == 1){
 
-								echo $this->Html->link('<i class="fa fa fa-check-square-o text-success fa-lg "></i>',array('action'=>'hold',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> 'Ubnpublish this table'));
+								echo $this->Html->link('<i class="fa fa fa-check-square-o text-success fa-lg "></i>',array('action'=>'hold',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> __('Ubnpublish this table')));
 							}
 							if($customTable['CustomTable']['publish'] == 0){
 
@@ -449,38 +449,38 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 										'data-toggle'=>'tooltip', 
 										'data-trigger'=>'hover', 
 										'data-placement'=>'bottom',  
-										'title'=> 'Publish this table')
+										'title'=> __('Publish this table'))
 								);
 							}
 
-							if($customTable['CustomTable']['table_locked'] == 0)echo $this->Html->link('<i class="fa fa-lock text-success fa-lg "></i>',array('action'=>'unlock',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> 'Unlock table'));
+							if($customTable['CustomTable']['table_locked'] == 0)echo $this->Html->link('<i class="fa fa-lock text-success fa-lg "></i>',array('action'=>'unlock',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> __('Unlock table')));
 
-							else if($customTable['CustomTable']['table_locked'] == 1) echo $this->Html->link('<i class="fa fa-unlock text-danger fa-lg "></i>',array('action'=>'lock',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> 'Lock table'));
+							else if($customTable['CustomTable']['table_locked'] == 1) echo $this->Html->link('<i class="fa fa-unlock text-danger fa-lg "></i>',array('action'=>'lock',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> __('Lock table')));
 
 
 							if($customTable['CustomTable']['table_locked'] == 1){
 
 								if($customTable['CustomTable']['custom_table_id'] == ''){
 
-									echo $this->Html->link('<i class="fa fa-refresh text-warning fa-lg "></i>',array('action'=>'recreate','timestamp'=>date('ymdhis'), $customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> 'Recreate this table'));
+									echo $this->Html->link('<i class="fa fa-refresh text-warning fa-lg "></i>',array('action'=>'recreate','timestamp'=>date('ymdhis'), $customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> __('Recreate this table')));
 								}else{
 
-									echo $this->Html->link('<i class="fa fa-refresh text-warning fa-lg "></i>',array('action'=>'recreate_child',$customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> 'Recreate this table'));
+									echo $this->Html->link('<i class="fa fa-refresh text-warning fa-lg "></i>',array('action'=>'recreate_child',$customTable['CustomTable']['id'],'timestamp'=>date('ymdhis')),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> __('Recreate this table')));
 								}	
 
 								if($customTable['CustomTable']['custom_table_id'] == ''){
 
-									echo $this->Html->link('<i class="fa fa-trash-o text-danger fa-lg "></i>',array('action'=>'delete',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> 'Delete this table'));
+									echo $this->Html->link('<i class="fa fa-trash-o text-danger fa-lg "></i>',array('action'=>'delete',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> __('Delete this table')));
 								}else{
 
-									echo $this->Html->link('<i class="fa fa-trash-o text-danger fa-lg "></i>',array('action'=>'delete_child',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> 'Delete this table'));
+									echo $this->Html->link('<i class="fa fa-trash-o text-danger fa-lg "></i>',array('action'=>'delete_child',$customTable['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> __('Delete this table')));
 								}
 							}
 
 							if($customTable['CustomTable']['custom_table_id'] == ''){
-								echo $this->Html->link('<i class="fa fa-list-ol fa-lg "></i>',array('action'=>'add_child','custom_table_id'=> $customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id'],'process_id'=>$customTable['CustomTable']['process_id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> 'Link new table to this table'));
+								echo $this->Html->link('<i class="fa fa-list-ol fa-lg "></i>',array('action'=>'add_child','custom_table_id'=> $customTable['CustomTable']['id'],'qc_document_id'=>$customTable['CustomTable']['qc_document_id'],'process_id'=>$customTable['CustomTable']['process_id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom',  'title'=> __('Link new table to this table')));
 								
-								echo $this->Html->link('<i class="fa fa-chain fa-lg"></i>',array('controller'=>'approval_processes','action'=>'add','controller_name'=>Inflector::classify($customTable['CustomTable']['table_name']), 'timestamp'=>date('ymdhis'),'custom_table_id'=>$customTable['CustomTable']['id']),array('escape'=>false,'class'=>'tooltip1 btn btn-sm','data-toggle'=>'tooltip', 'data-trigger'=>'hover','data-placement'=>'bottom', 'title'=> 'Add Auto Approval Process'));    	
+								echo $this->Html->link('<i class="fa fa-chain fa-lg"></i>',array('controller'=>'approval_processes','action'=>'add','controller_name'=>Inflector::classify($customTable['CustomTable']['table_name']), 'timestamp'=>date('ymdhis'),'custom_table_id'=>$customTable['CustomTable']['id']),array('escape'=>false,'class'=>'tooltip1 btn btn-sm','data-toggle'=>'tooltip', 'data-trigger'=>'hover','data-placement'=>'bottom', 'title'=> __('Add Auto Approval Process')));    	
 							} 	
 							?>
 						</div>
@@ -491,10 +491,10 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 			<div class="col-md-6 no-margin-bottom">
 				<div class="box box-primary" id="tab-configuration-panel">
 					<div class="box-header with-border">
-						<h3 class="box-title" style="width:100%">Tab Configuration <span class="pull-right"><i class="fa fa-folder-o"></i></span></h3>
+						<h3 class="box-title" style="width:100%"><?php echo h(__('Tab Configuration')); ?> <span class="pull-right"><i class="fa fa-folder-o"></i></span></h3>
 					</div>
 					<div class="box-body">
-						<p class="tab-configuration-note">Define when each main-form tab or child document is available. Normal child forms are rendered independently and are not controlled here. Leave the visibility rule as <strong>Always visible</strong>, or leave its values unselected, to apply no field-value restriction.</p>
+						<p class="tab-configuration-note"><?php echo h(__('Define when each main-form tab or child document is available. Normal child forms are rendered independently and are not controlled here. Leave the visibility rule as')); ?> <strong><?php echo h(__('Always visible')); ?></strong><?php echo h(__(', or leave its values unselected, to apply no field-value restriction.')); ?></p>
 						<?php echo $this->Form->create('CustomTable', array('url' => array('action' => 'update_tab_settings', $customTable['CustomTable']['id']), 'id' => 'update-tab-settings', 'class' => 'form')); ?>
 						<?php echo $this->Form->hidden('tab_settings', array('id' => 'CustomTableTabSettings')); ?>
 						<?php if($tabConfigurationRows){ ?>
@@ -502,10 +502,10 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 								<table class="table table-bordered tab-configuration-table" id="tab-configuration-table">
 									<thead>
 										<tr>
-											<th>Tab</th>
-											<th>Position</th>
-											<th>Action visibility</th>
-											<th>Visibility rule</th>
+											<th><?php echo h(__('Tab')); ?></th>
+											<th><?php echo h(__('Position')); ?></th>
+											<th><?php echo h(__('Action visibility')); ?></th>
+											<th><?php echo h(__('Visibility rule')); ?></th>
 										</tr>
 										</thead>
 									<tbody>
@@ -529,23 +529,23 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 												<td><small class="tab-position"><?php echo h($formTab['position']); ?></small></td>
 												<td>
 													<select class="form-control input-sm tab-action-visibility">
-														<option value="always"<?php echo $actionVisibility === 'always' ? ' selected' : ''; ?>>Always visible</option>
-														<option value="hide_add"<?php echo $actionVisibility === 'hide_add' ? ' selected' : ''; ?>>Hide on Add</option>
-														<option value="hide_edit"<?php echo $actionVisibility === 'hide_edit' ? ' selected' : ''; ?>>Hide on Edit</option>
-														<option value="hide_both"<?php echo $actionVisibility === 'hide_both' ? ' selected' : ''; ?>>Hide on Add &amp; Edit</option>
+														<option value="always"<?php echo $actionVisibility === 'always' ? ' selected' : ''; ?>><?php echo h(__('Always visible')); ?></option>
+														<option value="hide_add"<?php echo $actionVisibility === 'hide_add' ? ' selected' : ''; ?>><?php echo h(__('Hide on Add')); ?></option>
+														<option value="hide_edit"<?php echo $actionVisibility === 'hide_edit' ? ' selected' : ''; ?>><?php echo h(__('Hide on Edit')); ?></option>
+														<option value="hide_both"<?php echo $actionVisibility === 'hide_both' ? ' selected' : ''; ?>><?php echo h(__('Hide on Add')); ?> &amp; <?php echo h(__('Edit')); ?></option>
 													</select>
 												</td>
 												<td>
 													<div class="form-group">
 														<select class="form-control input-sm tab-visibility-mode">
-															<option value="always"<?php echo $visibilityMode === 'always' ? ' selected' : ''; ?>>Always visible</option>
-															<option value="field"<?php echo $visibilityMode === 'field' ? ' selected' : ''; ?>>Only for a field value</option>
+															<option value="always"<?php echo $visibilityMode === 'always' ? ' selected' : ''; ?>><?php echo h(__('Always visible')); ?></option>
+															<option value="field"<?php echo $visibilityMode === 'field' ? ' selected' : ''; ?>><?php echo h(__('Only for a field value')); ?></option>
 														</select>
 													</div>
 													<div class="tab-configuration-rule row" style="margin-top:8px;<?php echo $visibilityMode === 'field' ? 'display:block' : ''; ?>">
 														<div class="col-xs-6">
 															<select class="form-control input-sm tab-visibility-field">
-																<option value="">Choose field</option>
+																<option value=""><?php echo h(__('Choose field')); ?></option>
 																<?php foreach($visibilityFields as $visibilityField){ ?>
 																	<option value="<?php echo h($visibilityField['name']); ?>" data-options="<?php echo h(json_encode($visibilityField['options'])); ?>"<?php echo $visibilityFieldName === $visibilityField['name'] ? ' selected' : ''; ?>><?php echo h($visibilityField['label']); ?></option>
 																<?php } ?>
@@ -566,14 +566,14 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 								</table>
 							</div>
 							<?php if(!$visibilityFields){ ?>
-								<p class="help-block">Add a radio or single-select field, such as Audit Status, before configuring a field-value rule.</p>
+								<p class="help-block"><?php echo h(__('Add a radio or single-select field, such as Audit Status, before configuring a field-value rule.')); ?></p>
 							<?php } ?>
 						<?php }else{ ?>
-							<div class="alert alert-info" style="margin-bottom:0">No tabs or child forms have been defined. Assign a Tab Name to fields or link a child form first.</div>
+							<div class="alert alert-info" style="margin-bottom:0"><?php echo h(__('No tabs or child forms have been defined. Assign a Tab Name to fields or link a child form first.')); ?></div>
 						<?php } ?>
 					</div>
 					<div class="box-footer text-right">
-						<?php echo $this->Form->submit('Save Tab Configuration', array('class' => 'btn btn-sm btn-success', 'id' => 'save-tab-settings')); ?>
+						<?php echo $this->Form->submit(__('Save Tab Configuration'), array('class' => 'btn btn-sm btn-success', 'id' => 'save-tab-settings')); ?>
 						<?php echo $this->Form->end(); ?>
 					</div>
 				</div>
@@ -603,10 +603,10 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 				</script>
 				<div class="row">
 					<div class="col-md-12">
-						<h4>Available JS APIs (Local APIs)</h4>
-						<p><strong>API Function: return_value_for_dropdown:</strong><br/>Sample Js Code<br />
+						<h4><?php echo h(__('Available JS APIs (Local APIs)')); ?></h4>
+						<p><strong><?php echo h(__('API Function: return_value_for_dropdown:')); ?></strong><br/><?php echo h(__('Sample Js Code')); ?><br />
 
-							<code-input name="return_value_for_dropdown" required id="return_value_for_dropdown" style="resize: both; overflow: hidden; " lang="JavaScript" placeholder="Write some JavaScript!" template="add">$().ready(function(){
+							<code-input name="return_value_for_dropdown" required id="return_value_for_dropdown" style="resize: both; overflow: hidden; " lang="JavaScript" placeholder="<?php echo h(__('Write some JavaScript!')); ?>" template="add">$().ready(function(){
 	$("#fieldIdforWhichonChangeFunctionToBeCalled").on("change",function(){
 		$.ajax({
 			url: "http(s)://your_local_address/current_table_name/return_value_for_dropdown/ModelForWhichValueIsToBeFetched/ModelFieldName/"+this.value,
@@ -617,8 +617,8 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 	});
 });</code-input>
 						</p>
-						<p><strong>API Function: return_options_for_dropdown:</strong><br/>Sample Js Code<br />
-							<code-input name="return_options_for_dropdown" required id="return_options_for_dropdown" style="resize: both; overflow: hidden; " lang="JavaScript" placeholder="Write some JavaScript!" template="add">$().ready(function(){
+						<p><strong><?php echo h(__('API Function: return_options_for_dropdown:')); ?></strong><br/><?php echo h(__('Sample Js Code')); ?><br />
+							<code-input name="return_options_for_dropdown" required id="return_options_for_dropdown" style="resize: both; overflow: hidden; " lang="JavaScript" placeholder="<?php echo h(__('Write some JavaScript!')); ?>" template="add">$().ready(function(){
 	$("#fieldIdforWhichonChangeFunctionToBeCalled").on("change",function(){
 		$.ajax({
 			url: "http(s)://your_local_address/current_table_name/return_options_for_dropdown/ModelForWhichValueIsToBeFetched/ModelFieldName/"+this.value,
@@ -629,8 +629,8 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 	});
 });</code-input>
 						</p>
-						<p><strong>API Function: fetch_record:</strong><br/>Sample Js Code<br />
-							<code-input name="fetch_record" required id="fetch_record" style="resize: both; overflow: hidden; " lang="JavaScript" placeholder="Write some JavaScript!" template="add">$().ready(function(){
+						<p><strong><?php echo h(__('API Function: fetch_record:')); ?></strong><br/><?php echo h(__('Sample Js Code')); ?><br />
+							<code-input name="fetch_record" required id="fetch_record" style="resize: both; overflow: hidden; " lang="JavaScript" placeholder="<?php echo h(__('Write some JavaScript!')); ?>" template="add">$().ready(function(){
 	$("#fieldIdforWhichonChangeFunctionToBeCalled").on("change",function(){
 		$.ajax({
 			url: "http(s)://your_local_address/current_table_name/fetch_record/TableNameForDataToBeFetched/FieldFromTheTable/OtherFieldNameToBeFetched/last/"+this.value,
@@ -647,7 +647,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 	</div>		
 	<?php if($childs){ ?>
 		<div class="row">	
-			<div class="col-md-12"><h4>Child Tables <small><i class="fa fa-chain"></i></small></h4></div>
+			<div class="col-md-12"><h4><?php echo h(__('Child Tables')); ?> <small><i class="fa fa-chain"></i></small></h4></div>
 			<?php foreach($childs as $child){ ?>
 				<div class="col-md-6">
 					<div class="box box-default">
@@ -655,25 +655,25 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 						<div class="box-body">
 							<table class="table table-responsive">
 								<tr>
-									<th width="120">Table Name</th>
+									<th width="120"><?php echo h(__('Table Name')); ?></th>
 									<td><?php echo $child['CustomTable']['table_name']?></td>
 								</tr>
 								<tr>
-									<th>Version</th>
+									<th><?php echo h(__('Version')); ?></th>
 									<td><?php echo $child['CustomTable']['table_version']?></td>
 								</tr>
 								<tr>
-									<th>Description</th>
+									<th><?php echo h(__('Description')); ?></th>
 									<td><?php echo $child['CustomTable']['description']?></td>
 								</tr>
-								<tr><th>Fields</th><td>
+								<tr><th><?php echo h(__('Fields')); ?></th><td>
 									<ul><?php 						
 									$fields = json_decode($child['CustomTable']['fields'],true);						
 									foreach($fields as $field){
 										echo "<li>" . $field['field_name'] . "</li>";							
 									}
 								?></td></tr>
-								<tr><th>Linked To</th><td><ul><?php 						
+								<tr><th><?php echo h(__('Linked To')); ?></th><td><ul><?php 						
 								$fields = json_decode($child['CustomTable']['fields'],true);
 								foreach($fields as $field){
 									if($field['linked_to'] != -1){
@@ -685,35 +685,35 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 								<td colspan="2" class="text-right">
 									<?php 
 									if($child['CustomTable']['publish'] == 1){
-										echo $this->Html->link('<i class="fa fa-minus-square-o fa-lg"></i>',array('action'=>'hold',$child['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Ubnpublish this table'));
+										echo $this->Html->link('<i class="fa fa-minus-square-o fa-lg"></i>',array('action'=>'hold',$child['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Ubnpublish this table')));
 									}
 									if($child['CustomTable']['publish'] == 0){
-										echo $this->Html->link('<i class="fa fa-check-square-o fa-lg text-success"></i>',array('action'=>'publish',$child['CustomTable']['id']),array('class'=>'tooltip1 btn btn-sm ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Publish this table'));
+										echo $this->Html->link('<i class="fa fa-check-square-o fa-lg text-success"></i>',array('action'=>'publish',$child['CustomTable']['id']),array('class'=>'tooltip1 btn btn-sm ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Publish this table')));
 									}?>
 
 									<?php  
-									if($child['CustomTable']['table_locked'] == 0)echo $this->Html->link('<i class="fa fa-lock fa-lg text-danger"></i>',array('action'=>'unlock',$child['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Unlock table'));
-									else if($child['CustomTable']['table_locked'] == 1) echo $this->Html->link('<i class="fa fa-unlock fa-lg text-danger"></i>',array('action'=>'lock',$child['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Lock table'));
+									if($child['CustomTable']['table_locked'] == 0)echo $this->Html->link('<i class="fa fa-lock fa-lg text-danger"></i>',array('action'=>'unlock',$child['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Unlock table')));
+									else if($child['CustomTable']['table_locked'] == 1) echo $this->Html->link('<i class="fa fa-unlock fa-lg text-danger"></i>',array('action'=>'lock',$child['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Lock table')));
 									?>
 
 									<?php 
 									// if($child['CustomTable']['publish'] == 0){
 									if($child['CustomTable']['custom_table_id'] == ''){
-										echo $this->Html->link('<i class="fa fa-refresh fa-lg text-warning"></i>',array('action'=>'recreate',$child['CustomTable']['id'],'qc_document_id'=>$child['CustomTable']['qc_document_id'],'process_id'=>$child['CustomTable']['process_id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Recreate this table'));	
+										echo $this->Html->link('<i class="fa fa-refresh fa-lg text-warning"></i>',array('action'=>'recreate',$child['CustomTable']['id'],'qc_document_id'=>$child['CustomTable']['qc_document_id'],'process_id'=>$child['CustomTable']['process_id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Recreate this table')));	
 									}else{
-										echo $this->Html->link('<i class="fa fa-cogs fa-lg text-warning"></i>',array('action'=>'view',$child['CustomTable']['id'],'qc_document_id'=>$child['CustomTable']['qc_document_id'],'process_id'=>$child['CustomTable']['process_id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Recreate this table'));
+										echo $this->Html->link('<i class="fa fa-cogs fa-lg text-warning"></i>',array('action'=>'view',$child['CustomTable']['id'],'qc_document_id'=>$child['CustomTable']['qc_document_id'],'process_id'=>$child['CustomTable']['process_id'],'timestamp'=>date('ymdhis')),array('class'=>'tooltip1 btn btn-sm ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Recreate this table')));
 										// }									
 									}?>
 
 									<?php  if($child['CustomTable']['table_locked'] == 1){
 										if($child['CustomTable']['custom_table_id'] == ''){
-											echo $this->Html->link('<i class="fa fa-trash-o fa-lg text-danger"></i>',array('action'=>'delete',$child['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Delete this table'));
+											echo $this->Html->link('<i class="fa fa-trash-o fa-lg text-danger"></i>',array('action'=>'delete',$child['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Delete this table')));
 										}else{
-											echo $this->Html->link('<i class="fa fa-trash-o fa-lg text-danger"></i>',array('action'=>'delete_child',$child['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Delete this table'));
+											echo $this->Html->link('<i class="fa fa-trash-o fa-lg text-danger"></i>',array('action'=>'delete_child',$child['CustomTable']['id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Delete this table')));
 										}
 									}?>
 									<?php									
-									if($child['CustomTable']['custom_table_id'] == '') echo $this->Html->link('<i class="fa fa-link text-info"></i>',array('action'=>'add_child','custom_table_id'=> $child['CustomTable']['id'],'qc_document_id'=>$child['CustomTable']['qc_document_id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Link new table to this table'));
+									if($child['CustomTable']['custom_table_id'] == '') echo $this->Html->link('<i class="fa fa-link text-info"></i>',array('action'=>'add_child','custom_table_id'=> $child['CustomTable']['id'],'qc_document_id'=>$child['CustomTable']['qc_document_id']),array('class'=>'btn btn-sm tooltip1 ', 'escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Link new table to this table')));
 									?>	
 								</td>
 							</tr>
@@ -798,7 +798,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 				<div class="box box-default">
 					<div class="box-header with-border">
 						<i class="fa fa-database"></i>
-						<h3 class="box-title">Data Entry</h3>
+						<h3 class="box-title"><?php echo h(__('Data Entry')); ?></h3>
 					</div>
 					<div class="box-body">
 						<div class="row">
@@ -819,7 +819,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 				</div>
 			</div>
 		</div>
-		<?php echo $this->Form->submit('Update Dataentry',array('class'=>'btn btn-sm btn-success','id'=>'updatedataentrybutton'));
+		<?php echo $this->Form->submit(__('Update Dataentry'),array('class'=>'btn btn-sm btn-success','id'=>'updatedataentrybutton'));
 		echo $this->Form->end();?>
 
 <script>
@@ -872,17 +872,17 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 				<div class="col-md-12">
 					<div class="box box-default">
 						<div class="box-header">
-							<h4 class="box-title">Table Permissions</h4>
+							<h4 class="box-title"><?php echo h(__('Table Permissions')); ?></h4>
 						</div>
 						<div class="box-body">
 							<div class="row">
 								<div class="col-md-12">
 									<table class="table table-bordered">
 										<tr>
-											<th>Creators</th>
-											<th>Viewers</th>
-											<th>Editors</th>
-											<th>Approvers</th>
+											<th><?php echo h(__('Creators')); ?></th>
+											<th><?php echo h(__('Viewers')); ?></th>
+											<th><?php echo h(__('Editors')); ?></th>
+											<th><?php echo h(__('Approvers')); ?></th>
 										</tr>
 										<tr>
 											<tr>
@@ -917,10 +917,10 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 										</tr>
 									</tr>
 									<tr>
-										<td>Create, View, Edit, Delete</td>
-										<td>View Only</td>
-										<td>View, Edit</td>
-										<td>View, Edit, Approve</td>
+										<td><?php echo h(__('Create, View, Edit, Delete')); ?></td>
+										<td><?php echo h(__('View Only')); ?></td>
+										<td><?php echo h(__('View, Edit')); ?></td>
+										<td><?php echo h(__('View, Edit, Approve')); ?></td>
 									</tr>
 								</table>
 							</div>							
@@ -929,7 +929,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 				</div>
 			</div>
 		</div>
-		<?php echo $this->Form->submit('Update Access',array('class'=>'btn btn-sm btn-success','id'=>'updateaccessbutton'));
+		<?php echo $this->Form->submit(__('Update Access'),array('class'=>'btn btn-sm btn-success','id'=>'updateaccessbutton'));
 		echo $this->Form->end();?>
 		<?php } ?>
 </div>

@@ -18,7 +18,7 @@
 </script><?php echo $this->Session->flash();?>	
 <div class="qcDocumentCategories ">
 	<div id="main">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Qc Document Categories','modelClass'=>'QcDocumentCategory','options'=>array("sr_no"=>"Sr No","name"=>"Name","short_name"=>"Short Name","record_status"=>"Record Status","approved_by"=>"Approved By","prepared_by"=>"Prepared By"),'pluralVar'=>'qcDocumentCategories'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Qc Document Categories'),'modelClass'=>'QcDocumentCategory','options'=>array("sr_no"=>__("Sr No"),"name"=>__("Name"),"short_name"=>__("Short Name"),"record_status"=>__("Record Status"),"approved_by"=>__("Approved By"),"prepared_by"=>__("Prepared By")),'pluralVar'=>'qcDocumentCategories'))); ?>
 		
 		
 		<script type="text/javascript">
@@ -103,7 +103,7 @@
 											</div>
 
 											<?php echo $this->element('export'); ?>
-											<?php echo $this->element('advanced-search',array('postData'=>array("sr_no"=>"Sr No","name"=>"Name","short_name"=>"Short Name","record_status"=>"Record Status","approved_by"=>"Approved By","prepared_by"=>"Prepared By"),'PublishedBranchList'=>array($PublishedBranchList))); ?>
+											<?php echo $this->element('advanced-search',array('postData'=>array("sr_no"=>__("Sr No"),"name"=>__("Name"),"short_name"=>__("Short Name"),"record_status"=>__("Record Status"),"approved_by"=>__("Approved By"),"prepared_by"=>__("Prepared By")),'PublishedBranchList'=>array($PublishedBranchList))); ?>
 											<?php echo $this->element('import',array('postData'=>array("sr_no"=>"Sr No","name"=>"Name","short_name"=>"Short Name","record_status"=>"Record Status","approved_by"=>"Approved By","prepared_by"=>"Prepared By"))); ?>
 
 

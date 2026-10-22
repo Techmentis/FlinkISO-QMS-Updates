@@ -2,7 +2,7 @@
 <?php echo $this->Session->flash();?>	
 
 	<div class="designations ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Designations','modelClass'=>'Designation','options'=>array(),'pluralVar'=>'designations'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Designations'),'modelClass'=>'Designation','options'=>array(),'pluralVar'=>'designations'))); ?>
 
 
 <div class="nav panel panel-default">
@@ -56,8 +56,8 @@
 &nbsp;</td></tr>
 <tr>
 	<td colspan="2">
-			<?php echo $this->Html->link('Delete This Record?', array('controller' => 'designations', 'action' => 'delete', $designation['Designation']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
-	<?php echo $this->Html->link('Edit This Record?', array('controller' => 'designations', 'action' => 'edit', $designation['Designation']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
+			<?php echo $this->Html->link(__('Delete This Record?'), array('controller' => 'designations', 'action' => 'delete', $designation['Designation']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
+	<?php echo $this->Html->link(__('Edit This Record?'), array('controller' => 'designations', 'action' => 'edit', $designation['Designation']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
 	</td>
 </tr>
 </table>

@@ -8,6 +8,7 @@
 <!DOCTYPE html>
 <html data-theme="azure">
 <head>
+<?php echo $this->element('translation_strings'); ?>
   <script type="text/javascript">
     (function(){
       try {
@@ -80,7 +81,7 @@ echo $this->fetch('script');
 		  <?php if ($this->Session->read('User')) echo $this->Element('breadcrump');?>	    
 		  <!-- Main content -->
 		  <?php if(($_SERVER['SERVER_NAME']) == 'localhost'){ ?>
-				<div class="row"><div class="col-md-12"><div class="alert text-danger"><small><strong>Note:</strong> ONLYOFFICE Doc Editors will not work on localhost. Either install ONLYOFFICE Doc Server on your premise and use IP address to access FlinkISO application Or use Static IP use ONLYOFFICE Hosted FlinkISO server.</small></div></div></div>
+				<div class="row"><div class="col-md-12"><div class="alert text-danger"><small><strong><?php echo h(__('Note:')); ?></strong> <?php echo h(__('ONLYOFFICE Doc Editors will not work on localhost. Either install ONLYOFFICE Doc Server on your premise and use IP address to access FlinkISO application Or use Static IP use ONLYOFFICE Hosted FlinkISO server.')); ?></small></div></div></div>
 			<?php } ?>
 		  <section class="content">
 			  <?php echo $this->Session->flash(array('class'=>'alert-danger')); ?>			  
@@ -98,10 +99,10 @@ echo $this->fetch('script');
 	<!-- /.content-wrapper -->
 	<footer class="main-footer">  
 		<div class="pull-right hidden-xs">
-		  <b>Version</b> 2.4.42
+		  <b><?php echo h(__('Version')); ?></b> 2.4.42
 	  </div>
-	  <strong>Copyright &copy; 2013 <a href="http://www.techmentis.biz">Techmentis Global Services Pvt Ltd</a>.</strong> All rights
-	  reserved.
+	  <strong><?php echo h(__('Copyright')); ?> &copy; 2013 <a href="http://www.techmentis.biz"><?php echo h(__('Techmentis Global Services Pvt Ltd')); ?></a>.</strong> <?php echo h(__('All rights
+	  reserved.')); ?>
   </footer>
   </div>
 <div id="addsignature-employee"></div>
@@ -209,7 +210,7 @@ if($customTable){ ?>
 				url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/checkunique/"+ val +"/" + name,
 					success: function(data, result) {
 						if(data == true){
-							$("#"+id).prev('label').append('<small style="color:#ed7c7c"> : Value Exists. Add unique value.</small>');
+							$("#"+id).prev('label').append(<?php echo json_encode(__('<small style="color:#ed7c7c"> : Value Exists. Add unique value.</small>'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 							$("#"+id).val('');
 							$("#"+id).addClass('error').removeClass(' valid success');
 						}
@@ -353,7 +354,7 @@ if($this->action == 'index'){?>
 		if($.inArray(ext,earr) > -1){
 			
 		}else{
-			alert('This file type is not allowed : ' + ext);
+			alert(<?php echo json_encode(__('This file type is not allowed : '), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?> + ext);
 			$("#"+eid).val('');
 			$("#"+eid).prev("label").html('');
 		}

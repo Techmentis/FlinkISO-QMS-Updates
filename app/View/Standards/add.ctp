@@ -12,16 +12,16 @@
 	?>
 
 	<?php echo $this->Session->flash();?>	
-	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Standards','modelClass'=>'Standard','options'=>array("sr_no"=>"Sr No","name"=>"Name","details"=>"Details"),'pluralVar'=>'standards'))); ?>
+	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Standards'),'modelClass'=>'Standard','options'=>array("sr_no"=>__("Sr No"),"name"=>__("Name"),"details"=>__("Details")),'pluralVar'=>'standards'))); ?>
 	<div class="nav panel panel-default">
 		<div class="standards form col-md-12">
 			<?php echo $this->Form->create('Standard',array('role'=>'form','class'=>'form')); ?>
 			<div class="row">
 				<?php
 				echo "<div class='col-md-12'>".$this->Form->input('name',array('class'=>'form-control')) . '</div>'; 
-				echo "<div class='col-md-12'>".$this->Form->input('clauses',array('type'=>'textarea', 'placeholder'=>$placeholder, 'class'=>'form-control','label'=>'Enter clauses in CSV format')) . '</div>';
-				echo "<div class='col-md-12'>CSV : Comma Seperated Values. <br />Clause No.<strong>,</strong>Sub-Clause<strong>,</strong>Title/Name of the clause<strong>,</strong> Details(textual Description) < enter ><br /> Please avoid additional comma's inbetween at this stage. You can always edit these from Standard/Clauses page later.</div>";
-				echo "<div class='col-md-12'>".$this->Form->input('details',array('class'=>'form-control','label'=>'Brief Description')) . '</div>';
+				echo "<div class='col-md-12'>".$this->Form->input('clauses',array('type'=>'textarea', 'placeholder'=>$placeholder, 'class'=>'form-control','label'=>__('Enter clauses in CSV format'))) . '</div>';
+				echo '<div class=\'col-md-12\'>' . h(__('CSV : Comma Seperated Values.')) . ' <br />' . h(__('Clause No.')) . '<strong>,</strong>' . h(__('Sub-Clause')) . '<strong>,</strong>' . h(__('Title/Name of the clause')) . '<strong>,</strong> ' . h(__('Details(textual Description)')) . ' < ' . h(__('enter >')) . '<br /> ' . h(__('Please avoid additional comma\'s inbetween at this stage. You can always edit these from Standard/Clauses page later.')) . '</div>';
+				echo "<div class='col-md-12'>".$this->Form->input('details',array('class'=>'form-control','label'=>__('Brief Description'))) . '</div>';
 				?>
 				<?php
 				echo $this->Form->input('id');

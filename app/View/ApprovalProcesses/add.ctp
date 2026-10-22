@@ -3,7 +3,7 @@
 	<?php echo $this->Session->flash();?>	
 
 	<div class="approvalProcesses ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Approval Processes','modelClass'=>'ApprovalProcess','options'=>array(),'pluralVar'=>'approvalProcesses'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Approval Processes'),'modelClass'=>'ApprovalProcess','options'=>array(),'pluralVar'=>'approvalProcesses'))); ?>
 
 		<div class="nav panel panel-default">
 			<div class="approvalProcesses form col-md-12">
@@ -17,30 +17,30 @@
 				</div>
 				<div class="row">
 					<div class="col-md-12">
-						<h4>Add Steps</h4>
+						<h4><?php echo h(__('Add Steps')); ?></h4>
 						<div class="table-responsive">
 							<table class="table table-bordered table-condenced" id="apptble" style="min-width: 1800px;">
 								<thead>
 									<tr>
 										<th rowspan="2" width="80">#</th>
-										<th rowspan="2">Title</th>
-										<th rowspan="2">Comment</th>
-										<th colspan="7">Send To</th>
-										<th colspan="2">Settings</th>
-										<th colspan="2">Ignore</th>							
+										<th rowspan="2"><?php echo h(__('Title')); ?></th>
+										<th rowspan="2"><?php echo h(__('Comment')); ?></th>
+										<th colspan="7"><?php echo h(__('Send To')); ?></th>
+										<th colspan="2"><?php echo h(__('Settings')); ?></th>
+										<th colspan="2"><?php echo h(__('Ignore')); ?></th>							
 									</tr>
 									<tr>
-										<th>Reviwer</th>						
-										<th>Approver</th>
-										<th>HOD</th>
-										<th>Admin</th>
-										<th>Designation</th>										
-										<th>Users</th>
-										<th>Publisher</th>
-										<th width="220">Mode</th>
-										<th width="220">Type</th>
-										<th width="180">Department </th>
-										<th width="180">Branch </th>
+										<th><?php echo h(__('Reviwer')); ?></th>						
+										<th><?php echo h(__('Approver')); ?></th>
+										<th><?php echo h(__('HOD')); ?></th>
+										<th><?php echo h(__('Admin')); ?></th>
+										<th><?php echo h(__('Designation')); ?></th>										
+										<th><?php echo h(__('Users')); ?></th>
+										<th><?php echo h(__('Publisher')); ?></th>
+										<th width="220"><?php echo h(__('Mode')); ?></th>
+										<th width="220"><?php echo h(__('Type')); ?></th>
+										<th width="180"><?php echo h(__('Department')); ?> </th>
+										<th width="180"><?php echo h(__('Branch')); ?> </th>
 										<th></th>
 									</tr>
 								</thead>
@@ -69,16 +69,16 @@
 										<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.send_to_publishers',array('checkbox'=>'checkbox','label'=>false,
 										'onchange'=>'udpatecheck('.$i.',"publisher",this);')) ?></td>			
 
-										<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.approval_mode',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>'View Only',1=>'Edit'),'default'=>1)) ?></td>
-										<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.approval_type',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>'All',1=>'Any'),'default'=>1));?></td>
+										<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.approval_mode',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>__('View Only'),1=>__('Edit')),'default'=>1)) ?></td>
+										<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.approval_type',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>__('All'),1=>__('Any')),'default'=>1));?></td>
 
-										<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.ignore_department',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>'Yes',1=>'No'),'default'=>1));?></td>
-										<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.ignore_branch',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>'Yes',1=>'No'),'default'=>1));?></td>
+										<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.ignore_department',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>__('Yes'),1=>__('No')),'default'=>1));?></td>
+										<td><?php echo $this->Form->input('ApprovalStep.steps.'.$i.'.ignore_branch',array('class'=>'','type'=>'radio', 'legend'=>false, 'options'=>array(0=>__('Yes'),1=>__('No')),'default'=>1));?></td>
 									</tr>
 									
 								</tbody>
 								<footer>
-									<tr><td colspan="14" class="text-right"><?php echo $this->Html->link('Add','#',array('onClick'=>'addrows('.$i.')'))?></td></tr>
+									<tr><td colspan="14" class="text-right"><?php echo $this->Html->link(__('Add'),'#',array('onClick'=>'addrows('.$i.')'))?></td></tr>
 								</footer>
 							</table>
 						</div>
@@ -165,7 +165,7 @@
 		$().ready(function() {
 			jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 				return this.optional(element) || (parseFloat(value) > 0);
-			}, "Please select the value");
+			}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 			$('#ApprovalProcessAddForm').validate({        	
 				rules: {

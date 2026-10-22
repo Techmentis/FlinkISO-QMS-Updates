@@ -57,7 +57,7 @@
                 <div id="newdoctitle<?php echo $docid;?>"></div>        
                 <div class="box collapsed-box" id="ofdcontainer<?php echo $placeholderid;?>">
                   <div class="box-header with-border data-header" data-widget="collapse">
-                    <h3 class="box-title"><i class="fa <?php echo $icon;?>"></i>&nbsp;&nbsp;<?php echo $heading;?>&nbsp;&nbsp;<small>Your document is ready, click on + sign to load the document.</small></h3>
+                    <h3 class="box-title"><i class="fa <?php echo $icon;?>"></i>&nbsp;&nbsp;<?php echo $heading;?>&nbsp;&nbsp;<small><?php echo h(__('Your document is ready, click on + sign to load the document.')); ?></small></h3>
                     <div class="box-tools pull-right">
                       <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus" id="ofccontainerbtn<?php echo $placeholderid;?>"></i></button>
                   </div>            
@@ -431,7 +431,7 @@
                         var earr = ["doc","docx","xls","xlsx"];
 
                         if($.inArray(ext,earr)){
-                            alert('This file type is not allowed');
+                            alert(<?php echo json_encode(__('This file type is not allowed'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                             location.reload(true);
                         }else{
 
@@ -445,7 +445,7 @@
                         
                         if (!isNaN(str[0]) && !isNaN(str[str.length - 1])) {
                           this.value = "";
-                          alert('File with onlynumbers is not allowed.');
+                          alert(<?php echo json_encode(__('File with onlynumbers is not allowed.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                           location.reload(true);
                       } else {
 
@@ -457,7 +457,7 @@
             </script>
             <div class="box collapsed-box">          
               <div class="box-header with-border">
-                <h3 class="box-title text-danger">Document</h3>
+                <h3 class="box-title text-danger"><?php echo h(__('Document')); ?></h3>
 
                 <div class="box-tools pull-right">
                   <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
@@ -468,10 +468,10 @@
             <?php 
             if(($this->request->controller == 'qc_documents' || $this->request->controller == 'processes') && $this->action == 'edit'){ ?>
                 <div class="row">
-                    <div class="col-md-12"><p class="text-danger">System could not load the document. Uplaod Document from View page.</p></div>                
+                    <div class="col-md-12"><p class="text-danger"><?php echo h(__('System could not load the document. Uplaod Document from View page.')); ?></p></div>                
                 </div>
             <?php }else{ ?>
-                <p class="text-danger">System could not load the document.</p>
+                <p class="text-danger"><?php echo h(__('System could not load the document.')); ?></p>
             <?php } ?>
         </div>          
     </div>
@@ -481,14 +481,14 @@
         <div class="col-md-12">
             <div class="box box-warning collapsed-box" id="ofdcontainer<?php echo $placeholderid;?>">
               <div class="box-header with-border data-header" data-widget="collapse">
-                <h3 class="box-title"><i class="fa fa-clock-o"></i>&nbsp;&nbsp;Document&nbsp;&nbsp;<small> Last Updated : <?php echo date('Y-m-d H:i:s',strtotime($last_modified))?>. We are updating your document. Please wait...</small></h3>
+                <h3 class="box-title"><i class="fa fa-clock-o"></i>&nbsp;&nbsp;<?php echo h(__('Document')); ?>&nbsp;&nbsp;<small> Last Updated : <?php echo date('Y-m-d H:i:s',strtotime($last_modified))?>. We are updating your document. Please wait...</small></h3>
                 <div class="box-tools pull-right">                    
                     <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus" id="ofccontainerbtn<?php echo $placeholderid;?>"></i></button>
                     <i class="fa fa-refresh" id="ofcrefresh<?php echo $placeholderid;?>"></i>
                 </div>            
             </div>          
             <div class="box-body">
-                <p>This document is recently updated. Please allow 1-3 mins for changes to reflect.</p>
+                <p><?php echo h(__('This document is recently updated. Please allow 1-3 mins for changes to reflect.')); ?></p>
             </div>
         </div>
     </div>

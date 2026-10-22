@@ -464,7 +464,7 @@ public function _convert_to_html($url = null,$filetype = null,$outputtype = null
     
     $new_data = file_get_contents($downloadUri);
     if ($new_data === FALSE) {
-        echo "error";
+        echo __("error");
     } else {
         if($this->request->data['PdfTemplate']['html_cleanup'] == 0 && $outputtype == 'html'){
             if($record_id != 'cover'){
@@ -477,7 +477,7 @@ public function _convert_to_html($url = null,$filetype = null,$outputtype = null
             $folder = new Folder();
             if ($folder->create($savepath,0777)) {
             } else {
-                echo "Folder creation failed";
+                echo __("Folder creation failed");
                 exit;
             }
         }
@@ -622,7 +622,7 @@ public function save_template() {
     $this->autoRender = false;
     $local = $this->request->params['named'];
     if (($body_stream = file_get_contents("php://input")) === FALSE) {
-        echo "Bad Request";
+        echo __("Bad Request");
     }
     
     $data = json_decode($body_stream, TRUE);
@@ -677,7 +677,7 @@ public function save_template() {
             }
         }
     }
-    echo "{\"error\":0}";
+    echo __("{\"error\":0}");
 }
 
 public function view($id = null){
@@ -749,7 +749,7 @@ public function _write_html_file($filename = null, $content = null, $record_id =
     $folder = new Folder();
     if ($folder->create($path,0777)) {
     } else {
-        echo "Folder creation failed.";
+        echo __("Folder creation failed.");
         exit;
     }
     $file = $path . DS . $filename .".html" ;

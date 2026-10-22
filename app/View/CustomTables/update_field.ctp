@@ -13,25 +13,25 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Update Field</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo h(__('Close')); ?>"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><?php echo h(__('Update Field')); ?></h4>
       </div>
       <div class="modal-body">
 
         <table class="table table-bordered" id="fieldstable">
           <tbody>
-            <tr><th colspan="8">Password</th></tr>
+            <tr><th colspan="8"><?php echo h(__('Password')); ?></th></tr>
             <tr><th colspan="8"><?php echo $this->Form->input('CustomTableFields.'.$f.'.password',array('required', 'type'=>'password','class'=>'form-control','label'=>false));?></th></tr>
             <tr>
-              <th>Field Name</th>
-              <th>Linked To</th>
-              <th>Display Type</th>
-              <th>Field Type</th>          
-              <th>Length</th>
-              <th>Display Size</th>
-              <th>Mandetory?</th>
-              <th>Options</th>
-              <th>Index</th>
+              <th><?php echo h(__('Field Name')); ?></th>
+              <th><?php echo h(__('Linked To')); ?></th>
+              <th><?php echo h(__('Display Type')); ?></th>
+              <th><?php echo h(__('Field Type')); ?></th>          
+              <th><?php echo h(__('Length')); ?></th>
+              <th><?php echo h(__('Display Size')); ?></th>
+              <th><?php echo h(__('Mandetory?')); ?></th>
+              <th><?php echo h(__('Options')); ?></th>
+              <th><?php echo h(__('Index')); ?></th>
             </tr>         
             <?php 
         
@@ -51,9 +51,9 @@
                 <td><?php echo $this->Form->input('CustomTableFields.'.$f.'.field_type',array('disabled','default'=>$existingField['field_type'],'label'=>false,'class'=>'form-control','options'=>$fiedTypes,'onChange'=>'checklengths(this.value,this.id,'.$f.')'));?></td>  
                 <td><?php echo $this->Form->input('CustomTableFields.'.$f.'.length',array('default'=>$existingField['length'],'label'=>false,'class'=>'form-control'));?></td>  
                 <td><?php echo $this->Form->input('CustomTableFields.'.$f.'.size',array('selected'=>$existingField['size'],'label'=>false,'class'=>'form-control','options'=>$bootstrapSizes,'default'=>11));?></td>  
-                <td><?php echo $this->Form->input('CustomTableFields.'.$f.'.mandetory',array('selected'=>$existingField['mandetory'],'label'=>false,'class'=>'form-control','options'=>array(0=>'Yes',1=>'No'),'default'=>0));?></td> 
-                <td><?php echo $this->Form->input('CustomTableFields.'.$f.'.csvoptions',array('default'=>$existingField['csvoptions'],'placeholder'=>'yes,no,etc,etc,', 'label'=>false,'class'=>'validate form-control'));?></td>
-                <td><?php echo $this->Form->input('CustomTableFields.'.$f.'.index_show',array('default'=>$existingField['index_show'],'options'=>array('Yes','No'), 'label'=>false,'class'=>'validate form-control'));?></td>
+                <td><?php echo $this->Form->input('CustomTableFields.'.$f.'.mandetory',array('selected'=>$existingField['mandetory'],'label'=>false,'class'=>'form-control','options'=>array(0=>__('Yes'),1=>__('No')),'default'=>0));?></td> 
+                <td><?php echo $this->Form->input('CustomTableFields.'.$f.'.csvoptions',array('default'=>$existingField['csvoptions'],'placeholder'=>__('yes,no,etc,etc,'), 'label'=>false,'class'=>'validate form-control'));?></td>
+                <td><?php echo $this->Form->input('CustomTableFields.'.$f.'.index_show',array('default'=>$existingField['index_show'],'options'=>array(__('Yes'),__('No')), 'label'=>false,'class'=>'validate form-control'));?></td>
               </tr>
               <?php
               $f++;
@@ -67,7 +67,7 @@
         
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo h(__('Close')); ?></button>
         <?php echo $this->Form->submit(__('Submit'), array('div' => false, 'class' => 'btn btn-primary btn-success','id'=>'submit_id_1')); ?>
       </div>
     </div><!-- /.modal-content -->

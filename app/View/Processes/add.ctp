@@ -39,7 +39,7 @@
 <div id="Process_div">	
 	<?php echo $this->Session->flash();?>
 	<div class="Process">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('friendlyName'=>'Processes','pluralHumanName'=>'Process','modelClass'=>'Process','options'=>array(),'pluralVar'=>'processes'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('friendlyName'=>__('Processes'),'pluralHumanName'=>__('Process'),'modelClass'=>'Process','options'=>array(),'pluralVar'=>'processes'))); ?>
 
 		<?php echo $this->Form->create('Process',array('role'=>'form','class'=>'form','type'=>'file')); ?>		
 
@@ -99,7 +99,7 @@
 					if($this->request->data[Inflector::classify($linkedTable['CustomTable']['table_name'])]){
 						if($linkedTable['CustomTable']['form_layout'] == 2){
 							echo "<div class='panel panel-default'><div class='panel-body no-padding'>";
-							echo "<table class='table table-responsive table-bordered'><tr><th>Name/title</th>";
+							echo '<table class=\'table table-responsive table-bordered\'><tr><th>' . h(__('Name/title')) . '</th>';
 							foreach(json_decode($linkedTable['CustomTable']['fields'],true) as $field){
 								echo "<th>" . Inflector::humanize($field['field_name']) . "</th>";
 							}
@@ -166,7 +166,7 @@
 
 					jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 						return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';
-					}, "Please select the value");
+					}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 
 					$('#ProcessAddForm').validate();

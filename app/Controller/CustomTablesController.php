@@ -277,7 +277,7 @@ class CustomTablesController extends AppController {
                 $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
                 $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
             }else{
-                echo "<br />You are not authorized to view this form<br /><br />";
+                echo '<br />' . h(__('You are not authorized to view this form')) . '<br /><br />';
                 exit;
             }
         }
@@ -1291,7 +1291,7 @@ class CustomTablesController extends AppController {
 
     private function _ensure_ai_form_link_columns($tableName, $qcDocumentId, $customTableId) {
         if (!preg_match('/^[a-zA-Z0-9_]+$/', $tableName)) {
-            throw new InvalidArgumentException('Invalid generated table name.');
+            throw new InvalidArgumentException(__('Invalid generated table name.'));
         }
         $columns = array();
         foreach ((array)$this->CustomTable->query('SHOW COLUMNS FROM `'.$tableName.'`') as $row) {
@@ -1929,7 +1929,7 @@ class CustomTablesController extends AppController {
                         $result = json_decode($result,true);
                         
                         if(!$result || $result['error'] == 1){
-                            echo "Something went wrong. Please try again";
+                            echo __("Something went wrong. Please try again");
                         }else{                            
                             $result = json_decode($result['response']['finalResult'],true);
                             if (!$this->_generated_code_is_safe($result)) {
@@ -1993,7 +1993,7 @@ class CustomTablesController extends AppController {
                         $this->redirect(array('action' => 'recreate',$this->CustomTable->id, 'qc_document_id' => $this->request->params['named']['qc_document_id'],'process_id' => $this->request->params['named']['process_id']));
                         
                     } else {
-                        echo "failed folder - 1" . Configure::read('path');
+                        echo __("failed folder - 1") . Configure::read('path');
                         $this->Session->setFlash(__('Custom Table id folder could not be created'));
                         $this->redirect(array('action' => 'index', 'qc_document_id' => $this->request->params['named']['qc_document_id'],'process_id' => $this->request->params['named']['process_id']));
                     }
@@ -2283,7 +2283,7 @@ class CustomTablesController extends AppController {
                 
 
                 if(!$result || $result['error'] == 1){
-                    echo "Something went wrong. Please try again";
+                    echo __("Something went wrong. Please try again");
                 }else{
                     $result = json_decode($result['response']['finalResult'],true);
                     if (!$this->_generated_code_is_safe($result)) {
@@ -2720,7 +2720,7 @@ class CustomTablesController extends AppController {
                 if($dir_writable_controller == false || $dir_writable_model == false || $dir_writable_view == false){
                     $this->Session->setFlash(__('Unable to change directory permissions. Please manually change app/Controller, app/Model & app/View directories to writable.(0777)'));
                     if($skip == false) $this->redirect(array('action' => 'recreate',$this->request->data['CustomTable']['id']));
-                    else echo "Unable to change directory permissions. Please manually change app/Controller, app/Model & app/View directories to writable.(0777)";exit;
+                    else echo __("Unable to change directory permissions. Please manually change app/Controller, app/Model & app/View directories to writable.(0777)");exit;
                 }else{
 
                 }
@@ -2854,7 +2854,7 @@ class CustomTablesController extends AppController {
                     $this->Session->setFlash($message);
                     if ($this->_ajax_generation_response(false, $message, 422)) return $this->response;
                 }else{
-                    echo "The custom table ".$this->request->data['CustomTable']['table_name']." could not be saved. Please, try again.";
+                    echo __("The custom table ").$this->request->data['CustomTable']['table_name']." could not be saved. Please, try again.";
                 }
             }
         }
@@ -3255,7 +3255,7 @@ class CustomTablesController extends AppController {
         $local = $this->request->params['named'];
         
         if (($body_stream = file_get_contents("php://input")) === FALSE) {
-            echo "Bad Request";
+            echo __("Bad Request");
         }
         $data = json_decode($body_stream, TRUE);
         if ($data["status"] == 2) {
@@ -3363,14 +3363,14 @@ class CustomTablesController extends AppController {
             }
             
         }
-        echo "{\"error\":0}";
+        echo __("{\"error\":0}");
     }
     public function save_custom_table_doc() {
         $this->autoRender = false;
         $local = $this->request->params['named'];
         
         if (($body_stream = file_get_contents("php://input")) === FALSE) {
-            echo "Bad Request";
+            echo __("Bad Request");
         }
         $data = json_decode($body_stream, TRUE);
         
@@ -3434,7 +3434,7 @@ class CustomTablesController extends AppController {
                 
             }            
         }
-        echo "{\"error\":0}";
+        echo __("{\"error\":0}");
     }
 
     public function unlock($id = null) {
@@ -4056,7 +4056,7 @@ class CustomTablesController extends AppController {
             // check if table already exists
             $checkExisting = $this->CustomTable->find('count',array('conditions'=>array('CustomTable.table_name'=>$tableName[0])));
             if($checkExisting > 0){
-                echo "Table already exists";
+                echo __("Table already exists");
                 return false;
             }
             $table_name = $tableName[0];
@@ -4083,7 +4083,7 @@ class CustomTablesController extends AppController {
                 $result = json_decode($result,true);
 
                 if($result['error'] == 1 || $result == null){
-                    echo "Something went wrong. Please try again";
+                    echo __("Something went wrong. Please try again");
                 }else{
                     $this->_clear_cake_cache();
                     Configure::write('debug',2);
@@ -4197,7 +4197,7 @@ class CustomTablesController extends AppController {
                     $this->_clear_cake_cache();
                     Configure::write('debug',0);
                 }else{
-                    echo 'SQL failed!';
+                    echo __('SQL failed!');
                 }
             }else{
                 return false;
@@ -4382,7 +4382,7 @@ class CustomTablesController extends AppController {
                 }
                 $this->redirect(array('action' => 'link_processes', $id, date('Ymdhis')));
             }else{
-                echo "error";
+                echo __("error");
             }
         }
 
@@ -4617,7 +4617,7 @@ class CustomTablesController extends AppController {
                     );
                     if(!isset($fieldMap[$permission])){
                         $this->response->statusCode(400);
-                        $this->response->body(json_encode(array('success'=>false, 'message'=>'Invalid permission.')));
+                        $this->response->body(json_encode(array('success'=>false, 'message'=>__('Invalid permission.'))));
                         return $this->response;
                     }
 
@@ -4660,7 +4660,7 @@ class CustomTablesController extends AppController {
                     $saved = $this->CustomTable->save($customTable,false);
                     if(!$saved){
                         $this->response->statusCode(500);
-                        $this->response->body(json_encode(array('success'=>false, 'message'=>'Access could not be updated.')));
+                        $this->response->body(json_encode(array('success'=>false, 'message'=>__('Access could not be updated.'))));
                         return $this->response;
                     }
 
@@ -4692,7 +4692,7 @@ class CustomTablesController extends AppController {
             }
         }
         $this->response->statusCode(403);
-        $this->response->body(json_encode(array('success'=>false, 'message'=>'Invalid access.')));
+        $this->response->body(json_encode(array('success'=>false, 'message'=>__('Invalid access.'))));
         return $this->response;
     }
 

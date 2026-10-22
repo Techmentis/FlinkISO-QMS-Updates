@@ -10,7 +10,7 @@
 			<div id="<?php echo $qcDocument['QcDocument']['id'];?>_li_div"></div>
 		</ul>
 		<?php if(isset($qcDocumentChild)){ ?>		
-			<h5>Child Documents</h5>
+			<h5><?php echo h(__('Child Documents')); ?></h5>
 			<ul class="list-group pdf-list">
 			<?php foreach($qcDocumentChild as $qcDocument){?>
 				<li class="list-group-item" id="<?php echo $qcDocument['QcDocument']['id']?>_li">
@@ -35,22 +35,22 @@
 				<div class="row">
 					<div class="col-md-5">
 						<label style="margin:7px 0 0 0;">
-							<input type="checkbox" id="record-pdf-select-all" /> Select all records
+							<input type="checkbox" id="record-pdf-select-all" /> <?php echo h(__('Select all records')); ?>
 						</label>
 					</div>
 					<div class="col-md-7 text-right">
 						<button type="button" class="btn btn-sm btn-primary record-bundle-button" onclick="generateRecordBundle('selected');">
-							<i class="fa fa-files-o"></i> Selected records
+							<i class="fa fa-files-o"></i> <?php echo h(__('Selected records')); ?>
 						</button>
 						<button type="button" class="btn btn-sm btn-success record-bundle-button" onclick="generateRecordBundle('all');">
-							<i class="fa fa-file-pdf-o"></i> All records
+							<i class="fa fa-file-pdf-o"></i> <?php echo h(__('All records')); ?>
 						</button>
 					</div>
 				</div>
 				<div id="record-bundle-result" style="margin-top:10px;"></div>
 			</div>
-			<p class="text-muted"><small>Use the download icon for an individual record, or select records to create one combined PDF. QC documents are not included.</small></p>
-			<h5>Record</h5>
+			<p class="text-muted"><small><?php echo h(__('Use the download icon for an individual record, or select records to create one combined PDF. QC documents are not included.')); ?></small></p>
+			<h5><?php echo h(__('Record')); ?></h5>
 			<ul class="list-group pdf-list">
 				<li class="list-group-item" id="<?php echo $record[Inflector::classify($record['CustomTable']['table_name'])]['id'];?>_li">
 					<input type="checkbox" class="record-pdf-select" style="margin-right:10px;"
@@ -137,7 +137,7 @@
 		});
 
 		if(records.length === 0){
-			$('#record-bundle-result').html('<div class="alert alert-warning">Select at least one record.</div>');
+			$('#record-bundle-result').html(<?php echo json_encode(__('<div class="alert alert-warning">Select at least one record.</div>'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 			return;
 		}
 
@@ -145,7 +145,7 @@
 		$('#record-bundle-records').val(JSON.stringify(records));
 		$('#record-bundle-id').val(bundleId);
 		$('.record-bundle-button').prop('disabled', true);
-		$('#record-bundle-result').html('<div class="text-info"><i class="fa fa-refresh fa-spin"></i> Generating and combining '+records.length+' record PDF'+(records.length === 1 ? '' : 's')+'...</div>');
+		$('#record-bundle-result').html(<?php echo json_encode(__('<div class="text-info"><i class="fa fa-refresh fa-spin"></i> Generating and combining '), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>+records.length+<?php echo json_encode(__(' record PDF'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>+(records.length === 1 ? '' : 's')+'...</div>');
 		var bundleStartedAt = new Date().getTime();
 
 		$('#DocumentDownloadRecordListForm').ajaxSubmit({
@@ -159,7 +159,7 @@
 				var elapsedSeconds = Math.round((new Date().getTime() - bundleStartedAt) / 1000);
 				var message = '<i class="fa fa-refresh fa-spin"></i> PDF generation is still running. Waiting for the finished file...';
 				if(elapsedSeconds >= 25 || request.status === 502 || request.status === 503 || request.status === 504){
-					message += '<br><small>The web server stopped waiting for this long request. If this happens frequently, ask the administrator to increase the Apache/FastCGI timeout (currently approximately 30 seconds) and check PHP <code>max_execution_time</code> and <code>memory_limit</code>.</small>';
+					message += <?php echo json_encode(__('<br><small>The web server stopped waiting for this long request. If this happens frequently, ask the administrator to increase the Apache/FastCGI timeout (currently approximately 30 seconds) and check PHP <code>max_execution_time</code> and <code>memory_limit</code>.</small>'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 				}
 				$('#record-bundle-result').html('<div class="alert alert-info">'+message+'</div>');
 				pollRecordBundle(bundleId, 0);
@@ -171,8 +171,8 @@
 		if(attempt >= 120){
 			$('.record-bundle-button').prop('disabled', false);
 			$('#record-bundle-result').html(
-				'<div class="alert alert-danger">PDF generation did not finish within four minutes. '
-				+'Ask the administrator to review the Apache/FastCGI request timeout, PHP <code>max_execution_time</code> and <code>memory_limit</code>, and the OnlyOffice conversion-service availability.</div>'
+				<?php echo json_encode(__('<div class="alert alert-danger">PDF generation did not finish within four minutes. '), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>
+				+<?php echo json_encode(__('Ask the administrator to review the Apache/FastCGI request timeout, PHP <code>max_execution_time</code> and <code>memory_limit</code>, and the OnlyOffice conversion-service availability.</div>'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>
 			);
 			return;
 		}
@@ -183,7 +183,7 @@
 			dataType: 'json',
 			success: function(result){
 				if(result.ready){
-					var link = $('<a/>', {href: result.url, target: '_blank', text: 'Download combined records PDF'});
+					var link = $('<a/>', {href: result.url, target: '_blank', text: <?php echo json_encode(__('Download combined records PDF'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>});
 					var box = $('<div/>', {'class':'alert alert-success record-bundle-download'});
 					box.append($('<i/>', {'class':'fa fa-file-pdf-o'})).append('&nbsp;&nbsp;').append(link);
 					$('#record-bundle-result').empty().append(box);
@@ -214,11 +214,11 @@
 			complete: function(data,response) {				
 				$("#"+id+"_fa").removeClass('fa-refresh fa-spin').addClass('fa-check text-success');
 				$("#"+id+"_li_div").html(data.responseText);				
-				$(".modal-title").html("Your PDFs files are ready for download.");
+				$(".modal-title").html(<?php echo json_encode(__('Your PDFs files are ready for download.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 				$('.li_a').unbind('click');
 			},
 			error: function(request, status, error) {                    
-				alert('Action failed!');
+				alert(<?php echo json_encode(__('Action failed!'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 			}
 		});
 

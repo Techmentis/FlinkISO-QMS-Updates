@@ -6,7 +6,7 @@
         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
           <span class="fa fa-th"></span>
         </button>
-        <?php echo $this->Html->link('FlinkISO',array('controller'=>'users','action'=>'dashboard'),array('class'=>'navbar-brand'));?>
+        <?php echo $this->Html->link(__('FlinkISO'),array('controller'=>'users','action'=>'dashboard'),array('class'=>'navbar-brand'));?>
       </div>
 
       <!-- Header Navbar: style can be found in header.less -->
@@ -77,9 +77,6 @@
                     <ul class="">
                       <li class="" ><a href="#" class="header-li-sub"><span></span></a>
                         <ul class="no-margin no-padding">
-                          <?php if (($this->Session->read('User.is_mr') || $this->Session->read('User.is_super_user')) && !empty($languagePreferenceAvailable)): ?>
-                          <li><?php echo $this->Html->link(__('Languages'), array('controller' => 'languages', 'action' => 'index')); ?></li>
-                          <?php endif; ?>
                           <li><?php echo $this->Html->link(__('Add Logo'),array('controller'=>'settings','action'=>'edit',$this->Session->read('User.company_id'),'timestamp'=>date('ymdhis'))); ?></li>
                           <li><?php echo $this->Html->link(__('Add SMTP Email'),array('controller'=>'settings','action'=>'smtp_details',$this->Session->read('User.company_id'),'timestamp'=>date('ymdhis'))); ?></li>
                           <li><?php echo $this->Html->link(__('Add Password Policy'),array('controller'=>'settings','action'=>'password_setting',$this->Session->read('User.company_id'),'timestamp'=>date('ymdhis'))); ?></li>
@@ -116,6 +113,7 @@
                   <?php } ?>
                 </ul>
               </li>
+              <?php echo $this->element('language_menu'); ?>
               <li><a href="#"><i class="fa fa-refresh fa-spin" aria-hidden="true" id="uni-ajaxload"></i> </a></li>
             </ul>
             <!-- Navbar Right Menu -->

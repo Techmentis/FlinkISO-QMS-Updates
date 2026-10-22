@@ -2,8 +2,8 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Create Masters</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo h(__('Close')); ?>"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><?php echo h(__('Create Masters')); ?></h4>
     </div>
 
     <div class="modal-body create-master-modal-body">
@@ -11,13 +11,13 @@
      <?php echo $this->fetch('script'); ?>
      <?php echo $this->Form->create('CustomTable',array('role'=>'form','class'=>'form','default' => false)); ?>
      <div class="row">
-        <div class="col-md-12">Table Name must be plural (e.g. employees, users etc). Table Name must not start or end with number.</div>
-        <?php echo "<div class='col-md-6'>".$this->Form->input('name',array('class'=>'form-control','required','label'=>'Name : <small>e.g Units/ Currency/ Type etc.</small>')) . '</div>'; ?>	
+        <div class="col-md-12"><?php echo h(__('Table Name must be plural (e.g. employees, users etc). Table Name must not start or end with number.')); ?></div>
+        <?php echo "<div class='col-md-6'>".$this->Form->input('name',array('class'=>'form-control','required','label'=>h(__('Name :')) . ' <small>' . h(__('e.g Units/ Currency/ Type etc.')) . '</small>')) . '</div>'; ?>	
         <?php echo "<div class='col-md-3'>".$this->Form->input('password',array('type'=>'password', 'class'=>'form-control',)) . '</div>'; ?>
         <?php echo "<div class='col-md-3'>".$this->Form->input('re-password',array('type'=>'password', 'class'=>'form-control',)) . '</div>'; ?>	
         <div class="col-md-12">
            <br /><br />
-           <div class="alert alert-warning">Please note : This feature is only available for creating masters. This will create a form with single field viz. Name. You can add required data to it later. Masters are typically datasets like list of states, cities, several types like units, curriencies etc. Use this feature carefully.</div>
+           <div class="alert alert-warning"><?php echo h(__('Please note : This feature is only available for creating masters. This will create a form with single field viz. Name. You can add required data to it later. Masters are typically datasets like list of states, cities, several types like units, curriencies etc. Use this feature carefully.')); ?></div>
        </div>
    </div>
    <?php echo $this->Form->end();?>
@@ -49,18 +49,18 @@
                     $("#cust_submit_id").show();
                     $("#cust-submit-indicator").show();
                 },error: function(request, status, error) {
-                    alert('Action failed!');
+                    alert(<?php echo json_encode(__('Action failed!'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                 },success: function(data, status, xhr) {
                     
-                    if(data == 'Table already exists'){
-                        $(".create-master-modal-body").html('Table already exists.Please select another name.');
+                    if(data == <?php echo json_encode(__('Table already exists'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>){
+                        $(".create-master-modal-body").html(<?php echo json_encode(__('Table already exists.Please select another name.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                         $("#cust-submit-indicator").hide();    
-                    }else if(data == 'SQL failed'){                        
-                        $(".create-master-modal-body").html('System failed to run SQL successfully. Please try again with different name.');
+                    }else if(data == <?php echo json_encode(__('SQL failed'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>){                        
+                        $(".create-master-modal-body").html(<?php echo json_encode(__('System failed to run SQL successfully. Please try again with different name.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                         $("#cust-submit-indicator").hide();    
                     }else{
                         $("#linkedTos").val(data);
-                        $(".create-master-modal-body").html('Master Table Added.');
+                        $(".create-master-modal-body").html(<?php echo json_encode(__('Master Table Added.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                         $("#cust-submit-indicator").hide();    
                     }
                 },

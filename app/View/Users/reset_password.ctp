@@ -27,30 +27,30 @@
         </div>
         <div class="col-md-6">
             <div class="panel panel-default">
-                <div class="panel-heading"><h4>Reset Password</h4></div>
+                <div class="panel-heading"><h4><?php echo h(__('Reset Password')); ?></h4></div>
                 <div class="panel-body">
                     <div class="row">
                         <?php echo $this->Form->create('User', array('role' => 'form', 'class' => 'form')); ?>
                         <fieldset>                              
                             <?php
                             if($this->Session->read('User.username')){
-                                echo "<div class='col-md-12'>" . $this->Form->input('username',array('class'=>'form-control','label'=>'Enter your userame', 'readonly'=>'readonly', 'default'=>$this->Session->read('User.username'))) . "</div>";
+                                echo "<div class='col-md-12'>" . $this->Form->input('username',array('class'=>'form-control','label'=>__('Enter your userame'), 'readonly'=>'readonly', 'default'=>$this->Session->read('User.username'))) . "</div>";
                             }else{                            
-                                echo "<div class='col-md-12'>" . $this->Form->input('username',array('class'=>'form-control','label'=>'Enter your userame')) . "</div>";
+                                echo "<div class='col-md-12'>" . $this->Form->input('username',array('class'=>'form-control','label'=>__('Enter your userame'))) . "</div>";
                             }
                             
                             echo "<div class='col-md-12'>" . $this->Form->input('password', array('class'=>'form-control', 'label' => __('New Password'), 'type' => 'password', 'div' => false, 'placeholder' => '*******'))."</div>";
                             echo "<div class='col-md-12'>" . $this->Form->input('temppassword', array('class'=>'form-control', 'label' => __('Confirm Password'), 'type' => 'password', 'div' => false, 'placeholder' => '*******'))."</div>";
                             ?>
-                            <?php echo "<div class='col-md-12 text-center'><hr />" . $this->Html->link('Click here to generate OTP','#',array('onClick'=>'otp()')) ."<hr /></div>";?>
-                            <?php echo "<div class='col-md-12'>" .$this->Form->input('otp',array('label'=>'OTP', 'class'=>'form-control','required'=>'required')). "</div>";
+                            <?php echo "<div class='col-md-12 text-center'><hr />" . $this->Html->link(__('Click here to generate OTP'),'#',array('onClick'=>'otp()')) ."<hr /></div>";?>
+                            <?php echo "<div class='col-md-12'>" .$this->Form->input('otp',array('label'=>__('OTP'), 'class'=>'form-control','required'=>'required')). "</div>";
                             echo "<div class='col-md-12'><span class='help-block' id='otp_check'></span></div>";
                             ?>
                         </fieldset>
                         
                         <div class="col-md-12 show" id="toshow">
                             <br />
-                            <?php echo $this->Form->submit('Submit',array('div'=>false,'class'=>'btn btn-info btn-sm','update'=>'#main','id'=>'submit_id')); ?>
+                            <?php echo $this->Form->submit(__('Submit'),array('div'=>false,'class'=>'btn btn-info btn-sm','update'=>'#main','id'=>'submit_id')); ?>
                             <?php echo $this->Html->image('indicator.gif', array('id' => 'submit-indicator')); ?>
                             <?php echo $this->Form->end(); ?>
                             <?php echo $this->Js->writeBuffer(); ?>
@@ -80,13 +80,13 @@
         type: "POST",
         data: checkEmail,
         dataType : "JSON",
-        beforeSend:function(){$("#otp_check").show().html('Sending opt... please wait.');},        
+        beforeSend:function(){$("#otp_check").show().html(<?php echo json_encode(__('Sending opt... please wait.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);},        
         success:function(data, result) 
         {            
             if(data == "Yes"){
                 $("#UserOtp").prop('required','required');
                 $("#UserOtp").focus();
-                $("#otp_check").html('OTP SENT, please check your email').removeClass("help-block").removeClass("text-danger").addClass("text-success");;                
+                $("#otp_check").html(<?php echo json_encode(__('OTP SENT, please check your email'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>).removeClass("help-block").removeClass("text-danger").addClass("text-success");;                
             }else{
               $("#otp_check").html('').addClass(" text-danger").removeClass("help-block").removeClass("text-success").addClass(" text-danger");              
           }

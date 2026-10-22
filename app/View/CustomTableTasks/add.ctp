@@ -40,7 +40,7 @@
 					},
 					error: function(request, status, error) {
                     //alert(request.responseText);
-						alert('Action failed!');
+						alert(<?php echo json_encode(__('Action failed!'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 					}
 				});
 			}
@@ -57,7 +57,7 @@
 
 			jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 				return this.optional(element) || (parseFloat(value) != -1);
-			}, "Please select the value");
+			}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 
 			if(taskForm.length){
@@ -89,7 +89,7 @@
 	</style>
 	<!-- <div class="col-md-6"> -->
 		<div class="box box-default collapsed-box">
-			<div class="box-header data-header" data-widget="collapse"><h3 class="box-title"><span class=""><i class="fa fa-calendar-check-o"></i></span> Create Tasks </h3>
+			<div class="box-header data-header" data-widget="collapse"><h3 class="box-title"><span class=""><i class="fa fa-calendar-check-o"></i></span> <?php echo h(__('Create Tasks')); ?> </h3>
 				<div class="box-tools pull-right"><button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button></div>
 			</div>
 
@@ -153,7 +153,7 @@
 								</tr>
 							<?php endforeach; ?>
 						<?php }else{ ?>
-							<tr><td colspan=102>No results found</td></tr>
+							<tr><td colspan=102><?php echo h(__('No results found')); ?></td></tr>
 						<?php } ?>
 					</table>
 				</div>
@@ -199,7 +199,7 @@
 					</div>			
 				<?php } ?>
 				</div>
-				<div class="box-footer"><strong>Note: </strong>When you add task for employee, basis on the condition set by you, emplyee will automatically receive an email when those conditions are met. Task will also be displayed on employees dashboard for action. There is no need to add additional email triggers for such conditions.</div>
+				<div class="box-footer"><strong><?php echo h(__('Note:')); ?> </strong><?php echo h(__('When you add task for employee, basis on the condition set by you, emplyee will automatically receive an email when those conditions are met. Task will also be displayed on employees dashboard for action. There is no need to add additional email triggers for such conditions.')); ?></div>
 			</div>
 		</div>
 		

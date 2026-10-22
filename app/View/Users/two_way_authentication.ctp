@@ -23,14 +23,14 @@
         <div class="users form col-md-12">
             <?php echo $this->Form->create('User', array('role' => 'form', 'class' => 'form')); ?>
             <div class="row">
-                <div class="col-md-12"><?php   echo $this->Form->input('two_way_authentication', array('type' => 'radio', 'legend' => '<h4>' . __('Two way authentication') . '</h4>', 'options' => array(0 => 'Disable', 1 => 'Enable'), 'default' => $company['Company']['two_way_authentication'])); ?>
+                <div class="col-md-12"><?php   echo $this->Form->input('two_way_authentication', array('type' => 'radio', 'legend' => '<h4>' . __('Two way authentication') . '</h4>', 'options' => array(0 => __('Disable'), 1 => __('Enable')), 'default' => $company['Company']['two_way_authentication'])); ?>
                 
             </div>
             <div class="col-md-12">
                 <div class="text-danger">
-                    <p><strong>Note: </strong>Do not enable Two Way Authentication unless your emails are working. We recomment setting up 
+                    <p><strong><?php echo h(__('Note:')); ?> </strong><?php echo h(__('Do not enable Two Way Authentication unless your emails are working. We recomment setting up')); ?> 
                         <strong><?php echo $this->Html->link(__('SMTP Details'),array('controller'=>'settings','action'=>'smtp_details')); ?></strong>
-                    first.</p>
+                    <?php echo h(__('first.')); ?></p>
                 </div>
             </div>
             <?php

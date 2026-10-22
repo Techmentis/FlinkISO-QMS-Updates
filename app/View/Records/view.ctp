@@ -2,7 +2,7 @@
 	<?php echo $this->Session->flash();?>	
 
 	<div class="records ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Records','modelClass'=>'Record','options'=>array(),'pluralVar'=>'records'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Records'),'modelClass'=>'Record','options'=>array(),'pluralVar'=>'records'))); ?>
 
 
 		<div class="nav panel panel-default">
@@ -53,8 +53,8 @@
 															<td colspan="2">
 																<div class="btn-group1">
 																	<?php     
-																	echo $this->Html->link('Delete This Record?',array('action'=>'delete',$record['Record']['id']),array('confirm'=>'This action can not be revered. Do you want to procces?', 'class'=>'btn btn-xs btn-danger'));
-																	echo "&nbsp;" . $this->Html->link('Edit This Record?',array('action'=>'edit',$record['Record']['id']),array('class'=>'btn btn-xs btn-warning'));        
+																	echo $this->Html->link(__('Delete This Record?'),array('action'=>'delete',$record['Record']['id']),array('confirm'=>__('This action can not be revered. Do you want to procces?'), 'class'=>'btn btn-xs btn-danger'));
+																	echo "&nbsp;" . $this->Html->link(__('Edit This Record?'),array('action'=>'edit',$record['Record']['id']),array('class'=>'btn btn-xs btn-warning'));        
 																	?>
 																</div>
 															</td>
@@ -92,7 +92,7 @@
 													echo $this->element('onlyoffice',array(
 														'url'=>$url,
 														'placeholderid'=>$placeholderid,
-														'panel_title'=>'Document Viewer',
+														'panel_title'=>__('Document Viewer'),
 														'mode'=>$mode,
 														'path'=>$file_path,
 														'file'=>$file,

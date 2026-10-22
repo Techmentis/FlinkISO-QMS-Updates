@@ -9,7 +9,7 @@
 </style>
 <?php echo $this->fetch('script'); ?>
 	<div class="employees ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Employees','modelClass'=>'Employee','options'=>array(),'pluralVar'=>'employees'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Employees'),'modelClass'=>'Employee','options'=>array(),'pluralVar'=>'employees'))); ?>
 
 
 <div class="nav panel panel-default">
@@ -21,9 +21,6 @@
 			<div class="col-md-12">	
 			<?php }?>
 			<h3><?php echo __('Employee Profile'); ?></h3>
-            <?php if (!empty($languagePreferenceAvailable) && $this->Session->read('User.employee_id') === $employee['Employee']['id']): ?>
-            <p><?php echo $this->Html->link(__('Language'), array('controller' => 'users', 'action' => 'language_preferences'), array('class' => 'btn btn-default')); ?></p>
-            <?php endif; ?>
 				<table class="table table-responsive">
 					<tr><td><?php echo __('Name'); ?></td>
 					<td>
@@ -161,8 +158,8 @@
 			&nbsp;</td></tr>
 			<tr>
 				<td colspan="2">
-					<?php echo $this->Html->link('Delete This Record?', array('controller' => 'employees', 'action' => 'delete', $employee['Employee']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
-					<?php echo $this->Html->link('Edit This Record?', array('controller' => 'employees', 'action' => 'edit', $employee['Employee']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
+					<?php echo $this->Html->link(__('Delete This Record?'), array('controller' => 'employees', 'action' => 'delete', $employee['Employee']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
+					<?php echo $this->Html->link(__('Edit This Record?'), array('controller' => 'employees', 'action' => 'edit', $employee['Employee']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
 				</td>
 			</tr>
 
@@ -173,7 +170,7 @@
 					<table class="table table-responsive no-border">
 						<tr>
 							<td>
-								<h4>Upload signature</h4>
+								<h4><?php echo h(__('Upload signature')); ?></h4>
 								<?php 
 								$sign = WWW_ROOT . 'img' . DS . $this->Session->read('User.company_id') . DS . 'signature' . DS . $this->Session->read('User.employee_id') . DS . 'sign.png';
 								if(file_exists($sign)){
@@ -181,30 +178,30 @@
 									echo $this->Form->create('Employee',array('action'=>'upload','type'=>'file'),array('class'=>'form-control'));
 									
 									echo "<div class='col-md-12'>". $this->Html->Image($this->Session->read('User.company_id') . DS . 'signature' . DS . $this->Session->read('User.employee_id') . DS . 'sign.png',array('height'=>'60')) . "</div>";
-									echo "<div class='col-md-12'>". $this->Html->link('Delete?',array('action'=>'deletesignature'))."</div>";
-									echo "<div class='col-md-8'><span class='control-fileupload'><i class='fa fa-file-o'></i>". $this->Form->input('signature',array('class'=>$block_class ,  'type'=>'file', 'label'=>'Update Your Signature', 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));')) ."</span></div>";
-									echo "<div class='col-md-4'>" . $this->Form->submit('Add',array('class'=>'btn btn-sm btn-success','style'=>'margin-top:15px')) ."</div>";
+									echo "<div class='col-md-12'>". $this->Html->link(__('Delete?'),array('action'=>'deletesignature'))."</div>";
+									echo "<div class='col-md-8'><span class='control-fileupload'><i class='fa fa-file-o'></i>". $this->Form->input('signature',array('class'=>$block_class ,  'type'=>'file', 'label'=>__('Update Your Signature'), 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));')) ."</span></div>";
+									echo "<div class='col-md-4'>" . $this->Form->submit(__('Add'),array('class'=>'btn btn-sm btn-success','style'=>'margin-top:15px')) ."</div>";
 									echo $this->Form->end();
 									echo "</div>";
 								}else{
 									echo "<div class='row'>";
 									echo $this->Form->create('Employee',array('action'=>'upload','type'=>'file'),array('class'=>'form-control'));
-									echo "<div class='col-md-8'><span class='control-fileupload'><i class='fa fa-file-o'></i>". $this->Form->input('signature',array('class'=>$block_class ,  'type'=>'file', 'label'=>'Upload Your Signature', 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));')) ."</span></div>";
-									echo "<div class='col-md-4'>" . $this->Form->submit('Add',array('class'=>'btn btn-sm btn-success','style'=>'margin-top:15px')) ."</div>";
+									echo "<div class='col-md-8'><span class='control-fileupload'><i class='fa fa-file-o'></i>". $this->Form->input('signature',array('class'=>$block_class ,  'type'=>'file', 'label'=>__('Upload Your Signature'), 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));')) ."</span></div>";
+									echo "<div class='col-md-4'>" . $this->Form->submit(__('Add'),array('class'=>'btn btn-sm btn-success','style'=>'margin-top:15px')) ."</div>";
 									echo $this->Form->end();
 									echo "</div>";
 								}
 								?>
 							</td>
 						</tr>
-						<tr><td>Image type : png | Max Size : 20kb</td></tr>						
-						<tr><td><h4>OR</h4></td></tr>
+						<tr><td><?php echo h(__('Image type : png | Max Size : 20kb')); ?></td></tr>						
+						<tr><td><h4><?php echo h(__('OR')); ?></h4></td></tr>
 						<tr>
 							<td>			
-								<h4>Draw Signature</h4>	
+								<h4><?php echo h(__('Draw Signature')); ?></h4>	
 								<div class="row">
 									<div class="col-md-12 ">
-										<label style="margin:8px 0px" >Draw/ fetch Your Signature Below</label>
+										<label style="margin:8px 0px" ><?php echo h(__('Draw/ fetch Your Signature Below')); ?></label>
 										<div class="row">
 											<div class="col-md-12">
 												<div id="signed"></div>
@@ -212,19 +209,19 @@
 													<canvas id="signature-pad" class="signature-pad" width=350 height=150></canvas>					        
 												</div>
 												<div class="btn-group ">
-													<div class="btn tooltip1" onclick="copysign();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Copy Signature"><i class="fa fa-copy "></i></div>
-													<div class="btn tooltip1" onclick="getsignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Fetch Saved Signature"><i class="fa fa-folder-open"></i></div>
-													<div class="btn tooltip1" onclick="savesignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Save Signature"><i class="fa fa-save"></i></div>
-													<div class="btn tooltip1" onclick="clearCanvas();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "Clear Signature"><i class="fa fa-eraser"></i></div>							
+													<div class="btn tooltip1" onclick="copysign();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "<?php echo h(__('Copy Signature')); ?>"><i class="fa fa-copy "></i></div>
+													<div class="btn tooltip1" onclick="getsignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "<?php echo h(__('Fetch Saved Signature')); ?>"><i class="fa fa-folder-open"></i></div>
+													<div class="btn tooltip1" onclick="savesignature();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "<?php echo h(__('Save Signature')); ?>"><i class="fa fa-save"></i></div>
+													<div class="btn tooltip1" onclick="clearCanvas();" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title = "<?php echo h(__('Clear Signature')); ?>"><i class="fa fa-eraser"></i></div>							
 												</div>
 												<?php echo $this->Form->hidden('signature',array('id'=>'digital-signature'));?>
 											</div>
 											<div class="col-md-12">
 												<ul class="list-group">
-													<li class="list-group-item"><i class="fa fa-copy"></i> : Copy signature from earlier uploaded png file.</li>
-													<li class="list-group-item"><i class="fa fa-folder-open"></i> : Copy signature from earlier saved image.</li>
-													<li class="list-group-item"><i class="fa fa-save"></i> : Save current signature image.</li>
-													<li class="list-group-item"><i class="fa fa-eraser"></i> : Clear Canvas.</li>
+													<li class="list-group-item"><i class="fa fa-copy"></i> <?php echo h(__(': Copy signature from earlier uploaded png file.')); ?></li>
+													<li class="list-group-item"><i class="fa fa-folder-open"></i> <?php echo h(__(': Copy signature from earlier saved image.')); ?></li>
+													<li class="list-group-item"><i class="fa fa-save"></i> <?php echo h(__(': Save current signature image.')); ?></li>
+													<li class="list-group-item"><i class="fa fa-eraser"></i> <?php echo h(__(': Clear Canvas.')); ?></li>
 												</ul>
 											</div>
 										</div>
@@ -234,7 +231,7 @@
 						</tr>
 						<tr>
 							<td>
-								<h4>Upload Profile Picture</h4>
+								<h4><?php echo h(__('Upload Profile Picture')); ?></h4>
 								<?php 
 								$profile = WWW_ROOT . 'img' . DS . $this->Session->read('User.company_id') . DS . 'profile' . DS . $this->Session->read('User.employee_id') . DS . 'profile.png';
 								if(file_exists($profile)){
@@ -242,22 +239,22 @@
 									echo $this->Form->create('Employee',array('action'=>'profile','type'=>'file'),array('class'=>'form-control'));
 									echo "<div class='col-md-12'>". $this->Html->Image($this->Session->read('User.company_id') . DS . 'profile' . DS . $this->Session->read('User.employee_id') . DS . 'profile.png',array('height'=>'60')) . "</div>";
 									
-									echo "<div class='col-md-8'><span class='control-fileupload'><i class='fa fa-file-o'></i>". $this->Form->input('profile',array('class'=>$block_class ,  'type'=>'file', 'label'=>'Update Your Profile Profile', 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));')) ."</span></div>";
-									echo "<div class='col-md-4'>" . $this->Form->submit('Add',array('class'=>'btn btn-sm btn-success','style'=>'margin-top:15px')) ."</div>";
+									echo "<div class='col-md-8'><span class='control-fileupload'><i class='fa fa-file-o'></i>". $this->Form->input('profile',array('class'=>$block_class ,  'type'=>'file', 'label'=>__('Update Your Profile Profile'), 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));')) ."</span></div>";
+									echo "<div class='col-md-4'>" . $this->Form->submit(__('Add'),array('class'=>'btn btn-sm btn-success','style'=>'margin-top:15px')) ."</div>";
 									echo $this->Form->end();
 									echo "</div>";
 								}else{
 									echo "<div class='row'>";
 									echo $this->Form->create('Employee',array('action'=>'profile','type'=>'file'),array('class'=>'form-control'));
-									echo "<div class='col-md-8'><span class='control-fileupload'><i class='fa fa-file-o'></i>". $this->Form->input('profile',array('class'=>$block_class ,  'type'=>'file', 'label'=>'Upload Your profile Profile', 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));')) ."</span></div>";
-									echo "<div class='col-md-4'>" . $this->Form->submit('Add',array('class'=>'btn btn-sm btn-success','style'=>'margin-top:15px')) ."</div>";
+									echo "<div class='col-md-8'><span class='control-fileupload'><i class='fa fa-file-o'></i>". $this->Form->input('profile',array('class'=>$block_class ,  'type'=>'file', 'label'=>__('Upload Your profile Profile'), 'div'=>false , 'onchange'=>'$(this).prev("label").html($(this).val().substr(12));')) ."</span></div>";
+									echo "<div class='col-md-4'>" . $this->Form->submit(__('Add'),array('class'=>'btn btn-sm btn-success','style'=>'margin-top:15px')) ."</div>";
 									echo $this->Form->end();
 									echo "</div>";
 								}
 								?>
 							</td>
 						</tr>
-						<tr><td>Image type : png | Max Size : 800kb</td></tr>					
+						<tr><td><?php echo h(__('Image type : png | Max Size : 800kb')); ?></td></tr>					
 				</table>
 				<?php } ?>
 			</div>

@@ -2,7 +2,7 @@
 <?php echo $this->Session->flash();?>	
 
 	<div class="departments ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Departments','modelClass'=>'Department','options'=>array(),'pluralVar'=>'departments'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Departments'),'modelClass'=>'Department','options'=>array(),'pluralVar'=>'departments'))); ?>
 
 
 <div class="nav panel panel-default">
@@ -51,8 +51,8 @@
 &nbsp;</td></tr>
 <tr>
 	<td colspan="2">
-			<?php echo $this->Html->link('Delete This Record?', array('controller' => 'departments', 'action' => 'delete', $department['Department']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
-	<?php echo $this->Html->link('Edit This Record?', array('controller' => 'departments', 'action' => 'edit', $department['Department']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
+			<?php echo $this->Html->link(__('Delete This Record?'), array('controller' => 'departments', 'action' => 'delete', $department['Department']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
+	<?php echo $this->Html->link(__('Edit This Record?'), array('controller' => 'departments', 'action' => 'edit', $department['Department']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
 	</td>
 </tr>
 </table>

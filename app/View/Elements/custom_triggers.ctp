@@ -24,7 +24,7 @@
 													echo $this->Form->create($data['controller'],array('controller'=>$data['controller'],'action'=>'edit/'.$recs[Inflector::classify($data['controller'])]['id'],'id'=>false),array('id'=>false));
 													echo $this->Form->hidden('Access.skip_access_check',array('default'=>1));
 													echo $this->Form->hidden('Access.allow_access_user',array('default'=>$this->Session->read('User.id')));
-													echo $this->Form->submit('Act',array('class'=>'btn btn-xs btn-danger'));
+													echo $this->Form->submit(__('Act'),array('class'=>'btn btn-xs btn-danger'));
 													echo $this->Form->end();
 													?>
 												</td>

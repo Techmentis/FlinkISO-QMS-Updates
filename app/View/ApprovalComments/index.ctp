@@ -1,7 +1,7 @@
 <?php echo $this->element('checkbox-script'); ?><div  id="main">
     <?php echo $this->Session->flash(); ?>
     <div class="approvalComments ">
-        <?php echo $this->element('nav-header-lists', ['postData' => ['pluralHumanName' => 'Approval Comments', 'modelClass' => 'ApprovalComment', 'options' => ["sr_no" => "Sr No", "comments" => "Comments"], 'pluralVar' => 'approvalComments']]); ?>
+        <?php echo $this->element('nav-header-lists', ['postData' => ['pluralHumanName' => __('Approval Comments'), 'modelClass' => 'ApprovalComment', 'options' => ["sr_no" => __("Sr No"), "comments" => __("Comments")], 'pluralVar' => 'approvalComments']]); ?>
 
         <script type="text/javascript">
             $(document).ready(function(){
@@ -47,7 +47,7 @@
                         </tr>
                     <?php endforeach; ?>
                 <?php } else { ?>
-                    <tr><td colspan=42>No results found</td></tr>
+                    <tr><td colspan=42><?php echo h(__('No results found')); ?></td></tr>
                 <?php } ?>
             </table>
             <?php echo $this->Form->end(); ?>

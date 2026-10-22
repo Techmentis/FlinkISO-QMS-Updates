@@ -1,12 +1,12 @@
 <?php echo $this->Session->flash();?>   
-    <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Update Qc Document Revision','modelClass'=>'QcDocument','options'=>array("sr_no"=>"Sr No","document_number"=>"Document Number","reference_number"=>"Reference Number","issue_number"=>"Issue Number","date_of_next_issue"=>"Date Of Next Issue","date_of_issue"=>"Date Of Issue","effective_from_date"=>"Effective From Date","revision_number"=>"Revision Number","date_of_review"=>"Date Of Review","revision_date"=>"Revision Date","document_type"=>"Document Type","it_categories"=>"It Categories","document_status"=>"Document Status","issued_by"=>"Issued By","archived"=>"Archived","change_history"=>"Change History","cr_status"=>"Cr Status","mark_for_cr_update"=>"Mark For Cr Update","temp_date_of_issue"=>"Temp Date Of Issue","temp_effective_from_date"=>"Temp Effective From Date","linked_formats"=>"Linked Formats","cover_page"=>"Cover Page","page_orientation"=>"Page Orientation"),'pluralVar'=>'qcDocuments'))); ?>
+    <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Update Qc Document Revision'),'modelClass'=>'QcDocument','options'=>array("sr_no"=>__("Sr No"),"document_number"=>__("Document Number"),"reference_number"=>__("Reference Number"),"issue_number"=>__("Issue Number"),"date_of_next_issue"=>__("Date Of Next Issue"),"date_of_issue"=>__("Date Of Issue"),"effective_from_date"=>__("Effective From Date"),"revision_number"=>__("Revision Number"),"date_of_review"=>__("Date Of Review"),"revision_date"=>__("Revision Date"),"document_type"=>__("Document Type"),"it_categories"=>__("It Categories"),"document_status"=>__("Document Status"),"issued_by"=>__("Issued By"),"archived"=>__("Archived"),"change_history"=>__("Change History"),"cr_status"=>__("Cr Status"),"mark_for_cr_update"=>__("Mark For Cr Update"),"temp_date_of_issue"=>__("Temp Date Of Issue"),"temp_effective_from_date"=>__("Temp Effective From Date"),"linked_formats"=>__("Linked Formats"),"cover_page"=>__("Cover Page"),"page_orientation"=>__("Page Orientation")),'pluralVar'=>'qcDocuments'))); ?>
 
 <h3><?php echo h($qcDocument['QcDocument']['document_number']); ?>-<?php echo h($qcDocument['QcDocument']['title']); ?>-<?php echo h($qcDocument['QcDocument']['revision_number']); ?><br />
                     <small><?php echo $qcDocument['Standard']['name']; ?> - <?php echo h($qcDocument['QcDocument']['document_status']); ?></small></h3>
 
 <div class="box box-info">
         <div class="box-header">
-          <h3 class="box-title">Change Revision Process</h3>
+          <h3 class="box-title"><?php echo h(__('Change Revision Process')); ?></h3>
 
           <div class="box-tools">
             <!-- <a href="/cloud/medrun/custom_tables"><i class="fa fa-database fa-lg"></i></a> -->
@@ -15,13 +15,13 @@
         <!-- /.box-header -->
         <div class="box-body">
                 <ol>
-                    <li>System Will Archive The Current Document</li>
+                    <li><?php echo h(__('System Will Archive The Current Document')); ?></li>
                     <li>System will copy Current Document in Archives Folder with revision number as <?php echo $qcDocument['QcDocument']['revision_number']?></li>
-                    <li>System will link the New Updated Document with Current Document</li>
-                    <li>System will mark document status as <strong>Awaiting Issue</strong> </li>
-                    <li>User must then goto edit file and update rest of the details like Prepared By, Approved By, Issued By etc.</li>
+                    <li><?php echo h(__('System will link the New Updated Document with Current Document')); ?></li>
+                    <li><?php echo h(__('System will mark document status as')); ?> <strong><?php echo h(__('Awaiting Issue')); ?></strong> </li>
+                    <li><?php echo h(__('User must then goto edit file and update rest of the details like Prepared By, Approved By, Issued By etc.')); ?></li>
                 </ol>
-                <p>You can update rest of the details from Edit field once the document updation is done.</p>
+                <p><?php echo h(__('You can update rest of the details from Edit field once the document updation is done.')); ?></p>
 
             </div>
             <!-- /.box-body -->
@@ -30,24 +30,24 @@
 <div class="row">
     <div class="col-md-12">
         <div class="box box-default">
-            <div class="box-header"><h4>Current Document</h4></div>
+            <div class="box-header"><h4><?php echo h(__('Current Document')); ?></h4></div>
             <div class="box-body">
                 <div class="table-responsive">
                     <table class="table table-bordered">
                         <tr>
-                            <th>Document Number</th>
+                            <th><?php echo h(__('Document Number')); ?></th>
                             <td><?php echo $document['QcDocument']['document_number']?></td>
-                            <th>Revision Number</th>
+                            <th><?php echo h(__('Revision Number')); ?></th>
                             <td><?php echo $document['QcDocument']['revision_number']?></td>
-                            <th>Date Of Issue</th>
+                            <th><?php echo h(__('Date Of Issue')); ?></th>
                             <td><?php echo $document['QcDocument']['date_of_issue']?></td>
                         </tr>
                         <tr>
-                            <th>Prepared By</th>
+                            <th><?php echo h(__('Prepared By')); ?></th>
                             <td><?php echo $document['PreparedBy']['name']?></td>
-                            <th>Approved By</th>
+                            <th><?php echo h(__('Approved By')); ?></th>
                             <td><?php echo $document['ApprovedBy']['name']?></td>
-                            <th>Issued By</th>
+                            <th><?php echo h(__('Issued By')); ?></th>
                             <td><?php echo $document['IssuedBy']['name']?></td>
                         </tr>
                     </table>
@@ -97,7 +97,7 @@
                                 echo '<div class="col-md-12">'. $this->element('onlyoffice',array(
                                     'url'=>$url,
                                     'placeholderid'=>0,
-                                    'panel_title'=>'Document Viewer',
+                                    'panel_title'=>__('Document Viewer'),
                                     'mode'=>$mode,
                                     'path'=>$file_path,
                                     'file'=>$file,
@@ -118,7 +118,7 @@
                                     'docid'=> $qcDocument['QcDocument']['id']
                                 )) .'</div>';
                             }else{
-                                echo "Something went wrong";
+                                echo __("Something went wrong");
                             } ?>
                         
                 </div>
@@ -131,24 +131,24 @@
 <div class="row">
     <div class="col-md-12">
         <div class="box box-default">
-            <div class="box-header"><h4>New Updated Document</h4></div>
+            <div class="box-header"><h4><?php echo h(__('New Updated Document')); ?></h4></div>
             <div class="box-body">
                 <div class="table-responsive">
                     <table class="table table-bordered">
                         <tr>
-                            <th>Document Number</th>
+                            <th><?php echo h(__('Document Number')); ?></th>
                             <td><?php echo $document['QcDocument']['document_number']?></td>
-                            <th>Revision Number</th>
+                            <th><?php echo h(__('Revision Number')); ?></th>
                             <td><?php echo $document['QcDocument']['revision_number'] + 1?></td>
-                            <th>Date Of Issue</th>
+                            <th><?php echo h(__('Date Of Issue')); ?></th>
                             <td><?php echo $document['QcDocument']['date_of_issue']?></td>
                         </tr>
                         <tr>
-                            <th>Prepared By</th>
+                            <th><?php echo h(__('Prepared By')); ?></th>
                             <td><?php echo $document['PreparedBy']['name']?></td>
-                            <th>Approved By</th>
+                            <th><?php echo h(__('Approved By')); ?></th>
                             <td><?php echo $document['ApprovedBy']['name']?></td>
-                            <th>Issued By</th>
+                            <th><?php echo h(__('Issued By')); ?></th>
                             <td>--</td>
                         </tr>
                     </table>
@@ -177,7 +177,7 @@
                                 'url'=>$url,                       
                                 'user_id'=>$user_id,               
                                 'placeholderid'=>$placeholderid,
-                                'panel_title'=>'Document Viewer',
+                                'panel_title'=>__('Document Viewer'),
                                 'mode'=>$mode,                     
                                 'path'=>$file_path,                
                                 'file'=>$file,
@@ -202,16 +202,16 @@
                 </div>
                 <div class="row">                
                     <div class="col-md-12">
-                        <h4>Changed Request Details</h4>
+                        <h4><?php echo h(__('Changed Request Details')); ?></h4>
                         <div class="table-responsive">
                             <table class="table">
                                 <tr>
                                 <?php foreach($fields as $field){ ?>
                                     <th><?php echo Inflector::humanize($field);?></th>
                                 <?php }?>
-                                <th>Prepared By</th>
-                                <th>Approved By</th>
-                                <th>Action</th>
+                                <th><?php echo h(__('Prepared By')); ?></th>
+                                <th><?php echo h(__('Approved By')); ?></th>
+                                <th><?php echo h(__('Action')); ?></th>
                                 </tr>
                                 <?php               
                                 foreach($records as $record){
@@ -269,14 +269,14 @@
         <div class="col-md-6"><?php echo $this->Form->input('revision_number',array('class'=>'form-control','default'=>$qcDocument['QcDocument']['revision_number']+1));?></div>
         <div class="col-md-6"><?php echo $this->Form->input('revision_date',array('class'=>'form-control','default'=>date('Y-m-d')));?></div>
     
-        <div class="col-md-12"><br /><?php echo $this->Form->submit('Update Document',array('class'=>'btn btn-lg btn-info'));
+        <div class="col-md-12"><br /><?php echo $this->Form->submit(__('Update Document'),array('class'=>'btn btn-lg btn-info'));
         echo $this->Form->end();?></div>
     <!-- update from ends-->
     </div>
 
 <?php } else {?>
     <div class="row">
-        <div class="col-md-12"><h4 class="text-danger">You have not defined Change Management Custom Table.</h4></div>
-        <div class="col-md-12">Click <?php echo $this->Html->link('Here',array('action'=>'define_change_history_table'));?> to link you change manahement custom table.</div>
+        <div class="col-md-12"><h4 class="text-danger"><?php echo h(__('You have not defined Change Management Custom Table.')); ?></h4></div>
+        <div class="col-md-12">Click <?php echo $this->Html->link(__('Here'),array('action'=>'define_change_history_table'));?> to link you change manahement custom table.</div>
     </div>
 <?php }?>

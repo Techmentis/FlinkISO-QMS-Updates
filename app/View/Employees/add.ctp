@@ -3,14 +3,14 @@
     <?php echo $this->Session->flash();?>   
 
     <div class="employees ">
-        <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Employees','modelClass'=>'Employee','options'=>array(),'pluralVar'=>'employees'))); ?>
-        <?php echo $this->Html->link('Add Bulk',array('action'=>'add_bulk','timestamp'=>date('ymdhis')),array('class'=>'btn btn-sm btn-primary pull-right'));?>
+        <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Employees'),'modelClass'=>'Employee','options'=>array(),'pluralVar'=>'employees'))); ?>
+        <?php echo $this->Html->link(__('Add Bulk'),array('action'=>'add_bulk','timestamp'=>date('ymdhis')),array('class'=>'btn btn-sm btn-primary pull-right'));?>
         <div class="nav panel panel-default">
             <div class="employees form col-md-12">
                 <?php echo $this->Form->create('Employee',array('role'=>'form','class'=>'form')); ?>
                 <div class="row">
                     <?php
-                    echo "</div><div class='row'><div class='col-md-12'><h4>Mandatory</h4></div>";
+                    echo '</div><div class=\'row\'><div class=\'col-md-12\'><h4>' . h(__('Mandatory')) . '</h4></div>';
                     echo "<div class='col-md-3'>".$this->Form->input('employee_number',array('class'=>'form-control',)) . '</div>'; 
                     echo "<div class='col-md-3'>".$this->Form->input('name',array('class'=>'form-control',)) . '</div>'; 
                     echo "<div class='col-md-3'>".$this->Form->input('branch_id',array('class'=>'form-control', 'style'=>'','required'=>'required')) . '</div>';
@@ -20,7 +20,7 @@
                     echo "<div class='col-md-3'>".$this->Form->input('employment_status',array('class'=>'','type'=>'radio','options'=>$customArray['employmentStatuses'],'default'=>1)) . '</div>'; 
                     echo "<div class='col-md-3'>".$this->Form->input('parent_id',array('class'=>'form-control', 'style'=>'')) . '</div>';                     
                     
-                    echo "</div><div class='row'><div class='col-md-12'><hr /><h4>Optional</h4></div>";
+                    echo '</div><div class=\'row\'><div class=\'col-md-12\'><hr /><h4>' . h(__('Optional')) . '</h4></div>';
                     
                     echo "<div class='col-md-3'>".$this->Form->input('qualification',array('class'=>'form-control',)) . '</div>'; 
                     echo "<div class='col-md-3'>".$this->Form->input('joining_date',array('class'=>'form-control',)) . '</div>'; 
@@ -36,7 +36,7 @@
                     echo "<div class='col-md-3'>".$this->Form->input('maritial_status',array('class'=>'','type'=>'radio','options'=>$customArray['maritialStatuses'])) . '</div>';      
                     
                     echo "<div class='col-md-3'>".$this->Form->input('is_approver',array('class'=>'','type'=>'radio','options'=>$customArray['isApprovar'],'default'=>0)) . '</div>'; 
-                    echo "<div class='col-md-3'>".$this->Form->input('is_hod',array('class'=>'','type'=>'radio','legend'=>'Is HOD?', 'options'=>$customArray['isHod'],'default'=>0)) . '</div>'; 
+                    echo "<div class='col-md-3'>".$this->Form->input('is_hod',array('class'=>'','type'=>'radio','legend'=>__('Is HOD?'), 'options'=>$customArray['isHod'],'default'=>0)) . '</div>'; 
                     echo "<div class='col-md-6'>".$this->Form->input('prepared_by',array('class'=>'form-control',)) . '</div>'; 
                     echo "<div class='col-md-6'>".$this->Form->input('approved_by',array('class'=>'form-control',)) . '</div>';
                     ?>
@@ -77,7 +77,7 @@
         $().ready(function() {
             jQuery.validator.addMethod("greaterThanZero", function(value, element) {
                 return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';
-            }, "Please select the value");
+            }, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
             $('#EmployeeAddForm').validate({            
                 rules: {
@@ -125,7 +125,7 @@
 <?php echo $this->element('master_duplicate_validation', array(
     'recordIdSelector'=>'#EmployeeId',
     'fields'=>array(
-        '#EmployeeEmployeeNumber'=>array('field'=>'employee_number', 'message'=>'This employee number already exists.'),
-        '#EmployeeOfficeEmail'=>array('field'=>'office_email', 'message'=>'This office email already exists.')
+        '#EmployeeEmployeeNumber'=>array('field'=>'employee_number', 'message'=>__('This employee number already exists.')),
+        '#EmployeeOfficeEmail'=>array('field'=>'office_email', 'message'=>__('This office email already exists.'))
     )
 )); ?>

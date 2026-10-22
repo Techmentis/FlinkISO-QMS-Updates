@@ -19,7 +19,7 @@
 </style>
 <div  id="main">
 	<?php echo $this->Session->flash();?>
-	<?php echo $this->element('nav-header-lists',array('postData'=>array('friendlyName'=>'Processes','pluralHumanName'=>'processes','modelClass'=>'Process','options'=>array("process_definition"=>"Process Definition","process_objective_and_metrics"=>"Process Objecttive And Metrics","process_owners"=>"Process Owners","applicable_to_branches"=>"Applicable To Branches","additional_responsibilities"=>"Additional Responsibilities","input_processes"=>"Input Processes","output_processes"=>"Outout Processes","process_output"=>"Process Output","risks_and_opportunities"=>"Risks And Opportunities","standards"=>"Standards","clauses"=>"Clauses","process_definition"=>"Process Definition",""=>"Process Objecttive And Metrics","process_owners"=>"Process Owners","applicable_to_branches"=>"Applicable To Branches","additional_responsibilities"=>"Additional Responsibilities","input_processes"=>"Input Processes","output_processes"=>"Outout Processes","process_output"=>"Process Output","risks_and_opportunities"=>"Risks And Opportunities","standards"=>"Standards","clauses"=>"Clauses"),'pluralVar'=>'Processs'))); ?><div class="row"><div class="col-md-12">
+	<?php echo $this->element('nav-header-lists',array('postData'=>array('friendlyName'=>__('Processes'),'pluralHumanName'=>__('processes'),'modelClass'=>'Process','options'=>array("process_definition"=>__("Process Definition"),"process_objective_and_metrics"=>__("Process Objecttive And Metrics"),"process_owners"=>__("Process Owners"),"applicable_to_branches"=>__("Applicable To Branches"),"additional_responsibilities"=>__("Additional Responsibilities"),"input_processes"=>__("Input Processes"),"output_processes"=>__("Outout Processes"),"process_output"=>__("Process Output"),"risks_and_opportunities"=>__("Risks And Opportunities"),"standards"=>__("Standards"),"clauses"=>__("Clauses"),"process_definition"=>__("Process Definition"),""=>__("Process Objecttive And Metrics"),"process_owners"=>__("Process Owners"),"applicable_to_branches"=>__("Applicable To Branches"),"additional_responsibilities"=>__("Additional Responsibilities"),"input_processes"=>__("Input Processes"),"output_processes"=>__("Outout Processes"),"process_output"=>__("Process Output"),"risks_and_opportunities"=>__("Risks And Opportunities"),"standards"=>__("Standards"),"clauses"=>__("Clauses")),'pluralVar'=>'Processs'))); ?><div class="row"><div class="col-md-12">
 	</div></div>
 	<div id="newdoctitle<?php echo $docid;?>"></div>        
         <div class="box collapsed-box" id="ofdcontainer<?php echo $placeholderid;?>">
@@ -37,71 +37,71 @@
 		<div class="table-responsive">
 			<table class="table table-bordered table table-striped table-hover" id="exportcsv">
 				<tr>
-					<th>Qc Document</th>
+					<th><?php echo h(__('Qc Document')); ?></th>
 					<td><?php echo $process['QcDocument']['title'];?></td>
 				</tr>
 				<tr>
-					<th> Process Definition</th>
+					<th> <?php echo h(__('Process Definition')); ?></th>
 					<td><?php echo $process['Process']['process_definition'];?></td>
 				</tr>
 				<tr>
-					<th> Process Objecttive And Metrics</th>
+					<th> <?php echo h(__('Process Objecttive And Metrics')); ?></th>
 					<td><?php echo $process['Process']['process_objective_and_metrics'];?></td>
 				</tr>
 				<tr>
-					<th>Process Owners</th>
+					<th><?php echo h(__('Process Owners')); ?></th>
 					<td><?php foreach(json_decode($process['Process']['process_owners'],true) as $field ){
 						echo $processOwners[$field] .", ";
 					};?></td>
 				</tr>
 				<tr>
-					<th>Applicable To Branches</th>
+					<th><?php echo h(__('Applicable To Branches')); ?></th>
 					<td><?php foreach(json_decode($process['Process']['applicable_to_branches'],true) as $field ){
 						echo $applicableToBranches[$field] .", ";
 					};?></td>
 				</tr>
 				<tr>
-					<th> Additional Responsibilities</th>
+					<th> <?php echo h(__('Additional Responsibilities')); ?></th>
 					<td><?php echo $process['Process']['additional_responsibilities'];?></td>
 				</tr>
 				<tr>
-					<th>Input Processes</th>
+					<th><?php echo h(__('Input Processes')); ?></th>
 					<td><?php foreach(json_decode($process['Process']['input_processes'],true) as $field ){
 						echo $inputProcesses[$field] .", ";
 					};?></td>
 				</tr>
 				<tr>
-					<th>Outout Processes</th>
+					<th><?php echo h(__('Outout Processes')); ?></th>
 					<td><?php foreach(json_decode($process['Process']['output_processes'],true) as $field ){
 						echo $outputProcesses[$field] .", ";
 					};?></td>
 				</tr>
 				<tr>
-					<th> Process Output</th>
+					<th> <?php echo h(__('Process Output')); ?></th>
 					<td><?php echo $process['Process']['process_output'];?></td>
 				</tr>
 				<tr>
-					<th> Risks And Opportunities</th>
+					<th> <?php echo h(__('Risks And Opportunities')); ?></th>
 					<td><?php echo $process['Process']['risks_and_opportunities'];?></td>
 				</tr>
 				<tr>
-					<th>Standards</th>
+					<th><?php echo h(__('Standards')); ?></th>
 					<td><?php foreach(json_decode($process['Process']['standards'],true) as $field ){
 						echo $standards[$field] .", ";
 					};?></td>
 				</tr>
 				<tr>
-					<th>Clauses</th>
+					<th><?php echo h(__('Clauses')); ?></th>
 					<td><?php foreach(json_decode($process['Process']['clauses'],true) as $field ){
 						echo $clauses[$field] .", ";
 					};?></td>
 				</tr>
 				<tr>
-					<th>Prepared By</th>
+					<th><?php echo h(__('Prepared By')); ?></th>
 					<td><?php echo $process['PreparedBy']['name'];?></td>
 				</tr>
 				<tr>
-					<th>Approved By</th>
+					<th><?php echo h(__('Approved By')); ?></th>
 					<td><?php echo $process['ApprovedBy']['name'];?></td>
 				</tr>
 			</table>
@@ -110,7 +110,7 @@
 	<div class="row">
 		<div class="col-md-4">
 			<div class="row">
-				<div class="col-md-12 text-center">Input</div>
+				<div class="col-md-12 text-center"><?php echo h(__('Input')); ?></div>
 			<?php foreach($ips as $id => $name){ ?>
 				<div class="col-md-12"><div class="process_div input_div">
 					<?php echo $this->Html->link($name,array('action'=>'view',$id))?>
@@ -120,14 +120,14 @@
 		</div>
 		<div class="col-md-4">
 			<div class="row">
-				<div class="col-md-12 text-center">Current</div>
+				<div class="col-md-12 text-center"><?php echo h(__('Current')); ?></div>
 					<div class="col-md-12">
 						<div class="process_div current_div"><?php echo $process['Process']['name'];?></div>
 					</div>
 				</div>
 			</div>			
 		<div class="col-md-4">
-			<div class="col-md-12 text-center">Output</div>
+			<div class="col-md-12 text-center"><?php echo h(__('Output')); ?></div>
 			<?php foreach($ops as $id => $name){ ?>
 				<div class="col-md-12"><div class="process_div output_div">
 					<?php echo $this->Html->link($name,array('action'=>'view',$id))?>
@@ -143,7 +143,7 @@
 	</div>
 	<div class="row">
 		<div class="col-md-12">
-			<h4>Linked Tables</h4>
+			<h4><?php echo h(__('Linked Tables')); ?></h4>
 			<?php 
 			foreach($linkedTables as $id => $linkedTable){
 				echo "<div class='col-md-6'><ul>";

@@ -18,15 +18,15 @@ $values = array('Audit Schedule','Audit Checklist','Audit Findings','MRM','Custo
 <?php echo $this->element('checkbox-script'); ?><div  id="main">
 	<?php echo $this->Session->flash();?>	
 	<div class="qcDocuments ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Qc Documents','modelClass'=>'QcDocument','options'=>array("sr_no"=>"Sr No","document_number"=>"Document Number","reference_number"=>"Reference Number","issue_number"=>"Issue Number","date_of_next_issue"=>"Date Of Next Issue","date_of_issue"=>"Date Of Issue","effective_from_date"=>"Effective From Date","revision_number"=>"Revision Number","date_of_review"=>"Date Of Review","revision_date"=>"Revision Date","document_type"=>"Document Type","it_categories"=>"It Categories","document_status"=>"Document Status","issued_by"=>"Issued By","archived"=>"Archived","change_history"=>"Change History","cr_status"=>"Cr Status","mark_for_cr_update"=>"Mark For Cr Update","temp_date_of_issue"=>"Temp Date Of Issue","temp_effective_from_date"=>"Temp Effective From Date","linked_formats"=>"Linked Formats","cover_page"=>"Cover Page","page_orientation"=>"Page Orientation"),'pluralVar'=>'qcDocuments'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Qc Documents'),'modelClass'=>'QcDocument','options'=>array("sr_no"=>__("Sr No"),"document_number"=>__("Document Number"),"reference_number"=>__("Reference Number"),"issue_number"=>__("Issue Number"),"date_of_next_issue"=>__("Date Of Next Issue"),"date_of_issue"=>__("Date Of Issue"),"effective_from_date"=>__("Effective From Date"),"revision_number"=>__("Revision Number"),"date_of_review"=>__("Date Of Review"),"revision_date"=>__("Revision Date"),"document_type"=>__("Document Type"),"it_categories"=>__("It Categories"),"document_status"=>__("Document Status"),"issued_by"=>__("Issued By"),"archived"=>__("Archived"),"change_history"=>__("Change History"),"cr_status"=>__("Cr Status"),"mark_for_cr_update"=>__("Mark For Cr Update"),"temp_date_of_issue"=>__("Temp Date Of Issue"),"temp_effective_from_date"=>__("Temp Effective From Date"),"linked_formats"=>__("Linked Formats"),"cover_page"=>__("Cover Page"),"page_orientation"=>__("Page Orientation")),'pluralVar'=>'qcDocuments'))); ?>
 
 		
 		<div class="table-responsive" style="overflow:scroll">
 			<div class="row">
 				<div class="col-md-12">
-					<h4>Add Initial Documents & Data.</h4>
-					<p>Forms for following documents are available to download through our APIs. <strong>You can use this option to add basic QMS documents to understand how system works.</strong>. When you click Submit, system will add all these documents and will copy a blank ".DOCX" files against each document. You can edit these documents to add your content.To edit, goto each document and click edit icon. To add HTML Forms, goto each document's view page and click on Database icon at the bottom. It will take you to the HTML Form Builder. Based on the document, select the HTML Form and click download and save the form. System will then create HTML form for that document. Repeat this step for each document.</p>
-					<p class="text-warning">You can change document name, number, version from here. Once added these fields can not be changed. You can change all other fields from Edit page of the document. If you wish to continue with these documents, add existing name, number and version and proceed.</p>
+					<h4><?php echo h(__('Add Initial Documents')); ?> & <?php echo h(__('Data.')); ?></h4>
+					<p><?php echo h(__('Forms for following documents are available to download through our APIs.')); ?> <strong><?php echo h(__('You can use this option to add basic QMS documents to understand how system works.')); ?></strong><?php echo h(__('. When you click Submit, system will add all these documents and will copy a blank ".DOCX" files against each document. You can edit these documents to add your content.To edit, goto each document and click edit icon. To add HTML Forms, goto each document\'s view page and click on Database icon at the bottom. It will take you to the HTML Form Builder. Based on the document, select the HTML Form and click download and save the form. System will then create HTML form for that document. Repeat this step for each document.')); ?></p>
+					<p class="text-warning"><?php echo h(__('You can change document name, number, version from here. Once added these fields can not be changed. You can change all other fields from Edit page of the document. If you wish to continue with these documents, add existing name, number and version and proceed.')); ?></p>
 				</div>
 			</div>
 			<?php echo $this->Form->create('QcDocument',array('role'=>'form','class'=>'form','type'=>'file')); ?>
@@ -38,16 +38,16 @@ $values = array('Audit Schedule','Audit Checklist','Audit Findings','MRM','Custo
 			</div>
 			<table cellpadding="0" cellspacing="0" class="table table-responsive table-hover index">
 				<tr>
-					<th width="200">Document Name</th>
-					<th>Number</th>
-					<th>Version</th>
-					<th>Date Created</th>
-					<th>Date Of Issue</th>
-					<th>Effective From Date</th>
+					<th width="200"><?php echo h(__('Document Name')); ?></th>
+					<th><?php echo h(__('Number')); ?></th>
+					<th><?php echo h(__('Version')); ?></th>
+					<th><?php echo h(__('Date Created')); ?></th>
+					<th><?php echo h(__('Date Of Issue')); ?></th>
+					<th><?php echo h(__('Effective From Date')); ?></th>
 					
-					<th>Document Type</th>
-					<th>Prepared By</th>
-					<th>Approved By</th>
+					<th><?php echo h(__('Document Type')); ?></th>
+					<th><?php echo h(__('Prepared By')); ?></th>
+					<th><?php echo h(__('Approved By')); ?></th>
 				</tr>
 				
 				<?php 
@@ -92,9 +92,9 @@ $values = array('Audit Schedule','Audit Checklist','Audit Findings','MRM','Custo
 		</div>
 		<div class="row">
 			<div class="col-md-12">
-				<h5>Note:</h5>
-				<p>After you add these document, make sure to update "Audit" & "Audit Findings" as child documents to "Audit Schedule". To do this, goto each document and select "Audit Schedule" as a parent document from the drop down.</p>
-				<p>After your initial testing, delete all these documents and HTML Tables, and add your actual QMS documents with correct name,number etc and create new custom HTML tables.</p>
+				<h5><?php echo h(__('Note:')); ?></h5>
+				<p><?php echo h(__('After you add these document, make sure to update "Audit"')); ?> & <?php echo h(__('"Audit Findings" as child documents to "Audit Schedule". To do this, goto each document and select "Audit Schedule" as a parent document from the drop down.')); ?></p>
+				<p><?php echo h(__('After your initial testing, delete all these documents and HTML Tables, and add your actual QMS documents with correct name,number etc and create new custom HTML tables.')); ?></p>
 			</div>
 		</div>
 		<div class="">
@@ -123,7 +123,7 @@ $values = array('Audit Schedule','Audit Checklist','Audit Findings','MRM','Custo
 
 		jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 			return this.optional(element) || (parseFloat(value) != -1);
-		}, "Please select the value");
+		}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 
 		$('#QcDocumentAddBulkForm').validate(); 

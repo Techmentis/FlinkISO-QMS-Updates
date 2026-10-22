@@ -3,7 +3,7 @@
 	<?php echo $this->Session->flash();?>	
 
 	<div class="designations ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Designations','modelClass'=>'Designation','options'=>array(),'pluralVar'=>'designations'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Designations'),'modelClass'=>'Designation','options'=>array(),'pluralVar'=>'designations'))); ?>
 
 		<div class="nav panel panel-default">
 			<div class="designations form col-md-12">
@@ -71,5 +71,5 @@
 		</script>
 <?php echo $this->element('master_duplicate_validation', array(
     'recordIdSelector'=>'#DesignationId',
-    'fields'=>array('#DesignationName'=>array('field'=>'name', 'message'=>'This designation already exists.'))
+    'fields'=>array('#DesignationName'=>array('field'=>'name', 'message'=>__('This designation already exists.')))
 )); ?>

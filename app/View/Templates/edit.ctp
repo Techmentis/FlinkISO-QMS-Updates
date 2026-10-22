@@ -24,7 +24,7 @@
 				success: function(data, result) {						    		
 					if(data == 1){
 						$("#TemplateName").val('');
-						$("#duplicate_name").html('Template with this name already exists. Chose another name');
+						$("#duplicate_name").html(<?php echo json_encode(__('Template with this name already exists. Chose another name'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 					}else{
 						$("#duplicate_name").html('');
 					}
@@ -36,7 +36,7 @@
 
 </script>				
 <div id="qcDocuments_ajax">
-	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Template','modelClass'=>'Template','options'=>array(),'pluralVar'=>'templates'))); ?>
+	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Template'),'modelClass'=>'Template','options'=>array(),'pluralVar'=>'templates'))); ?>
 	<?php echo $this->Form->create('Template',array('role'=>'form','class'=>'form','type'=>'file')); ?>
 	<div class="nav panel panel-default">
 		<div class="qcDocuments form col-md-12">			
@@ -44,7 +44,7 @@
 				<?php
 				$filesTypes = array('docx'=>'Document','xlsx'=>'Spreadsheet');
 				echo $this->Form->input('id');
-				echo "<div class='col-md-12'>".$this->Form->input('name',array('readonly'=>'readonly', 'label'=>'Template Name', 'class'=>'form-control',)) . '</div>';
+				echo "<div class='col-md-12'>".$this->Form->input('name',array('readonly'=>'readonly', 'label'=>__('Template Name'), 'class'=>'form-control',)) . '</div>';
 				echo "<div class='col-md-4 hide'>".$this->Form->input('file_type',array('readonly'=>'readonly','options'=>$filesTypes, 'type'=>'radio','default'=>'docx', 'required'=>'required','class'=>'',)) . '</div>';
 				echo "<div class='col-md-4'>".$this->Form->hidden('model',array('default'=>'Template',)) . '</div>';
 				echo "<div class='col-md-4'>".$this->Form->hidden('controller',array('default'=>'templates',)) . '</div>';
@@ -76,7 +76,7 @@
 		echo $this->element('onlyoffice',array(
 			'url'=>$url,
 			'placeholderid'=>$placeholderid,
-			'panel_title'=>'Document Viewer',
+			'panel_title'=>__('Document Viewer'),
 			'mode'=>$mode,
 			'path'=>$file_path,
 			'file'=>$file,
@@ -131,7 +131,7 @@
 			str2 = str1.replace(/\s/g,' ');
 			str = str2.replace('/\//','/');
 		}else if(field == "n"){
-			name = "Document Number";
+			name = <?php echo json_encode(__('Document Number'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 				// clean_document_number(value);
 			var path = value;
 			str1 = path.replace(/[`~!@#$%^&*()|+\=?;:'",.<>\{\}\[\]\\]/gi,'');
@@ -149,12 +149,12 @@
 					if(field == "t"){
 						name = "Title";
 					}else if(field == "n"){
-						name = "Document Number";
+						name = <?php echo json_encode(__('Document Number'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 							// clean_document_number(value);
 					}
 
 					$("#"+id).val('');
-					$("#duplicate_errors").html(name + " already exists");
+					$("#duplicate_errors").html(name + <?php echo json_encode(__(' already exists'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 				}else{
 					$("#duplicate_errors").html("");
 						// clean_document_number(value);
@@ -167,7 +167,7 @@
 
 		jQuery.validator.addMethod("greaterThanZero", function(value, element) {
 			return this.optional(element) || (parseFloat(value) != -1);
-		}, "Please select the value");
+		}, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
 		$('#TemplateEditForm').validate(); 
 		

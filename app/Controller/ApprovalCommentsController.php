@@ -20,7 +20,7 @@ class ApprovalCommentsController extends AppController {
         $this->layout = 'ajax';
 
         if(!$this->request->params['named']['approval_step_id']){
-            echo "Approval Step Missing.";
+            echo __("Approval Step Missing.");
             exit;
         }
 

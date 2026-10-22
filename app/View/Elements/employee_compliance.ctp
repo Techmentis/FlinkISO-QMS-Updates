@@ -9,14 +9,14 @@
 	</style>
 	<div class="row">
 		<div class="col-md-6">
-			<h3><?php echo $customTable['CustomTable']['name'];?><br /><small>Employee Compliance Report</small></h3>
+			<h3><?php echo $customTable['CustomTable']['name'];?><br /><small><?php echo h(__('Employee Compliance Report')); ?></small></h3>
 		</div>
 		<div class="col-md-6">
 			<h3><?php echo $schedules[$customTable['CustomTable']['schedule']];; ?></h3>
 			<?php 
-				if($customTable['CustomTable']['data_update_type'] == 1)echo "Every user should update a saperate document for a defined schedule.";
-				if($customTable['CustomTable']['data_update_type'] == 2)echo "Multiple users should update a single document for a defined schedule.";
-				if($customTable['CustomTable']['data_update_type'] == 0)echo "Any user should update a single document for a defined schedule.";
+				if($customTable['CustomTable']['data_update_type'] == 1)echo __("Every user should update a saperate document for a defined schedule.");
+				if($customTable['CustomTable']['data_update_type'] == 2)echo __("Multiple users should update a single document for a defined schedule.");
+				if($customTable['CustomTable']['data_update_type'] == 0)echo __("Any user should update a single document for a defined schedule.");
 			?>
 		</div>
 	</div>
@@ -25,27 +25,27 @@
 		<div class="col-md-3"><?php echo $this->Form->input('department_id',array('class'=>'form-control', 'multiple'=>true, 'options'=>$PublishedDepartmentList));?></div>
 		<div class="col-md-3"><?php echo $this->Form->input('branch_id',array('class'=>'form-control','multiple'=>true,'options'=>$PublishedBranchList));?></div>
 		<div class="col-md-3"><?php echo $this->Form->input('date_range',array('class'=>'form-control','id'=>'adddaterange'));?></div>
-		<div class="col-md-2"><?php echo $this->Form->submit('Submit',array('class'=>'btn btn-md btn-default','style'=>'margin-top:28px'));?></div>
+		<div class="col-md-2"><?php echo $this->Form->submit(__('Submit'),array('class'=>'btn btn-md btn-default','style'=>'margin-top:28px'));?></div>
 		<div class="col-md-1"><i class="fa fa-refresh fa-spin pull-right" style="margin-top:40px" id="refspin"></i></div>
 		<?php echo $this->Form->end();?>
 	</div>
 	<div class="row">
 		<div class="col-md-12"><br />
 			<table class="table table-bordered">
-				<tr><th rowspan="2"><h4>Duration</h4></th>
+				<tr><th rowspan="2"><h4><?php echo h(__('Duration')); ?></h4></th>
 					<?php foreach($users as $userid => $username){ ?>
 						<th colspan="2"><?php echo $username;?></th>
 					<?php } ?>
-						<th colspan="2">Total</th>
+						<th colspan="2"><?php echo h(__('Total')); ?></th>
 						<th rowspan="2" style="background-color:#f5f5f5">%</th>
 				</tr>
 				<tr>
 					<?php foreach($users as $userid => $username){ ?>
-						<td>Expected</td>
-						<td>Actual</td>
+						<td><?php echo h(__('Expected')); ?></td>
+						<td><?php echo h(__('Actual')); ?></td>
 					<?php } ?>
-						<th>Expected</th>
-						<th>Actual</th>
+						<th><?php echo h(__('Expected')); ?></th>
+						<th><?php echo h(__('Actual')); ?></th>
 				</tr>
 			<?php
 			foreach($results as $duration => $data){ ?>
@@ -88,7 +88,7 @@
 				</tr>
 			<?php }?>
 			<tr style="background-color:#f5f5f5">
-				<th>Total</th>
+				<th><?php echo h(__('Total')); ?></th>
 				<?php foreach($vav as $user => $totals){ ?>
 					<th><?php echo $totals['expected'];?></th>
 					<th><?php echo $totals['actual'];

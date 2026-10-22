@@ -1,18 +1,18 @@
 <?php echo $this->element('Emails/email_header', array(
-    'emailTitle' => 'Daily Task Reminders',
-    'emailPreheader' => 'Your FlinkISO task summary is ready.',
+    'emailTitle' => __('Daily Task Reminders'),
+    'emailPreheader' => __('Your FlinkISO task summary is ready.'),
     'environment' => isset($env) ? $env : null,
     'app_url' => isset($app_url) ? $app_url : null
 )); ?>
 <table role="presentation" width="100%" cellpadding="7" cellspacing="0" border="0" style="width:100%; border:1px solid #d9d9d9; border-collapse:collapse; font-size:12px; line-height:1.4;">
     <thead>
         <tr style="background-color:#1769aa; color:#ffffff;">
-            <th align="left">Name</th>
-            <th align="center">Completion</th>
-            <th align="left">Type</th>
-            <th align="left">Status</th>
-            <th align="left">Assigned To</th>
-            <th align="left">From&ndash;To</th>
+            <th align="left"><?php echo h(__('Name')); ?></th>
+            <th align="center"><?php echo h(__('Completion')); ?></th>
+            <th align="left"><?php echo h(__('Type')); ?></th>
+            <th align="left"><?php echo h(__('Status')); ?></th>
+            <th align="left"><?php echo h(__('Assigned To')); ?></th>
+            <th align="left"><?php echo h(__('From')); ?>&ndash;<?php echo h(__('To')); ?></th>
         </tr>
     </thead>
     <tbody>
@@ -20,9 +20,9 @@
         <?php foreach ($tasks as $task): ?>
         <?php
         $taskType = isset($task['Task']['type']) ? $task['Task']['type'] : '';
-        if ((int)$task['Task']['task_type'] === 0) $taskType = 'General';
-        elseif ((int)$task['Task']['task_type'] === 1) $taskType = 'Process Related';
-        elseif ((int)$task['Task']['task_type'] === 2) $taskType = 'Project Related';
+        if ((int)$task['Task']['task_type'] === 0) $taskType = __('General');
+        elseif ((int)$task['Task']['task_type'] === 1) $taskType = __('Process Related');
+        elseif ((int)$task['Task']['task_type'] === 2) $taskType = __('Project Related');
         $schedule = isset($schedules[$task['Task']['schedule_id']]) ? $schedules[$task['Task']['schedule_id']] : '';
         ?>
         <tr>
@@ -35,7 +35,7 @@
         </tr>
         <?php endforeach; ?>
     <?php else: ?>
-        <tr><td colspan="6" style="padding:18px; text-align:center; color:#777777;">No results found.</td></tr>
+        <tr><td colspan="6" style="padding:18px; text-align:center; color:#777777;"><?php echo h(__('No results found.')); ?></td></tr>
     <?php endif; ?>
     </tbody>
 </table>

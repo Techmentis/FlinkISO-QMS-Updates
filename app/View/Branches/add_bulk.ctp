@@ -3,7 +3,7 @@
     <?php echo $this->Session->flash(); ?>	
 
     <div class="branches ">
-      <?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => 'Branches', 'modelClass' => 'Branch', 'options' => array(), 'pluralVar' => 'branches'))); ?>            
+      <?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => __('Branches'), 'modelClass' => 'Branch', 'options' => array(), 'pluralVar' => 'branches'))); ?>            
       <div class="nav panel panel-default">
         <div class="branches form col-md-12">
            <?php echo $this->Form->create('Branch', array('role' => 'form', 'class' => 'form')); ?>
@@ -18,8 +18,8 @@ Branch 4
 .
 .
 ";
-             echo "<div class='col-md-12'>" . $this->Form->input('name', array('type'=>'textarea', 'class' => 'form-control','label'=>'Add multiple branches/locations','placeholder'=>$str)) . '</div>';
-             echo "<div class='col-md-12 help-text'>Add branch/loction with < enter > as new record.</div>";
+             echo "<div class='col-md-12'>" . $this->Form->input('name', array('type'=>'textarea', 'class' => 'form-control','label'=>__('Add multiple branches/locations'),'placeholder'=>$str)) . '</div>';
+             echo '<div class=\'col-md-12 help-text\'>' . h(__('Add branch/loction with')) . ' < ' . h(__('enter > as new record.')) . '</div>';
              ?>
              <?php
              echo $this->Form->input('id');
@@ -60,7 +60,7 @@ Branch 4
 
         jQuery.validator.addMethod("greaterThanZero", function(value, element) {
             return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';
-        }, "Please select the value");
+        }, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
         $('#BranchAddBulkForm').validate({        	
             rules: {

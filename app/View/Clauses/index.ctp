@@ -1,7 +1,7 @@
 <?php echo $this->element('checkbox-script'); ?><div  id="main">
 	<?php echo $this->Session->flash();?>	
 	<div class="clauses ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Clauses','modelClass'=>'Clause','options'=>array("sr_no"=>"Sr No","title"=>"Title","standard"=>"Standard","clause"=>"Clause","sub-clause"=>"Sub-clause","details"=>"Details","additional_details"=>"Additional Details","tabs"=>"Tabs","external_link_1"=>"External Link 1","external_link_2"=>"External Link 2","external_link_3"=>"External Link 3","external_link_4"=>"External Link 4","external_link_5"=>"External Link 5","system_tables"=>"System Tables"),'pluralVar'=>'clauses'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Clauses'),'modelClass'=>'Clause','options'=>array("sr_no"=>__("Sr No"),"title"=>__("Title"),"standard"=>__("Standard"),"clause"=>__("Clause"),"sub-clause"=>__("Sub-clause"),"details"=>__("Details"),"additional_details"=>__("Additional Details"),"tabs"=>__("Tabs"),"external_link_1"=>__("External Link 1"),"external_link_2"=>__("External Link 2"),"external_link_3"=>__("External Link 3"),"external_link_4"=>__("External Link 4"),"external_link_5"=>__("External Link 5"),"system_tables"=>__("System Tables")),'pluralVar'=>'clauses'))); ?>
 
 		<script type="text/javascript">
 			$(document).ready(function(){
@@ -24,7 +24,7 @@
 					<th><?php echo $this->Paginator->sort('prepared_by'); ?></th>		
 					<th><?php echo $this->Paginator->sort('approved_by'); ?></th>		
 					<th><?php echo $this->Paginator->sort('publish'); ?></th>	
-					<th>Action</th>			
+					<th><?php echo h(__('Action')); ?></th>			
 				</tr>
 				<?php if($clauses){ ?>
 					<?php foreach ($clauses as $clause): ?>
@@ -49,7 +49,7 @@
 							</tr>
 						<?php endforeach; ?>
 					<?php }else{ ?>
-						<tr><td colspan=90>No results found</td></tr>
+						<tr><td colspan=90><?php echo h(__('No results found')); ?></td></tr>
 					<?php } ?>
 				</table>
 				<?php echo $this->Form->end();?>			

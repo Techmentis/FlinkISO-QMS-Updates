@@ -104,7 +104,7 @@ if($filetype != null){
         <div id="newdoctitle<?php echo $docid;?>"></div>        
         <div class="box collapsed-box" id="ofdcontainer<?php echo $placeholderid;?>">
           <div class="box-header with-border data-header" data-widget="collapse">
-            <h3 class="box-title"><i class="fa <?php echo $icon;?>"></i>&nbsp;&nbsp;<?php echo $heading;?>&nbsp;&nbsp;<small>Your document is ready, click here to load the document.</small></h3>
+            <h3 class="box-title"><i class="fa <?php echo $icon;?>"></i>&nbsp;&nbsp;<?php echo $heading;?>&nbsp;&nbsp;<small><?php echo h(__('Your document is ready, click here to load the document.')); ?></small></h3>
             <div class="box-tools pull-right">
               <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus" id="ofccontainerbtn<?php echo $placeholderid;?>"></i></button>
           </div>
@@ -126,17 +126,17 @@ if($filetype != null){
         // add reload document script as a function for each IF.
         $comarray = array('qc_documents','custom_tables','processes','pdf_templates');
         if($this->request->controller == 'custom_tables' && $this->action == 'view'){
-            echo "<div class='data_type_notification'>Loading file in view mode.</div>";
+            echo '<div class=\'data_type_notification\'>' . h(__('Loading file in view mode.')) . '</div>';
             $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/custom_tables'. '/' . $record_id . '/' . $file;
             $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/custom_tables'. '/' . $record_id . '/' . 'diff.zip';
             $callbackUrl = Router::url('/',true) ."custom_tables/save_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller ;            
         }else if($this->request->controller == 'custom_tables' && $this->action == 'recreate'){
-            echo "<div class='data_type_notification'>Loading Custom Table File.</div>";
+            echo '<div class=\'data_type_notification\'>' . h(__('Loading Custom Table File.')) . '</div>';
             $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/custom_tables'. '/' . $record_id . '/' . $file;
             $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/custom_tables'. '/' . $record_id . '/' . 'diff.zip';
             $callbackUrl = Router::url('/',true) ."custom_tables/save_custom_table_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller ;            
         }else if($this->request->controller == 'templates' && $this->action == 'edit'){
-            echo "<div class='data_type_notification'>Loading Template file.</div>";
+            echo '<div class=\'data_type_notification\'>' . h(__('Loading Template file.')) . '</div>';
             $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/templates'. '/' . $record_id . '/' . $file;
             $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/templates'. '/' . $record_id . '/' . 'diff.zip';
             $callbackUrl = Router::url('/',true) ."templates/save_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller ;            
@@ -144,10 +144,10 @@ if($filetype != null){
         {
             if($this->action == 'edit' || $this->action == 'add'){
                 if(!$mode)$mode = 'edit';
-                echo "<div class='data_type_notification'>Document setting is Document/Both. Loding document in Edit mode.</div>";
+                echo '<div class=\'data_type_notification\'>' . h(__('Document setting is Document/Both. Loding document in Edit mode.')) . '</div>';
             }else{
                 $mode = 'view';
-                echo "<div class='data_type_notification'>Loading file in view mode.</div>";
+                echo '<div class=\'data_type_notification\'>' . h(__('Loading file in view mode.')) . '</div>';
             }
             // section for custom forms         
             
@@ -157,7 +157,7 @@ if($filetype != null){
             $callbackUrl = Router::url('/',true) ."custom_tables/save_rec_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller;
         }else if(!in_array($this->request->controller, $comarray) && ($this->action == 'add' || $this->action == 'edit' || $this->action == 'view') && $document['QcDocument']['data_type'] == 1)
         {
-            echo "<div class='data_type_notification'>Document setting is Data. Loding document in View mode.</div>";            
+            echo '<div class=\'data_type_notification\'>' . h(__('Document setting is Data. Loding document in View mode.')) . '</div>';            
             $mode = 'view';
             // section for custom forms
             $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/' . 'custom_tables'. '/' . $fileEdit['File']['id'] . '/' . $fileEdit['File']['name'].'.'.$fileEdit['File']['file_type'];
@@ -353,7 +353,7 @@ if($filetype != null){
                                 <?php if(!empty($finalHistory)){ ?>
                                     <div class="col-md-12" style="padding-top:10px">
                                         <p style="padding-left:10px; padding-top:10px; margin-top:10px; border-top:1px solid #ccc;">
-                                            <strong>Note:</strong> Previous document versions are available. You can either view previous document version side-by-side or at the bottom on the current document. To toggle the view, click toggle button below.
+                                            <strong><?php echo h(__('Note:')); ?></strong> <?php echo h(__('Previous document versions are available. You can either view previous document version side-by-side or at the bottom on the current document. To toggle the view, click toggle button below.')); ?>
                                         </p>
                                     </div>
                                 <?php } ?>
@@ -366,7 +366,7 @@ if($filetype != null){
                                                     '<i class="fa fa-toggle-on fa-lg"></i>',
                                                     array('action'=>$this->action,$this->request->params['pass'][0],'compare'=>'off','timestamp'=>date('ymdhis')),
                                                     array(
-                                                        'data-original-title'=>'Turn off side-by-side compare.',
+                                                        'data-original-title'=>__('Turn off side-by-side compare.'),
                                                         'compare'=>'yes',
                                                         'class'=>'btn text-success tooltip1',
                                                         'data-toggle'=>'tooltip',
@@ -380,7 +380,7 @@ if($filetype != null){
                                                     '<i class="fa fa-toggle-off fa-lg"></i>',
                                                     array('action'=>$this->action,$this->request->params['pass'][0],'compare'=>'yes','timestamp'=>date('ymdhis')),
                                                     array(
-                                                        'data-original-title'=>'Turn On side-by-side compare.',
+                                                        'data-original-title'=>__('Turn On side-by-side compare.'),
                                                         'compare'=>'yes',
                                                         'class'=>'btn tooltip1',
                                                         'data-toggle'=>'tooltip',
@@ -438,7 +438,7 @@ if($filetype != null){
                                                 'url'=>base64_encode($url)
                                             ),
                                             array(
-                                                'data-original-title'=>'Delete this document?',
+                                                'data-original-title'=>__('Delete this document?'),
                                                 'class'=>'btn text-danger tooltip1',
                                                 'escape'=>false,
                                                 'data-toggle'=>'tooltip',
@@ -584,7 +584,7 @@ if($filetype != null){
                                                             '<i class="fa fa-toggle-on fa-lg"></i>',
                                                             array($this->request->params['pass'][0],'compare'=>'off','timestamp'=>date('ymdhis')),
                                                             array(
-                                                                'data-original-title'=>'Turn off side-by-side compare. This will reload the page.',
+                                                                'data-original-title'=>__('Turn off side-by-side compare. This will reload the page.'),
                                                                 'compare'=>'yes',
                                                                 'class'=>'btn text-success tooltip1',
                                                                 'data-toggle'=>'tooltip',
@@ -598,7 +598,7 @@ if($filetype != null){
                                                             '<i class="fa fa-toggle-off fa-lg"></i>',
                                                             array($this->request->params['pass'][0],'compare'=>'yes','timestamp'=>date('ymdhis')),
                                                             array(
-                                                                'data-original-title'=>'Turn On side-by-side compare.This will reload the page.',
+                                                                'data-original-title'=>__('Turn On side-by-side compare.This will reload the page.'),
                                                                 'compare'=>'yes',
                                                                 'class'=>'btn tooltip1',
                                                                 'data-toggle'=>'tooltip',
@@ -622,7 +622,7 @@ if($filetype != null){
                                                                     'class'=>'vlables btn btn-default btn-sm tooltip1',
                                                                     'data-toggle'=>'tooltip',
                                                                     'data-trigger'=>'hover',
-                                                                    'data-original-title'=>'Updated by: '. $version_key['user']['name'].' on: '. $version_key['created'],
+                                                                    'data-original-title'=>__('Updated by: '). $version_key['user']['name'].' on: '. $version_key['created'],
                                                                     'onClick'=>'loaddocumentversions(
                                                                     \''.base64_encode($version_key['user']['url']).'\',
                                                                     '.$version_key['key'].',
@@ -658,7 +658,7 @@ if($filetype != null){
                                                         'url'=>base64_encode($url)
                                                     ),
                                                     array(
-                                                        'data-original-title'=>'Delete this document?',
+                                                        'data-original-title'=>__('Delete this document?'),
                                                         'class'=>'btn text-danger tooltip1', 
                                                         'escape'=>false,
                                                         'data-toggle'=>'tooltip',
@@ -696,7 +696,7 @@ if($filetype != null){
                                     var earr = ["doc","docx","xls","xlsx"];
 
                                     if($.inArray(ext,earr)){
-                                        alert('This file type is not allowed');
+                                        alert(<?php echo json_encode(__('This file type is not allowed'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                                         location.reload(true);
                                     }else{
 
@@ -710,7 +710,7 @@ if($filetype != null){
 
                                     if (!isNaN(str[0]) && !isNaN(str[str.length - 1])) {
                                       this.value = "";
-                                      alert('File with onlynumbers is not allowed.');
+                                      alert(<?php echo json_encode(__('File with onlynumbers is not allowed.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                                       location.reload(true);
                                   } else {
 
@@ -722,7 +722,7 @@ if($filetype != null){
                         </script>
                         <div class="box collapsed-box">
                           <div class="box-header with-border">
-                            <h3 class="box-title text-danger">Document</h3>
+                            <h3 class="box-title text-danger"><?php echo h(__('Document')); ?></h3>
                             <div class="box-tools pull-right">
                               <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
                               </button>
@@ -732,10 +732,10 @@ if($filetype != null){
                         <?php
                         if(($this->request->controller == 'qc_documents' || $this->request->controller == 'processes') && $this->action == 'edit'){ ?>
                             <div class="row">
-                                <div class="col-md-12"><p class="text-danger">System could not load the document. Uplaod Document from View page.</p></div>
+                                <div class="col-md-12"><p class="text-danger"><?php echo h(__('System could not load the document. Uplaod Document from View page.')); ?></p></div>
                             </div>
                         <?php }else{ ?>
-                            <p class="text-danger">System could not load the document.</p>
+                            <p class="text-danger"><?php echo h(__('System could not load the document.')); ?></p>
                         <?php } ?>
                     </div>
                 </div>
@@ -745,14 +745,14 @@ if($filetype != null){
                 <div class="col-md-12">
                     <div class="box box-warning collapsed-box" id="ofdcontainer<?php echo $placeholderid;?>">
                       <div class="box-header with-border data-header" data-widget="collapse">
-                        <h3 class="box-title"><i class="fa fa-clock-o"></i>&nbsp;&nbsp;Document&nbsp;&nbsp;<small> Last Updated : <?php echo date('Y-m-d H:i:s',strtotime($last_modified))?>. We are updating your document. Please wait...</small></h3>
+                        <h3 class="box-title"><i class="fa fa-clock-o"></i>&nbsp;&nbsp;<?php echo h(__('Document')); ?>&nbsp;&nbsp;<small> Last Updated : <?php echo date('Y-m-d H:i:s',strtotime($last_modified))?>. We are updating your document. Please wait...</small></h3>
                         <div class="box-tools pull-right">
                             <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus" id="ofccontainerbtn<?php echo $placeholderid;?>"></i></button>
                             <i class="fa fa-refresh" id="ofcrefresh<?php echo $placeholderid;?>"></i>
                         </div>
                     </div>
                     <div class="box-body">
-                        <p>This document is recently updated. Please allow 1-3 mins for changes to reflect.</p>
+                        <p><?php echo h(__('This document is recently updated. Please allow 1-3 mins for changes to reflect.')); ?></p>
                     </div>
                 </div>
             </div>

@@ -20,7 +20,7 @@ else if($this->request->params['named']['prepared_by'])$prepared_by = $this->req
 		.font-weight-bold{font-weight: 600;color: #3566b1 !important;}.table-border-dark{border: 1px solid #000;}.btn .badge{position: absolute;top: -10px;}
 	</style>
 	<?php
-	$approvalStatuses = array(0=>'Pending...',1=>'Approved',2=>'Not Approved',3=>'Returned to Previous Step');
+	$approvalStatuses = array(0=>__('Pending...'),1=>__('Approved'),2=>__('Not Approved'),3=>__('Returned to Previous Step'));
 	?>
 	<div class="row">
 		<div class="col-md-12">
@@ -30,18 +30,18 @@ else if($this->request->params['named']['prepared_by'])$prepared_by = $this->req
 						if(isset($customTable) && $customTable['CustomTable']['name'])$approvalPanelTitle = $customTable['CustomTable']['name'];
 						else $approvalPanelTitle = Inflector::humanize($this->request->controller);
 					?>
-					<h3 class="box-title"><span class="text-black"> <?php echo $approvalPanelTitle;?></span><span class="text-gray-dark"> Approval History</span>
+					<h3 class="box-title"><span class="text-black"> <?php echo $approvalPanelTitle;?></span><span class="text-gray-dark"> <?php echo h(__('Approval History')); ?></span>
 					<?php if($this->action == 'edit'){ ?><small>Prepared By : <?php echo $this->request->data['PreparedBy']['name'];?></small><?php } ?></h3>
 					<i class="fa  fa-clock-o pull-right"></i>
 				</div>
 				<div class="box-body" style="padding: 0;">
 					<table cellpadding="0" cellspacing="0" class="table table-responsive">
 						<tr >
-							<th>Date/time</th>
-							<th>From</th>
-							<th>To</th>
-							<th>Comment</th>
-							<th class="text-right">Approve / Reject</th>
+							<th><?php echo h(__('Date/time')); ?></th>
+							<th><?php echo h(__('From')); ?></th>
+							<th><?php echo h(__('To')); ?></th>
+							<th><?php echo h(__('Comment')); ?></th>
+							<th class="text-right"><?php echo h(__('Approve / Reject')); ?></th>
 						</tr>
 						
 						<?php 
@@ -52,7 +52,7 @@ else if($this->request->params['named']['prepared_by'])$prepared_by = $this->req
 								?>
 								<script type="text/javascript">
 									$().ready(function(){
-										$(".approval_checkbox_div").html('<div class="text-danger">You can not Publish this record unless everyone approves it as Approval Type is ALL.<br /></div>');										
+										$(".approval_checkbox_div").html(<?php echo json_encode(__('<div class="text-danger">You can not Publish this record unless everyone approves it as Approval Type is ALL.<br /></div>'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);										
 									})
 									
 								</script>
@@ -92,7 +92,7 @@ else if($this->request->params['named']['prepared_by'])$prepared_by = $this->req
 								<td><?php echo h($approval['Employee']['name']); ?><?php echo h($approval['User']['name']); ?></td>
 								<td>
 									<?php echo h($approval['Approval']['comments']);?>
-									<?php if($approval['Approval']['approval_status'] == 3){ ?><span class="label label-warning">Returned to Previous Step</span><?php } ?>
+									<?php if($approval['Approval']['approval_status'] == 3){ ?><span class="label label-warning"><?php echo h(__('Returned to Previous Step')); ?></span><?php } ?>
 								</td>
 								<td>
 									<?php if($approval['Approval']['user_id'] == $this->Session->read('User.id') && $approval['Approval']['status'] != 1){ ?>
@@ -121,7 +121,7 @@ else if($this->request->params['named']['prepared_by'])$prepared_by = $this->req
 						<?php endforeach; ?>
 						<?php if($showmessage == true){ ?>						
 						<tr>
-							<td colspan="5">Click on the message to respond.</td>
+							<td colspan="5"><?php echo h(__('Click on the message to respond.')); ?></td>
 						</tr>
 						<?php } ?>
 					</table>
@@ -135,7 +135,7 @@ $approval = array();?>
 	<script type="text/javascript">	
 		function approve(approval_id,comments,status){
 			var txt;
-			var r = confirm("Are you sure you want to approve this record?");
+			var r = confirm(<?php echo json_encode(__('Are you sure you want to approve this record?'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 			if (r == true) {
 				$('#'+approval_id+'_div').load('<?php echo Router::url('/', true); ?>approvals/action/id:'+approval_id+'/comments:'+comments);		  	
 			} else {

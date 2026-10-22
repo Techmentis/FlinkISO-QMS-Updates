@@ -9,7 +9,7 @@
 		}
 	</style>				
 	<?php echo $this->Session->flash();?>	
-	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'View Qc Documents','modelClass'=>'QcDocument','options'=>array("sr_no"=>"Sr No","document_number"=>"Document Number","reference_number"=>"Reference Number","issue_number"=>"Issue Number","date_of_next_issue"=>"Date Of Next Issue","date_of_issue"=>"Date Of Issue","effective_from_date"=>"Effective From Date","revision_number"=>"Revision Number","date_of_review"=>"Date Of Review","revision_date"=>"Revision Date","document_type"=>"Document Type","it_categories"=>"It Categories","document_status"=>"Document Status","issued_by"=>"Issued By","archived"=>"Archived","change_history"=>"Change History","cr_status"=>"Cr Status","mark_for_cr_update"=>"Mark For Cr Update","temp_date_of_issue"=>"Temp Date Of Issue","temp_effective_from_date"=>"Temp Effective From Date","linked_formats"=>"Linked Formats","cover_page"=>"Cover Page","page_orientation"=>"Page Orientation"),'pluralVar'=>'qcDocuments'))); ?>
+	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('View Qc Documents'),'modelClass'=>'QcDocument','options'=>array("sr_no"=>__("Sr No"),"document_number"=>__("Document Number"),"reference_number"=>__("Reference Number"),"issue_number"=>__("Issue Number"),"date_of_next_issue"=>__("Date Of Next Issue"),"date_of_issue"=>__("Date Of Issue"),"effective_from_date"=>__("Effective From Date"),"revision_number"=>__("Revision Number"),"date_of_review"=>__("Date Of Review"),"revision_date"=>__("Revision Date"),"document_type"=>__("Document Type"),"it_categories"=>__("It Categories"),"document_status"=>__("Document Status"),"issued_by"=>__("Issued By"),"archived"=>__("Archived"),"change_history"=>__("Change History"),"cr_status"=>__("Cr Status"),"mark_for_cr_update"=>__("Mark For Cr Update"),"temp_date_of_issue"=>__("Temp Date Of Issue"),"temp_effective_from_date"=>__("Temp Effective From Date"),"linked_formats"=>__("Linked Formats"),"cover_page"=>__("Cover Page"),"page_orientation"=>__("Page Orientation")),'pluralVar'=>'qcDocuments'))); ?>
 
 	<div class="">
 		<div class="row">
@@ -19,7 +19,7 @@
 				</div>
 				<div class="col-md-4 text-right hide"><br /><br />
 					<div id="downloadpdf">
-						<div class="btn btn-sm btn-info" id="generate_pdf"><i class="fa fa-file-pdf-o"></i>&nbsp;&nbsp;&nbsp;Generate PDF <i class="fa fa-refresh fa-spin hide"></i></div>
+						<div class="btn btn-sm btn-info" id="generate_pdf"><i class="fa fa-file-pdf-o"></i>&nbsp;&nbsp;&nbsp;<?php echo h(__('Generate PDF')); ?> <i class="fa fa-refresh fa-spin hide"></i></div>
 						<script type="text/javascript">
 							$("#generate_pdf").on('click',function(){
 								$(".fa-spin").removeClass('hide').addClass('show').addClass('pull-right');
@@ -39,17 +39,17 @@
 				<ul class="nav nav-tabs docs" role="tablist">			
 					<!-- <li class="active"><a href="#document" data-toggle="tab">Details</a></li> -->
 					<?php if($qcDocument['QcDocument']['file_type']){ ?>
-						<li class="active"><a href="#view_document" data-toggle="tab">Document</a></li>
+						<li class="active"><a href="#view_document" data-toggle="tab"><?php echo h(__('Document')); ?></a></li>
 					<?php }else{ ?>
-						<li class="active"><a style="background-color: #ff6060 !important;" href="#view_document" data-toggle="tab">Add Document</a></li>
+						<li class="active"><a style="background-color: #ff6060 !important;" href="#view_document" data-toggle="tab"><?php echo h(__('Add Document')); ?></a></li>
 					<?php } ?>					
-					<li ><a href="#childdocument" data-toggle="tab">Child Documents <span class="badge"><?php echo count($childDocs)?></span></a></li>			  
-					<li><a href="#tab_3" onclick="loadchangehistory()" data-toggle="tab">Change Requests <span class="badge"><?php echo 0?></span></a></li>
-					<li><a href="#tab_2" onclick="loadrevisions()" data-toggle="tab">Revisons <span class="badge"><?php echo 0?></span></a></li>
-					<li><a href="#tab_4" data-toggle="tab">Upload Additional Docs</a></li>
-					<li><a href="#tab_5" data-toggle="tab">Read Receipts</a></li>
-					<li><a href="#tab_6" data-toggle="tab">Downloads</a></li>
-					<li ><?php echo $this->Html->link('Add Child&nbsp;&nbsp;<i class="fa fa-external-link"></i>',array('action'=>'add','parent_id'=>$qcDocument['QcDocument']['id']),array('escape'=>false));?></li>
+					<li ><a href="#childdocument" data-toggle="tab"><?php echo h(__('Child Documents')); ?> <span class="badge"><?php echo count($childDocs)?></span></a></li>			  
+					<li><a href="#tab_3" onclick="loadchangehistory()" data-toggle="tab"><?php echo h(__('Change Requests')); ?> <span class="badge"><?php echo 0?></span></a></li>
+					<li><a href="#tab_2" onclick="loadrevisions()" data-toggle="tab"><?php echo h(__('Revisons')); ?> <span class="badge"><?php echo 0?></span></a></li>
+					<li><a href="#tab_4" data-toggle="tab"><?php echo h(__('Upload Additional Docs')); ?></a></li>
+					<li><a href="#tab_5" data-toggle="tab"><?php echo h(__('Read Receipts')); ?></a></li>
+					<li><a href="#tab_6" data-toggle="tab"><?php echo h(__('Downloads')); ?></a></li>
+					<li ><?php echo $this->Html->link(h(__('Add Child')) . '&nbsp;&nbsp;<i class="fa fa-external-link"></i>',array('action'=>'add','parent_id'=>$qcDocument['QcDocument']['id']),array('escape'=>false));?></li>
 				</ul>
 				<div class="tab-content">
 					
@@ -60,11 +60,11 @@
 					</div>
 					
 					<div class="tab-pane" id="tab_2">
-						<h4>Document Revision Hstory</h4>	
+						<h4><?php echo h(__('Document Revision Hstory')); ?></h4>	
 						
 					</div>
 					<div class="tab-pane" id="tab_3">
-						<h4>Document Change Requestes</h4>
+						<h4><?php echo h(__('Document Change Requestes')); ?></h4>
 					</div>
 					<div class="tab-pane" id="tab_4">
 						<?php echo $this->element('fileuploads',array('id'=>$qcDocument['QcDocument']['id']));?>
@@ -87,14 +87,14 @@
 						<div class="row">
 							<div class="col-md-12">
 								<table class="table table-responsive table-bordered">
-									<thead><h4>Document Details</h4></thead>
+									<thead><h4><?php echo h(__('Document Details')); ?></h4></thead>
 									<tbody>
 										<tr>
-											<th>Document Name</th>
+											<th><?php echo h(__('Document Name')); ?></th>
 											<td><?php echo $qcDocument['QcDocument']['name'];?></td>
-											<th>Document Number</th>
+											<th><?php echo h(__('Document Number')); ?></th>
 											<td><?php echo $qcDocument['QcDocument']['document_number'];?></td>
-											<th>Standard</th>
+											<th><?php echo h(__('Standard')); ?></th>
 											<td><?php echo $qcDocument['Standard']['name'];?></td>
 										</tr>
 										<tr>
@@ -175,10 +175,10 @@
 
 								$mode = 'view';
 
-								echo '<div class="col-md-12"><h4>Archived Document</h4>'. $this->element('onlyoffice_load_archived',array(
+								echo '<div class="col-md-12"><h4>' . h(__('Archived Document')) . '</h4>'. $this->element('onlyoffice_load_archived',array(
 									'url'=>$url,
 									'placeholderid'=>0,
-									'panel_title'=>'Document Viewer',
+									'panel_title'=>__('Document Viewer'),
 									'mode'=>$mode,
 									'path'=>$file_path,
 									'file'=>$file,
@@ -227,7 +227,7 @@
 										if($.inArray(ext,earr) > -1){
 											
 										}else{
-											alert('This file type is not allowed : ' + ext);
+											alert(<?php echo json_encode(__('This file type is not allowed : '), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?> + ext);
 											location.reload(true);
 										}
 
@@ -239,7 +239,7 @@
 										
 										if (!isNaN(str[0]) && !isNaN(str[str.length - 1])) {
 											this.value = "";
-											alert('File with onlynumbers is not allowed.');
+											alert(<?php echo json_encode(__('File with onlynumbers is not allowed.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 											location.reload(true);
 										} else {
 											

@@ -36,7 +36,7 @@
                     error: function() {
                         $("#trigger_submit_id").removeAttr("disabled");
                         $("#trigger_submit_indicator").hide();
-                        alert('Action failed!');
+                        alert(<?php echo json_encode(__('Action failed!'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                     }
                 });
             }
@@ -81,7 +81,7 @@
             });
             jQuery.validator.addMethod("greaterThanZero", function(value, element) {
                 return this.optional(element) || (parseFloat(value) !== -1);
-            }, "Please select the value");
+            }, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
             if(triggerForm.length){
                 triggerForm.validate();
@@ -94,13 +94,13 @@
                     url: $(this).attr('href'),
                     type: 'GET',
                     beforeSend: function(){
-                        panel.html('<div class="text-center"><i class="fa fa-refresh fa-spin"></i> Loading email triggers...</div>');
+                        panel.html(<?php echo json_encode(__('<div class="text-center"><i class="fa fa-refresh fa-spin"></i> Loading email triggers...</div>'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                     },
                     success: function(response){
                         panel.replaceWith(response);
                     },
                     error: function(){
-                        panel.html('<div class="alert alert-danger">Unable to load the email trigger. Please refresh the tab and try again.</div>');
+                        panel.html(<?php echo json_encode(__('<div class="alert alert-danger">Unable to load the email trigger. Please refresh the tab and try again.</div>'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                     }
                 });
             });
@@ -116,11 +116,11 @@
         <?php echo $this->Session->flash();?>
         <div class="box box-default">
             <div class="box-header data-header" data-widget="collapse">
-                <h3 class="box-title"><span><i class="fa fa-bell-o"></i></span> Edit Email Trigger</h3>
+                <h3 class="box-title"><span><i class="fa fa-bell-o"></i></span> <?php echo h(__('Edit Email Trigger')); ?></h3>
                 <div class="box-tools pull-right"><button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button></div>
             </div>
             <div class="box-body">
-        <p class="text-right"><?php echo $this->Html->link('<i class="fa fa-list"></i> All rules', array('action'=>'index'), array('class'=>'btn btn-default btn-sm', 'escape'=>false)); ?> <?php echo $this->Html->link('<i class="fa fa-envelope"></i> Delivery log', array('action'=>'deliveries','custom_table_id'=>$customTableId), array('class'=>'btn btn-default btn-sm', 'escape'=>false)); ?></p>
+        <p class="text-right"><?php echo $this->Html->link('<i class="fa fa-list"></i> ' . h(__('All rules')), array('action'=>'index'), array('class'=>'btn btn-default btn-sm', 'escape'=>false)); ?> <?php echo $this->Html->link('<i class="fa fa-envelope"></i> ' . h(__('Delivery log')), array('action'=>'deliveries','custom_table_id'=>$customTableId), array('class'=>'btn btn-default btn-sm', 'escape'=>false)); ?></p>
         <div class="table-responsive" style="overflow:scroll;">
             <table cellpadding="0" cellspacing="0" class="table table-hover">
                 <tr>
@@ -137,7 +137,7 @@
                         <td><?php echo h($customTrigger['CustomTrigger']['name']); ?>&nbsp;</td>
                         <td><?php echo h($customTrigger['CustomTrigger']['message']); ?>&nbsp;</td>
                         <td class="text-right">
-                            <?php echo $this->Html->link('<i class="fa fa-edit"></i>',array('action'=>'edit',$customTrigger['CustomTrigger']['id'],'custom_table_id'=>$customTrigger['CustomTrigger']['custom_table_id']),array('id'=>$customTrigger['CustomTrigger']['id'].'-edit','class'=>'btn btn-sm btn-default custom-trigger-panel-link', 'escape'=>false, 'title'=>'Edit'));?>
+                            <?php echo $this->Html->link('<i class="fa fa-edit"></i>',array('action'=>'edit',$customTrigger['CustomTrigger']['id'],'custom_table_id'=>$customTrigger['CustomTrigger']['custom_table_id']),array('id'=>$customTrigger['CustomTrigger']['id'].'-edit','class'=>'btn btn-sm btn-default custom-trigger-panel-link', 'escape'=>false, 'title'=>__('Edit')));?>
                             <?php echo $this->Form->postLink(!empty($customTrigger['CustomTrigger']['enabled']) ? '<i class="fa fa-pause"></i>' : '<i class="fa fa-play"></i>', array('action'=>'toggle_enabled', $customTrigger['CustomTrigger']['id']), array('escape'=>false, 'class'=>'btn btn-sm btn-default', 'title'=>!empty($customTrigger['CustomTrigger']['enabled']) ? 'Disable' : 'Enable')); ?>
                             <?php echo $this->Html->link('<i class="fa fa-trash-o"></i>','#',array('id'=>$customTrigger['CustomTrigger']['id'].'-del','class'=>'btn btn-sm btn-default','escape'=>false));?>
 
@@ -166,7 +166,7 @@
                     </tr>
                 <?php endforeach; ?>
             <?php }else{ ?>
-                <tr><td colspan="4">No results found</td></tr>
+                <tr><td colspan="4"><?php echo h(__('No results found')); ?></td></tr>
             <?php } ?>
         </table>
     </div>
@@ -180,56 +180,56 @@
                     <div class="row">
                 <div class="col-md-12">
                     <div class="row">
-                        <?php echo "<div class='col-md-12'>".$this->Form->input('event_name',array('label'=>'When', 'options'=>$eventNames, 'required'=>'required', 'class'=>'form-control')) . '</div>'; ?>
+                        <?php echo "<div class='col-md-12'>".$this->Form->input('event_name',array('label'=>__('When'), 'options'=>$eventNames, 'required'=>'required', 'class'=>'form-control')) . '</div>'; ?>
                     </div>
                     <?php if($fieldNames != null){ ?>
                         <div class="row" id="field-condition">
                             <?php
-                            echo "<div class='col-md-4'>".$this->Form->input('field_name',array('label'=>'Field', 'options'=>$fieldNames, 'empty'=>'Select field', 'class'=>'form-control')) . '</div>';
-                            echo "<div class='col-md-4'>".$this->Form->input('condition_operator',array('label'=>'Condition', 'options'=>$conditionOperators, 'class'=>'form-control')) . '</div>';
-                            echo "<div class='col-md-4' id='get_data'>".$this->Form->input('changed_field_value',array('label'=>'Value', 'class'=>'form-control','options'=>array())) . '</div>';
+                            echo "<div class='col-md-4'>".$this->Form->input('field_name',array('label'=>__('Field'), 'options'=>$fieldNames, 'empty'=>__('Select field'), 'class'=>'form-control')) . '</div>';
+                            echo "<div class='col-md-4'>".$this->Form->input('condition_operator',array('label'=>__('Condition'), 'options'=>$conditionOperators, 'class'=>'form-control')) . '</div>';
+                            echo "<div class='col-md-4' id='get_data'>".$this->Form->input('changed_field_value',array('label'=>__('Value'), 'class'=>'form-control','options'=>array())) . '</div>';
                             ?>
                         </div>
                     <?php } ?>
                     <?php if($dateFieldNames != null){ ?>
                         <div class="row" id="date-condition">
                             <?php
-                            echo "<div class='col-md-6'>".$this->Form->input('date_field',array('label'=>'Date field', 'options'=>$dateFieldNames, 'empty'=>'Select date field', 'class'=>'form-control')) . '</div>';
-                            echo "<div class='col-md-6'>".$this->Form->input('date_offset_days',array('label'=>'Days before date', 'type'=>'number', 'class'=>'form-control')) . '</div>';
+                            echo "<div class='col-md-6'>".$this->Form->input('date_field',array('label'=>__('Date field'), 'options'=>$dateFieldNames, 'empty'=>__('Select date field'), 'class'=>'form-control')) . '</div>';
+                            echo "<div class='col-md-6'>".$this->Form->input('date_offset_days',array('label'=>__('Days before date'), 'type'=>'number', 'class'=>'form-control')) . '</div>';
                             ?>
-                            <div class="col-md-12"><p class="help-block">Use 0 for the due date and a negative value for an overdue reminder.</p></div>
+                            <div class="col-md-12"><p class="help-block"><?php echo h(__('Use 0 for the due date and a negative value for an overdue reminder.')); ?></p></div>
                         </div>
                     <?php } ?>
                 </div>
-                <div class="col-md-12"><br /><label>Send Email To</label></div>
+                <div class="col-md-12"><br /><label><?php echo h(__('Send Email To')); ?></label></div>
                 <?php
                 if(!empty($notifyDepartments)){
-                    echo "<div class='col-md-6'>".$this->Form->input('notify_departments',array('class'=>'nd','label'=>'Everyone in selected Department')) . '</div>';
+                    echo "<div class='col-md-6'>".$this->Form->input('notify_departments',array('class'=>'nd','label'=>__('Everyone in selected Department'))) . '</div>';
                 }
 
                 if(!empty($notifyBranches)){
-                    echo "<div class='col-md-6'>".$this->Form->input('notify_branches',array('class'=>'nb','label'=>'Everyone in selected Branches')) . '</div>';
+                    echo "<div class='col-md-6'>".$this->Form->input('notify_branches',array('class'=>'nb','label'=>__('Everyone in selected Branches'))) . '</div>';
                 }
 
                 if(!empty($notifyDesignations)){
-                    echo "<div class='col-md-12'>".$this->Form->input('notify_designations',array('class'=>'nb','label'=>'Everyone with selected designation')) . '</div>';
+                    echo "<div class='col-md-12'>".$this->Form->input('notify_designations',array('class'=>'nb','label'=>__('Everyone with selected designation'))) . '</div>';
                 }
 
-                echo "<div class='col-md-6'>".$this->Form->input('notify_admins',array('class'=>'admin','label'=>'Admins')) . '</div>';
-                echo "<div class='col-md-6'>".$this->Form->input('notify_hods',array('class'=>'hod','label'=>'Department HoDs')) . '</div>';
-                echo "<div class='col-md-12'>".$this->Form->input('hod_departments',array('label'=>'Select Departments','multiple', 'options'=>$departments)) . '</div>';
+                echo "<div class='col-md-6'>".$this->Form->input('notify_admins',array('class'=>'admin','label'=>__('Admins'))) . '</div>';
+                echo "<div class='col-md-6'>".$this->Form->input('notify_hods',array('class'=>'hod','label'=>__('Department HoDs'))) . '</div>';
+                echo "<div class='col-md-12'>".$this->Form->input('hod_departments',array('label'=>__('Select Departments'),'multiple', 'options'=>$departments)) . '</div>';
                 ?>
-                <div class="col-md-12"><p><br /><strong>Note: </strong>If table has a department field, and if you chose Notify HoDs, HoD of that department will automaticaly receive the email. To send email to additional HoDs from different departments, chose thode departments from "Select Departments" field.</p></div>
+                <div class="col-md-12"><p><br /><strong><?php echo h(__('Note:')); ?> </strong><?php echo h(__('If table has a department field, and if you chose Notify HoDs, HoD of that department will automaticaly receive the email. To send email to additional HoDs from different departments, chose thode departments from "Select Departments" field.')); ?></p></div>
                 <?php
-                echo "<div class='col-md-6'>".$this->Form->input('notify_user',array('label'=>'Employee/User field from this record', 'empty'=>'None', 'class'=>'form-control')) . '</div>';
+                echo "<div class='col-md-6'>".$this->Form->input('notify_user',array('label'=>__('Employee/User field from this record'), 'empty'=>__('None'), 'class'=>'form-control')) . '</div>';
                 echo "<div class='col-md-6'>".$this->Form->input('notify_users',array('class'=>'form-control','type'=>'select', 'multiple', 'options'=>$employees )) . '</div>';
-                echo "<div class='col-md-6 hidden'>".$this->Form->input('enabled',array('label'=>'Enabled')) . '</div>';
+                echo "<div class='col-md-6 hidden'>".$this->Form->input('enabled',array('label'=>__('Enabled'))) . '</div>';
                 ?>
-                <div class="col-md-12"><h4>Delivery</h4></div>
+                <div class="col-md-12"><h4><?php echo h(__('Delivery')); ?></h4></div>
                 <?php
-                echo "<div class='col-md-4'>".$this->Form->input('delivery_timing',array('options'=>array('immediate'=>'Immediately','delayed'=>'After a delay'), 'class'=>'form-control')) . '</div>';
-                echo "<div class='col-md-4'>".$this->Form->input('delay_minutes',array('label'=>'Delay (minutes)', 'type'=>'number', 'min'=>0, 'class'=>'form-control')) . '</div>';
-                echo "<div class='col-md-4'>".$this->Form->input('cooldown_minutes',array('label'=>'Suppress repeats for (minutes)', 'type'=>'number', 'min'=>0, 'class'=>'form-control')) . '</div>';
+                echo "<div class='col-md-4'>".$this->Form->input('delivery_timing',array('options'=>array('immediate'=>__('Immediately'),'delayed'=>__('After a delay')), 'class'=>'form-control')) . '</div>';
+                echo "<div class='col-md-4'>".$this->Form->input('delay_minutes',array('label'=>__('Delay (minutes)'), 'type'=>'number', 'min'=>0, 'class'=>'form-control')) . '</div>';
+                echo "<div class='col-md-4'>".$this->Form->input('cooldown_minutes',array('label'=>__('Suppress repeats for (minutes)'), 'type'=>'number', 'min'=>0, 'class'=>'form-control')) . '</div>';
                 ?>
                     </div>
                 </div>
@@ -237,11 +237,11 @@
                     <div class="row">
                 <?php
                 echo "<div class='col-md-12'>".$this->Form->hidden('custom_table_id',array('class'=>'form-control', 'default'=>$customTableId)) . '</div>';
-                echo "<div class='col-md-12'>".$this->Form->input('name',array('label'=>'Subject', 'required'=>'required', 'class'=>'form-control',)) . '</div>';
+                echo "<div class='col-md-12'>".$this->Form->input('name',array('label'=>__('Subject'), 'required'=>'required', 'class'=>'form-control',)) . '</div>';
 
 
-                echo "<div class='col-md-12'>".$this->Form->input('message',array('required'=>'required', 'rows'=>18, 'label'=>'Message body to send to recipient', 'class'=>'form-control')) . '</div>';
-                echo "<div class='col-md-12'><p class='help-block'>Variables: <code>{{module.name}}</code>, <code>{{event.name}}</code>, <code>{{record.id}}</code>, <code>{{record.FIELD_NAME}}</code>, <code>{{changes.FIELD_NAME.old}}</code>, <code>{{changes.FIELD_NAME.new}}</code>, <code>{{actor.name}}</code>, <code>{{reminder.target_date}}</code>.</p></div>";
+                echo "<div class='col-md-12'>".$this->Form->input('message',array('required'=>'required', 'rows'=>18, 'label'=>__('Message body to send to recipient'), 'class'=>'form-control')) . '</div>';
+                echo '<div class=\'col-md-12\'><p class=\'help-block\'>' . h(__('Variables:')) . ' <code>{{module.name}}</code>, <code>{{event.name}}</code>, <code>{{record.id}}</code>, <code>{{record.FIELD_NAME}}</code>, <code>{{changes.FIELD_NAME.old}}</code>, <code>{{changes.FIELD_NAME.new}}</code>, <code>{{actor.name}}</code>, <code>{{reminder.target_date}}</code>.</p></div>';
 
                 echo $this->Form->input('id');
                 echo $this->Form->hidden('History.pre_post_values', array('value'=>json_encode($this->data)));

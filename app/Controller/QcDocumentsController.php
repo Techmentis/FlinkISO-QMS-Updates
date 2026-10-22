@@ -647,7 +647,7 @@ class QcDocumentsController extends AppController {
             if ($pathfolder->create(Configure::read('path') . DS . $id)) {
                 chmod(Configure::read('path') . DS . $id,0777);
             } else {
-                echo "failed folder" . Configure::read('path');
+                echo __("failed folder") . Configure::read('path');
             }
         }
         if (move_uploaded_file($data['QcDocument']['file']['tmp_name'], $file)) {
@@ -676,7 +676,7 @@ class QcDocumentsController extends AppController {
             chmod($history_file_for_save, 0777);
             file_put_contents($history_file_for_save . DS . "createdInfo.json", json_encode($json, JSON_PRETTY_PRINT));
         } else {
-            echo "File move failed!";
+            echo __("File move failed!");
         }
         if ($this->data['QcDocument']['file_key']) {
         } else {
@@ -927,7 +927,7 @@ class QcDocumentsController extends AppController {
                 if ($pathfolder->create(Configure::read('path') . DS . $this->request->data['QcDocument']['id'])) {
                     chmod(Configure::read('path') . DS . $this->request->data['QcDocument']['id'],0777);
                 } else {
-                    echo "failed folder" . Configure::read('path');
+                    echo __("failed folder") . Configure::read('path');
                 }
             }
             if (!file_exists($file)) {
@@ -1208,10 +1208,10 @@ class QcDocumentsController extends AppController {
                 $filekey = $this->_generate_onlyoffice_key($to);
                 $this->set(array('file'=>$file,'url'=>$url,'filekey'=>$filekey,'filetype'=>$filetype));
             }else{
-                echo "Unable to copy file";
+                echo __("Unable to copy file");
             }
         }else{
-            echo "File does not exists";
+            echo __("File does not exists");
         }
     }
 
@@ -1521,7 +1521,7 @@ class QcDocumentsController extends AppController {
             if(copy($from,$to)){
 
             }else{
-                echo "Something went wrong. System could not find the original document";
+                echo __("Something went wrong. System could not find the original document");
             }
             // move new files from files folder to qc document folder
             // rename that file with new version number

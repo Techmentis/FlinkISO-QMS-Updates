@@ -1,7 +1,7 @@
 <div id="customTriggers_ajax">
 <?php echo $this->Session->flash();?>	
 <div class="customTriggers ">
-   <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Custom Triggers','modelClass'=>'CustomTrigger','options'=>array(),'pluralVar'=>'customTriggers'))); ?>
+   <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Custom Triggers'),'modelClass'=>'CustomTrigger','options'=>array(),'pluralVar'=>'customTriggers'))); ?>
    <div class="nav panel panel-default">
       <div class="customTriggers form col-md-12">
          <table class="table table-responsive">
@@ -166,8 +166,8 @@
             </tr>
             <tr>
                <td colspan="2">
-                  <?php echo $this->Html->link('Delete This Record?', array('controller' => 'designations', 'action' => 'delete', $customTrigger['Designation']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
-                  <?php echo $this->Html->link('Edit This Record?', array('controller' => 'designations', 'action' => 'delete', $customTrigger['Designation']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
+                  <?php echo $this->Html->link(__('Delete This Record?'), array('controller' => 'designations', 'action' => 'delete', $customTrigger['Designation']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
+                  <?php echo $this->Html->link(__('Edit This Record?'), array('controller' => 'designations', 'action' => 'delete', $customTrigger['Designation']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
                </td>
             </tr>
          </table>

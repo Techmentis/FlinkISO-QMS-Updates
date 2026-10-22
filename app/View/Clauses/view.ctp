@@ -1,7 +1,7 @@
 <div id="clauses_ajax">
 <?php echo $this->Session->flash();?>
 	<div class="clauses ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Clauses','modelClass'=>'Clause','options'=>array(),'pluralVar'=>'clauses'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Clauses'),'modelClass'=>'Clause','options'=>array(),'pluralVar'=>'clauses'))); ?>
 			<div class="nav panel panel-default">
 				<div class="clauses form col-md-12">
 					<table class="table table-responsive">
@@ -101,8 +101,8 @@
 						&nbsp;</td></tr>
 						<tr>
 						<td colspan="2">
-							<?php echo $this->Html->link('Delete This Record?', array('controller' => 'clauses', 'action' => 'delete', $clause['Clause']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
-							<?php echo $this->Html->link('Edit This Record?', array('controller' => 'clauses', 'action' => 'edit', $clause['Clause']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
+							<?php echo $this->Html->link(__('Delete This Record?'), array('controller' => 'clauses', 'action' => 'delete', $clause['Clause']['id']),array('class'=>'btn btn-sm btn-danger')); ?>
+							<?php echo $this->Html->link(__('Edit This Record?'), array('controller' => 'clauses', 'action' => 'edit', $clause['Clause']['id']),array('class'=> 'btn btn-sm btn-warning')); ?>
 						</td>
 						</tr>
 					</table>

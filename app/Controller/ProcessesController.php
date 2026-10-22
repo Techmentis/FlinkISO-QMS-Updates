@@ -226,7 +226,7 @@ class ProcessesController extends AppController {
         }        
 
         if ($new_data === FALSE) {
-            echo "error";
+            echo __("error");
         } else {
             
              $savepath = WWW_ROOT .'files' . DS . $company_id   . DS . 'processes' . DS . $record_id;
@@ -237,7 +237,7 @@ class ProcessesController extends AppController {
                 $folder = new Folder();
                 if ($folder->create($savepath,0777)) {
                 } else {
-                    echo "Folder creation failed";
+                    echo __("Folder creation failed");
                     exit;
                 }    
             }
@@ -326,7 +326,7 @@ class ProcessesController extends AppController {
             if ($pathfolder->create(Configure::read('path') . DS . $id)) {
                 chmod(Configure::read('path') . DS . $id,0777);
             } else {
-                echo "failed folder" . Configure::read('path');
+                echo __("failed folder") . Configure::read('path');
                 $this->Session->setFlash(__('Folder creation failed. Please, try again.'));
             }
         }
@@ -341,7 +341,7 @@ class ProcessesController extends AppController {
             $this->Process->create();
             $this->Process->save($process['Process']);
         } else {
-            echo "File move failed!";
+            echo __("File move failed!");
         }
         if ($this->data['Process']['file_key']) {
         } else {

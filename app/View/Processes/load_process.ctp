@@ -33,71 +33,71 @@
 		<div class="table-responsive">
 			<table class="table table-bordered table table-striped table-hover" id="exportcsv">
 				<tr>
-					<th>Qc Document</th>
+					<th><?php echo h(__('Qc Document')); ?></th>
 					<td><?php echo $process['QcDocument']['title'];?></td>
 				</tr>
 				<tr>
-					<th> Process Definition</th>
+					<th> <?php echo h(__('Process Definition')); ?></th>
 					<td><?php echo $process['Process']['process_definition'];?></td>
 				</tr>
 				<tr>
-					<th> Process Objecttive And Metrics</th>
+					<th> <?php echo h(__('Process Objecttive And Metrics')); ?></th>
 					<td><?php echo $process['Process']['process_objective_and_metrics'];?></td>
 				</tr>
 				<tr>
-					<th>Process Owners</th>
+					<th><?php echo h(__('Process Owners')); ?></th>
 					<td><?php foreach(json_decode($process['Process']['process_owners'],true) as $field ){
 						echo $processOwners[$field] .", ";
 					};?></td>
 				</tr>
 				<tr>
-					<th>Applicable To Branches</th>
+					<th><?php echo h(__('Applicable To Branches')); ?></th>
 					<td><?php foreach(json_decode($process['Process']['applicable_to_branches'],true) as $field ){
 						echo $applicableToBranches[$field] .", ";
 					};?></td>
 				</tr>
 				<tr>
-					<th> Additional Responsibilities</th>
+					<th> <?php echo h(__('Additional Responsibilities')); ?></th>
 					<td><?php echo $process['Process']['additional_responsibilities'];?></td>
 				</tr>
 				<tr>
-					<th>Input Processes</th>
+					<th><?php echo h(__('Input Processes')); ?></th>
 					<td><?php foreach(json_decode($process['Process']['input_processes'],true) as $field ){
 						echo $inputProcesses[$field] .", ";
 					};?></td>
 				</tr>
 				<tr>
-					<th>Outout Processes</th>
+					<th><?php echo h(__('Outout Processes')); ?></th>
 					<td><?php foreach(json_decode($process['Process']['output_processes'],true) as $field ){
 						echo $outputProcesses[$field] .", ";
 					};?></td>
 				</tr>
 				<tr>
-					<th> Process Output</th>
+					<th> <?php echo h(__('Process Output')); ?></th>
 					<td><?php echo $process['Process']['process_output'];?></td>
 				</tr>
 				<tr>
-					<th> Risks And Opportunities</th>
+					<th> <?php echo h(__('Risks And Opportunities')); ?></th>
 					<td><?php echo $process['Process']['risks_and_opportunities'];?></td>
 				</tr>
 				<tr>
-					<th>Standards</th>
+					<th><?php echo h(__('Standards')); ?></th>
 					<td><?php foreach(json_decode($process['Process']['standards'],true) as $field ){
 						echo $standards[$field] .", ";
 					};?></td>
 				</tr>
 				<tr>
-					<th>Clauses</th>
+					<th><?php echo h(__('Clauses')); ?></th>
 					<td><?php foreach(json_decode($process['Process']['clauses'],true) as $field ){
 						echo $clauses[$field] .", ";
 					};?></td>
 				</tr>
 				<tr>
-					<th>Prepared By</th>
+					<th><?php echo h(__('Prepared By')); ?></th>
 					<td><?php echo $process['PreparedBy']['name'];?></td>
 				</tr>
 				<tr>
-					<th>Approved By</th>
+					<th><?php echo h(__('Approved By')); ?></th>
 					<td><?php echo $process['ApprovedBy']['name'];?></td>
 				</tr>
 			</table>
@@ -106,7 +106,7 @@
 	<div class="row">
 		<div class="col-md-4">
 			<div class="row">
-				<div class="col-md-12 text-center">Input</div>
+				<div class="col-md-12 text-center"><?php echo h(__('Input')); ?></div>
 			<?php foreach($ips as $id => $name){ ?>
 				<div class="col-md-12"><div class="process_div input_div">
 					<?php echo $this->Html->link($name,array('action'=>'view',$id))?>
@@ -116,14 +116,14 @@
 		</div>
 		<div class="col-md-4">
 			<div class="row">
-				<div class="col-md-12 text-center">Current</div>
+				<div class="col-md-12 text-center"><?php echo h(__('Current')); ?></div>
 					<div class="col-md-12">
 						<div class="process_div current_div"><?php echo $process['Process']['name'];?></div>
 					</div>
 				</div>
 			</div>			
 		<div class="col-md-4">
-			<div class="col-md-12 text-center">Output</div>
+			<div class="col-md-12 text-center"><?php echo h(__('Output')); ?></div>
 			<?php foreach($ops as $id => $name){ ?>
 				<div class="col-md-12"><div class="process_div output_div">
 					<?php echo $this->Html->link($name,array('action'=>'view',$id))?>

@@ -70,7 +70,7 @@ public function add() {
 	if($this->_show_approvals()){
 		$this->loadModel('User');
 		$this->User->recursive = 0;
-		$userids = $this->User->find('list',array('order'=>array('User.name'=>'ASC'),'conditions'=>array('User.publish'=>1,'User.soft_delete'=>0,'User.is_approvar'=>1)));
+		$userids = $this->User->find('list',array('order'=>array('User.name'=>'ASC'),'conditions'=>array('User.publish'=>1,'User.soft_delete'=>0,'User.is_approver'=>1)));
 		$this->set(array('userids'=>$userids,'show_approvals'=>$this->_show_approvals()));
 	}
 

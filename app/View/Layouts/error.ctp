@@ -63,10 +63,10 @@ echo $this->fetch('script');
       <!-- /.content-wrapper -->
       <footer class="main-footer">  
         <div class="pull-right hidden-xs">
-          <b>Version</b> 2.0
+          <b><?php echo h(__('Version')); ?></b> 2.0
       </div>
-      <strong>Copyright &copy; 2013 <a href="http://www.techmentis.biz">Techmentis Global Services Pvt Ltd</a>.</strong> All rights
-      reserved.
+      <strong><?php echo h(__('Copyright')); ?> &copy; 2013 <a href="http://www.techmentis.biz"><?php echo h(__('Techmentis Global Services Pvt Ltd')); ?></a>.</strong> <?php echo h(__('All rights
+      reserved.')); ?>
   </footer>
   <?php
   if ($this->Session->read('User'))

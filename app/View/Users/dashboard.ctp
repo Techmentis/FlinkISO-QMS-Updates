@@ -14,34 +14,34 @@ $pptarray = array('ppt','pptx');
 <?php echo $this->Session->flash();?>
 <div class="row">
   <div class="col-xs-12">
-    <h3>Dashboard</h3>
+    <h3><?php echo h(__('Dashboard')); ?></h3>
     <div class="">
       <div class="row">
         <div class="col-md-7 text-left">
           <?php
           echo $this->Html->link('<i class="fa fa-sitemap"></i>',array('controller'=>'branches', 'action'=>'index','timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn btn btn-app btn-sm btn-default','escape'=>false,
-              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'List of Branches'
+              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('List of Branches')
             ));
           echo $this->Html->link('<i class="fa fa-industry"></i>',array('controller'=>'departments', 'action'=>'index','timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn btn btn-app btn-sm btn-default','escape'=>false ,
-              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'List of Departments'
+              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('List of Departments')
             ));
           echo $this->Html->link('<i class="fa fa-briefcase"></i>',array('controller'=>'designations', 'action'=>'index','timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn btn btn-app btn-sm btn-default','escape'=>false,
-              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'List of Designations'
+              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('List of Designations')
             ));
           echo $this->Html->link('<i class="fa fa-users"></i>',array('controller'=>'employees', 'action'=>'index','timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn btn btn-app btn-sm btn-default','escape'=>false,'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 
-              'data-placement'=>'bottom', 'title'=> 'List of Employees'
+              'data-placement'=>'bottom', 'title'=> __('List of Employees')
             ));
           echo $this->Html->link('<i class="fa fa-user"></i>',array('controller'=>'users', 'action'=>'index','timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn btn btn-app btn-sm btn-default','escape'=>false,
-              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'List of Users'
+              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('List of Users')
             ));
           echo $this->Html->link('<i class="fa fa-user-secret"></i>',array('controller'=>'user_sessions', 'action'=>'index','timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn btn btn-app btn-sm btn-default','escape'=>false,
-              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'System User Audit Trail'
+              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('System User Audit Trail')
             ));
           ?>
           </div>
@@ -50,16 +50,16 @@ $pptarray = array('ppt','pptx');
     </div>
   </div>
 <div class="row">
-    <div class="col-lg-3 col-xs-3"><div class="small-box bg-aqua"><div class="inner"><h3><?php echo $totalDocs;?></h3><p>Documents Created</p></div>
+    <div class="col-lg-3 col-xs-3"><div class="small-box bg-aqua"><div class="inner"><h3><?php echo $totalDocs;?></h3><p><?php echo h(__('Documents Created')); ?></p></div>
         <div class="icon"><i class="fa fa-folder-open"></i></div></div>
     </div>
-    <div class="col-lg-3 col-xs-3"><div class="small-box bg-green"><div class="inner"><h3><?php echo $totalTables;?></h3><p>HTML Forms Created</p></div>
+    <div class="col-lg-3 col-xs-3"><div class="small-box bg-green"><div class="inner"><h3><?php echo $totalTables;?></h3><p><?php echo h(__('HTML Forms Created')); ?></p></div>
         <div class="icon"><i class="fa fa-database"></i></div></div>
     </div>
-    <div class="col-lg-3 col-xs-3"><div class="small-box bg-yellow"><div class="inner"><h3><?php echo $totalFiles;?></h3><p>Total Files Created</p></div>
+    <div class="col-lg-3 col-xs-3"><div class="small-box bg-yellow"><div class="inner"><h3><?php echo $totalFiles;?></h3><p><?php echo h(__('Total Files Created')); ?></p></div>
         <div class="icon"><i class="fa fa-file-o"></i></div></div>
     </div>
-    <div class="col-lg-3 col-xs-3"><div class="small-box bg-red"><div class="inner"><h3><?php echo $totalFileSize;?><sup style="font-size: 20px">mb</sup></h3><p>Total Files Size</p></div>
+    <div class="col-lg-3 col-xs-3"><div class="small-box bg-red"><div class="inner"><h3><?php echo $totalFileSize;?><sup style="font-size: 20px"><?php echo h(__('mb')); ?></sup></h3><p><?php echo h(__('Total Files Size')); ?></p></div>
         <div class="icon"><i class="fa fa-folder-open"></i></div></div>
     </div>
   </div>
@@ -72,7 +72,7 @@ $pptarray = array('ppt','pptx');
     <div class="col-xs-12">
       <div class="box box-info">
         <div class="box-header">
-          <h3 class="box-title">Shared Custom Forms</h3> <i class="fa fa-database pull-right"></i>
+          <h3 class="box-title"><?php echo h(__('Shared Custom Forms')); ?></h3> <i class="fa fa-database pull-right"></i>
           <div class="box-tools">
             <!-- <?php echo $this->Html->link('<i class="fa fa-database fa-lg"></i>',array('controller'=>'custom_tables','action'=>'index'),array('escape'=>false));?> -->
           </div>
@@ -81,19 +81,19 @@ $pptarray = array('ppt','pptx');
         <div class="box-body table-responsive no-padding">
           <table class="table table-hover">
             <tbody><tr>
-              <th>Document</th>
-              <th>Schedule</th>
+              <th><?php echo h(__('Document')); ?></th>
+              <th><?php echo h(__('Schedule')); ?></th>
               <!-- <th>Data Update Type</th> -->
-              <th>Last Updated</th>
-              <th>Updated By</th>
-              <th>Status</th>              
+              <th><?php echo h(__('Last Updated')); ?></th>
+              <th><?php echo h(__('Updated By')); ?></th>
+              <th><?php echo h(__('Status')); ?></th>              
               <th class="text-right"></th>
             </tr>
             <?php 
             $dataUpdateType= array(
-              0=>'Any user should update a single document for a defined schedule',
-              1=>'Every user should update a saperate document for a defined schedule',
-              2=>'Multiple users should update a single document for a defined schedule',
+              0=>__('Any user should update a single document for a defined schedule'),
+              1=>__('Every user should update a saperate document for a defined schedule'),
+              2=>__('Multiple users should update a single document for a defined schedule'),
             );
             foreach($customTables as $customTable){
               $last_updated = $this->requestAction(array(
@@ -131,7 +131,7 @@ $pptarray = array('ppt','pptx');
                     if($last_updated['created']){
                       echo $this->Time->timeAgoInWords($last_updated['created']);
                     }else{
-                      echo "NIL";
+                      echo __("NIL");
                     }?>
                 </td>
                 <td><?php echo $PublishedUserList[$last_updated['created_by']] ?></td>
@@ -144,7 +144,7 @@ $pptarray = array('ppt','pptx');
                       <?php
                       if($chk == 0){
                           echo $this->Html->link('<i class="fa fa-plus fa-lg"></i>',array('controller'=>''.$customTable['CustomTable']['table_name'].'','action'=>'add',
-                            'custom_table_id'=> $customTable['CustomTable']['id'],'qc_document_id'=> $customTable['CustomTable']['qc_document_id'],'custom_table_id'=>$customTable['CustomTable']['id']),array('escape'=>false,'class'=>'btn btn-default btn-xs tooltip1','data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Add New Record'));
+                            'custom_table_id'=> $customTable['CustomTable']['id'],'qc_document_id'=> $customTable['CustomTable']['qc_document_id'],'custom_table_id'=>$customTable['CustomTable']['id']),array('escape'=>false,'class'=>'btn btn-default btn-xs tooltip1','data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Add New Record')));
                       }
 
                       if($chk ==  1){
@@ -153,7 +153,7 @@ $pptarray = array('ppt','pptx');
                             'action'=>'edit',$last_updated['id'],
                             'qc_document_id'=>$customTable['CustomTable']['qc_document_id'],
                             'custom_table_id'=>$customTable['CustomTable']['id']
-                          ),array('escape'=>false,'class'=>'btn btn-default btn-xs tooltip1','data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Update Record'));
+                          ),array('escape'=>false,'class'=>'btn btn-default btn-xs tooltip1','data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Update Record')));
                       }
 
                       if($chk ==  2){
@@ -162,15 +162,15 @@ $pptarray = array('ppt','pptx');
                             'action'=>'edit',$last_updated['id'],
                             'qc_document_id'=>$customTable['CustomTable']['qc_document_id'],
                             'custom_table_id'=>$customTable['CustomTable']['id']
-                          ),array('escape'=>false,'class'=>'btn btn-default btn-xs tooltip1','data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Update Record'));
+                          ),array('escape'=>false,'class'=>'btn btn-default btn-xs tooltip1','data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Update Record')));
                       }
                     ?>
                 </th>
               </tr>
             <?php } ?>
               <tr>
-                <td colspan="6"><small>To add new record click <i class="fa fa-plus"></i> button. To Updated last added record click <i class="fa fa-edit"></i>  button or to view the record click <i class="fa fa-desktop"></i> button.
-                <!-- To see all records added by you click <?php echo $this->Html->link('here',array('controller'=>'records','action'=>'index'));?> -->
+                <td colspan="6"><small><?php echo h(__('To add new record click')); ?> <i class="fa fa-plus"></i> <?php echo h(__('button. To Updated last added record click')); ?> <i class="fa fa-edit"></i>  <?php echo h(__('button or to view the record click')); ?> <i class="fa fa-desktop"></i> <?php echo h(__('button.')); ?>
+                <!-- To see all records added by you click <?php echo $this->Html->link(__('here'),array('controller'=>'records','action'=>'index'));?> -->
                     </small>
                 </td>
               </tr>
@@ -187,18 +187,18 @@ $pptarray = array('ppt','pptx');
         <div class="col-md-12">
           <div class="box box-default">
             <div class="box-header ">
-              <h3 class="box-title">Approvals</h3>
+              <h3 class="box-title"><?php echo h(__('Approvals')); ?></h3>
               <?php echo $this->Html->link('<i class="fa fa-list"></i>',array('controller'=>'approvals','action'=>'index'),array('escape'=>false,'class'=>'pull-right'));?>
             </div>
             <div class="box-body" style="padding:0">
               <div class="table-responsive">
                 <table cellpadding="0" cellspacing="0" class="table table-hover">
                   <tr>
-                    <th>Table</th>
-                    <th>Date/time</th>
-                    <th>Record</th>
-                    <th>From</th>
-                    <th>Comments</th>
+                    <th><?php echo h(__('Table')); ?></th>
+                    <th><?php echo h(__('Date/time')); ?></th>
+                    <th><?php echo h(__('Record')); ?></th>
+                    <th><?php echo h(__('From')); ?></th>
+                    <th><?php echo h(__('Comments')); ?></th>
                     <th width="90" class="text-right"></th>
                   </tr>
 
@@ -241,7 +241,7 @@ $pptarray = array('ppt','pptx');
                   </table>
                 </div>
               </div>
-              <div class="box-footer"><small>List of approvals sent/received by you.</small></div>
+              <div class="box-footer"><small><?php echo h(__('List of approvals sent/received by you.')); ?></small></div>
             </div>
     <?php }else{ ?>
     <?php } ?>
@@ -250,7 +250,7 @@ $pptarray = array('ppt','pptx');
         <div class="col-md-12">
           <div class="box box-danger">
             <div class="box-header ">
-              <h3 class="box-title">Approval Responses</h3>
+              <h3 class="box-title"><?php echo h(__('Approval Responses')); ?></h3>
               <div class="box-tools">
                 <!-- <i class="fa fa-mail-reply fa-sm pull-right"></i> -->
               </div>
@@ -259,10 +259,10 @@ $pptarray = array('ppt','pptx');
               <div class="table-responsive">
                 <table cellpadding="0" cellspacing="0" class="table table-hover">
                   <tr>
-                    <th>Table</th>
-                    <th>Date/time</th>
-                    <th>From</th>
-                    <th>Comments</th>
+                    <th><?php echo h(__('Table')); ?></th>
+                    <th><?php echo h(__('Date/time')); ?></th>
+                    <th><?php echo h(__('From')); ?></th>
+                    <th><?php echo h(__('Comments')); ?></th>
                     <!-- <th>Approval Status</th> -->
                     <th width="90" class="text-right"></th>
                   </tr>
@@ -303,7 +303,7 @@ $pptarray = array('ppt','pptx');
                       <?php endforeach; ?>
                     </table>
                   </div>
-                  <div class="box-footer"><small>List of approvals responses sent/received by you.</small></div>
+                  <div class="box-footer"><small><?php echo h(__('List of approvals responses sent/received by you.')); ?></small></div>
                 </div>
               </div>
             </div>
@@ -317,7 +317,7 @@ $pptarray = array('ppt','pptx');
       <div class="col-md-12">
         <div class="box box-info">
           <div class="box-header ">
-            <h3 class="box-title">Documents shared with you for co-authoring and in Draft mode.</h3>
+            <h3 class="box-title"><?php echo h(__('Documents shared with you for co-authoring and in Draft mode.')); ?></h3>
             <div class="box-tools">
               <i class="fa fa-share-alt fa-lg pull-right"></i>
             </div>
@@ -326,13 +326,13 @@ $pptarray = array('ppt','pptx');
             <div class="table-responsive">
               <table class="table">
                 <tr>
-                  <th>Document Name</th>
-                  <th>Number</th>
-                  <th>Standard</th>
-                  <th>Clause</th>
-                  <th>Prepared By</th>
-                  <th>Created</th>
-                  <th>Last Modified</th>
+                  <th><?php echo h(__('Document Name')); ?></th>
+                  <th><?php echo h(__('Number')); ?></th>
+                  <th><?php echo h(__('Standard')); ?></th>
+                  <th><?php echo h(__('Clause')); ?></th>
+                  <th><?php echo h(__('Prepared By')); ?></th>
+                  <th><?php echo h(__('Created')); ?></th>
+                  <th><?php echo h(__('Last Modified')); ?></th>
                   <th width="120"></th>
                 </tr>
                 <?php
@@ -345,22 +345,22 @@ $pptarray = array('ppt','pptx');
                     <td><?php echo $qcDocument['PreparedBy']['name']?></td>
                     <td><?php echo $qcDocument['QcDocument']['created']?></td>
                     <td><?php echo $qcDocument['QcDocument']['modified']?></td>
-                    <td><?php echo $this->Html->link('Collaborate',array('controller'=>'qc_documents','action'=>'edit',$qcDocument['QcDocument']['id'],'timestamp'=>date('ymdhis')),array('class'=>'btn btn-xs btn-info'))?></td>
+                    <td><?php echo $this->Html->link(__('Collaborate'),array('controller'=>'qc_documents','action'=>'edit',$qcDocument['QcDocument']['id'],'timestamp'=>date('ymdhis')),array('class'=>'btn btn-xs btn-info'))?></td>
                   </tr>
                 <?php } ?>
               </table>
             </div>
           </div>
-          <div class="box-footer"><small>To turn off Co-authring for a document, change document status to "Published/Issued".</small></div>
+          <div class="box-footer"><small><?php echo h(__('To turn off Co-authring for a document, change document status to "Published/Issued".')); ?></small></div>
         </div>
       </div>
     </div>
     <?php } ?>
     <?php if($this->Session->read('User.is_mr') == 1){ ?>
       <?php if(!empty($lockedUsers)){ 
-          echo '<div class="row"><div class="col-md-12"><h4>Locked Users <small>Click on user to unlock.</small></h4><ul>';
+          echo '<div class="row"><div class="col-md-12"><h4>' . h(__('Locked Users')) . ' <small>' . h(__('Click on user to unlock.')) . '</small></h4><ul>';
           foreach($lockedUsers as $lockedUser => $name){
-            echo '<li>'.$this->Html->link('Uplock ' .$name,  array('action'=>'locked_users',$lockedUser)).'</li>';
+            echo '<li>'.$this->Html->link(__('Uplock ') .$name,  array('action'=>'locked_users',$lockedUser)).'</li>';
           }
           echo '</ul></div></div>';
       }?>          

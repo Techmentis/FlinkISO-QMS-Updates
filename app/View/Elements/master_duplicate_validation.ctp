@@ -35,7 +35,7 @@ $(function () {
                     // warning as a value that could be submitted as record data.
                     if ($.trim(response) === 'false' && $field.is('input, textarea') &&
                         $.trim($field.val() || '') === checkedValue) {
-                        $field.val('').attr('placeholder', checkedValue + ' already exist.')
+                        $field.val('').attr('placeholder', checkedValue + <?php echo json_encode(__(' already exist.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>)
                             .data('duplicatePlaceholder', true);
                     }
                     return response;
@@ -50,7 +50,7 @@ $(function () {
                 }
             },
             messages: {
-                remote: options.message || 'This value already exists.'
+                remote: options.message || <?php echo json_encode(__('This value already exists.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>
             }
         });
     });

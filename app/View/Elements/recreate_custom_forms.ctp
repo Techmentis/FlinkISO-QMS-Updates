@@ -28,17 +28,17 @@ if($result['error']==1 or $response == null){
         <!-- <div class="alert alert-danger">FlinkISO API Subscription Has Expired.</div> -->
         <div class="panel panel-default">
           <div class="panel-body">
-            <p><strong>Alert:</strong> Your FlinkISO API Subcription has expired. Click here to renew the subscription.</p>
-            <p>You can renew the subscription by purchasing the API access from the links below.</p>
-            <p>Please use our registred email address while making the purchase.</p>
+            <p><strong><?php echo h(__('Alert:')); ?></strong> <?php echo h(__('Your FlinkISO API Subcription has expired. Click here to renew the subscription.')); ?></p>
+            <p><?php echo h(__('You can renew the subscription by purchasing the API access from the links below.')); ?></p>
+            <p><?php echo h(__('Please use our registred email address while making the purchase.')); ?></p>
             <div class="row">
               <div class="col-md-12">
                 <table class="table table-bordered">
                   <tr>
-                    <th>1 Month: USD.88</th>
-                    <th>3 Months: USD.231</th>
-                    <th>6 Months: USD.440</th>
-                    <th>12 Months: USD.750</th>
+                    <th><?php echo h(__('1 Month: USD.88')); ?></th>
+                    <th><?php echo h(__('3 Months: USD.231')); ?></th>
+                    <th><?php echo h(__('6 Months: USD.440')); ?></th>
+                    <th><?php echo h(__('12 Months: USD.750')); ?></th>
                 </tr>
                   <tr>
                     <td>                    
@@ -77,7 +77,7 @@ if($result['error']==1 or $response == null){
               </table>
             </div>
           </div>
-          <p class="text-danger">If you are seeing this alert, Do not click Submit button. Click Back to goback to previouse page.</p>
+          <p class="text-danger"><?php echo h(__('If you are seeing this alert, Do not click Submit button. Click Back to goback to previouse page.')); ?></p>
         </div>
       </div>
     </div>
@@ -85,15 +85,15 @@ if($result['error']==1 or $response == null){
 <?php }else{ ?>
   <div class="row">
     <div class="col-md-12">
-      <div class="alert alert-danger">FlinkISO API is not available.</div>
+      <div class="alert alert-danger"><?php echo h(__('FlinkISO API is not available.')); ?></div>
       <div class="panel panel-default">
         <div class="panel-body">
-          <p>Make sure that our API server is accesible from your server.</p>
-          <p>Make sure that you have renewed your API subscription. Contact <strong>sales@flinkiso.com</strong> for renewal.</p>
-          <p class="text-danger">If you are seeing this alert, Do not click Submit button. Click Back to goback to previouse page.</p>
-          <p><a href="https://www.paypal.com/ncp/payment/HUWKVKPWAQPH2" target="_blank" class="btn btn-success btn-lg">Pay Now!</a></p>
-          <p>Please make sure to use the same registered email address while making the payment.</p>
-          <p>To know more about FlinkISO API: <a href="https://www.flinkiso.com/pricing/qms-api.html" target="_blank">Click Here.</a></p>
+          <p><?php echo h(__('Make sure that our API server is accesible from your server.')); ?></p>
+          <p><?php echo h(__('Make sure that you have renewed your API subscription. Contact')); ?> <strong><?php echo h(__('sales@flinkiso.com')); ?></strong> <?php echo h(__('for renewal.')); ?></p>
+          <p class="text-danger"><?php echo h(__('If you are seeing this alert, Do not click Submit button. Click Back to goback to previouse page.')); ?></p>
+          <p><a href="https://www.paypal.com/ncp/payment/HUWKVKPWAQPH2" target="_blank" class="btn btn-success btn-lg"><?php echo h(__('Pay Now!')); ?></a></p>
+          <p><?php echo h(__('Please make sure to use the same registered email address while making the payment.')); ?></p>
+          <p><?php echo h(__('To know more about FlinkISO API:')); ?> <a href="https://www.flinkiso.com/pricing/qms-api.html" target="_blank"><?php echo h(__('Click Here.')); ?></a></p>
         </div>
       </div>
     </div>      

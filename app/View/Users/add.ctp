@@ -23,7 +23,7 @@
         $("#submit-indicator").hide();
         jQuery.validator.addMethod("greaterThanZero", function(value, element) {
             return (value != -1);
-        }, "Please select the value");
+        }, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
         $('#UserAddForm').validate({
             rules: {
@@ -90,7 +90,7 @@
 
 <div id="users_ajax">
     <?php echo $this->Session->flash(); ?>
-    <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Users','modelClass'=>'User','options'=>array(),'pluralVar'=>'users'))); ?>    
+    <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Users'),'modelClass'=>'User','options'=>array(),'pluralVar'=>'users'))); ?>    
     <?php echo $this->Form->create('User', array('role' => 'form', 'class' => 'form')); ?>
     <div class="panel panel-default">
         <div class="panel-body">    
@@ -130,15 +130,15 @@
                     <div class="row hide"><br />
                         <fieldset><legend><h5><?php echo __('Copy permission from available user'); ?></h5></legend>
                             <div class="col-md-12">
-                                <strong>Note:</strong>
+                                <strong><?php echo h(__('Note:')); ?></strong>
                                 <br />
                                 <ul>
-                                    <li>Each user created has permissions to access the system with specified limitations.</li>
-                                    <li>You will need to exclusively provide access to each user based on his/her role.</li>
-                                    <li>If you have already a user to whom you have provided access, and if you are creating a user with identical access you can select that user from the drop-down and the new user will automatically have those access.</li>
-                                    <li>You can later either assign more access or limit the new user by manually changing the access.</li>
-                                    <li>You can manually add user access from Users/View page by clicking <span class="label btn-danger">Manage Access Control</span>.</li>
-                                    <li><strong>MR users are excluded from following list as MRs have complete access to application.</strong></li>
+                                    <li><?php echo h(__('Each user created has permissions to access the system with specified limitations.')); ?></li>
+                                    <li><?php echo h(__('You will need to exclusively provide access to each user based on his/her role.')); ?></li>
+                                    <li><?php echo h(__('If you have already a user to whom you have provided access, and if you are creating a user with identical access you can select that user from the drop-down and the new user will automatically have those access.')); ?></li>
+                                    <li><?php echo h(__('You can later either assign more access or limit the new user by manually changing the access.')); ?></li>
+                                    <li><?php echo h(__('You can manually add user access from Users/View page by clicking')); ?> <span class="label btn-danger"><?php echo h(__('Manage Access Control')); ?></span>.</li>
+                                    <li><strong><?php echo h(__('MR users are excluded from following list as MRs have complete access to application.')); ?></strong></li>
                                 </ul>
                             </div>
 
@@ -152,7 +152,7 @@
                 </div>        
             </div>
             <?php                      
-            echo $this->Form->input('assigned_branches', array('name'=>'data[User][assigned_branches][]', 'type'=>'select', 'label' => 'Select Branches', 'id' => 'AssignedBranches', 'multiple', 'options' => $PublishedBranchList, 'selected' => json_decode($this->request->data['User']['assigned_branches'],true)));
+            echo $this->Form->input('assigned_branches', array('name'=>'data[User][assigned_branches][]', 'type'=>'select', 'label' => __('Select Branches'), 'id' => 'AssignedBranches', 'multiple', 'options' => $PublishedBranchList, 'selected' => json_decode($this->request->data['User']['assigned_branches'],true)));
             ?>            
             <?php echo $this->Form->input('publish');?>
             <?php echo $this->Form->submit(__('Submit'), array('div' => false, 'class' => 'btn btn-primary btn-success', 'update' => '#users_ajax', 'async' => 'false','id'=>'submit_id')); ?>
@@ -173,7 +173,7 @@
 <?php echo $this->element('master_duplicate_validation', array(
     'recordIdSelector'=>'#UserId',
     'fields'=>array(
-        '#UserUsername'=>array('field'=>'username', 'message'=>'This username already exists.'),
-        '#UserEmployeeId'=>array('field'=>'employee_id', 'message'=>'This employee already has a user account.')
+        '#UserUsername'=>array('field'=>'username', 'message'=>__('This username already exists.')),
+        '#UserEmployeeId'=>array('field'=>'employee_id', 'message'=>__('This employee already has a user account.'))
     )
 )); ?>

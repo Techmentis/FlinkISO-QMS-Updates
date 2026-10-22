@@ -1,19 +1,19 @@
 <?php
 $groups = array(
-    'main' => 'Main Table',
-    'child' => 'Child Tables',
-    'linked' => 'Linked Tables'
+    'main' => __('Main Table'),
+    'child' => __('Child Tables'),
+    'linked' => __('Linked Tables')
 );
 ?>
 <div class="document-tables-panel table-responsive">
     <table class="table document-tables-list">
         <thead>
             <tr>
-                <th>Table</th>
-                <th>System Name</th>
-                <th>Document</th>
-                <th>Status</th>
-                <th class="text-right">Actions</th>
+                <th><?php echo h(__('Table')); ?></th>
+                <th><?php echo h(__('System Name')); ?></th>
+                <th><?php echo h(__('Document')); ?></th>
+                <th><?php echo h(__('Status')); ?></th>
+                <th class="text-right"><?php echo h(__('Actions')); ?></th>
             </tr>
         </thead>
         <tbody>
@@ -36,9 +36,9 @@ $groups = array(
                         </td>
                         <td>
                             <?php if ($documentTable['CustomTable']['publish']) { ?>
-                                <span class="label label-success">Published</span>
+                                <span class="label label-success"><?php echo h(__('Published')); ?></span>
                             <?php } else { ?>
-                                <span class="label label-default">Unpublished</span>
+                                <span class="label label-default"><?php echo h(__('Unpublished')); ?></span>
                             <?php } ?>
                         </td>
                         <td class="text-right">
@@ -54,21 +54,21 @@ $groups = array(
                                     }
                                     if ($documentTable['CustomTable']['publish'] && !$documentTable['CustomTable']['table_locked']) {
                                         echo $this->Html->link(
-                                            '<i class="fa fa-plus"></i> Add',
+                                            '<i class="fa fa-plus"></i> ' . h(__('Add')),
                                             array_merge(array(
                                                 'controller' => $documentTable['CustomTable']['table_name'],
-                                                'action' => 'add'
+                                                'action' => __('add')
                                             ), $tableContext),
-                                            array('class' => 'btn btn-sm btn-default', 'escape' => false)
+                                            array('class' => __('btn btn-sm btn-default'), 'escape' => false)
                                         );
                                     }
                                     echo $this->Html->link(
-                                        '<i class="fa fa-table"></i> Index',
+                                        '<i class="fa fa-table"></i> ' . h(__('Index')),
                                         array_merge(array(
                                             'controller' => $documentTable['CustomTable']['table_name'],
-                                            'action' => 'index'
+                                            'action' => __('index')
                                         ), $tableContext),
-                                        array('class' => 'btn btn-sm btn-default', 'escape' => false)
+                                        array('class' => __('btn btn-sm btn-default'), 'escape' => false)
                                     );
                                     ?>
                                 </div>

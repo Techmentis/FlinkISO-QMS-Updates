@@ -16,7 +16,7 @@
 
 $pluginDot = empty($plugin) ? null : $plugin . '.';
 ?>
-<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Error','modelClass'=>'Error','options'=>array(),'pluralVar'=>'errors'))); ?>
+<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Error'),'modelClass'=>'Error','options'=>array(),'pluralVar'=>'errors'))); ?>
 <style type="text/css">
     .error{text-align: center !important; float: none;}
 </style>
@@ -24,7 +24,7 @@ $pluginDot = empty($plugin) ? null : $plugin . '.';
     <br /><br />  
     <i class="fa fa-code text-danger" style="font-size: 8em"></i>
     <h2><?php echo __d('cake_dev', 'Missing Action'); ?></h2>
-    <h3>Solution : Try recreating the table and linkes/child tables.</h3>
+    <h3><?php echo h(__('Solution : Try recreating the table and linkes/child tables.')); ?></h3>
 
     <p class="error text-center">
         <strong><?php echo __d('cake_dev', 'Error'); ?>: </strong>

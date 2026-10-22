@@ -39,7 +39,7 @@ if($fileEdit){
 	            'url'=>$url,
 	            'user_id'=>$user_id,
 	            'placeholderid'=>$placeholderid,
-	            'panel_title'=>'Document Viewer',
+	            'panel_title'=>__('Document Viewer'),
 	            'mode'=>$mode,
 	            'path'=>$file_path,
 	            'file'=>$file,
@@ -104,7 +104,7 @@ if($fileEdit){
 				echo $this->element('onlyoffice_for_extra',array(
 		            'url'=>$url,
 					'placeholderid'=>0,
-					'panel_title'=>'Document Viewer',
+					'panel_title'=>__('Document Viewer'),
 					'mode'=>$mode,
 					'path'=>$file_path,
 					'file'=>$file,

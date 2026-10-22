@@ -3,8 +3,8 @@
     <?php echo $this->Session->flash(); ?>	
 
     <div class="branches ">
-      <?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => 'Branches', 'modelClass' => 'Branch', 'options' => array(), 'pluralVar' => 'branches'))); ?>
-      <?php echo $this->Html->link('Add Bulk',array('action'=>'add_bulk'),array('class'=>'btn btn-sm btn-primary pull-right'));?>
+      <?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => __('Branches'), 'modelClass' => 'Branch', 'options' => array(), 'pluralVar' => 'branches'))); ?>
+      <?php echo $this->Html->link(__('Add Bulk'),array('action'=>'add_bulk'),array('class'=>'btn btn-sm btn-primary pull-right'));?>
 
       <div class="nav panel panel-default">
         <div class="branches form col-md-12">
@@ -54,7 +54,7 @@
 
         jQuery.validator.addMethod("greaterThanZero", function(value, element) {
             return this.optional(element) || $("#"+element.id+" option:selected").text() != 'Select';
-        }, "Please select the value");
+        }, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
         $('#BranchAddForm').validate({        	
             rules: {
@@ -77,5 +77,5 @@
 </script>
 <?php echo $this->element('master_duplicate_validation', array(
     'recordIdSelector'=>'#BranchId',
-    'fields'=>array('#BranchName'=>array('field'=>'name', 'message'=>'This branch already exists.'))
+    'fields'=>array('#BranchName'=>array('field'=>'name', 'message'=>__('This branch already exists.')))
 )); ?>

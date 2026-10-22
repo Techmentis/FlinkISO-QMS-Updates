@@ -12,13 +12,13 @@
 </script>
 <div  id="main"  id="users_ajax">
 	<?php echo $this->Session->flash();?>
-	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'User Audit Trail','modelClass'=>'UserSession','options'=>array(),'pluralVar'=>'user_sessions'))); ?>
+	<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('User Audit Trail'),'modelClass'=>'UserSession','options'=>array(),'pluralVar'=>'user_sessions'))); ?>
 
 	
 	<?php
 	echo '<div class="row">'. $this->Form->create('UserSession',array('action'=>'index','type'=>'get'),array('role'=>'form','class'=>'form'));
 	echo '<div class="col-md-8">'.$this->Form->input('user_id',array( 'value'=>$userId)).'</div>';
-	echo '<div class="col-md-4">'.$this->Form->submit('Submit',array('class'=>'btn btn-info pull-left', 'id'=>'submit_id', 'div'=>array('style'=>array('margin:30px 0 0 10px')))).'</div>';
+	echo '<div class="col-md-4">'.$this->Form->submit(__('Submit'),array('class'=>'btn btn-info pull-left', 'id'=>'submit_id', 'div'=>array('style'=>array('margin:30px 0 0 10px')))).'</div>';
 	echo $this->Html->image('indicator.gif', array('id' => 'submit-indicator', 'class'=>'pull-right'));
 	echo $this->Form->end();
 	echo '</div>';
@@ -46,10 +46,10 @@
 							<th><?php echo $this->Paginator->sort('ip_address'); ?></th>
 							<th><?php echo $this->Paginator->sort('start_time'); ?></th>
 							<th><?php echo $this->Paginator->sort('end_time'); ?></th>
-							<th>Active for</th>
+							<th><?php echo h(__('Active for')); ?></th>
 							<th><?php echo $this->Paginator->sort('user_id'); ?></th>
 							<th><?php echo $this->Paginator->sort('employee_id'); ?></th>
-							<th>Show Details</th>
+							<th><?php echo h(__('Show Details')); ?></th>
 						</tr>
 						<?php if($userSessions){ ?>
 							<?php $x=0;
@@ -62,12 +62,12 @@
 									<td><?php echo round(abs(strtotime($userSession['UserSession']['end_time']) - strtotime($userSession['UserSession']['start_time'])) / 60,2). " minutes";			?></td>
 									<td><?php echo $this->Html->link($users[$userSession['User']['id']], array('controller' => 'users', 'action' => 'view', $userSession['User']['id'])); ?></td>
 									<td><?php echo $this->Html->link($userSession['Employee']['name'], array('controller' => 'employees', 'action' => 'view', $userSession['Employee']['id'])); ?></td>
-									<td><?php echo $this->Html->link('Show Details',array('action'=>'view',$userSession['UserSession']['id']),array('class'=>'btn btn-xs btn-info'));?></td>
+									<td><?php echo $this->Html->link(__('Show Details'),array('action'=>'view',$userSession['UserSession']['id']),array('class'=>'btn btn-xs btn-info'));?></td>
 								</tr>
 								<?php $x++;
 							endforeach; ?>
 						<?php }else{ ?>
-							<tr><td colspan=7>No results found</td></tr></table>
+							<tr><td colspan=7><?php echo h(__('No results found')); ?></td></tr></table>
 						<?php } ?>
 					</table>
 				</div>

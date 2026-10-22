@@ -1,7 +1,7 @@
 <?php echo $this->element('checkbox-script'); ?><div  id="main">
 <?php echo $this->Session->flash();?>	
 	<div class="approvalSteps ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Approval Steps','modelClass'=>'ApprovalStep','options'=>array("sr_no"=>"Sr No","title"=>"Title","process_step"=>"Process Step","send_to_department_hod"=>"Send To Department Hod","send_to_designation"=>"Send To Designation","send_to_admins"=>"Send To Admins","send_to_reviwers"=>"Send To Reviwers","send_to_publishers"=>"Send To Publishers","send_to_users"=>"Send To Users","comments"=>"Comments","approval_mode"=>"Approval Mode","approval_type"=>"Approval Type"),'pluralVar'=>'approvalSteps'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Approval Steps'),'modelClass'=>'ApprovalStep','options'=>array("sr_no"=>__("Sr No"),"title"=>__("Title"),"process_step"=>__("Process Step"),"send_to_department_hod"=>__("Send To Department Hod"),"send_to_designation"=>__("Send To Designation"),"send_to_admins"=>__("Send To Admins"),"send_to_reviwers"=>__("Send To Reviwers"),"send_to_publishers"=>__("Send To Publishers"),"send_to_users"=>__("Send To Users"),"comments"=>__("Comments"),"approval_mode"=>__("Approval Mode"),"approval_type"=>__("Approval Type")),'pluralVar'=>'approvalSteps'))); ?>
 
 <script type="text/javascript">
 $(document).ready(function(){
@@ -34,7 +34,7 @@ $('table th a, .pag_list li span a').on('click', function() {
 					<th><?php echo $this->Paginator->sort('approved_by'); ?></th>		
 					<th><?php echo $this->Paginator->sort('publish'); ?></th>		
 
-				<th>Actions</th>
+				<th><?php echo h(__('Actions')); ?></th>
 				</tr>
 				<?php if($approvalSteps){ ?>
 <?php foreach ($approvalSteps as $approvalStep): ?>
@@ -66,7 +66,7 @@ $('table th a, .pag_list li span a').on('click', function() {
 					<td class=" actions">	<?php echo $this->element('actions', array('created' => $approvalStep['ApprovalStep']['created_by'], 'postVal' => $approvalStep['ApprovalStep']['id'], 'softDelete' => $approvalStep['ApprovalStep']['soft_delete'])); ?>	</td>	</tr>
 <?php endforeach; ?>
 <?php }else{ ?>
-	<tr><td colspan=81>No results found</td></tr>
+	<tr><td colspan=81><?php echo h(__('No results found')); ?></td></tr>
 <?php } ?>
 			</table>
 <?php echo $this->Form->end();?>			

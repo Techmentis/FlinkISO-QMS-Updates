@@ -62,7 +62,7 @@ class BillingController extends AppController {
 
     public function update() {
         if (!$this->Session->read('User.id') || (int)$this->Session->read('User.is_mr') !== 1) {
-            throw new ForbiddenException('Only an authenticated administrator can run updates.');
+            throw new ForbiddenException(__('Only an authenticated administrator can run updates.'));
         }
         App::uses('FlinkisoUpdater', 'Lib');
         if (!$this->Session->read('Updater.token')) {
@@ -82,7 +82,7 @@ class BillingController extends AppController {
         $this->autoRender = false;
         $submitted = isset($this->request->data['token']) ? $this->request->data['token'] : '';
         if (!is_string($submitted) || !hash_equals($token, $submitted)) {
-            throw new ForbiddenException('Invalid updater token. Reload the page.');
+            throw new ForbiddenException(__('Invalid updater token. Reload the page.'));
         }
         $service = new FlinkisoUpdater(ROOT, Configure::read('FlinkisoUpdater'));
         $operation = isset($this->request->data['operation']) ? $this->request->data['operation'] : '';
@@ -94,11 +94,11 @@ class BillingController extends AppController {
             $this->response->body(json_encode($data));
             return $this->response;
         }
-        if ($operation !== 'run') throw new BadRequestException('Unknown updater operation.');
+        if ($operation !== 'run') throw new BadRequestException(__('Unknown updater operation.'));
         $repeat = isset($this->request->data['repeat']) && $this->request->data['repeat'] === '1';
         $date = isset($this->request->data['date']) ? $this->request->data['date'] : '';
         $db = $this->Billing->getDataSource()->getConnection();
-        if (!($db instanceof PDO)) throw new RuntimeException('Updater requires a PDO database connection.');
+        if (!($db instanceof PDO)) throw new RuntimeException(__('Updater requires a PDO database connection.'));
         // Use one request/lock for the complete run; disconnecting the browser must not interrupt publication.
         ignore_user_abort(true);
         set_time_limit(0);
@@ -140,6 +140,6 @@ class BillingController extends AppController {
     public function install_updates() { return $this->_retiredUpdater(); }
 
     protected function _retiredUpdater() {
-        throw new MethodNotAllowedException('Use Billing > Update to run the complete updater.');
+        throw new MethodNotAllowedException(__('Use Billing > Update to run the complete updater.'));
     }
 }

@@ -14,26 +14,26 @@
 }
 </style>
 <div class="panel panel-default">
-    <div class="panel-heading"><h3 class="panel-title">FlinkISO Updater</h3></div>
+    <div class="panel-heading"><h3 class="panel-title"><?php echo h(__('FlinkISO Updater')); ?></h3></div>
     <div class="panel-body">
         <div class="col-md-6">
-        <p>Download and install the latest application updates from your configured GitHub repository.</p>
-        <p>A dated application backup is created first. Configuration and uploaded files are preserved. Please run during a maintenance window with other users signed out.</p>
-        <p class="text-muted">SQL runs before files are published. SQL errors are logged and skipped, and installation continues.</p>
+        <p><?php echo h(__('Download and install the latest application updates from your configured GitHub repository.')); ?></p>
+        <p><?php echo h(__('A dated application backup is created first. Configuration and uploaded files are preserved. Please run during a maintenance window with other users signed out.')); ?></p>
+        <p class="text-muted"><?php echo h(__('SQL runs before files are published. SQL errors are logged and skipped, and installation continues.')); ?></p>
         <div class="panel panel-default panel-body" style="margin-top:15px">
-            <strong>After updating, check <code>app/Config/core.php</code>.</strong>
-            This file is preserved and is not changed by the updater.
+            <strong><?php echo h(__('After updating, check')); ?> <code>app/Config/core.php</code>.</strong>
+            <?php echo h(__('This file is preserved and is not changed by the updater.')); ?>
             <ol style="margin:8px 0 0 20px;padding-left:0">
-                <li>Change <code>ApiPath</code> from the older API address to <code>https://api.flinkiso.com/v2/</code>.</li>
-                <li>Verify that <code>PDFTkPath</code> contains the full path returned by <code>command -v pdftk</code>, followed by a space. Common values are <code>/usr/bin/pdftk </code> and <code>/usr/local/bin/pdftk </code>.</li>
+                <li><?php echo h(__('Change')); ?> <code>ApiPath</code> <?php echo h(__('from the older API address to')); ?> <code>https://api.flinkiso.com/v2/</code>.</li>
+                <li><?php echo h(__('Verify that')); ?> <code>PDFTkPath</code> <?php echo h(__('contains the full path returned by')); ?> <code>command -v pdftk</code><?php echo h(__(', followed by a space. Common values are')); ?> <code>/usr/bin/pdftk </code> <?php echo h(__('and')); ?> <code>/usr/local/bin/pdftk </code>.</li>
             </ol>
         </div>
         <br />
-        <button type="button" class="btn btn-success" id="updater-start">Back up and update</button>
-        <div id="updater-working" style="display:none" role="status"><span class="updater-spinner" aria-hidden="true"></span>Updater is working. Please keep this page open.</div>
+        <button type="button" class="btn btn-success" id="updater-start"><?php echo h(__('Back up and update')); ?></button>
+        <div id="updater-working" style="display:none" role="status"><span class="updater-spinner" aria-hidden="true"></span><?php echo h(__('Updater is working. Please keep this page open.')); ?></div>
         <div id="updater-status" role="status" aria-live="polite" style="margin:15px 0"></div>
         <div id="updater-steps">
-        <?php foreach (array('connect' => 'Connect to GitHub', 'backup' => 'Back up application', 'download' => 'Download latest archive', 'extract' => 'Unzip archive', 'validate' => 'Validate files and permissions', 'sql' => 'Run SQL', 'install' => 'Install application files') as $key => $label): ?>
+        <?php foreach (array('connect' => __('Connect to GitHub'), 'backup' => __('Back up application'), 'download' => __('Download latest archive'), 'extract' => __('Unzip archive'), 'validate' => __('Validate files and permissions'), 'sql' => __('Run SQL'), 'install' => __('Install application files')) as $key => $label): ?>
             <div style="margin-top:12px"><strong><?php echo h($label); ?></strong>
                 <div class="progress" style="height:18px;margin-bottom:6px">
                     <div id="updater-<?php echo h($key); ?>" class="progress-bar" role="progressbar" aria-label="<?php echo h($label); ?>" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width:0%">0%</div>
@@ -43,8 +43,8 @@
         </div>
         </div>
         <div class="col-md-6">
-        <h4>Update log</h4>
-        <pre id="updater-log" style="max-height:360px;overflow:auto;white-space:pre-wrap" aria-label="Update log"></pre>
+        <h4><?php echo h(__('Update log')); ?></h4>
+        <pre id="updater-log" style="max-height:360px;overflow:auto;white-space:pre-wrap" aria-label="<?php echo h(__('Update log')); ?>"></pre>
         </div>
     </div>
 </div>
@@ -72,7 +72,7 @@
             bar.style.width = (item.percent === 0 && !item.error ? 100 : item.percent) + '%';
             bar.setAttribute('aria-valuenow', item.percent);
             bar.textContent = item.error ? 'Failed' : item.percent === 0 ? 'Working…' : item.percent + '%';
-            bar.className = 'progress-bar' + (item.error ? ' progress-bar-danger' : item.percent < 100 ? ' progress-bar-striped active updater-running' : ' progress-bar-success');
+            bar.className = 'progress-bar' + (item.error ? ' progress-bar-danger' : item.percent < 100 ? <?php echo json_encode(__(' progress-bar-striped active updater-running'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?> : ' progress-bar-success');
             if (item.error) bar.style.width = '100%';
         }
         message(item.message, item.error);
@@ -91,30 +91,30 @@
             lines.forEach(function (line) {
                 if (!line.trim()) return;
                 try { var item = JSON.parse(line); row(item); if (item.error || item.step === 'complete') terminal = true; }
-                catch (e) { message('Unexpected server response. Review the server log and backup/.updater before retrying.', true); }
+                catch (e) { message(<?php echo json_encode(__('Unexpected server response. Review the server log and backup/.updater before retrying.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>, true); }
             });
         }
         xhr.onprogress = consume;
         xhr.onload = function () {
             consume();
             if (!terminal) working(false);
-            if (!terminal) message('Connection ended without a completion result. The server may still be running. Review backup/.updater logs before retrying.', true);
+            if (!terminal) message(<?php echo json_encode(__('Connection ended without a completion result. The server may still be running. Review backup/.updater logs before retrying.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>, true);
             if (terminal) button.disabled = false;
         };
-        xhr.onerror = function () { working(false); message('Connection lost. The updater may still be running. Review backup/.updater logs before retrying.', true); };
+        xhr.onerror = function () { working(false); message(<?php echo json_encode(__('Connection lost. The updater may still be running. Review backup/.updater logs before retrying.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>, true); };
         xhr.send('operation=run&token=' + encodeURIComponent(token) + '&repeat=' + (repeat ? '1' : '0') + '&date=' + encodeURIComponent(date));
     }
     button.addEventListener('click', function () {
         button.disabled = true; log.textContent = ''; working(true);
         $('#updater-steps .progress-bar').removeClass('progress-bar-success progress-bar-danger updater-running active').css('width', '0%').attr('aria-valuenow', '0').text('0%');
-        message('Checking today’s backup...', false);
+        message(<?php echo json_encode(__('Checking today’s backup...'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>, false);
         if (backupCheck.error) {
             working(false);
             message(backupCheck.error, true);
             button.disabled = false;
             return;
         }
-        var repeat = backupCheck.exists && window.confirm('A completed backup already exists for ' + backupCheck.date + '. Select OK to create another backup, or Cancel to reuse today’s completed backup and continue.');
+        var repeat = backupCheck.exists && window.confirm(<?php echo json_encode(__('A completed backup already exists for '), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?> + backupCheck.date + '. Select OK to create another backup, or Cancel to reuse today’s completed backup and continue.');
         run(repeat, backupCheck.date);
     });
 }());

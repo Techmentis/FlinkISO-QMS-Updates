@@ -1,12 +1,12 @@
 <div class="box box-default collapsed-box">
 	<div class="box-header data-header" data-widget="collapse">
-		<h3 class="box-title"><span class=""><i class="fa fa-pie-chart"></i></span> Show Charts/ Panels on dashboard</h3>
+		<h3 class="box-title"><span class=""><i class="fa fa-pie-chart"></i></span> <?php echo h(__('Show Charts/ Panels on dashboard')); ?></h3>
 		<div class="box-tools pull-right"><button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button></div>
 	</div>
 	<div class="box-body">
 		<table class="table table-striped">
 			<tr>
-				<th>Field Name</th>
+				<th><?php echo h(__('Field Name')); ?></th>
 				<th width="12"></th>
 				<th width="12"></th>
 			</tr>
@@ -43,7 +43,7 @@
 		</table>
 	</div>
 	<div class="box-footer">
-		<small>You can check any of the following fields from here and default chart will start displaying on the dashboard. For more options goto Graph Panels from main menu.</small> 
+		<small><?php echo h(__('You can check any of the following fields from here and default chart will start displaying on the dashboard. For more options goto Graph Panels from main menu.')); ?></small> 
 	</div>
 </div>
 <script>

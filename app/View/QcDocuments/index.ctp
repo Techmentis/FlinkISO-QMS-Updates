@@ -12,7 +12,7 @@ $pptarray = array('ppt','pptx');
 <div  id="main">
     <?php echo $this->Session->flash();?>
     <div class="qcDocuments ">
-        <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Master List Of Documents','modelClass'=>'QcDocument','options'=>array("sr_no"=>"Sr No","document_number"=>"Document Number","reference_number"=>"Reference Number","issue_number"=>"Issue Number","date_of_next_issue"=>"Date Of Next Issue","date_of_issue"=>"Date Of Issue","effective_from_date"=>"Effective From Date","revision_number"=>"Revision Number","date_of_review"=>"Date Of Review","revision_date"=>"Revision Date","document_type"=>"Document Type","it_categories"=>"It Categories","document_status"=>"Document Status","issued_by"=>"Issued By","archived"=>"Archived","change_history"=>"Change History","cr_status"=>"Cr Status","mark_for_cr_update"=>"Mark For Cr Update","temp_date_of_issue"=>"Temp Date Of Issue","temp_effective_from_date"=>"Temp Effective From Date","linked_formats"=>"Linked Formats","cover_page"=>"Cover Page","page_orientation"=>"Page Orientation"),'pluralVar'=>'qcDocuments'))); ?>
+        <?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Master List Of Documents'),'modelClass'=>'QcDocument','options'=>array("sr_no"=>__("Sr No"),"document_number"=>__("Document Number"),"reference_number"=>__("Reference Number"),"issue_number"=>__("Issue Number"),"date_of_next_issue"=>__("Date Of Next Issue"),"date_of_issue"=>__("Date Of Issue"),"effective_from_date"=>__("Effective From Date"),"revision_number"=>__("Revision Number"),"date_of_review"=>__("Date Of Review"),"revision_date"=>__("Revision Date"),"document_type"=>__("Document Type"),"it_categories"=>__("It Categories"),"document_status"=>__("Document Status"),"issued_by"=>__("Issued By"),"archived"=>__("Archived"),"change_history"=>__("Change History"),"cr_status"=>__("Cr Status"),"mark_for_cr_update"=>__("Mark For Cr Update"),"temp_date_of_issue"=>__("Temp Date Of Issue"),"temp_effective_from_date"=>__("Temp Effective From Date"),"linked_formats"=>__("Linked Formats"),"cover_page"=>__("Cover Page"),"page_orientation"=>__("Page Orientation")),'pluralVar'=>'qcDocuments'))); ?>
         <script type="text/javascript">
             $(document).ready(function(){
                 $('table th a, .pag_list li span a').on('click', function() {
@@ -39,15 +39,15 @@ $pptarray = array('ppt','pptx');
             <table cellpadding="0" cellspacing="0" class="table table-responsive table-hover index">
                 <tr>
                     <th><?php echo $this->Paginator->sort('title'); ?></th>
-                    <th><?php echo $this->Paginator->sort('intdocunumber','Document Number'); ?></th>
-                    <th>Rev.No.</th>
+                    <th><?php echo $this->Paginator->sort('intdocunumber',__('Document Number')); ?></th>
+                    <th><?php echo h(__('Rev.No.')); ?></th>
                     <th><?php echo $this->Paginator->sort('prepared_by'); ?></th>
                     <th><?php echo $this->Paginator->sort('approved_by'); ?></th>
                     <th><?php echo $this->Paginator->sort('issued_by'); ?></th>
                     <th><?php echo $this->Paginator->sort('document_status'); ?></th>
                     <th><?php echo __('Tables'); ?></th>
                     <th><?php echo $this->Paginator->sort('publish'); ?></th>
-                    <th width="90">Actions</th>
+                    <th width="90"><?php echo h(__('Actions')); ?></th>
                 </tr>
                 <?php if($qcDocuments){ ?>
                     <?php foreach ($qcDocuments as $qcDocument):
@@ -108,15 +108,15 @@ $pptarray = array('ppt','pptx');
 
                         <td class="" width="120">
                             <div class="btn-group btn-no-border">
-                                <?php echo $this->Html->link('<i class="fa fa-television"></i>',array('controller'=>'qc_documents','action'=>'view',$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View'));?>
+                                <?php echo $this->Html->link('<i class="fa fa-television"></i>',array('controller'=>'qc_documents','action'=>'view',$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('View')));?>
 
-                                <?php echo $this->Html->link('<i class="fa fa-edit"></i>',array('controller'=>'qc_documents','action'=>'edit',$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Edit'));?>
+                                <?php echo $this->Html->link('<i class="fa fa-edit"></i>',array('controller'=>'qc_documents','action'=>'edit',$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Edit')));?>
 
                                 <?php
                                 if($qcDocument['QcDocument']['tables'] == 0 && $this->Session->read('User.is_super_user')){
-                                    echo $this->Html->link('<i class="fa fa-database"></i>',array('controller'=>'custom_tables','action'=>'add','qc_document_id'=>$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Create Table'));
+                                    echo $this->Html->link('<i class="fa fa-database"></i>',array('controller'=>'custom_tables','action'=>'add','qc_document_id'=>$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('Create Table')));
                                 }elseif($qcDocument['QcDocument']['tables'] > 0){
-                                    echo $this->Html->link('<i class="fa fa-database"></i>',array('controller'=>'custom_tables','action'=>'index','qc_document_id'=>$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View Table'));
+                                    echo $this->Html->link('<i class="fa fa-database"></i>',array('controller'=>'custom_tables','action'=>'index','qc_document_id'=>$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> __('View Table')));
                                 }
 
                                 ?>
@@ -125,7 +125,7 @@ $pptarray = array('ppt','pptx');
                     </tr>
                 <?php endforeach; ?>
             <?php }else{ ?>
-                <tr><td colspan=144>No results found</td></tr>
+                <tr><td colspan=144><?php echo h(__('No results found')); ?></td></tr>
             <?php } ?>
         </table>
         <?php echo $this->Form->end();?>
@@ -162,27 +162,27 @@ $pptarray = array('ppt','pptx');
 
                 $("#"+id+"_dnum").html('');
                 if(data == 'Exists'){
-                    $("#"+id+"_dnum").html('Document Number already exists. Try different number.');
+                    $("#"+id+"_dnum").html(<?php echo json_encode(__('Document Number already exists. Try different number.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                 }
 
                 if(data == 'DocDontExists'){
-                    $("#"+id+"_dnum").html('Unable to find the document.');
+                    $("#"+id+"_dnum").html(<?php echo json_encode(__('Unable to find the document.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                 }
 
                 if(data == 'Toolong'){
-                    $("#"+id+"_dnum").html('Document Number should not be more than 7 characters long.');
+                    $("#"+id+"_dnum").html(<?php echo json_encode(__('Document Number should not be more than 7 characters long.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                 }
 
                 if(data == 'BkpFoldFailed'){
-                    $("#"+id+"_dnum").html('Unable to backup existing folder.');
+                    $("#"+id+"_dnum").html(<?php echo json_encode(__('Unable to backup existing folder.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                 }
 
                 if(data == 'Success'){
-                    $("#"+id+"_dnum").html('Document Number Updated.');
+                    $("#"+id+"_dnum").html(<?php echo json_encode(__('Document Number Updated.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                 }
 
                 if(data == 'notsame'){
-                    $("#"+id+"_dnum").html('Old & New Document Numbers must be same length.');
+                    $("#"+id+"_dnum").html(<?php echo json_encode(__('Old & New Document Numbers must be same length.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
                 }
             },
         });

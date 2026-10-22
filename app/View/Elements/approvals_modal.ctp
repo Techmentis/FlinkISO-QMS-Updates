@@ -16,7 +16,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close change-approver-modal-close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close change-approver-modal-close" data-dismiss="modal" aria-label="<?php echo h(__('Close')); ?>"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="changeApproverModalTitle"><?php echo __('Change Approver'); ?></h4>
       </div>
       <div class="modal-body">

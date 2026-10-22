@@ -3,7 +3,7 @@
 <div  id="main">
     <?php echo $this->Session->flash(); ?>
     <div class="employees ">
-        <?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => 'Employees', 'modelClass' => 'Employee', 'options' => array("sr_no" => "Sr No", "name" => "Name", "employee_number" => "Employee Number", "qualification" => "Qualification", "joining_date" => "Joining Date", "date_of_birth" => "Date Of Birth", "pancard_number" => "Pancard Number", "personal_telephone" => "Personal Telephone", "office_telephone" => "Office Telephone", "mobile" => "Mobile", "personal_email" => "Personal Email", "office_email" => "Office Email", "residence_address" => "Residence Address", "permenant_address" => "Permanent Address", "maritial_status" => "Marital Status", "driving_license" => "Driving License"), 'pluralVar' => 'employees'))); ?>
+        <?php echo $this->element('nav-header-lists', array('postData' => array('pluralHumanName' => __('Employees'), 'modelClass' => 'Employee', 'options' => array("sr_no" => __("Sr No"), "name" => __("Name"), "employee_number" => __("Employee Number"), "qualification" => __("Qualification"), "joining_date" => __("Joining Date"), "date_of_birth" => __("Date Of Birth"), "pancard_number" => __("Pancard Number"), "personal_telephone" => __("Personal Telephone"), "office_telephone" => __("Office Telephone"), "mobile" => __("Mobile"), "personal_email" => __("Personal Email"), "office_email" => __("Office Email"), "residence_address" => __("Residence Address"), "permenant_address" => __("Permanent Address"), "maritial_status" => __("Marital Status"), "driving_license" => __("Driving License")), 'pluralVar' => 'employees'))); ?>
 
         
         <style type="text/css">
@@ -26,7 +26,7 @@
         echo $this->Html->script(array('jquery.orgchart'));
         echo $this->fetch('script');
         ?>
-        <h4 class="h4class">Employee Organizational Chart <br />
+        <h4 class="h4class"><?php echo h(__('Employee Organizational Chart')); ?> <br />
             <small><?php echo $this->Html->link(__('Employee'), array('controller' => 'employees', 'action' => 'org_chart', 'render'=>'h', 'timestamp'=>date('ymdhis'))); ?> | 
             <?php echo $this->Html->link(__('Designation'), array('controller' => 'designations', 'action' => 'org_chart', 'render'=>'h', 'timestamp'=>date('ymdhis'))); ?></small> 
             <br />
@@ -45,9 +45,9 @@
                       $hclass = ' btn-default';
                   }
                   ?>                  
-                  <?php echo $this->Html->link('Verticle',array('action'=>'org_chart','render'=>'v'),array('class'=>'btn' . $vclass));?>
-                  <?php echo $this->Html->link('Horizontal',array('action'=>'org_chart','render'=>'h'),array('class'=>'btn'. $hclass));?>
-                  <?php echo $this->Html->link('Download PNG', '#',array('class'=>'btn btn-default','id'=>'printBtn'));?>
+                  <?php echo $this->Html->link(__('Verticle'),array('action'=>'org_chart','render'=>'v'),array('class'=>'btn' . $vclass));?>
+                  <?php echo $this->Html->link(__('Horizontal'),array('action'=>'org_chart','render'=>'h'),array('class'=>'btn'. $hclass));?>
+                  <?php echo $this->Html->link(__('Download PNG'), '#',array('class'=>'btn btn-default','id'=>'printBtn'));?>
               </div>
           </small>
       </h4>

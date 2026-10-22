@@ -15,33 +15,35 @@ class UsersController extends AppController {
      */
     // public $components = array('Paginator');
     public $components = array('Ctrl');
-    public function language_preferences() {
+    public function change_language() {
+        $this->request->onlyAllow('post');
         $userId = $this->Session->read('User.id');
         if (!$userId) throw new ForbiddenException(__('Login to continue.'));
+        $token = isset($this->request->data['token']) ? $this->request->data['token'] : '';
+        $expected = $this->Session->read('Languages.token');
+        if (!is_string($token) || !is_string($expected) || !hash_equals($expected, $token)) throw new ForbiddenException(__('Reload the page and try again.'));
         $this->loadModel('Language');
         if (!$this->Language->available()) throw new RuntimeException(__('Run the language database update first.'));
-        if (!$this->Session->read('Languages.token')) $this->Session->write('Languages.token', bin2hex(openssl_random_pseudo_bytes(32)));
-        $languageToken = $this->Session->read('Languages.token');
-        if ($this->request->is('post')) {
-            $token = isset($this->request->data['token']) ? $this->request->data['token'] : '';
-            if (!is_string($token) || !hash_equals($languageToken, $token)) throw new ForbiddenException(__('Reload the page and try again.'));
-            $id = isset($this->request->data['User']['language_id']) ? $this->request->data['User']['language_id'] : '';
-            $language = is_scalar($id) ? $this->Language->find('first', array('recursive' => -1,
-                'conditions' => array('Language.id' => $id, 'Language.enabled' => 1))) : array();
-            if (!$language) {
-                $this->Session->setFlash(__('Select an available language.'));
-            } elseif ($this->User->updateAll(array('User.language_id' => (int)$language['Language']['id']), array('User.id' => $userId))) {
-                $this->Session->write('User.language_id', $language['Language']['id']);
-                $this->Session->write('Config.language', $language['Language']['code']);
-                Configure::write('Config.language', $language['Language']['code']);
-                $this->Session->setFlash(__('Language saved.'));
-                return $this->redirect(array('action' => 'language_preferences'));
-            } else $this->Session->setFlash(__('Could not save language.'));
+        $id = isset($this->request->data['User']['language_id']) ? $this->request->data['User']['language_id'] : '';
+        $language = is_scalar($id) ? $this->Language->find('first', array('recursive' => -1,
+            'conditions' => array('Language.id' => $id, 'Language.enabled' => 1))) : array();
+        if (!$language) throw new BadRequestException(__('Select an available language.'));
+        if (!$this->User->updateAll(array('User.language_id' => $this->User->getDataSource()->value((string)$language['Language']['id'], 'string')), array('User.id' => $userId))) {
+            throw new RuntimeException(__('Could not save language.'));
         }
-        $this->request->data = $this->User->find('first', array('recursive' => -1,
-            'fields' => array('User.language_id'), 'conditions' => array('User.id' => $userId)));
-        $languages = $this->Language->choices();
-        $this->set(compact('languages', 'languageToken'));
+        $this->Session->write('User.language_id', $language['Language']['id']);
+        $this->Session->write('Config.language', $language['Language']['code']);
+        Configure::write('Config.language', $language['Language']['code']);
+        $returnTo = isset($this->request->data['return_to']) ? $this->request->data['return_to'] : '';
+        // Only allow local application paths; never redirect to another host.
+        if (is_string($returnTo) && substr($returnTo, 0, 1) === '/' && substr($returnTo, 0, 2) !== '//' &&
+            strpos($returnTo, '\\') === false && !preg_match('/[\x00-\x20]/', $returnTo) &&
+            strpos($returnTo, $this->request->base . '/') === 0 &&
+            strpos($returnTo, '/users/change_language') === false) {
+            // here() includes the installation base; Router adds it when redirecting.
+            return $this->redirect(substr($returnTo, strlen($this->request->base)));
+        }
+        return $this->redirect(array('controller' => 'users', 'action' => 'dashboard'));
     }
 
     public function _commons() {
@@ -182,7 +184,7 @@ class UsersController extends AppController {
                     }
                 }else{
                     debug($this->User->validationErrors);
-                    echo "failed";
+                    echo __("failed");
                     exit;
                 }
 

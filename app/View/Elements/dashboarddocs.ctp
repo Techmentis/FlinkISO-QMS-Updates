@@ -12,15 +12,15 @@
           <div class="table-responsive">
             <table class="table">
               <tr>
-                <th>Document Name</th>
-                <th>Number</th>
-                <th>Standard</th>
-                <th>Clause</th>
-                <th>Prepared By</th>
-                <th>Reviewed By</th>
-                <th>Approved By</th>
-                <th>Created</th>
-                <th>Last Modified</th>
+                <th><?php echo h(__('Document Name')); ?></th>
+                <th><?php echo h(__('Number')); ?></th>
+                <th><?php echo h(__('Standard')); ?></th>
+                <th><?php echo h(__('Clause')); ?></th>
+                <th><?php echo h(__('Prepared By')); ?></th>
+                <th><?php echo h(__('Reviewed By')); ?></th>
+                <th><?php echo h(__('Approved By')); ?></th>
+                <th><?php echo h(__('Created')); ?></th>
+                <th><?php echo h(__('Last Modified')); ?></th>
                 <th width="120"></th>
               </tr>
               <?php              

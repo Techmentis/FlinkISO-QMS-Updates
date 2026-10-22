@@ -23,7 +23,7 @@ echo $this->fetch('script');
     });
 </script>
 <?php echo $this->Session->flash(); ?>
-<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Users','modelClass'=>'User','options'=>array(),'pluralVar'=>'users'))); ?>
+<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Users'),'modelClass'=>'User','options'=>array(),'pluralVar'=>'users'))); ?>
 <div class="nav panel panel-default">
     <?php echo $this->Session->flash(); ?>
     <div class="nav">

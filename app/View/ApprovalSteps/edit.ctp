@@ -3,7 +3,7 @@
 <?php echo $this->Session->flash();?>	
 
 	<div class="approvalSteps ">
-		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>'Approval Steps','modelClass'=>'ApprovalStep','options'=>array(),'pluralVar'=>'approvalSteps'))); ?>
+		<?php echo $this->element('nav-header-lists',array('postData'=>array('pluralHumanName'=>__('Approval Steps'),'modelClass'=>'ApprovalStep','options'=>array(),'pluralVar'=>'approvalSteps'))); ?>
 
 <div class="nav panel panel-default">
 <div class="approvalSteps form col-md-12">
@@ -66,7 +66,7 @@
     $().ready(function() {
     	jQuery.validator.addMethod("greaterThanZero", function(value, element) {
             return this.optional(element) || (parseFloat(value) > 0);
-        }, "Please select the value");
+        }, <?php echo json_encode(__('Please select the value'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 
         $('#ApprovalStepEditForm').validate({        	
             rules: {
