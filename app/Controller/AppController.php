@@ -877,7 +877,7 @@ class AppController  extends Controller {
             }else{
 
             }
-            if(isset($this->request->params['named']['published']) && $this->request->params['named']['published']==null)$con1 = null ; else $con1 = $pubCon;
+            if(isset($this->request->params['named']['published']) && $this->request->params['named']['published'] === null)$con1 = null ; else $con1 = $pubCon;
             if(isset($this->request->params['named']['published']))$conditions=array($onlyBranch,$onlyOwn,$con1);
             else $conditions=array($onlyBranch,$onlyOwn,$con1);
         }else{

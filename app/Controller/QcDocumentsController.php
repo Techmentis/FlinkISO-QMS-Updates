@@ -141,6 +141,19 @@ class QcDocumentsController extends AppController {
             );
         }
 
+        // Publication is a separate constraint from the strict/loose search
+        // options, so a search cannot reintroduce records of the other status.
+        if(isset($this->request->params['named']['published'])){
+            if((string)$this->request->params['named']['published'] === '0'){
+                $accessConditions[] = array('OR' => array(
+                    'QcDocument.publish' => 0,
+                    'QcDocument.publish IS NULL'
+                ));
+            }elseif((string)$this->request->params['named']['published'] === '1'){
+                $accessConditions[] = array('QcDocument.publish' => 1);
+            }
+        }
+
         $indexConditions = array($accessConditions);
         if (!empty($conditions)) {
             $indexConditions = array_merge($indexConditions, $conditions);
