@@ -72,3 +72,7 @@
 
 		});
 	</script>
+<?php echo $this->element('master_duplicate_validation', array(
+    'recordIdSelector'=>'#BranchId',
+    'fields'=>array('#BranchName'=>array('field'=>'name', 'message'=>'This branch already exists.'))
+)); ?>

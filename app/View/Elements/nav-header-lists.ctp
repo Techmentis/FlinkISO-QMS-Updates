@@ -1,4 +1,9 @@
 <style type="text/css">.fa-dark.fa{color: #5c5b5b;}
+.btn-app.record-unpublished-button{position:relative;overflow:visible;}
+.btn-app.record-unpublished-button > .badge.record-unpublished-count{
+    position:absolute;top:-8px;right:-8px;bottom:auto;left:auto;
+    margin:0;z-index:1;background-color:#a94442;color:#fff;
+}
 </style>
 <?php
 if ($unpublished == null)
@@ -71,14 +76,17 @@ unset($postData['options']['publish']);
      array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
         'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Published'
     ));
-     echo $this->Html->link('<l class="fa fa-minus-square-o"></i>',array('action'=>'index','published'=>0,
+     $unpublishedBadge = isset($toolbarUnpublishedCount)
+         ? '<span class="badge record-unpublished-count">'.(int)$toolbarUnpublishedCount.'</span>'
+         : '';
+     echo $this->Html->link('<i class="fa fa-minus-square-o"></i>'.$unpublishedBadge,array('action'=>'index','published'=>0,
         'qc_document_id' => $this->request->params['named']['qc_document_id'],
         'custom_table_id' => $this->request->params['named']['custom_table_id'],
         'process_id' => $this->request->params['named']['process_id'],
         'timestamp'=>date('ymdhis')
     ),
-     array('class'=>'tooltip1 btn btn-app btn-sm btn-default','escape'=>false,
-        'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Ubnpublished/ Pending Approvals'
+     array('class'=>'tooltip1 btn btn-app btn-sm btn-default record-unpublished-button','escape'=>false,
+        'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Unpublished / Pending Approvals'
     ));
 
  }

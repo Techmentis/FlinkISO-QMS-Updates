@@ -111,7 +111,11 @@ class FlinkisoUpdater {
         $step = 'connect';
         try {
             $repo = $this->repository();
-            if (!extension_loaded('curl') || !class_exists('ZipArchive')) throw new RuntimeException('PHP cURL and ZipArchive extensions are required.');
+            if (!extension_loaded('curl')) throw new RuntimeException('Missing required PHP extension: cURL (php-curl).');
+            if (!function_exists('exec')) throw new RuntimeException('PHP exec() is required to run command-line unzip.');
+            $unzipCheck = array(); $unzipCheckStatus = 0;
+            exec('command -v unzip 2>/dev/null', $unzipCheck, $unzipCheckStatus);
+            if ($unzipCheckStatus !== 0 || !$unzipCheck) throw new RuntimeException('Command-line unzip is required.');
             $errors = array();
             $this->writableErrors($this->root . '/backup', $errors);
             $this->writableErrors($this->root . '/app/webroot/updates', $errors);
@@ -312,44 +316,23 @@ class FlinkisoUpdater {
     }
 
     private function extract($archive, $stage, $repo) {
-        $zip = new ZipArchive();
-        if ($zip->open($archive, ZipArchive::CHECKCONS) !== true) throw new RuntimeException('Invalid or corrupt ZIP archive.');
-        $root = null; $links = array(); $names = array();
-        try {
-            for ($i = 0; $i < $zip->numFiles; $i++) {
-                $stat = $zip->statIndex($i); $name = $stat['name'];
-                if (!self::safeArchivePath($name)) throw new RuntimeException('Unsafe ZIP entry: ' . $name);
-                $names[$name] = $i;
-                $parts = explode('/', $name);
-                if ($root === null) $root = $parts[0];
-                $opsys = 0; $attr = 0;
-                if ($zip->getExternalAttributesIndex($i, $opsys, $attr) && (($attr >> 16) & 0170000) === 0120000) {
-                    $target = $zip->getFromIndex($i);
-                    if (is_string($target) && $target !== '') $links[$name] = $target;
-                }
+        $this->mkdirChecked($stage);
+        $output = array(); $status = 0;
+        exec('unzip -oq ' . escapeshellarg($archive) . ' -d ' . escapeshellarg($stage) . ' 2>&1', $output, $status);
+        if ($status !== 0) {
+            $details = trim(implode("\n", array_slice($output, -20)));
+            throw new RuntimeException('Could not unzip the update archive.' . ($details !== '' ? "\n" . $details : ''));
+        }
+
+        $expected = $stage . '/' . $repo['folder'];
+        if (!is_dir($expected)) {
+            $entries = array_values(array_filter(scandir($stage), function ($name) {
+                return $name !== '.' && $name !== '..';
+            }));
+            if (count($entries) !== 1 || !is_dir($stage . '/' . $entries[0]) || !rename($stage . '/' . $entries[0], $expected)) {
+                throw new RuntimeException('Cannot normalize GitHub archive folder.');
             }
-            // Resolve every link before writing anything. Only links to regular files inside this ZIP are allowed.
-            $resolvedLinks = array();
-            foreach ($links as $name => $unused) {
-                $resolved = $this->resolveZipLink($name, $links, $names);
-                if ($resolved !== null) $resolvedLinks[$name] = $resolved;
-            }
-            $this->mkdirChecked($stage);
-            // Extract manually so ZipArchive never creates operating-system symlinks.
-            foreach ($names as $name => $index) {
-                $output = $stage . '/' . $name;
-                if (substr($name, -1) === '/') { $this->mkdirChecked(rtrim($output, '/')); continue; }
-                $this->mkdirChecked(dirname($output));
-                $sourceIndex = isset($resolvedLinks[$name]) ? $names[$resolvedLinks[$name]] : $index;
-                $input = $zip->getStream($zip->getNameIndex($sourceIndex));
-                $destination = fopen($output, 'wb');
-                if (!$input || !$destination) throw new RuntimeException('Cannot extract ZIP entry: ' . $name);
-                $copied = stream_copy_to_stream($input, $destination);
-                fclose($input); fclose($destination);
-                if ($copied === false) throw new RuntimeException('Cannot extract ZIP entry: ' . $name);
-            }
-            if ($root !== $repo['folder'] && !rename($stage . '/' . $root, $stage . '/' . $repo['folder'])) throw new RuntimeException('Cannot normalize GitHub archive folder.');
-        } finally { $zip->close(); }
+        }
     }
 
     private function resolveZipLink($name, $links, $names, $trail = array()) {

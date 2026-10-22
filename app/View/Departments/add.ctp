@@ -70,3 +70,7 @@
 
 		});
 	</script>
+<?php echo $this->element('master_duplicate_validation', array(
+    'recordIdSelector'=>'#DepartmentId',
+    'fields'=>array('#DepartmentName'=>array('field'=>'name', 'message'=>'This department already exists.'))
+)); ?>

@@ -52,6 +52,7 @@
 (function () {
     var url = <?php echo json_encode($this->Html->url(array('controller' => 'billing', 'action' => 'update'))); ?>;
     var token = <?php echo json_encode($updaterToken); ?>;
+    var backupCheck = <?php echo json_encode($updaterBackupCheck); ?>;
     var button = document.getElementById('updater-start');
     var status = document.getElementById('updater-status');
     var log = document.getElementById('updater-log');
@@ -107,12 +108,14 @@
         button.disabled = true; log.textContent = ''; working(true);
         $('#updater-steps .progress-bar').removeClass('progress-bar-success progress-bar-danger updater-running active').css('width', '0%').attr('aria-valuenow', '0').text('0%');
         message('Checking today’s backup...', false);
-        $.ajax({url: url, method: 'POST', dataType: 'json', data: {operation: 'check', token: token}})
-            .done(function (data) {
-                if (data.error) { working(false); message(data.error, true); button.disabled = false; return; }
-                var repeat = data.exists && window.confirm('A completed backup already exists for ' + data.date + '. Select OK to create another backup, or Cancel to reuse today’s completed backup and continue.');
-                run(repeat, data.date);
-            }).fail(function () { working(false); message('Could not check the backup. Reload the page and verify your login.', true); button.disabled = false; });
+        if (backupCheck.error) {
+            working(false);
+            message(backupCheck.error, true);
+            button.disabled = false;
+            return;
+        }
+        var repeat = backupCheck.exists && window.confirm('A completed backup already exists for ' + backupCheck.date + '. Select OK to create another backup, or Cancel to reuse today’s completed backup and continue.');
+        run(repeat, backupCheck.date);
     });
 }());
 </script>

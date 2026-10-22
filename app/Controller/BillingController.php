@@ -71,6 +71,12 @@ class BillingController extends AppController {
         $token = $this->Session->read('Updater.token');
         if (!$this->request->is('post')) {
             $this->set('updaterToken', $token);
+            $service = new FlinkisoUpdater(ROOT, Configure::read('FlinkisoUpdater'));
+            try {
+                $this->set('updaterBackupCheck', $service->check());
+            } catch (Exception $e) {
+                $this->set('updaterBackupCheck', array('error' => $e->getMessage()));
+            }
             return;
         }
         $this->autoRender = false;

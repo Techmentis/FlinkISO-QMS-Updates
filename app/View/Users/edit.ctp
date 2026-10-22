@@ -136,3 +136,9 @@ $.ajaxSetup({beforeSend: function() {$("#busy-indicator").show();}, complete: fu
 </script>
 
 </div>
+<?php echo $this->element('master_duplicate_validation', array(
+    'recordIdSelector'=>'#UserId',
+    'fields'=>array(
+        '#UserEmployeeId'=>array('field'=>'employee_id', 'message'=>'This employee already has another user account.')
+    )
+)); ?>

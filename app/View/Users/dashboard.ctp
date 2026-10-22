@@ -27,6 +27,10 @@ $pptarray = array('ppt','pptx');
             array('class'=>'tooltip1 btn btn btn-app btn-sm btn-default','escape'=>false ,
               'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'List of Departments'
             ));
+          echo $this->Html->link('<i class="fa fa-briefcase"></i>',array('controller'=>'designations', 'action'=>'index','timestamp'=>date('ymdhis')),
+            array('class'=>'tooltip1 btn btn btn-app btn-sm btn-default','escape'=>false,
+              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'List of Designations'
+            ));
           echo $this->Html->link('<i class="fa fa-users"></i>',array('controller'=>'employees', 'action'=>'index','timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn btn btn-app btn-sm btn-default','escape'=>false,'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 
               'data-placement'=>'bottom', 'title'=> 'List of Employees'

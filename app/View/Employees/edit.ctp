@@ -123,3 +123,10 @@
 
 		});
 	</script>
+<?php echo $this->element('master_duplicate_validation', array(
+    'recordIdSelector'=>'#EmployeeId',
+    'fields'=>array(
+        '#EmployeeEmployeeNumber'=>array('field'=>'employee_number', 'message'=>'This employee number already exists.'),
+        '#EmployeeOfficeEmail'=>array('field'=>'office_email', 'message'=>'This office email already exists.')
+    )
+)); ?>

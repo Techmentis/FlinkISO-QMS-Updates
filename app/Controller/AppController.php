@@ -199,6 +199,46 @@ class AppController  extends Controller {
         }
         $skipcontrollers = array('branches','departments','designations','employees','users','standards','clauses','custom_tables','approval_processes');
         if(!in_array($this->request->controller,$skipcontrollers))$this->_fetch_approval_steps();
+        if($this->action === 'index' && $this->request->controller !== 'custom_tables'){
+            $this->_set_unpublished_toolbar_count();
+        }
+    }
+
+    protected function _set_unpublished_toolbar_count(){
+        $modelName = $this->modelClass;
+        if(empty($modelName) || !isset($this->$modelName) || !$this->$modelName->hasField('publish')) return;
+
+        // Reuse the list's permissions, parent scope and search filters. Only
+        // replace the publication filter; pagination does not limit the count.
+        $settings = $this->paginate;
+        if(isset($settings[$modelName])) $settings = $settings[$modelName];
+        if(!isset($settings['conditions'])) return;
+        $options = array(
+            'recursive' => isset($settings['recursive']) ? $settings['recursive'] : $this->$modelName->recursive,
+            'conditions' => array(
+                $this->_without_publication_conditions($settings['conditions'], $modelName),
+                'OR' => array($modelName.'.publish' => 0, $modelName.'.publish IS NULL')
+            )
+        );
+        foreach(array('joins', 'group', 'contain') as $option){
+            if(isset($settings[$option])) $options[$option] = $settings[$option];
+        }
+        $this->set('toolbarUnpublishedCount', (int)$this->$modelName->find('count', $options));
+    }
+
+    protected function _without_publication_conditions($conditions, $modelName){
+        if(!is_array($conditions)) return $conditions;
+        $result = array();
+        foreach($conditions as $key => $value){
+            $expression = is_int($key) && is_string($value) ? $value : $key;
+            if(is_string($expression) && preg_match('/^'.preg_quote($modelName, '/').'\\.publish(?:\\s|$)/i', trim($expression))) continue;
+            if(is_array($value)){
+                $value = $this->_without_publication_conditions($value, $modelName);
+                if(empty($value)) continue;
+            }
+            $result[$key] = $value;
+        }
+        return $result;
     }
 
     public function _find_parent(){
@@ -314,13 +354,13 @@ class AppController  extends Controller {
                 ));
             }else{
                 $skip = array('approval_comments','approvals','standards','processes');
-                $ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','pull_signature_from_user_id','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check','json','xml','return_user_list','org_chart');
+                $ignore = array('install_updates', 'register','activate', 'send_otp', 'generate_invoice', 'renew', 'invoices', 'check_invoice_date','login', 'logout', 'forgot_password', 'reset_password', 'save_doc','access_denied','dashboard','dir_size','get_password_change_remind','last_updated_record','assigned_tasks','get_signatures','download_file','get_signature','save_signature','pull_signature_from_user_id','profile','upload','onlyofficechk', 'save_template',  'save_rec_doc','save_custom_docs','save_file', 'change_password','check_password_validation','check_duplicate','clean_table_names','jwtencode','get_directory_tree','updateaccess','opt_check','json','xml','return_user_list','org_chart');
                 if(!in_array($this->action,$ignore)){
                     // $this->Session->setFlash(__('Blocked Action: '. $this->request->action), 'default', array('class' => 'alert alert-danger'));
                     $this->_check_access();
                 }
             }
-            $skip_track_history = array('check_invoice_dateTue','dir_size','advance_search','assigned_tasks','index','jwtencode','field_fetch','check_document','code_input_main');
+            $skip_track_history = array('check_invoice_dateTue','check_duplicate','dir_size','advance_search','assigned_tasks','index','jwtencode','field_fetch','check_document','code_input_main');
             if (
             !in_array($this->action, $skip_track_history) &&
             Inflector::Classify($this->name) != 'App' &&
@@ -4874,6 +4914,56 @@ class AppController  extends Controller {
             return true;
         }
 
+    }
+
+    /**
+     * Browser-side duplicate validation for the application masters.
+     * The controller/field whitelist prevents this endpoint from becoming an
+     * arbitrary database-field lookup, and the record id makes edits safe.
+     */
+    public function check_duplicate(){
+        $this->autoRender = false;
+        $this->response->type('json');
+
+        $allowedFields = array(
+            'branches' => array('name'),
+            'departments' => array('name'),
+            'designations' => array('name'),
+            'employees' => array('employee_number', 'office_email'),
+            'users' => array('username', 'employee_id')
+        );
+        $controller = $this->request->params['controller'];
+        $field = isset($this->request->data['field']) ? $this->request->data['field'] : '';
+        $value = isset($this->request->data['value']) ? trim($this->request->data['value']) : '';
+        $recordId = isset($this->request->data['id']) ? trim($this->request->data['id']) : '';
+
+        if(!$this->request->is('post') || empty($this->Session->read('User.id')) ||
+            !isset($allowedFields[$controller]) || !in_array($field, $allowedFields[$controller], true)){
+            $this->response->statusCode(400);
+            $this->response->body(json_encode(false));
+            return $this->response;
+        }
+
+        // Empty optional values are left to the normal required-field rules.
+        if($value === ''){
+            $this->response->body(json_encode(true));
+            return $this->response;
+        }
+
+        $model = $this->modelClass;
+        $dataSource = $this->$model->getDataSource();
+        $qualifiedField = $dataSource->name($model.'.'.$field);
+        $conditions = array(
+            'LOWER(TRIM('.$qualifiedField.')) = '.$dataSource->value(strtolower($value), 'string')
+        );
+        if($recordId !== '') $conditions[$model.'.'.$this->$model->primaryKey.' !='] = $recordId;
+
+        $duplicate = $this->$model->find('count', array(
+            'recursive' => -1,
+            'conditions' => $conditions
+        ));
+        $this->response->body(json_encode($duplicate === 0));
+        return $this->response;
     }
 
     public function code_input_main($id = null){

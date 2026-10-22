@@ -69,3 +69,7 @@
 				});
 			});
 		</script>
+<?php echo $this->element('master_duplicate_validation', array(
+    'recordIdSelector'=>'#DesignationId',
+    'fields'=>array('#DesignationName'=>array('field'=>'name', 'message'=>'This designation already exists.'))
+)); ?>

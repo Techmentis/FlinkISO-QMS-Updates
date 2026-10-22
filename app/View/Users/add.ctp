@@ -85,23 +85,6 @@
             }
         });
 
-        function checkUsername() {
-            $('#usernameCheckResult').load('<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/check_username/' + $('#UserUsername').val(), function(response, status, xhr) {
-                if (response !== '') {
-                    $('#usernameCheckResult').show();
-                    $('#UserUsername').val('');
-                    $('#UserUsername').addClass('error');
-                } else {
-                    $('#UserUsername').removeClass('error');
-                    $('#usernameCheckResult').hide();
-                }
-            });
-
-        }
-        $('#UserUsername').blur(function() {
-            checkUsername();
-        });
-        checkUsername();
     });
 </script>
 
@@ -184,3 +167,10 @@
     }
 });
 </script>
+<?php echo $this->element('master_duplicate_validation', array(
+    'recordIdSelector'=>'#UserId',
+    'fields'=>array(
+        '#UserUsername'=>array('field'=>'username', 'message'=>'This username already exists.'),
+        '#UserEmployeeId'=>array('field'=>'employee_id', 'message'=>'This employee already has a user account.')
+    )
+)); ?>
