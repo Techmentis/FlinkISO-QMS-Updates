@@ -15,6 +15,35 @@ class UsersController extends AppController {
      */
     // public $components = array('Paginator');
     public $components = array('Ctrl');
+    public function language_preferences() {
+        $userId = $this->Session->read('User.id');
+        if (!$userId) throw new ForbiddenException(__('Login to continue.'));
+        $this->loadModel('Language');
+        if (!$this->Language->available()) throw new RuntimeException(__('Run the language database update first.'));
+        if (!$this->Session->read('Languages.token')) $this->Session->write('Languages.token', bin2hex(openssl_random_pseudo_bytes(32)));
+        $languageToken = $this->Session->read('Languages.token');
+        if ($this->request->is('post')) {
+            $token = isset($this->request->data['token']) ? $this->request->data['token'] : '';
+            if (!is_string($token) || !hash_equals($languageToken, $token)) throw new ForbiddenException(__('Reload the page and try again.'));
+            $id = isset($this->request->data['User']['language_id']) ? $this->request->data['User']['language_id'] : '';
+            $language = is_scalar($id) ? $this->Language->find('first', array('recursive' => -1,
+                'conditions' => array('Language.id' => $id, 'Language.enabled' => 1))) : array();
+            if (!$language) {
+                $this->Session->setFlash(__('Select an available language.'));
+            } elseif ($this->User->updateAll(array('User.language_id' => (int)$language['Language']['id']), array('User.id' => $userId))) {
+                $this->Session->write('User.language_id', $language['Language']['id']);
+                $this->Session->write('Config.language', $language['Language']['code']);
+                Configure::write('Config.language', $language['Language']['code']);
+                $this->Session->setFlash(__('Language saved.'));
+                return $this->redirect(array('action' => 'language_preferences'));
+            } else $this->Session->setFlash(__('Could not save language.'));
+        }
+        $this->request->data = $this->User->find('first', array('recursive' => -1,
+            'fields' => array('User.language_id'), 'conditions' => array('User.id' => $userId)));
+        $languages = $this->Language->choices();
+        $this->set(compact('languages', 'languageToken'));
+    }
+
     public function _commons() {
         $departments = $this->User->Department->find('list', array('conditions' => array('Department.publish' => 1, 'Department.soft_delete' => 0)));
         $branches = $this->User->Branch->find('list', array('conditions' => array('Branch.publish' => 1, 'Branch.soft_delete' => 0)));

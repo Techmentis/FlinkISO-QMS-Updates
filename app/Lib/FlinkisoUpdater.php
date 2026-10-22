@@ -1,5 +1,5 @@
 <?php
-/** Fresh updater engine. No shell commands or request-supplied repository credentials. */
+/** Updater engine. Uses command-line unzip; repository credentials come from configuration. */
 class FlinkisoUpdater {
     const DEFAULT_URL = 'https://github.com/Techmentis/FlinkISO-QMS-Updates/archive/refs/heads/main.zip';
     private $root;
@@ -206,6 +206,10 @@ class FlinkisoUpdater {
             // installable so fixes in the update repository reach existing installations.
             $skip = array('Config/core.php', 'Config/database.php', 'Config/installed.txt', 'tmp', 'webroot/files', 'webroot/updates');
             $incoming = $this->inventory($source, '', $skip, $errors);
+            // Installed translations belong to the customer. Keep them when updating the master template.
+            foreach ($incoming as $relative => $unused) {
+                if (preg_match('~^Locale/[^/]+/LC_MESSAGES/[^/]+\.(po|mo)$~', $relative) && is_file($this->root . '/app/' . $relative)) unset($incoming[$relative]);
+            }
             if (!$incoming) $errors[] = 'Archive contains no application update files.';
             $checkedDirectories = array();
             foreach ($incoming as $rel => $path) {

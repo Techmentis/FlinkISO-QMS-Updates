@@ -128,6 +128,10 @@ class AppController  extends Controller {
     }
 
     public function beforeRender() {
+        if ($this->request->controller === 'users' && $this->action === 'language_preferences') {
+            $this->set('menus', array());
+            return;
+        }
         $this->_check_login();
         if($this->Session->read('User')){
             $this->_table_menu();
@@ -371,8 +375,37 @@ class AppController  extends Controller {
         return $dbsize[0][0]['Bytes'];
     }
 
+    /** Apply the authenticated user's saved preference; tolerate pre-migration installs. */
+    protected function _applyUserLanguage() {
+        $code = 'eng';
+        $userId = $this->Session->read('User.id');
+        $this->set('languagePreferenceAvailable', false);
+        if ($userId) {
+            try {
+                $this->loadModel('Language');
+                if ($this->Language->available()) {
+                    $this->set('languagePreferenceAvailable', true);
+                    $this->loadModel('User');
+                    $user = $this->User->find('first', array('recursive' => -1,
+                        'fields' => array('User.language_id'), 'conditions' => array('User.id' => $userId)));
+                    if (!empty($user['User']['language_id'])) {
+                        $language = $this->Language->find('first', array('recursive' => -1,
+                            'conditions' => array('Language.id' => $user['User']['language_id'], 'Language.enabled' => 1)));
+                        if (!empty($language['Language']['code']) && preg_match('/^[a-z]{3}$/D', $language['Language']['code'])) {
+                            $code = $language['Language']['code'];
+                        }
+                    }
+                }
+            } catch (Exception $e) { CakeLog::write('error', 'Language preference: ' . $e->getMessage()); }
+        }
+        $this->Session->write('Config.language', $code);
+        Configure::write('Config.language', $code);
+    }
+
     public function beforeFilter() {
         $this->_check_login();
+        $this->_applyUserLanguage();
+        if ($this->request->controller === 'users' && $this->action === 'language_preferences') return;
         $this->_loadAiConfiguration();
         if($this->Session->read('User')){
             Configure::write("files", WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id'));

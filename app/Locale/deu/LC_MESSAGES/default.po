@@ -1,0 +1,2721 @@
+msgid ""
+msgstr "Project-Id-Version: FlinkISO\nLanguage: deu\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "AI functions are disabled."
+msgstr ""
+
+msgid "Only POST requests are accepted."
+msgstr ""
+
+msgid "Select Chat, FlinkISO, or Forms mode."
+msgstr ""
+
+msgid "Forms mode is available only in Quality Documents, Custom Tables, and generated forms."
+msgstr ""
+
+msgid "Only Super Users can use Form Creation AI."
+msgstr ""
+
+msgid "Enter a request for FlinkISO AI."
+msgstr ""
+
+msgid "The request is too long."
+msgstr ""
+
+msgid "What should the %s file contain?"
+msgstr ""
+
+msgid "Document topic and requirements"
+msgstr ""
+
+msgid "AI error: FlinkISO could not complete the request to the configured AI provider."
+msgstr ""
+
+msgid "The generated form context is missing its custom_table_id."
+msgstr ""
+
+msgid "The current generated form could not be found."
+msgstr ""
+
+msgid "The current form has an invalid saved field definition."
+msgstr ""
+
+msgid "I could not safely update that field configuration. Review the notes and clarify the request."
+msgstr ""
+
+msgid "The requested field change was prepared."
+msgstr ""
+
+msgid "The requested field change was prepared. FlinkISO is rebuilding the form through the API."
+msgstr ""
+
+msgid "The server could not store the approved AI change for rebuilding."
+msgstr ""
+
+msgid "Only an MR user can rebuild a generated form."
+msgstr ""
+
+msgid "The requested field change is ready for review, but your account cannot rebuild this form."
+msgstr ""
+
+msgid "Open the Quality Document that should be converted into a form, then try again."
+msgstr ""
+
+msgid "The current Quality Document could not be found."
+msgstr ""
+
+msgid "The document displayed in ONLYOFFICE could not be found on the FlinkISO server."
+msgstr ""
+
+msgid "The selected document must be smaller than 25 MB for visual AI analysis."
+msgstr ""
+
+msgid "The validated form definition was found. FlinkISO is retrying form creation without running AI analysis again."
+msgstr ""
+
+msgid "Reusing the previously validated field definition; AI analysis was not run again."
+msgstr ""
+
+msgid "The saved form definition was found. FlinkISO is retrying MVC generation through the API."
+msgstr ""
+
+msgid "The FlinkISO AI API is not configured."
+msgstr ""
+
+msgid "FlinkISO AI is already processing another request. Stop or wait for that request before starting a new one."
+msgstr ""
+
+msgid "AI generation was cancelled."
+msgstr ""
+
+msgid "AI error: The model did not finish generating this form within %s minutes."
+msgstr ""
+
+msgid "API error: FlinkISO could not connect to API v2."
+msgstr ""
+
+msgid "FlinkISO AI is processing another request. Wait for it to finish, or stop it from the panel where it was started."
+msgstr ""
+
+msgid "AI error: The configured AI provider rejected its API key. Update the AI API key in FlinkISO settings. API v2 was reached successfully."
+msgstr ""
+
+msgid "AI error: %s"
+msgstr ""
+
+msgid "API error: API v2 rejected this FlinkISO instance. Confirm that the company ID is registered and API/AI access is enabled on the API server."
+msgstr ""
+
+msgid "API error: %s"
+msgstr ""
+
+msgid "API error: The FlinkISO AI API returned an invalid response."
+msgstr ""
+
+msgid "AI error: The model reached its output limit before it finished the form. No partial form was created. Please try again."
+msgstr ""
+
+msgid "AI error: The model response did not match the required FlinkISO preview format."
+msgstr ""
+
+msgid "I could not safely place the new field in the existing form. Review the notes and clarify the request."
+msgstr ""
+
+msgid "I could not safely update the choices for that field. Review the notes and clarify the request."
+msgstr ""
+
+msgid "I could not safely update that field label. Review the notes and clarify the request."
+msgstr ""
+
+msgid "I could not safely remove those choices. Review the notes and clarify the request."
+msgstr ""
+
+msgid "I could not safely move that field. Review the notes and clarify the request."
+msgstr ""
+
+msgid "I could not safely remove that field. Review the notes and clarify the request."
+msgstr ""
+
+msgid "Specify a supported change to the existing form."
+msgstr ""
+
+msgid "The requested field change is ready, but the rebuild could not be queued."
+msgstr ""
+
+msgid "Open the generated form that should receive these fields, then submit the request again."
+msgstr ""
+
+msgid "The parent fields were recognized, but one or more detected child tables were invalid. No form was created."
+msgstr ""
+
+msgid "FlinkISO detected repeatable information that should use child tables. Review the structure and confirm creation."
+msgstr ""
+
+msgid "The form fields were prepared. FlinkISO is now creating the form through the API."
+msgstr ""
+
+msgid "The server could not queue the generated form for creation."
+msgstr ""
+
+msgid "The form fields are ready, but form creation could not be queued."
+msgstr ""
+
+msgid "Only an MR user can create a generated form."
+msgstr ""
+
+msgid "The form fields are ready for review, but your account cannot create this form."
+msgstr ""
+
+msgid "I prepared a read-only FlinkISO field preview for your review."
+msgstr ""
+
+msgid "I could not prepare a valid field preview. Review the notes and clarify the request."
+msgstr ""
+
+msgid "Only GET requests are accepted."
+msgstr ""
+
+msgid "AI document draft not found."
+msgstr ""
+
+msgid "This AI response is not a downloadable artifact."
+msgstr ""
+
+msgid "Office document export requires the PHP Zip extension."
+msgstr ""
+
+msgid "FlinkISO could not create the requested %s artifact."
+msgstr ""
+
+msgid "Hello! What would you like to discuss?"
+msgstr ""
+
+msgid "Hello! I can help you add, remove, rename, reorder, link, or configure fields on this form. What would you like to change?"
+msgstr ""
+
+msgid "Hello! I can read the current Quality Document and create a FlinkISO form from it. What would you like me to do?"
+msgstr ""
+
+msgid "You are welcome."
+msgstr ""
+
+msgid "AI is not configured with a customer-managed provider for general assistance."
+msgstr ""
+
+msgid "AI error: Could not connect to the configured AI provider."
+msgstr ""
+
+msgid "The configured AI provider returned HTTP %s."
+msgstr ""
+
+msgid "unknown"
+msgstr ""
+
+msgid "The configured AI provider returned HTTP %s but no readable message content."
+msgstr ""
+
+msgid "FlinkISO manual image"
+msgstr ""
+
+msgid "The selected field is no longer present in this form. Reload the page and select it again."
+msgstr ""
+
+msgid "That guided field action is not supported."
+msgstr ""
+
+msgid "I could not safely apply that field action. Review the notes and clarify the request."
+msgstr ""
+
+msgid "The selected field change was prepared."
+msgstr ""
+
+msgid "The selected field change was prepared. FlinkISO is rebuilding the form through the API."
+msgstr ""
+
+msgid "The server could not queue the selected field change."
+msgstr ""
+
+msgid "The selected field change is ready for review, but your account cannot rebuild this form."
+msgstr ""
+
+msgid "The field wizard result was invalid. Please reopen the wizard and try again."
+msgstr ""
+
+msgid "The API could not compile the selected field settings."
+msgstr ""
+
+msgid "The API returned no compiled field."
+msgstr ""
+
+msgid "The field was valid, but it could not be placed in the current form."
+msgstr ""
+
+msgid "The field was compiled by API V2 and is ready for review."
+msgstr ""
+
+msgid "API V2 compiled the field. FlinkISO is rebuilding the form."
+msgstr ""
+
+msgid "The server could not queue the compiled field for rebuilding."
+msgstr ""
+
+msgid "API V2 is not configured."
+msgstr ""
+
+msgid "API V2 rejected the field settings."
+msgstr ""
+
+msgid "API V2 returned an invalid field response."
+msgstr ""
+
+msgid "The existing child table %s was recognized and will not be created again."
+msgstr ""
+
+msgid "%s is marked for removal, so it is not rendered."
+msgstr ""
+
+msgid "%s is configured as Linked Documents with no child forms selected, so FlinkISO renders an empty placement block instead of an input. Change it to Text, or link it to the intended model, to make it visible."
+msgstr ""
+
+msgid "%s is a Linked Documents placement rather than an input field. Its selected child forms are displayed only when applicable."
+msgstr ""
+
+msgid "%s is configured as a section break, not an input field."
+msgstr ""
+
+msgid "%s is configured as a %s field and should be rendered. Rebuild the form if its generated view does not contain the input."
+msgstr ""
+
+msgid "ONLYOFFICE conversion is not configured on this FlinkISO server."
+msgstr ""
+
+msgid "FlinkISO could not create an ONLYOFFICE-accessible URL for this document."
+msgstr ""
+
+msgid "ONLYOFFICE could not convert this document. %s"
+msgstr ""
+
+msgid "ONLYOFFICE did not return converted page images.%s"
+msgstr ""
+
+msgid "ONLYOFFICE returned an invalid converted-file URL."
+msgstr ""
+
+msgid "FlinkISO could not prepare temporary image storage."
+msgstr ""
+
+msgid "FlinkISO could not download the ONLYOFFICE page images. %s"
+msgstr ""
+
+msgid "The converted page-image archive is empty or larger than 80 MB."
+msgstr ""
+
+msgid "FlinkISO could not open the ONLYOFFICE page-image archive."
+msgstr ""
+
+msgid "The configured PDF to PPM executable is unavailable."
+msgstr ""
+
+msgid "FlinkISO could not prepare the local document renderer."
+msgstr ""
+
+msgid "The configured LibreOffice executable is unavailable."
+msgstr ""
+
+msgid "LibreOffice could not convert this document to PDF."
+msgstr ""
+
+msgid "Poppler could not render this document into page images."
+msgstr ""
+
+msgid "The selected document produced more than 32 MB of page images."
+msgstr ""
+
+msgid "The document converter did not produce readable page images."
+msgstr ""
+
+msgid "This form is not linked to a Quality Document."
+msgstr ""
+
+msgid "The linked Quality Document could not be found."
+msgstr ""
+
+msgid "The linked Quality Document file could not be found on the FlinkISO server."
+msgstr ""
+
+msgid "The linked Quality Document must be smaller than 25 MB for visual AI analysis."
+msgstr ""
+
+msgid "FlinkISO AI cannot read this document type yet. Use PDF, DOCX, XLSX, TXT, or CSV. Convert legacy XLS files to XLSX first."
+msgstr ""
+
+msgid "PDF text extraction is not installed on the AIS server. Install Poppler/pdftotext and configure PdfToTextPath."
+msgstr ""
+
+msgid "AIS could not extract text from the current PDF."
+msgstr ""
+
+msgid "DOCX extraction requires the PHP Zip extension on the AIS server."
+msgstr ""
+
+msgid "AIS could not open the current DOCX file."
+msgstr ""
+
+msgid "The current DOCX has no readable document content."
+msgstr ""
+
+msgid "XLSX extraction requires the PHP Zip and DOM extensions on the FlinkISO server."
+msgstr ""
+
+msgid "FlinkISO AI could not open the current XLSX file."
+msgstr ""
+
+msgid "The current document contains no extractable text. A scanned PDF requires OCR."
+msgstr ""
+
+msgid "What should “important” mean for %s?"
+msgstr ""
+
+msgid "Make mandatory"
+msgstr ""
+
+msgid "Make default"
+msgstr ""
+
+msgid "Mandatory and default"
+msgstr ""
+
+msgid "Show on list"
+msgstr ""
+
+msgid "Quality Document"
+msgstr ""
+
+msgid "Which model should %s link to?"
+msgstr ""
+
+msgid "What should the new field be called?"
+msgstr ""
+
+msgid "Field name"
+msgstr ""
+
+msgid "Configure the new field “%s”."
+msgstr ""
+
+msgid "Short text"
+msgstr ""
+
+msgid "Phone"
+msgstr ""
+
+msgid "Email"
+msgstr "E-Mail"
+
+msgid "Long text"
+msgstr ""
+
+msgid "Date"
+msgstr "Datum"
+
+msgid "Date and time"
+msgstr ""
+
+msgid "Number"
+msgstr ""
+
+msgid "Decimal number"
+msgstr ""
+
+msgid "Dropdown — single"
+msgstr ""
+
+msgid "Dropdown — multiple"
+msgstr ""
+
+msgid "Radio buttons"
+msgstr ""
+
+msgid "Checkboxes"
+msgstr ""
+
+msgid "File upload"
+msgstr ""
+
+msgid "Comments or notes"
+msgstr ""
+
+msgid "Hidden field"
+msgstr ""
+
+msgid "Linked documents"
+msgstr ""
+
+msgid "Section break"
+msgstr ""
+
+msgid "Employees"
+msgstr "Mitarbeitende"
+
+msgid "Branches"
+msgstr "Standorte"
+
+msgid "Departments"
+msgstr "Abteilungen"
+
+msgid "Designations"
+msgstr "Positionen"
+
+msgid "Quality Documents"
+msgstr ""
+
+msgid "Should %s allow one selection or multiple selections?"
+msgstr ""
+
+msgid "One selection"
+msgstr ""
+
+msgid "Multiple selections"
+msgstr ""
+
+msgid "Which choices should %s contain? Enter them separated by commas."
+msgstr ""
+
+msgid "For example: Yes, No, Not Applicable"
+msgstr ""
+
+msgid "Which field should be removed?"
+msgstr ""
+
+msgid "AI Generated QMS Document"
+msgstr ""
+
+msgid "AI prepared a read-only recommendation. An active FlinkISO API subscription is required to create or update forms automatically."
+msgstr ""
+
+msgid "Automatic form creation and modification are not included without an active API subscription."
+msgstr ""
+
+msgid "The AI history context is invalid."
+msgstr ""
+
+msgid "The requested form history is not available."
+msgstr ""
+
+msgid "The requested document history is not available."
+msgstr ""
+
+msgid "AI history storage is not available."
+msgstr ""
+
+msgid "AI history could not be loaded from the database."
+msgstr ""
+
+msgid "AI status storage is not available."
+msgstr ""
+
+msgid "Another user"
+msgstr ""
+
+msgid "FlinkISO AI"
+msgstr ""
+
+msgid "The AI request could not be found."
+msgstr ""
+
+msgid "This AI request has already finished."
+msgstr ""
+
+msgid "FlinkISO could not signal the AI request to stop."
+msgstr ""
+
+msgid "Cancelled by user."
+msgstr ""
+
+msgid "Stop requested. The API is cancelling model generation and releasing the request."
+msgstr ""
+
+msgid "Stop was recorded in FlinkISO, but the API cancellation could not be confirmed."
+msgstr ""
+
+msgid "Only Super Users can create or re-create application forms."
+msgstr ""
+
+msgid "Login to continue."
+msgstr "Melden Sie sich an, um fortzufahren."
+
+msgid "You are not authorized to view this section"
+msgstr ""
+
+msgid "Approval created."
+msgstr ""
+
+msgid "Approval could not be sent."
+msgstr ""
+
+msgid "The user has been saved but fail to send email. Please check smtp details."
+msgstr ""
+
+msgid "You can not delete this process."
+msgstr ""
+
+msgid "You do not have permission to delete "
+msgstr ""
+
+msgid "You can not delete this user"
+msgstr ""
+
+msgid "User is deleted."
+msgstr ""
+
+msgid "Enter Password To Continue"
+msgstr ""
+
+msgid "Incorrect Password"
+msgstr ""
+
+msgid "Records Deleted"
+msgstr ""
+
+msgid "Unknown user"
+msgstr ""
+
+msgid "No records to display! Please select search criteria."
+msgstr ""
+
+msgid "This table is not yet available for adding data"
+msgstr ""
+
+msgid "Unknown table"
+msgstr ""
+
+msgid "Select form first"
+msgstr ""
+
+msgid "Failed to copy file"
+msgstr ""
+
+msgid "You are not authorized to view this section :00"
+msgstr ""
+
+msgid "The main record was saved, but one or more child rows could not be saved. Please correct the child form and try again."
+msgstr ""
+
+msgid "Record has been saved"
+msgstr ""
+
+msgid "Record could not be saved. Please, try again."
+msgstr ""
+
+msgid "Unable to save file."
+msgstr ""
+
+msgid "Unable to upload file."
+msgstr ""
+
+msgid "Incorrect password"
+msgstr ""
+
+msgid "File Deleted"
+msgstr ""
+
+msgid "Select one or more valid next approvers before approving this step."
+msgstr ""
+
+msgid "Approved and sent directly to the next approval step."
+msgstr ""
+
+msgid "Approved, but the next step has no available approvers."
+msgstr ""
+
+msgid "Approved. Waiting for the remaining approvals in this step."
+msgstr ""
+
+msgid "Step completed by another approver under Any approval mode."
+msgstr ""
+
+msgid "Approval record not found."
+msgstr ""
+
+msgid "Current approval step was not found."
+msgstr ""
+
+msgid "This is the first approval step and cannot be returned further."
+msgstr ""
+
+msgid "No eligible users are available for the previous approval step."
+msgstr ""
+
+msgid "The record could not be moved to the previous step."
+msgstr ""
+
+msgid "Returned from %s: %s"
+msgstr ""
+
+msgid "Unable to create approvals for the previous step."
+msgstr ""
+
+msgid "The current approval could not be closed. No workflow changes were retained."
+msgstr ""
+
+msgid "Returned to previous step: %s."
+msgstr ""
+
+msgid "Invalid approval process"
+msgstr ""
+
+msgid "The approval process has been saved"
+msgstr ""
+
+msgid "The approval process could not be saved. Please, try again."
+msgstr ""
+
+msgid "The approval process for : "
+msgstr ""
+
+msgid "Invalid approval step"
+msgstr ""
+
+msgid "The approval step has been saved"
+msgstr ""
+
+msgid "The approval step could not be saved. Please, try again."
+msgstr ""
+
+msgid "This approval step cannot be deleted because it controls %d custom form field(s) in: %s. Remove those field rules first."
+msgstr ""
+
+msgid "The approval step deleted."
+msgstr ""
+
+msgid "The approval step could not be deleted. Please, try again."
+msgstr ""
+
+msgid "Approval Record Deleted"
+msgstr ""
+
+msgid "Approval Comment Deleted"
+msgstr ""
+
+msgid "Invalid branch"
+msgstr ""
+
+msgid "The branch has been saved"
+msgstr ""
+
+msgid "The branch could not be saved. Please, try again."
+msgstr ""
+
+msgid "The branches saved."
+msgstr ""
+
+msgid "The branches could not be saved. Please, try again."
+msgstr ""
+
+msgid "You do not have permission to access "
+msgstr ""
+
+msgid "Invalid clause"
+msgstr ""
+
+msgid "You do not have permission to add "
+msgstr ""
+
+msgid "The clause has been saved"
+msgstr ""
+
+msgid "The clause could not be saved. Please, try again."
+msgstr ""
+
+msgid "You do not have permission to edit "
+msgstr ""
+
+msgid "The clause updated."
+msgstr ""
+
+msgid "Email sent succeefully."
+msgstr ""
+
+msgid "Failed to send email. Please check smtp details."
+msgstr ""
+
+msgid "The custom task has been saved."
+msgstr ""
+
+msgid "The custom task could not be saved. Please, try again."
+msgstr ""
+
+msgid "Duplicate Task. Please try other options"
+msgstr ""
+
+msgid "Invalid custom task"
+msgstr ""
+
+msgid "The submitted form does not match the requested form."
+msgstr ""
+
+msgid "Unlock this form with its password before re-creating or modifying it."
+msgstr ""
+
+msgid "Invalid Table"
+msgstr ""
+
+msgid "Invalid request"
+msgstr ""
+
+msgid "Invalid tab"
+msgstr ""
+
+msgid "You are not authorized to rebuild this module."
+msgstr ""
+
+msgid "Main table not found."
+msgstr ""
+
+msgid "Module rebuilt successfully."
+msgstr ""
+
+msgid "You are not authorized to rebuild this form."
+msgstr ""
+
+msgid "The AI rebuild request is invalid."
+msgstr ""
+
+msgid "This AI rebuild request has expired. Please submit it again."
+msgstr ""
+
+msgid "This AI rebuild request belongs to another user."
+msgstr ""
+
+msgid "This AI rebuild request belongs to another company."
+msgstr ""
+
+msgid "Confirm whether the detected child tables should be created."
+msgstr ""
+
+msgid "The saved AI rebuild request is incomplete."
+msgstr ""
+
+msgid "Unlock this form with its password before applying AI changes."
+msgstr ""
+
+msgid "The generated form could not be found."
+msgstr ""
+
+msgid "The form changed after the AI proposal was created. Submit the request again to avoid overwriting newer changes."
+msgstr ""
+
+msgid "The updated form has no usable default field."
+msgstr ""
+
+msgid "The API could not rebuild the form."
+msgstr ""
+
+msgid "The API could not rebuild the form. No generated MVC files were replaced."
+msgstr ""
+
+msgid "The API finished, but the rebuilt field definition could not be verified."
+msgstr ""
+
+msgid "Form rebuilt successfully. Reload this page to use the updated form."
+msgstr ""
+
+msgid "The rebuild returned an unreadable response."
+msgstr ""
+
+msgid "The saved AI form creation request is incomplete."
+msgstr ""
+
+msgid "The source Quality Document could not be found."
+msgstr ""
+
+msgid "The generated form has no usable default field."
+msgstr ""
+
+msgid "FlinkISO could not generate a table name for this document."
+msgstr ""
+
+msgid "Created from Quality Document by FlinkISO AI."
+msgstr ""
+
+msgid "FlinkISO could not save the generated form definition."
+msgstr ""
+
+msgid "The API could not create the form."
+msgstr ""
+
+msgid "The API could not generate the form. The incomplete definition was removed; you can retry this request."
+msgstr ""
+
+msgid "The parent form was created, but FlinkISO could not create its confirmed child table(s): %s"
+msgstr ""
+
+msgid "Form version %s and %s confirmed child table(s) created successfully."
+msgstr ""
+
+msgid "Form version %s created successfully."
+msgstr ""
+
+msgid "A maximum of five child tables can be generated from one document."
+msgstr ""
+
+msgid "A detected child table had an invalid name or field count."
+msgstr ""
+
+msgid "Child table %s has no usable default field."
+msgstr ""
+
+msgid "FlinkISO could not allocate a table name for %s."
+msgstr ""
+
+msgid "Detected as a repeatable document section by FlinkISO AI."
+msgstr ""
+
+msgid "FlinkISO could not save child table %s."
+msgstr ""
+
+msgid "API V2 could not generate child table %s."
+msgstr ""
+
+msgid "API V2 returned unsafe or incomplete code for child table %s."
+msgstr ""
+
+msgid "FlinkISO could not create the physical child table %s."
+msgstr ""
+
+msgid "FlinkISO could not publish the generated files for child table %s."
+msgstr ""
+
+msgid "Something went wrong"
+msgstr ""
+
+msgid "Select Document/Process first"
+msgstr ""
+
+msgid "You are creating HTML form without any document."
+msgstr ""
+
+msgid "Default field missing"
+msgstr ""
+
+msgid "Copy file failed"
+msgstr ""
+
+msgid "API returned invalid linked-field PHP. Generated MVC files were not written."
+msgstr ""
+
+msgid "Form created"
+msgstr ""
+
+msgid "Custom Table id folder could not be created"
+msgstr ""
+
+msgid "Custom Table id folder already exixts"
+msgstr ""
+
+msgid "The custom table "
+msgstr ""
+
+msgid "Chose document first to create table. Tables are linked with documents and document must be present before adding table."
+msgstr ""
+
+msgid "File copy failed"
+msgstr ""
+
+msgid "Folder creation failed"
+msgstr ""
+
+msgid "Enter password"
+msgstr ""
+
+msgid "Can not delete this table due to dependency on "
+msgstr ""
+
+msgid "Can not recreate/delete locked table"
+msgstr ""
+
+msgid "Table Deleted"
+msgstr ""
+
+msgid "Can not delete this table."
+msgstr ""
+
+msgid "Unable to change directory permissions. Please manually change app/Controller, app/Model & app/View directories to writable.(0777)"
+msgstr ""
+
+msgid "Something went wrong. Please try again"
+msgstr ""
+
+msgid "API returned invalid linked-field PHP. Existing MVC files were not overwritten."
+msgstr ""
+
+msgid "Form updated successfully"
+msgstr ""
+
+msgid "The child form is not linked to a parent form. It could not be saved."
+msgstr ""
+
+msgid "Child form has no usable field for its default display value"
+msgstr ""
+
+msgid "The parent form for this child form was not found. It could not be saved."
+msgstr ""
+
+msgid "Child form updated successfully"
+msgstr ""
+
+msgid "Table unlocked"
+msgstr ""
+
+msgid "Table locked"
+msgstr ""
+
+msgid "Table published"
+msgstr ""
+
+msgid "Table unpublished"
+msgstr ""
+
+msgid "There are duplicate fields"
+msgstr ""
+
+msgid "Changes Saved."
+msgstr ""
+
+msgid "Scripts Saved"
+msgstr ""
+
+msgid "You login password is now password to unlock this table."
+msgstr ""
+
+msgid "Invalid Credentials."
+msgstr ""
+
+msgid "Access Updated."
+msgstr ""
+
+msgid "Invalid Access."
+msgstr ""
+
+msgid "Invalid access."
+msgstr ""
+
+msgid "Invalid table access."
+msgstr ""
+
+msgid "Invalid tab configuration."
+msgstr ""
+
+msgid "Tab configuration saved."
+msgstr ""
+
+msgid "Tab configuration could not be saved."
+msgstr ""
+
+msgid "Dataentry Details Updated."
+msgstr ""
+
+msgid "Dataentry Details Updated failed"
+msgstr ""
+
+msgid "Incorrect access."
+msgstr ""
+
+msgid "Unlock every affected form with its password before re-creating all forms."
+msgstr ""
+
+msgid "Invalid delivery"
+msgstr ""
+
+msgid "The email has been queued for retry."
+msgstr ""
+
+msgid "Invalid trigger"
+msgstr ""
+
+msgid "Please select a valid Custom Form."
+msgstr ""
+
+msgid "Please select a field for the field-change trigger."
+msgstr ""
+
+msgid "Please select a date field for the reminder."
+msgstr ""
+
+msgid "Please select at least one recipient."
+msgstr ""
+
+msgid "The custom trigger has been saved"
+msgstr ""
+
+msgid "Please select table first"
+msgstr ""
+
+msgid "Missing trigger ID"
+msgstr ""
+
+msgid "The custom trigger has not been updated. The database error was written to the error log."
+msgstr ""
+
+msgid "The custom trigger has been updated"
+msgstr ""
+
+msgid "The custom trigger has not been updated. Details were written to the error log."
+msgstr ""
+
+msgid "Invalid department"
+msgstr ""
+
+msgid "The department has been saved"
+msgstr ""
+
+msgid "The department could not be saved. Please, try again."
+msgstr ""
+
+msgid "The departments saved"
+msgstr ""
+
+msgid "The departments could not be saved. Please, try again."
+msgstr ""
+
+msgid "Invalid designation"
+msgstr ""
+
+msgid "The designation has been saved"
+msgstr ""
+
+msgid "The designation could not be saved. Please, try again."
+msgstr ""
+
+msgid "The designations saved."
+msgstr ""
+
+msgid "The designations could not be saved. Please, try again."
+msgstr ""
+
+msgid "The document download has been saved."
+msgstr ""
+
+msgid "The document download could not be saved. Please, try again."
+msgstr ""
+
+msgid "Invalid employee"
+msgstr ""
+
+msgid "The employee has been saved"
+msgstr ""
+
+msgid "The employee could not be saved. Please, try again."
+msgstr ""
+
+msgid "Employees could not be saved. Invalid Email"
+msgstr ""
+
+msgid "Employees saved."
+msgstr ""
+
+msgid "Employees could not be saved. Please, try again."
+msgstr ""
+
+msgid "Incorrect signature file."
+msgstr ""
+
+msgid "Signature file is too large"
+msgstr ""
+
+msgid "Signature file added"
+msgstr ""
+
+msgid "Failed to add signature file."
+msgstr ""
+
+msgid "Incorrect Profile Picture."
+msgstr ""
+
+msgid "Profile Picture is too large"
+msgstr ""
+
+msgid "Profile Picture added"
+msgstr ""
+
+msgid "Failed to add Profile Picture."
+msgstr ""
+
+msgid "Signature deleted."
+msgstr ""
+
+msgid "Unable to find Signature."
+msgstr ""
+
+msgid "Graph Deleted"
+msgstr ""
+
+msgid "Only administrators and super users can manage languages."
+msgstr "Nur Administratoren und Superuser können Sprachen verwalten."
+
+msgid "Run the language database update first."
+msgstr "Führen Sie zuerst die Datenbankaktualisierung für Sprachen aus."
+
+msgid "Reload the page and try again."
+msgstr "Laden Sie die Seite neu und versuchen Sie es erneut."
+
+msgid "Could not save language."
+msgstr "Die Sprache konnte nicht gespeichert werden."
+
+msgid "Invalid language."
+msgstr "Ungültige Sprache."
+
+msgid "The catalog changed. Reload before saving."
+msgstr "Der Katalog wurde geändert. Laden Sie die Seite vor dem Speichern neu."
+
+msgid "Invalid plural forms."
+msgstr "Ungültige Pluralregeln."
+
+msgid "Enter a language name."
+msgstr "Geben Sie einen Sprachnamen ein."
+
+msgid "Translations saved."
+msgstr "Übersetzungen gespeichert."
+
+msgid "Template Created"
+msgstr ""
+
+msgid "Header Created"
+msgstr ""
+
+msgid "Template not found"
+msgstr ""
+
+msgid "Template deleted"
+msgstr ""
+
+msgid "Invalid qc document category"
+msgstr ""
+
+msgid "This process is not linked with any Document"
+msgstr ""
+
+msgid "Folder creation failed. Please, try again."
+msgstr ""
+
+msgid "Invalid Process"
+msgstr ""
+
+msgid "You can not edit this process."
+msgstr ""
+
+msgid "The qc document category has been saved"
+msgstr ""
+
+msgid "The qc document category could not be saved. Please, try again."
+msgstr ""
+
+msgid "Some Categories already exists."
+msgstr ""
+
+msgid "Categories saved."
+msgstr ""
+
+msgid "Categories could not be saved. Please, try again."
+msgstr ""
+
+msgid "You do not have permission to edit this document"
+msgstr ""
+
+msgid "Invalid document"
+msgstr ""
+
+msgid "Approval Saved"
+msgstr ""
+
+msgid "You can not edit this document, its archived."
+msgstr ""
+
+msgid "Files directory is not writable. Make sure to add 0777 permission (recursive) to \""
+msgstr ""
+
+msgid "You are not authorized to create new documents"
+msgstr ""
+
+msgid "Incorrect File Type"
+msgstr ""
+
+msgid "Unable to add template."
+msgstr ""
+
+msgid "Unable to copy template."
+msgstr ""
+
+msgid "The document has been saved"
+msgstr ""
+
+msgid "The document could not be saved. Please, try again."
+msgstr ""
+
+msgid "Incorrect document"
+msgstr ""
+
+msgid "failed folder"
+msgstr ""
+
+msgid "File Uploaded"
+msgstr ""
+
+msgid "File move failed...."
+msgstr ""
+
+msgid "Can not edit this document. This document is under revision."
+msgstr ""
+
+msgid "You must update this document."
+msgstr ""
+
+msgid "Invalid approval id"
+msgstr ""
+
+msgid "The document has been saved."
+msgstr ""
+
+msgid "document deleted"
+msgstr ""
+
+msgid "document was not deleted"
+msgstr ""
+
+msgid "Document was not deleted as you are not the creator of the document"
+msgstr ""
+
+msgid "Document does not exist"
+msgstr ""
+
+msgid "You are not authorized to delete this document"
+msgstr ""
+
+msgid "Form linked."
+msgstr ""
+
+msgid "Either revision number already exists, OR current revision number is less then existing revision numbers."
+msgstr ""
+
+msgid "Change request successfully completed. Document successfully updated."
+msgstr ""
+
+msgid "Something went wrong. System cound not find the original document."
+msgstr ""
+
+msgid "Document is already archived."
+msgstr ""
+
+msgid "Document Added"
+msgstr ""
+
+msgid "Document Number already exists."
+msgstr ""
+
+msgid "Unable to back the document."
+msgstr ""
+
+msgid "Document renamed."
+msgstr ""
+
+msgid "Document does not exists."
+msgstr ""
+
+msgid "The record lock has been saved."
+msgstr ""
+
+msgid "The record lock could not be saved. Please, try again."
+msgstr ""
+
+msgid "Invalid record lock"
+msgstr ""
+
+msgid "Invalid record"
+msgstr ""
+
+msgid "Select document first."
+msgstr ""
+
+msgid "The record could not be saved. Please, try again."
+msgstr ""
+
+msgid "The record has been saved."
+msgstr ""
+
+msgid "Invalid company"
+msgstr ""
+
+msgid "Uploaded file exceeds maximum upload size limit. Please try again."
+msgstr ""
+
+msgid "Logo file name is too long. Please try again."
+msgstr ""
+
+msgid "Logo file type is invalid. Please try again."
+msgstr ""
+
+msgid "Logo uploaded."
+msgstr ""
+
+msgid "Logo upload was not successful. Please try again."
+msgstr ""
+
+msgid "The uploaded file exceeds specified maximum file size. Contact your system administrator and try again."
+msgstr ""
+
+msgid "Email sent successfully"
+msgstr ""
+
+msgid "Email configuration failed!"
+msgstr ""
+
+msgid "Only an administrator can configure AI."
+msgstr ""
+
+msgid "AI settings storage could not be prepared."
+msgstr ""
+
+msgid "Select a valid AI provider."
+msgstr ""
+
+msgid "Select a valid document conversion engine."
+msgstr ""
+
+msgid "Enter a valid HTTP or HTTPS AI API URL."
+msgstr ""
+
+msgid "Enter an AI model."
+msgstr ""
+
+msgid "Enter an AI vision model."
+msgstr ""
+
+msgid "Enter the cloud AI API key."
+msgstr ""
+
+msgid "PDF to PPM"
+msgstr ""
+
+msgid "LibreOffice"
+msgstr ""
+
+msgid "The AI API key could not be encrypted on this server."
+msgstr ""
+
+msgid "AI setup saved."
+msgstr ""
+
+msgid "AI setup could not be saved."
+msgstr ""
+
+msgid "Enter an absolute executable path for %s."
+msgstr ""
+
+msgid "The configured %s executable was not found or is not executable."
+msgstr ""
+
+msgid "The configured path does not point to the expected %s executable."
+msgstr ""
+
+msgid "FlinkISO could not run the configured %s executable."
+msgstr ""
+
+msgid "Invalid standard"
+msgstr ""
+
+msgid "You do not have permission to add standards"
+msgstr ""
+
+msgid "Unable to save clause."
+msgstr ""
+
+msgid "The standard has been saved"
+msgstr ""
+
+msgid "The standard could not be saved. Please, try again."
+msgstr ""
+
+msgid "You are not authorized to delete."
+msgstr ""
+
+msgid "The standard successfully delete."
+msgstr ""
+
+msgid "Unable to delete the standard."
+msgstr ""
+
+msgid "Duplicate Name."
+msgstr ""
+
+msgid "Unable to save file"
+msgstr ""
+
+msgid "Add template content"
+msgstr ""
+
+msgid "Something went wrong."
+msgstr ""
+
+msgid "Invoice Added."
+msgstr ""
+
+msgid "Invoice count not be generated."
+msgstr ""
+
+msgid "Select an available language."
+msgstr "Wählen Sie eine verfügbare Sprache aus."
+
+msgid "Language saved."
+msgstr "Sprache gespeichert."
+
+msgid "Invalid user"
+msgstr ""
+
+msgid "Select employee first."
+msgstr ""
+
+msgid "The user could not be saved. Please, try again."
+msgstr ""
+
+msgid "Only administrators can change Super User access."
+msgstr ""
+
+msgid "Invalid Super User access request."
+msgstr ""
+
+msgid "Super User access could not be saved."
+msgstr ""
+
+msgid "Your password has been change"
+msgstr ""
+
+msgid "Your current password does not match with the password you have entered. please try again."
+msgstr ""
+
+msgid "Incorrect details or User does not exist or OTP expired."
+msgstr ""
+
+msgid "Incorrect details"
+msgstr ""
+
+msgid "Register your application before you begin"
+msgstr ""
+
+msgid "Already Logged in. Please wait while your earlier session expires."
+msgstr ""
+
+msgid "Your account is locked"
+msgstr ""
+
+msgid "Incorrect login credential"
+msgstr ""
+
+msgid "Can not email OTP Code. Please check SMTP details and email address is correct."
+msgstr ""
+
+msgid "Enter OTP."
+msgstr ""
+
+msgid "Incorrect Login Credentials or your account is locked or already logged in"
+msgstr ""
+
+msgid "Two way authentication Enabled"
+msgstr ""
+
+msgid "Two way authentication Disabled"
+msgstr ""
+
+msgid "Invalid OTP Code."
+msgstr ""
+
+msgid "You have been logged out"
+msgstr ""
+
+msgid "Already Registred."
+msgstr ""
+
+msgid "Email not registered."
+msgstr ""
+
+msgid "Branch could not be saved."
+msgstr ""
+
+msgid "Account created successfully. Your email address is your username and password."
+msgstr ""
+
+msgid "Failed to create account. Error while creating user"
+msgstr ""
+
+msgid "Failed to create account. Error while creating employee"
+msgstr ""
+
+msgid "Failed to create account. Error while creating branch"
+msgstr ""
+
+msgid "Failed to create account. Error while creating company"
+msgstr ""
+
+msgid "Incorrect user."
+msgstr ""
+
+msgid "Page {:page} of {:pages}, showing {:current} records out of {:count} total, starting on record {:start}, ending on {:end}"
+msgstr "Seite {:page} von {:pages}, {:current} von insgesamt {:count} Datensätzen, von {:start} bis {:end}"
+
+msgid "previous"
+msgstr "zurück"
+
+msgid "next"
+msgstr "weiter"
+
+msgid "Approval"
+msgstr ""
+
+msgid "User"
+msgstr ""
+
+msgid "Comments"
+msgstr "Kommentare"
+
+msgid "Publish"
+msgstr "Veröffentlichen"
+
+msgid "Soft Delete"
+msgstr ""
+
+msgid "Submit"
+msgstr "Absenden"
+
+msgid "Approval Process"
+msgstr "Freigabeprozess"
+
+msgid "Title"
+msgstr "Titel"
+
+msgid "Process Step"
+msgstr ""
+
+msgid "Send To Department Hod"
+msgstr ""
+
+msgid "Send To Designation"
+msgstr ""
+
+msgid "Send To Admins"
+msgstr ""
+
+msgid "Send To Reviwers"
+msgstr ""
+
+msgid "Send To Publishers"
+msgstr ""
+
+msgid "Send To Users"
+msgstr ""
+
+msgid "Approval Mode"
+msgstr ""
+
+msgid "Approval Type"
+msgstr ""
+
+msgid "Prepared By"
+msgstr "Vorbereitet von"
+
+msgid "Approved By"
+msgstr "Freigegeben von"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "No results found"
+msgstr "Keine Ergebnisse gefunden"
+
+msgid "Change Approver"
+msgstr ""
+
+msgid "Model Name"
+msgstr ""
+
+msgid "Controller Name"
+msgstr ""
+
+msgid "Record"
+msgstr ""
+
+msgid "From"
+msgstr ""
+
+msgid "Approval Step"
+msgstr ""
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Approval Status"
+msgstr ""
+
+msgid "Approver Comments"
+msgstr ""
+
+msgid "Details"
+msgstr "Details"
+
+msgid "Standard"
+msgstr ""
+
+msgid "Clause"
+msgstr "Abschnitt"
+
+msgid "Sub-clause"
+msgstr ""
+
+msgid "Additional Details"
+msgstr ""
+
+msgid "Tabs"
+msgstr "Registerkarten"
+
+msgid "External Link 1"
+msgstr ""
+
+msgid "External Link 2"
+msgstr ""
+
+msgid "External Link 3"
+msgstr ""
+
+msgid "External Link 4"
+msgstr ""
+
+msgid "External Link 5"
+msgstr ""
+
+msgid "System Tables"
+msgstr ""
+
+msgid "Date/time"
+msgstr ""
+
+msgid "Field Name"
+msgstr ""
+
+msgid "Condition"
+msgstr ""
+
+msgid "Message"
+msgstr ""
+
+msgid "When"
+msgstr ""
+
+msgid "Subject"
+msgstr ""
+
+msgid "All rules"
+msgstr ""
+
+msgid "Retry"
+msgstr ""
+
+msgid "Update"
+msgstr "Aktualisieren"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Disable"
+msgstr ""
+
+msgid "Enable"
+msgstr ""
+
+msgid "Custom Table"
+msgstr ""
+
+msgid "File Name"
+msgstr ""
+
+msgid "Changed Field Value"
+msgstr ""
+
+msgid "Notify User"
+msgstr ""
+
+msgid "Notify Users"
+msgstr ""
+
+msgid "If Added"
+msgstr ""
+
+msgid "If Edited"
+msgstr ""
+
+msgid "If Publish"
+msgstr ""
+
+msgid "If Approved"
+msgstr ""
+
+msgid "If Soft Delete"
+msgstr ""
+
+msgid "Recipents"
+msgstr ""
+
+msgid "Cc"
+msgstr ""
+
+msgid "Bcc"
+msgstr ""
+
+msgid "Branch"
+msgstr "Standort"
+
+msgid "Department"
+msgstr "Abteilung"
+
+msgid "Designation"
+msgstr "Position"
+
+msgid "Clauses"
+msgstr ""
+
+msgid "Employee"
+msgstr "Mitarbeiter"
+
+msgid "Parent Designation"
+msgstr ""
+
+msgid "Level"
+msgstr ""
+
+msgid "Division Id"
+msgstr ""
+
+msgid "Download PDF"
+msgstr ""
+
+msgid "Edit Document Download"
+msgstr ""
+
+msgid "Actions"
+msgstr "Aktionen"
+
+msgid "Delete"
+msgstr "Löschen"
+
+msgid "Are you sure you want to delete # %s?"
+msgstr ""
+
+msgid "List Document Downloads"
+msgstr ""
+
+msgid "List Qc Documents"
+msgstr ""
+
+msgid "New Qc Document"
+msgstr ""
+
+msgid "List Custom Tables"
+msgstr ""
+
+msgid "New Custom Table"
+msgstr ""
+
+msgid "List Companies"
+msgstr ""
+
+msgid "New Company"
+msgstr ""
+
+msgid "List Users"
+msgstr ""
+
+msgid "New Created By"
+msgstr ""
+
+msgid "Document Download"
+msgstr ""
+
+msgid "Id"
+msgstr ""
+
+msgid "Sr No"
+msgstr ""
+
+msgid "Qc Document"
+msgstr ""
+
+msgid "Reccord Id"
+msgstr ""
+
+msgid "Download By"
+msgstr ""
+
+msgid "Process Definition"
+msgstr ""
+
+msgid "Signature"
+msgstr ""
+
+msgid "Digital Signature"
+msgstr ""
+
+msgid "Add Cover Page"
+msgstr ""
+
+msgid "Add Parent Records"
+msgstr ""
+
+msgid "Add Child Records"
+msgstr ""
+
+msgid "Add Linked Form Records"
+msgstr ""
+
+msgid "Created By"
+msgstr "Erstellt von"
+
+msgid "Created"
+msgstr "Erstellt"
+
+msgid "Modified By"
+msgstr "Geändert von"
+
+msgid "Modified"
+msgstr "Geändert"
+
+msgid "Branchid"
+msgstr ""
+
+msgid "Departmentid"
+msgstr ""
+
+msgid "Company"
+msgstr ""
+
+msgid "Delete Document Download"
+msgstr ""
+
+msgid "New Document Download"
+msgstr ""
+
+msgid "Add your signature"
+msgstr ""
+
+msgid "Fetch"
+msgstr ""
+
+msgid "Add"
+msgstr "Hinzufügen"
+
+msgid "Advanced Search"
+msgstr ""
+
+msgid "Field"
+msgstr ""
+
+msgid "Value"
+msgstr ""
+
+msgid "Asending / Desending"
+msgstr ""
+
+msgid "Expand panel"
+msgstr ""
+
+msgid "Close"
+msgstr "Schließen"
+
+msgid "Close FlinkISO AI"
+msgstr ""
+
+msgid "AI mode"
+msgstr ""
+
+msgid "Ask the configured AI provider general QMS or other questions"
+msgstr ""
+
+msgid "Chat"
+msgstr ""
+
+msgid "Ask questions using FlinkISO manuals and the current application context"
+msgstr ""
+
+msgid "FlinkISO"
+msgstr ""
+
+msgid "Create or modify FlinkISO forms through API V2"
+msgstr ""
+
+msgid "Forms mode is available only in Quality Documents, Custom Tables, and generated forms"
+msgstr ""
+
+msgid "Forms"
+msgstr "Formulare"
+
+msgid "How can I help?"
+msgstr ""
+
+msgid "Ask me a question about QMS or using FlinkISO."
+msgstr ""
+
+msgid "AI task in progress"
+msgstr ""
+
+msgid "FlinkISO AI is currently processing a request for this instance."
+msgstr ""
+
+msgid "Stop"
+msgstr ""
+
+msgid "Suggested general chat requests"
+msgstr ""
+
+msgid "Ask a general QMS question"
+msgstr ""
+
+msgid "Ask another question"
+msgstr ""
+
+msgid "Get practical guidance"
+msgstr ""
+
+msgid "Suggested FlinkISO requests"
+msgstr ""
+
+msgid "Help with this module"
+msgstr ""
+
+msgid "Ask a QMS question"
+msgstr ""
+
+msgid "Suggested form requests"
+msgstr ""
+
+msgid "Create a form from this document"
+msgstr ""
+
+msgid "Identify fields and rules"
+msgstr ""
+
+msgid "Summarize requirements"
+msgstr ""
+
+msgid "Add a field to this form"
+msgstr ""
+
+msgid "Review this form"
+msgstr ""
+
+msgid "Go to Form Builder"
+msgstr ""
+
+msgid "Create a new form"
+msgstr ""
+
+msgid "Define form requirements"
+msgstr ""
+
+msgid "Ask a question about QMS or using FlinkISO..."
+msgstr ""
+
+msgid "Message FlinkISO AI"
+msgstr ""
+
+msgid "When selected, the current Quality Document is sent to the FlinkISO API for this AI request."
+msgstr ""
+
+msgid "When selected, the form field definition and linked Quality Document content are shared with the configured remote AI provider. User names, IDs, and email addresses are not shared."
+msgstr ""
+
+msgid "The local AI uses this form field definition and linked Quality Document as read-only reference material."
+msgstr ""
+
+msgid "Send current document"
+msgstr ""
+
+msgid "Share form context and linked document"
+msgstr ""
+
+msgid "Use linked QC document"
+msgstr ""
+
+msgid "Secure AI API"
+msgstr ""
+
+msgid "Stop AI generation"
+msgstr ""
+
+msgid "Stop generation"
+msgstr ""
+
+msgid "Send message"
+msgstr ""
+
+msgid "AI guidance is provided by your configured AI provider."
+msgstr ""
+
+msgid "Approvals"
+msgstr "Freigaben"
+
+msgid "MAIN NAVIGATION"
+msgstr ""
+
+msgid "Dashboard"
+msgstr "Übersicht"
+
+msgid "Custom Tables"
+msgstr ""
+
+msgid "Masters"
+msgstr "Stammdaten"
+
+msgid "Employee Org Chart"
+msgstr "Organigramm der Mitarbeitenden"
+
+msgid "Designation Org Chart"
+msgstr "Organigramm der Positionen"
+
+msgid "Users"
+msgstr "Benutzer"
+
+msgid "Standards"
+msgstr "Normen"
+
+msgid "Add New Standard"
+msgstr ""
+
+msgid "Add New Clause"
+msgstr ""
+
+msgid "New Document Category"
+msgstr ""
+
+msgid "Document Management"
+msgstr ""
+
+msgid "Add New Document"
+msgstr ""
+
+msgid "List Of Documents"
+msgstr ""
+
+msgid "Add Template"
+msgstr ""
+
+msgid "Processes"
+msgstr "Prozesse"
+
+msgid "Add New Process"
+msgstr ""
+
+msgid "List Of Processes"
+msgstr ""
+
+msgid "Graph Panels"
+msgstr ""
+
+msgid "Settings"
+msgstr "Einstellungen"
+
+msgid "Add Logo"
+msgstr "Logo hinzufügen"
+
+msgid "Add SMTP Email"
+msgstr "SMTP-E-Mail einrichten"
+
+msgid "Add Password Policy"
+msgstr "Passwortrichtlinie hinzufügen"
+
+msgid "Two Way Authentication"
+msgstr "Zwei-Faktor-Authentifizierung"
+
+msgid "Define Change History Table"
+msgstr "Tabelle für den Änderungsverlauf festlegen"
+
+msgid "Billing"
+msgstr "Abrechnung"
+
+msgid "Trainings"
+msgstr "Schulungen"
+
+msgid "Add Trainings"
+msgstr "Schulungen hinzufügen"
+
+msgid "Pending Invoices"
+msgstr "Offene Rechnungen"
+
+msgid "Paid Invoices"
+msgstr "Bezahlte Rechnungen"
+
+msgid "Updating form"
+msgstr ""
+
+msgid "Saving the form configuration and rebuilding the generated files..."
+msgstr ""
+
+msgid "Update in progress"
+msgstr ""
+
+msgid "The form could not be updated."
+msgstr ""
+
+msgid "Form updated successfully."
+msgstr ""
+
+msgid "The form update failed. Please try again."
+msgstr ""
+
+msgid "The form was not updated."
+msgstr ""
+
+msgid "Additional Clauses"
+msgstr "Weitere Abschnitte"
+
+msgid "Qc Document Category"
+msgstr "Qualitätsdokumentkategorie"
+
+msgid "Issue Number"
+msgstr "Ausgabenummer"
+
+msgid "Date Of Issue"
+msgstr "Ausgabedatum"
+
+msgid "Date Of Next Issue"
+msgstr ""
+
+msgid "Effective From Date"
+msgstr "Gültig ab"
+
+msgid "Date Of Review"
+msgstr "Prüfdatum"
+
+msgid "Revision Date"
+msgstr "Revisionsdatum"
+
+msgid "Document Type"
+msgstr "Dokumenttyp"
+
+msgid "Document Security"
+msgstr "Dokumentenschutz"
+
+msgid "Issued By"
+msgstr "Herausgegeben von"
+
+msgid "Issuing Authority"
+msgstr ""
+
+msgid "Document Categories"
+msgstr "Dokumentkategorien"
+
+msgid "Auto Approval Process"
+msgstr "Automatischer Freigabeprozess"
+
+msgid "Documents"
+msgstr "Dokumente"
+
+msgid "Pdf Templates"
+msgstr "PDF-Vorlagen"
+
+msgid "Setting"
+msgstr "Einstellungen"
+
+msgid "Languages"
+msgstr "Sprachen"
+
+msgid "AI Setup"
+msgstr "KI-Einstellungen"
+
+msgid "Graphs And panels"
+msgstr "Diagramme und Ansichten"
+
+msgid "Open FlinkISO AI"
+msgstr "FlinkISO KI öffnen"
+
+msgid "Updates"
+msgstr "Aktualisierungen"
+
+msgid "Application theme"
+msgstr "Anwendungsdesign"
+
+msgid "Modern Azure"
+msgstr "Modernes Azurblau"
+
+msgid "Corporate Blue"
+msgstr "Unternehmensblau"
+
+msgid "Steel Blue"
+msgstr "Stahlblau"
+
+msgid "Indigo"
+msgstr "Indigo"
+
+msgid "Teal"
+msgstr "Petrol"
+
+msgid "Navy"
+msgstr "Marineblau"
+
+msgid "Graphite"
+msgstr "Graphit"
+
+msgid "Language"
+msgstr "Sprache"
+
+msgid "Reset Password"
+msgstr "Passwort zurücksetzen"
+
+msgid "Profile"
+msgstr "Profil"
+
+msgid "Logout"
+msgstr "Abmelden"
+
+msgid "A request to reset your password was sent. To change your password click the link below."
+msgstr ""
+
+msgid "Employee Profile"
+msgstr "Mitarbeiterprofil"
+
+msgid "Parent Employee"
+msgstr ""
+
+msgid "Employee Number"
+msgstr ""
+
+msgid "Identification Number"
+msgstr ""
+
+msgid "Qualification"
+msgstr ""
+
+msgid "Joining Date"
+msgstr ""
+
+msgid "Date Of Birth"
+msgstr ""
+
+msgid "Pancard Number"
+msgstr ""
+
+msgid "Personal Telephone"
+msgstr ""
+
+msgid "Office Telephone"
+msgstr ""
+
+msgid "Mobile"
+msgstr ""
+
+msgid "Personal Email"
+msgstr ""
+
+msgid "Office Email"
+msgstr ""
+
+msgid "Residence Address"
+msgstr ""
+
+msgid "Permenant Address"
+msgstr ""
+
+msgid "Maritial Status"
+msgstr ""
+
+msgid "Driving License"
+msgstr ""
+
+msgid "Employment Status"
+msgstr ""
+
+msgid "Is Approvar"
+msgstr ""
+
+msgid "Edit translations"
+msgstr "Übersetzungen bearbeiten"
+
+msgid "Leave a translation empty to use English. Keep placeholders such as %s and {:page} unchanged."
+msgstr "Lassen Sie eine Übersetzung leer, um Englisch zu verwenden. Behalten Sie Platzhalter wie %s und {:page} unverändert bei."
+
+msgid "Search"
+msgstr ""
+
+msgid "Plural forms"
+msgstr "Pluralregeln"
+
+msgid "Available to users"
+msgstr "Für Benutzer verfügbar"
+
+msgid "The language code and catalog folder remain fixed after creation."
+msgstr "Der Sprachcode und der Katalogordner bleiben nach der Erstellung unverändert."
+
+msgid "Plural form"
+msgstr "Pluralform"
+
+msgid "Save translations"
+msgstr "Übersetzungen speichern"
+
+msgid "Previous"
+msgstr ""
+
+msgid "Next"
+msgstr ""
+
+msgid "Add a language, then translate its catalog. The POT file is the shared source template; each language has its own PO file."
+msgstr "Fügen Sie eine Sprache hinzu und übersetzen Sie anschließend deren Katalog. Die POT-Datei ist die gemeinsame Ausgangsvorlage. Jede Sprache hat eine eigene PO-Datei."
+
+msgid "Language code"
+msgstr "Sprachcode"
+
+msgid "Add language"
+msgstr "Sprache hinzufügen"
+
+msgid "Use a three-letter CakePHP language code, for example deu."
+msgstr "Verwenden Sie einen dreistelligen CakePHP-Sprachcode, zum Beispiel deu."
+
+msgid "search"
+msgstr ""
+
+msgid "Qc Document Categories"
+msgstr ""
+
+msgid "List"
+msgstr ""
+
+msgid "Export"
+msgstr ""
+
+msgid "View / Upload Evidance"
+msgstr ""
+
+msgid "Edit"
+msgstr "Bearbeiten"
+
+msgid "Are you sure you want to delete this record ?"
+msgstr ""
+
+msgid "Send for Approval"
+msgstr ""
+
+msgid "Email Record"
+msgstr ""
+
+msgid "Are you sure ?"
+msgstr ""
+
+msgid "Approve Qc Document Category"
+msgstr ""
+
+msgid "View / Upload Evidence"
+msgstr ""
+
+msgid "Delete Record"
+msgstr ""
+
+msgid "New Qc Document Category"
+msgstr ""
+
+msgid "Import"
+msgstr ""
+
+msgid "View"
+msgstr "Anzeigen"
+
+msgid "Upload Evedance"
+msgstr ""
+
+msgid "Short Name"
+msgstr ""
+
+msgid "Parent Qc Document Category"
+msgstr ""
+
+msgid "Tables"
+msgstr ""
+
+msgid "Reviewed By"
+msgstr ""
+
+msgid "Published By"
+msgstr ""
+
+msgid "Save AI Setup"
+msgstr ""
+
+msgid "Edit Setting"
+msgstr ""
+
+msgid "View Standard"
+msgstr ""
+
+msgid "Brief Description"
+msgstr ""
+
+msgid "Access Denied"
+msgstr ""
+
+msgid "You do not have sufficient permissions to access this page. <br/>Contact your administrator for permissions related issues."
+msgstr ""
+
+msgid "Login Details"
+msgstr ""
+
+msgid "Username"
+msgstr "Benutzername"
+
+msgid "Password"
+msgstr "Passwort"
+
+msgid "Division"
+msgstr ""
+
+msgid "Choose User's Privileges"
+msgstr ""
+
+msgid "Admin"
+msgstr "Administrator"
+
+msgid "Super User — form building and Form Creation AI"
+msgstr ""
+
+msgid "Management team"
+msgstr ""
+
+msgid "Approver"
+msgstr "Freigabeverantwortlicher"
+
+msgid "User who can see other user's records"
+msgstr ""
+
+msgid "Copy permission from available user"
+msgstr ""
+
+msgid "Copy ACL form User"
+msgstr ""
+
+msgid "Select From Group"
+msgstr ""
+
+msgid "Go to Dashboard"
+msgstr ""
+
+msgid "Add Appraisal Answers"
+msgstr ""
+
+msgid "Approve User"
+msgstr ""
+
+msgid "Login ID: "
+msgstr ""
+
+msgid "Choose Other Details"
+msgstr ""
+
+msgid "New MR User"
+msgstr ""
+
+msgid "New user as management team member"
+msgstr ""
+
+msgid "User who can approve data added by other users"
+msgstr ""
+
+msgid "Benchmark:"
+msgstr ""
+
+msgid "Estimated Data Entry Per Day From This User"
+msgstr ""
+
+msgid "Reset your Password"
+msgstr ""
+
+msgid "Current Password"
+msgstr ""
+
+msgid "New Password"
+msgstr ""
+
+msgid "Confirm Password"
+msgstr ""
+
+msgid "Evidence Files"
+msgstr ""
+
+msgid "This user who can see other user's records."
+msgstr ""
+
+msgid "Super User — create/re-create forms and use Form Creation AI"
+msgstr ""
+
+msgid "Last Login"
+msgstr "Letzte Anmeldung"
+
+msgid "Super User"
+msgstr ""
+
+msgid "HoD"
+msgstr ""
+
+msgid "Reviewer"
+msgstr "Prüfer"
+
+msgid "Creator"
+msgstr "Ersteller"
+
+msgid "Publisher"
+msgstr "Veröffentlichungsverantwortlicher"
+
+msgid "Copy Access From"
+msgstr "Zugriffsrechte übernehmen von"
+
+msgid "Toggle Super User access"
+msgstr ""
+
+msgid "Welcome "
+msgstr ""
+
+msgid "Pending Documents for Issue"
+msgstr ""
+
+msgid "Document Number"
+msgstr ""
+
+msgid "Document Title"
+msgstr ""
+
+msgid "Date/Time"
+msgstr ""
+
+msgid "Act"
+msgstr ""
+
+msgid "Issue Document"
+msgstr ""
+
+msgid "Your language preference is saved to your profile. Untranslated text appears in English."
+msgstr "Ihre Sprachwahl wird in Ihrem Profil gespeichert. Nicht übersetzte Texte werden auf Englisch angezeigt."
+
+msgid "Save"
+msgstr "Speichern"
+
+msgid "New User"
+msgstr ""
+
+msgid "New Employee"
+msgstr ""
+
+msgid "Please Enter username"
+msgstr ""
+
+msgid "*********"
+msgstr ""
+
+msgid "Forgot password?"
+msgstr ""
+
+msgid "Latest News & Updates"
+msgstr ""
+
+msgid "is MR?"
+msgstr ""
+
+msgid "is View All?"
+msgstr ""
+
+msgid "is Approver?"
+msgstr ""
+
+msgid "Benchmark"
+msgstr ""
+
+msgid "Last Activity"
+msgstr ""
+
+msgid "Yes"
+msgstr "Ja"
+
+msgid "No"
+msgstr "Nein"
+
+msgid "Two way authentication"
+msgstr ""
+
+msgid "Please enter the OTP code which you get in your email"
+msgstr ""
+
+msgid "OPT Code"
+msgstr ""
+
+msgid "Pending Tasks"
+msgstr ""
+
+msgid "Error loading resource."
+msgstr ""
+
+msgid "Contact Administrator."
+msgstr ""
+
+msgid "Forgot your password?"
+msgstr ""
+
+msgid "Please enter the username you used for registration and you'll get an email with further instructions."
+msgstr ""
+
+msgid "User Name"
+msgstr ""
+
+msgid "Email Server Setting"
+msgstr ""
+
+msgid "Email Host Name"
+msgstr ""
+
+msgid "Email Port"
+msgstr ""
+
+msgid "Email Id"
+msgstr "E-Mail-Adresse"
+
+msgid "Skip"
+msgstr ""
+
+msgid "From Email Id"
+msgstr ""
+
+msgid "Record is locked"
+msgstr ""
+
+msgid "This record is under process and assigned to other user for updation. You can not access this record while its locked. <br/>Contact your administrator for permissions related issues."
+msgstr ""
+
+msgid "Set User Access"
+msgstr ""
+
+msgid "SMTP Details"
+msgstr ""
+
+msgid "Add User"
+msgstr ""
+
+msgid "Username : "
+msgstr ""
+
+msgid "Name : "
+msgstr ""
+
+msgid "Admin User?"
+msgstr ""
+
+msgid "Super User?"
+msgstr ""
+
+msgid "Can this user see records created by other users?"
+msgstr ""
+
+msgid "Is this user Approver?"
+msgstr ""
+
+msgid "Published?"
+msgstr ""
+

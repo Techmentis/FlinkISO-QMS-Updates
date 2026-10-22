@@ -1,0 +1,203 @@
+# FlinkISO translation template.
+msgid ""
+msgstr ""
+"Project-Id-Version: FlinkISO\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+
+#: Errors/fatal_error.ctp:19
+msgid "Fatal Error"
+msgstr ""
+
+#: Errors/fatal_error.ctp:21
+#: Errors/missing_action.ctp:30;34
+#: Errors/missing_behavior.ctp:22;26
+#: Errors/missing_component.ctp:22;26
+#: Errors/missing_connection.ctp:29
+#: Errors/missing_controller.ctp:29;33
+#: Errors/missing_database.ctp:29
+#: Errors/missing_datasource.ctp:29
+#: Errors/missing_datasource_config.ctp:20
+#: Errors/missing_helper.ctp:22;26
+#: Errors/missing_layout.ctp:20
+#: Errors/missing_plugin.ctp:20;24
+#: Errors/missing_table.ctp:29
+#: Errors/missing_view.ctp:30
+#: Errors/pdo_error.ctp:20
+#: Errors/private_action.ctp:20
+#: Errors/scaffold_error.ctp:20
+msgid "Error"
+msgstr ""
+
+#: Errors/fatal_error.ctp:25
+msgid "File"
+msgstr ""
+
+#: Errors/fatal_error.ctp:29
+msgid "Line"
+msgstr ""
+
+#: Errors/fatal_error.ctp:33
+#: Errors/missing_behavior.ctp:36
+#: Errors/missing_component.ctp:36
+#: Errors/missing_datasource_config.ctp:24
+#: Errors/missing_helper.ctp:36
+#: Errors/missing_layout.ctp:41
+#: Errors/missing_plugin.ctp:40
+#: Errors/pdo_error.ctp:34
+#: Errors/private_action.ctp:24
+#: Errors/scaffold_error.ctp:24
+msgid "Notice"
+msgstr ""
+
+#: Errors/fatal_error.ctp:34
+#: Errors/missing_behavior.ctp:37
+#: Errors/missing_component.ctp:37
+#: Errors/missing_datasource_config.ctp:25
+#: Errors/missing_helper.ctp:37
+#: Errors/missing_layout.ctp:42
+#: Errors/missing_plugin.ctp:41
+#: Errors/pdo_error.ctp:35
+#: Errors/private_action.ctp:25
+#: Errors/scaffold_error.ctp:25
+msgid "If you want to customize this error message, create %s"
+msgstr ""
+
+#: Errors/missing_action.ctp:26
+msgid "Missing Action"
+msgstr ""
+
+#: Errors/missing_action.ctp:31
+msgid "The action %1$s is not defined in controller %2$s"
+msgstr ""
+
+#: Errors/missing_action.ctp:35
+#: Errors/missing_behavior.ctp:27
+#: Errors/missing_component.ctp:27
+#: Errors/missing_controller.ctp:34
+#: Errors/missing_helper.ctp:27
+msgid "Create the class %s below in file: %s"
+msgstr ""
+
+#: Errors/missing_behavior.ctp:20
+msgid "Missing Behavior"
+msgstr ""
+
+#: Errors/missing_behavior.ctp:23
+#: Errors/missing_component.ctp:23
+#: Errors/missing_controller.ctp:30
+#: Errors/missing_helper.ctp:23
+msgid "%s could not be found."
+msgstr ""
+
+#: Errors/missing_component.ctp:20
+msgid "Missing Component"
+msgstr ""
+
+#: Errors/missing_connection.ctp:26
+#: Errors/missing_database.ctp:26
+msgid "Missing Database Connection"
+msgstr ""
+
+#: Errors/missing_connection.ctp:30
+#: Errors/missing_database.ctp:30
+#: Errors/missing_datasource.ctp:30
+#: Errors/missing_table.ctp:30
+msgid "A Database connection using \"%s\" was missing or unable to connect."
+msgstr ""
+
+#: Errors/missing_controller.ctp:26
+msgid "Missing Controller"
+msgstr ""
+
+#: Errors/missing_datasource.ctp:26
+msgid "Missing Datasource"
+msgstr ""
+
+#: Errors/missing_datasource_config.ctp:18
+msgid "Missing Datasource Configuration"
+msgstr ""
+
+#: Errors/missing_datasource_config.ctp:21
+msgid "The datasource configuration %1$s was not found in database.php."
+msgstr ""
+
+#: Errors/missing_helper.ctp:20
+msgid "Missing Helper"
+msgstr ""
+
+#: Errors/missing_layout.ctp:18
+msgid "Missing Layout"
+msgstr ""
+
+#: Errors/missing_layout.ctp:21
+msgid "The layout file %s can not be found or does not exist."
+msgstr ""
+
+#: Errors/missing_layout.ctp:25
+msgid "Confirm you have created the file: %s"
+msgstr ""
+
+#: Errors/missing_plugin.ctp:18
+msgid "Missing Plugin"
+msgstr ""
+
+#: Errors/missing_plugin.ctp:21
+msgid "The application is trying to load a file from the %s plugin"
+msgstr ""
+
+#: Errors/missing_plugin.ctp:25
+msgid "Make sure your plugin %s is in the %s directory and was loaded"
+msgstr ""
+
+#: Errors/missing_plugin.ctp:33
+msgid "Loading all plugins"
+msgstr ""
+
+#: Errors/missing_plugin.ctp:34
+msgid "If you wish to load all plugins at once, use the following line in your %s file"
+msgstr ""
+
+#: Errors/missing_table.ctp:26
+msgid "Missing Database Table"
+msgstr ""
+
+#: Errors/missing_view.ctp:26
+msgid "Missing View"
+msgstr ""
+
+#: Errors/missing_view.ctp:31
+msgid "The view for %1$s%2$s was not found."
+msgstr ""
+
+#: Errors/pdo_error.ctp:18
+msgid "Database Error"
+msgstr ""
+
+#: Errors/pdo_error.ctp:25
+msgid "SQL Query"
+msgstr ""
+
+#: Errors/pdo_error.ctp:30
+msgid "SQL Query Params"
+msgstr ""
+
+#: Errors/private_action.ctp:18
+msgid "Private Method in %s"
+msgstr ""
+
+#: Errors/private_action.ctp:21
+msgid "%s%s cannot be accessed directly."
+msgstr ""
+
+#: Errors/scaffold_error.ctp:18
+msgid "Scaffold Error"
+msgstr ""
+
+#: Errors/scaffold_error.ctp:21
+msgid "Method _scaffoldError in was not found in the controller"
+msgstr ""
+

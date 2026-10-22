@@ -20,7 +20,10 @@
 			<?php }else{?> 
 			<div class="col-md-12">	
 			<?php }?>
-			<h3>Employee Profile</h3>
+			<h3><?php echo __('Employee Profile'); ?></h3>
+            <?php if (!empty($languagePreferenceAvailable) && $this->Session->read('User.employee_id') === $employee['Employee']['id']): ?>
+            <p><?php echo $this->Html->link(__('Language'), array('controller' => 'users', 'action' => 'language_preferences'), array('class' => 'btn btn-default')); ?></p>
+            <?php endif; ?>
 				<table class="table table-responsive">
 					<tr><td><?php echo __('Name'); ?></td>
 					<td>

@@ -1,0 +1,4049 @@
+# FlinkISO translation template.
+msgid ""
+msgstr ""
+"Project-Id-Version: FlinkISO\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+
+#: AisController.php:24
+msgid "AI functions are disabled."
+msgstr ""
+
+#: AisController.php:31;3865
+#: CustomTablesController.php:552
+msgid "Only POST requests are accepted."
+msgstr ""
+
+#: AisController.php:49
+msgid "Select Chat, FlinkISO, or Forms mode."
+msgstr ""
+
+#: AisController.php:53
+msgid "Forms mode is available only in Quality Documents, Custom Tables, and generated forms."
+msgstr ""
+
+#: AisController.php:58
+msgid "Only Super Users can use Form Creation AI."
+msgstr ""
+
+#: AisController.php:61
+msgid "Enter a request for FlinkISO AI."
+msgstr ""
+
+#: AisController.php:64
+msgid "The request is too long."
+msgstr ""
+
+#: AisController.php:103
+msgid "What should the %s file contain?"
+msgstr ""
+
+#: AisController.php:115
+msgid "Document topic and requirements"
+msgstr ""
+
+#: AisController.php:163;169
+msgid "AI error: FlinkISO could not complete the request to the configured AI provider."
+msgstr ""
+
+#: AisController.php:190
+msgid "The generated form context is missing its custom_table_id."
+msgstr ""
+
+#: AisController.php:199
+msgid "The current generated form could not be found."
+msgstr ""
+
+#: AisController.php:203
+msgid "The current form has an invalid saved field definition."
+msgstr ""
+
+#: AisController.php:259;874
+msgid "I could not safely update that field configuration. Review the notes and clarify the request."
+msgstr ""
+
+#: AisController.php:271
+msgid "The requested field change was prepared."
+msgstr ""
+
+#: AisController.php:281;946
+msgid "The requested field change was prepared. FlinkISO is rebuilding the form through the API."
+msgstr ""
+
+#: AisController.php:284;949
+msgid "The server could not store the approved AI change for rebuilding."
+msgstr ""
+
+#: AisController.php:287;953;1855;1924
+msgid "Only an MR user can rebuild a generated form."
+msgstr ""
+
+#: AisController.php:288;954
+msgid "The requested field change is ready for review, but your account cannot rebuild this form."
+msgstr ""
+
+#: AisController.php:334
+msgid "Open the Quality Document that should be converted into a form, then try again."
+msgstr ""
+
+#: AisController.php:340
+msgid "The current Quality Document could not be found."
+msgstr ""
+
+#: AisController.php:346
+msgid "The document displayed in ONLYOFFICE could not be found on the FlinkISO server."
+msgstr ""
+
+#: AisController.php:362
+msgid "The selected document must be smaller than 25 MB for visual AI analysis."
+msgstr ""
+
+#: AisController.php:390
+msgid "The validated form definition was found. FlinkISO is retrying form creation without running AI analysis again."
+msgstr ""
+
+#: AisController.php:403;451
+msgid "Reusing the previously validated field definition; AI analysis was not run again."
+msgstr ""
+
+#: AisController.php:442
+msgid "The saved form definition was found. FlinkISO is retrying MVC generation through the API."
+msgstr ""
+
+#: AisController.php:479
+msgid "The FlinkISO AI API is not configured."
+msgstr ""
+
+#: AisController.php:523
+msgid "FlinkISO AI is already processing another request. Stop or wait for that request before starting a new one."
+msgstr ""
+
+#: AisController.php:683;3894
+msgid "AI generation was cancelled."
+msgstr ""
+
+#: AisController.php:694
+msgid "AI error: The model did not finish generating this form within %s minutes."
+msgstr ""
+
+#: AisController.php:701
+msgid "API error: FlinkISO could not connect to API v2."
+msgstr ""
+
+#: AisController.php:716
+msgid "FlinkISO AI is processing another request. Wait for it to finish, or stop it from the panel where it was started."
+msgstr ""
+
+#: AisController.php:719
+msgid "AI error: The configured AI provider rejected its API key. Update the AI API key in FlinkISO settings. API v2 was reached successfully."
+msgstr ""
+
+#: AisController.php:720;1268
+msgid "AI error: %s"
+msgstr ""
+
+#: AisController.php:722
+msgid "API error: API v2 rejected this FlinkISO instance. Confirm that the company ID is registered and API/AI access is enabled on the API server."
+msgstr ""
+
+#: AisController.php:723
+msgid "API error: %s"
+msgstr ""
+
+#: AisController.php:734
+msgid "API error: The FlinkISO AI API returned an invalid response."
+msgstr ""
+
+#: AisController.php:743
+msgid "AI error: The model reached its output limit before it finished the form. No partial form was created. Please try again."
+msgstr ""
+
+#: AisController.php:753
+msgid "AI error: The model response did not match the required FlinkISO preview format."
+msgstr ""
+
+#: AisController.php:833
+msgid "I could not safely place the new field in the existing form. Review the notes and clarify the request."
+msgstr ""
+
+#: AisController.php:846
+msgid "I could not safely update the choices for that field. Review the notes and clarify the request."
+msgstr ""
+
+#: AisController.php:860
+msgid "I could not safely update that field label. Review the notes and clarify the request."
+msgstr ""
+
+#: AisController.php:888
+msgid "I could not safely remove those choices. Review the notes and clarify the request."
+msgstr ""
+
+#: AisController.php:902
+msgid "I could not safely move that field. Review the notes and clarify the request."
+msgstr ""
+
+#: AisController.php:916
+msgid "I could not safely remove that field. Review the notes and clarify the request."
+msgstr ""
+
+#: AisController.php:929
+msgid "Specify a supported change to the existing form."
+msgstr ""
+
+#: AisController.php:950
+msgid "The requested field change is ready, but the rebuild could not be queued."
+msgstr ""
+
+#: AisController.php:959
+msgid "Open the generated form that should receive these fields, then submit the request again."
+msgstr ""
+
+#: AisController.php:962
+msgid "The parent fields were recognized, but one or more detected child tables were invalid. No form was created."
+msgstr ""
+
+#: AisController.php:979
+msgid "FlinkISO detected repeatable information that should use child tables. Review the structure and confirm creation."
+msgstr ""
+
+#: AisController.php:980
+msgid "The form fields were prepared. FlinkISO is now creating the form through the API."
+msgstr ""
+
+#: AisController.php:983
+msgid "The server could not queue the generated form for creation."
+msgstr ""
+
+#: AisController.php:984
+msgid "The form fields are ready, but form creation could not be queued."
+msgstr ""
+
+#: AisController.php:987
+msgid "Only an MR user can create a generated form."
+msgstr ""
+
+#: AisController.php:988
+msgid "The form fields are ready for review, but your account cannot create this form."
+msgstr ""
+
+#: AisController.php:991
+msgid "I prepared a read-only FlinkISO field preview for your review."
+msgstr ""
+
+#: AisController.php:994
+msgid "I could not prepare a valid field preview. Review the notes and clarify the request."
+msgstr ""
+
+#: AisController.php:1035;3669;3756
+msgid "Only GET requests are accepted."
+msgstr ""
+
+#: AisController.php:1038;1050
+msgid "AI document draft not found."
+msgstr ""
+
+#: AisController.php:1056
+msgid "This AI response is not a downloadable artifact."
+msgstr ""
+
+#: AisController.php:1059
+msgid "Office document export requires the PHP Zip extension."
+msgstr ""
+
+#: AisController.php:1071
+msgid "FlinkISO could not create the requested %s artifact."
+msgstr ""
+
+#: AisController.php:1090
+msgid "Hello! What would you like to discuss?"
+msgstr ""
+
+#: AisController.php:1092
+msgid "Hello! I can help you add, remove, rename, reorder, link, or configure fields on this form. What would you like to change?"
+msgstr ""
+
+#: AisController.php:1093
+msgid "Hello! I can read the current Quality Document and create a FlinkISO form from it. What would you like me to do?"
+msgstr ""
+
+#: AisController.php:1096
+msgid "You are welcome."
+msgstr ""
+
+#: AisController.php:1108
+msgid "AI is not configured with a customer-managed provider for general assistance."
+msgstr ""
+
+#: AisController.php:1249
+msgid "AI error: Could not connect to the configured AI provider."
+msgstr ""
+
+#: AisController.php:1261
+msgid "The configured AI provider returned HTTP %s."
+msgstr ""
+
+#: AisController.php:1261
+msgid "unknown"
+msgstr ""
+
+#: AisController.php:1263
+msgid "The configured AI provider returned HTTP %s but no readable message content."
+msgstr ""
+
+#: AisController.php:1651
+msgid "FlinkISO manual image"
+msgstr ""
+
+#: AisController.php:1775
+msgid "The selected field is no longer present in this form. Reload the page and select it again."
+msgstr ""
+
+#: AisController.php:1810
+msgid "That guided field action is not supported."
+msgstr ""
+
+#: AisController.php:1827
+msgid "I could not safely apply that field action. Review the notes and clarify the request."
+msgstr ""
+
+#: AisController.php:1839
+msgid "The selected field change was prepared."
+msgstr ""
+
+#: AisController.php:1849
+msgid "The selected field change was prepared. FlinkISO is rebuilding the form through the API."
+msgstr ""
+
+#: AisController.php:1852
+msgid "The server could not queue the selected field change."
+msgstr ""
+
+#: AisController.php:1856
+msgid "The selected field change is ready for review, but your account cannot rebuild this form."
+msgstr ""
+
+#: AisController.php:1876
+msgid "The field wizard result was invalid. Please reopen the wizard and try again."
+msgstr ""
+
+#: AisController.php:1882
+msgid "The API could not compile the selected field settings."
+msgstr ""
+
+#: AisController.php:1886
+msgid "The API returned no compiled field."
+msgstr ""
+
+#: AisController.php:1896
+msgid "The field was valid, but it could not be placed in the current form."
+msgstr ""
+
+#: AisController.php:1908
+msgid "The field was compiled by API V2 and is ready for review."
+msgstr ""
+
+#: AisController.php:1918
+msgid "API V2 compiled the field. FlinkISO is rebuilding the form."
+msgstr ""
+
+#: AisController.php:1921
+msgid "The server could not queue the compiled field for rebuilding."
+msgstr ""
+
+#: AisController.php:1941
+msgid "API V2 is not configured."
+msgstr ""
+
+#: AisController.php:1957
+msgid "API V2 rejected the field settings."
+msgstr ""
+
+#: AisController.php:1960
+msgid "API V2 returned an invalid field response."
+msgstr ""
+
+#: AisController.php:2136
+msgid "The existing child table %s was recognized and will not be created again."
+msgstr ""
+
+#: AisController.php:2172
+msgid "%s is marked for removal, so it is not rendered."
+msgstr ""
+
+#: AisController.php:2178
+msgid "%s is configured as Linked Documents with no child forms selected, so FlinkISO renders an empty placement block instead of an input. Change it to Text, or link it to the intended model, to make it visible."
+msgstr ""
+
+#: AisController.php:2180
+msgid "%s is a Linked Documents placement rather than an input field. Its selected child forms are displayed only when applicable."
+msgstr ""
+
+#: AisController.php:2183
+msgid "%s is configured as a section break, not an input field."
+msgstr ""
+
+#: AisController.php:2185
+msgid "%s is configured as a %s field and should be rendered. Rebuild the form if its generated view does not contain the input."
+msgstr ""
+
+#: AisController.php:2232
+#: SettingsController.php:218
+msgid "ONLYOFFICE conversion is not configured on this FlinkISO server."
+msgstr ""
+
+#: AisController.php:2236
+msgid "FlinkISO could not create an ONLYOFFICE-accessible URL for this document."
+msgstr ""
+
+#: AisController.php:2270
+msgid "ONLYOFFICE could not convert this document. %s"
+msgstr ""
+
+#: AisController.php:2275
+msgid "ONLYOFFICE did not return converted page images.%s"
+msgstr ""
+
+#: AisController.php:2281
+msgid "ONLYOFFICE returned an invalid converted-file URL."
+msgstr ""
+
+#: AisController.php:2285
+msgid "FlinkISO could not prepare temporary image storage."
+msgstr ""
+
+#: AisController.php:2300
+msgid "FlinkISO could not download the ONLYOFFICE page images. %s"
+msgstr ""
+
+#: AisController.php:2305
+msgid "The converted page-image archive is empty or larger than 80 MB."
+msgstr ""
+
+#: AisController.php:2314
+msgid "FlinkISO could not open the ONLYOFFICE page-image archive."
+msgstr ""
+
+#: AisController.php:2343
+msgid "The configured PDF to PPM executable is unavailable."
+msgstr ""
+
+#: AisController.php:2348
+msgid "FlinkISO could not prepare the local document renderer."
+msgstr ""
+
+#: AisController.php:2355
+msgid "The configured LibreOffice executable is unavailable."
+msgstr ""
+
+#: AisController.php:2368
+msgid "LibreOffice could not convert this document to PDF."
+msgstr ""
+
+#: AisController.php:2385
+msgid "Poppler could not render this document into page images."
+msgstr ""
+
+#: AisController.php:2417
+msgid "The selected document produced more than 32 MB of page images."
+msgstr ""
+
+#: AisController.php:2424
+msgid "The document converter did not produce readable page images."
+msgstr ""
+
+#: AisController.php:2436
+msgid "This form is not linked to a Quality Document."
+msgstr ""
+
+#: AisController.php:2450
+msgid "The linked Quality Document could not be found."
+msgstr ""
+
+#: AisController.php:2459
+msgid "The linked Quality Document file could not be found on the FlinkISO server."
+msgstr ""
+
+#: AisController.php:2482
+msgid "The linked Quality Document must be smaller than 25 MB for visual AI analysis."
+msgstr ""
+
+#: AisController.php:2527
+msgid "FlinkISO AI cannot read this document type yet. Use PDF, DOCX, XLSX, TXT, or CSV. Convert legacy XLS files to XLSX first."
+msgstr ""
+
+#: AisController.php:2546
+msgid "PDF text extraction is not installed on the AIS server. Install Poppler/pdftotext and configure PdfToTextPath."
+msgstr ""
+
+#: AisController.php:2555
+msgid "AIS could not extract text from the current PDF."
+msgstr ""
+
+#: AisController.php:2562
+msgid "DOCX extraction requires the PHP Zip extension on the AIS server."
+msgstr ""
+
+#: AisController.php:2566
+msgid "AIS could not open the current DOCX file."
+msgstr ""
+
+#: AisController.php:2571
+msgid "The current DOCX has no readable document content."
+msgstr ""
+
+#: AisController.php:2579
+msgid "XLSX extraction requires the PHP Zip and DOM extensions on the FlinkISO server."
+msgstr ""
+
+#: AisController.php:2583
+msgid "FlinkISO AI could not open the current XLSX file."
+msgstr ""
+
+#: AisController.php:2655
+msgid "The current document contains no extractable text. A scanned PDF requires OCR."
+msgstr ""
+
+#: AisController.php:3127
+msgid "What should “important” mean for %s?"
+msgstr ""
+
+#: AisController.php:3129
+msgid "Make mandatory"
+msgstr ""
+
+#: AisController.php:3130
+msgid "Make default"
+msgstr ""
+
+#: AisController.php:3131
+msgid "Mandatory and default"
+msgstr ""
+
+#: AisController.php:3132
+msgid "Show on list"
+msgstr ""
+
+#: AisController.php:3143
+msgid "Quality Document"
+msgstr ""
+
+#: AisController.php:3146
+msgid "Which model should %s link to?"
+msgstr ""
+
+#: AisController.php:3152
+msgid "What should the new field be called?"
+msgstr ""
+
+#: AisController.php:3153;3238
+msgid "Field name"
+msgstr ""
+
+#: AisController.php:3170
+msgid "Configure the new field “%s”."
+msgstr ""
+
+#: AisController.php:3174
+msgid "Short text"
+msgstr ""
+
+#: AisController.php:3175
+msgid "Phone"
+msgstr ""
+
+#: AisController.php:3176
+msgid "Email"
+msgstr ""
+
+#: AisController.php:3177
+msgid "Long text"
+msgstr ""
+
+#: AisController.php:3178
+#: CustomTableTasks/add.ctp:103
+msgid "Date"
+msgstr ""
+
+#: AisController.php:3179
+msgid "Date and time"
+msgstr ""
+
+#: AisController.php:3180
+msgid "Number"
+msgstr ""
+
+#: AisController.php:3181
+msgid "Decimal number"
+msgstr ""
+
+#: AisController.php:3182
+msgid "Dropdown — single"
+msgstr ""
+
+#: AisController.php:3183
+msgid "Dropdown — multiple"
+msgstr ""
+
+#: AisController.php:3184
+msgid "Radio buttons"
+msgstr ""
+
+#: AisController.php:3185
+msgid "Checkboxes"
+msgstr ""
+
+#: AisController.php:3186
+msgid "File upload"
+msgstr ""
+
+#: AisController.php:3187
+msgid "Comments or notes"
+msgstr ""
+
+#: AisController.php:3188
+msgid "Hidden field"
+msgstr ""
+
+#: AisController.php:3189
+msgid "Linked documents"
+msgstr ""
+
+#: AisController.php:3190
+msgid "Section break"
+msgstr ""
+
+#: AisController.php:3193
+#: Elements/asidebar.ctp:41
+#: Elements/header.ctp:68
+msgid "Employees"
+msgstr ""
+
+#: AisController.php:3194
+#: Elements/asidebar.ctp:38
+#: Elements/header.ctp:65
+msgid "Branches"
+msgstr ""
+
+#: AisController.php:3195
+#: Branches/view.ctp:17
+#: Elements/asidebar.ctp:39
+#: Elements/header.ctp:66
+msgid "Departments"
+msgstr ""
+
+#: AisController.php:3196
+#: Elements/asidebar.ctp:40
+#: Elements/header.ctp:67
+msgid "Designations"
+msgstr ""
+
+#: AisController.php:3197;3825;3854
+#: Elements/ai_assistant.ctp:23
+msgid "Quality Documents"
+msgstr ""
+
+#: AisController.php:3213
+msgid "Should %s allow one selection or multiple selections?"
+msgstr ""
+
+#: AisController.php:3215
+msgid "One selection"
+msgstr ""
+
+#: AisController.php:3216
+msgid "Multiple selections"
+msgstr ""
+
+#: AisController.php:3227
+msgid "Which choices should %s contain? Enter them separated by commas."
+msgstr ""
+
+#: AisController.php:3228
+msgid "For example: Yes, No, Not Applicable"
+msgstr ""
+
+#: AisController.php:3237
+msgid "Which field should be removed?"
+msgstr ""
+
+#: AisController.php:3331
+msgid "AI Generated QMS Document"
+msgstr ""
+
+#: AisController.php:3607
+msgid "AI prepared a read-only recommendation. An active FlinkISO API subscription is required to create or update forms automatically."
+msgstr ""
+
+#: AisController.php:3612
+msgid "Automatic form creation and modification are not included without an active API subscription."
+msgstr ""
+
+#: AisController.php:3678
+msgid "The AI history context is invalid."
+msgstr ""
+
+#: AisController.php:3686
+msgid "The requested form history is not available."
+msgstr ""
+
+#: AisController.php:3691
+msgid "The requested document history is not available."
+msgstr ""
+
+#: AisController.php:3694
+msgid "AI history storage is not available."
+msgstr ""
+
+#: AisController.php:3715
+msgid "AI history could not be loaded from the database."
+msgstr ""
+
+#: AisController.php:3760
+msgid "AI status storage is not available."
+msgstr ""
+
+#: AisController.php:3823
+msgid "Another user"
+msgstr ""
+
+#: AisController.php:3826
+#: Elements/ai_assistant.ctp:81
+msgid "FlinkISO AI"
+msgstr ""
+
+#: AisController.php:3869;3880
+msgid "The AI request could not be found."
+msgstr ""
+
+#: AisController.php:3883
+msgid "This AI request has already finished."
+msgstr ""
+
+#: AisController.php:3888
+msgid "FlinkISO could not signal the AI request to stop."
+msgstr ""
+
+#: AisController.php:3895
+msgid "Cancelled by user."
+msgstr ""
+
+#: AisController.php:3901
+msgid "Stop requested. The API is cancelling model generation and releasing the request."
+msgstr ""
+
+#: AisController.php:3902
+msgid "Stop was recorded in FlinkISO, but the API cancellation could not be confirmed."
+msgstr ""
+
+#: AppController.php:72
+msgid "Only Super Users can create or re-create application forms."
+msgstr ""
+
+#: AppController.php:98
+#: UsersController.php:20
+msgid "Login to continue."
+msgstr ""
+
+#: AppController.php:590;699;739;3483
+#: ApprovalsController.php:20
+#: CustomTablesController.php:277;298;1426;1724;2134;2427;2623;2943;3509;3539;3569;3647;3739
+#: UserSessionsController.php:26;43
+#: UsersController.php:1694
+msgid "You are not authorized to view this section"
+msgstr ""
+
+#: AppController.php:1089
+msgid "Approval created."
+msgstr ""
+
+#: AppController.php:1091
+msgid "Approval could not be sent."
+msgstr ""
+
+#: AppController.php:1147
+#: ApprovalCommentsController.php:767
+#: UsersController.php:175
+msgid "The user has been saved but fail to send email. Please check smtp details."
+msgstr ""
+
+#: AppController.php:1560
+msgid "You can not delete this process."
+msgstr ""
+
+#: AppController.php:1569
+msgid "You do not have permission to delete "
+msgstr ""
+
+#: AppController.php:1578;1751
+msgid "You can not delete this user"
+msgstr ""
+
+#: AppController.php:1588
+msgid "User is deleted."
+msgstr ""
+
+#: AppController.php:1711
+msgid "Enter Password To Continue"
+msgstr ""
+
+#: AppController.php:1724
+#: CustomTablesController.php:2609;3470;3496;3526;3556;3638;3657;3747
+msgid "Incorrect Password"
+msgstr ""
+
+#: AppController.php:1764
+msgid "Records Deleted"
+msgstr ""
+
+#: AppController.php:1772
+msgid "Unknown user"
+msgstr ""
+
+#: AppController.php:2106
+msgid "No records to display! Please select search criteria."
+msgstr ""
+
+#: AppController.php:3191
+msgid "This table is not yet available for adding data"
+msgstr ""
+
+#: AppController.php:3196
+msgid "Unknown table"
+msgstr ""
+
+#: AppController.php:3245;3251;3401;3408;4552;4558
+msgid "Select form first"
+msgstr ""
+
+#: AppController.php:3371
+msgid "Failed to copy file"
+msgstr ""
+
+#: AppController.php:3466
+msgid "You are not authorized to view this section :00"
+msgstr ""
+
+#: AppController.php:4024
+msgid "The main record was saved, but one or more child rows could not be saved. Please correct the child form and try again."
+msgstr ""
+
+#: AppController.php:4026
+#: ProcessesController.php:310
+msgid "Record has been saved"
+msgstr ""
+
+#: AppController.php:4070
+#: ProcessesController.php:314;416
+msgid "Record could not be saved. Please, try again."
+msgstr ""
+
+#: AppController.php:4076
+msgid "Unable to save file."
+msgstr ""
+
+#: AppController.php:4086
+msgid "Unable to upload file."
+msgstr ""
+
+#: AppController.php:4945
+#: CustomFilesController.php:26;52
+#: QcDocumentsController.php:1049;1109
+msgid "Incorrect password"
+msgstr ""
+
+#: AppController.php:4953
+#: CustomFilesController.php:60
+#: QcDocumentsController.php:1153
+msgid "File Deleted"
+msgstr ""
+
+#: ApprovalCommentsController.php:236
+msgid "Select one or more valid next approvers before approving this step."
+msgstr ""
+
+#: ApprovalCommentsController.php:318
+msgid "Approved and sent directly to the next approval step."
+msgstr ""
+
+#: ApprovalCommentsController.php:320
+msgid "Approved, but the next step has no available approvers."
+msgstr ""
+
+#: ApprovalCommentsController.php:322
+msgid "Approved. Waiting for the remaining approvals in this step."
+msgstr ""
+
+#: ApprovalCommentsController.php:508
+msgid "Step completed by another approver under Any approval mode."
+msgstr ""
+
+#: ApprovalCommentsController.php:517
+msgid "Approval record not found."
+msgstr ""
+
+#: ApprovalCommentsController.php:524
+msgid "Current approval step was not found."
+msgstr ""
+
+#: ApprovalCommentsController.php:538
+msgid "This is the first approval step and cannot be returned further."
+msgstr ""
+
+#: ApprovalCommentsController.php:573
+msgid "No eligible users are available for the previous approval step."
+msgstr ""
+
+#: ApprovalCommentsController.php:581;637
+msgid "The record could not be moved to the previous step."
+msgstr ""
+
+#: ApprovalCommentsController.php:611
+msgid "Returned from %s: %s"
+msgstr ""
+
+#: ApprovalCommentsController.php:621;626
+msgid "Unable to create approvals for the previous step."
+msgstr ""
+
+#: ApprovalCommentsController.php:660
+msgid "The current approval could not be closed. No workflow changes were retained."
+msgstr ""
+
+#: ApprovalCommentsController.php:676
+msgid "Returned to previous step: %s."
+msgstr ""
+
+#: ApprovalProcessesController.php:109;197
+msgid "Invalid approval process"
+msgstr ""
+
+#: ApprovalProcessesController.php:165
+msgid "The approval process has been saved"
+msgstr ""
+
+#: ApprovalProcessesController.php:169;243
+msgid "The approval process could not be saved. Please, try again."
+msgstr ""
+
+#: ApprovalProcessesController.php:224
+msgid "The approval process for : "
+msgstr ""
+
+#: ApprovalStepsController.php:54;126
+msgid "Invalid approval step"
+msgstr ""
+
+#: ApprovalStepsController.php:94
+msgid "The approval step has been saved"
+msgstr ""
+
+#: ApprovalStepsController.php:98;149
+msgid "The approval step could not be saved. Please, try again."
+msgstr ""
+
+#: ApprovalStepsController.php:175
+msgid "This approval step cannot be deleted because it controls %d custom form field(s) in: %s. Remove those field rules first."
+msgstr ""
+
+#: ApprovalStepsController.php:180
+msgid "The approval step deleted."
+msgstr ""
+
+#: ApprovalStepsController.php:182;187
+msgid "The approval step could not be deleted. Please, try again."
+msgstr ""
+
+#: ApprovalsController.php:314
+msgid "Approval Record Deleted"
+msgstr ""
+
+#: ApprovalsController.php:322
+msgid "Approval Comment Deleted"
+msgstr ""
+
+#: BranchesController.php:66;174
+msgid "Invalid branch"
+msgstr ""
+
+#: BranchesController.php:102
+msgid "The branch has been saved"
+msgstr ""
+
+#: BranchesController.php:106;188
+msgid "The branch could not be saved. Please, try again."
+msgstr ""
+
+#: BranchesController.php:154
+msgid "The branches saved."
+msgstr ""
+
+#: BranchesController.php:157
+msgid "The branches could not be saved. Please, try again."
+msgstr ""
+
+#: ClausesController.php:29
+msgid "You do not have permission to access "
+msgstr ""
+
+#: ClausesController.php:51;124
+msgid "Invalid clause"
+msgstr ""
+
+#: ClausesController.php:63
+msgid "You do not have permission to add "
+msgstr ""
+
+#: ClausesController.php:91
+msgid "The clause has been saved"
+msgstr ""
+
+#: ClausesController.php:95;138
+msgid "The clause could not be saved. Please, try again."
+msgstr ""
+
+#: ClausesController.php:120
+msgid "You do not have permission to edit "
+msgstr ""
+
+#: ClausesController.php:135
+msgid "The clause updated."
+msgstr ""
+
+#: CustomFilesController.php:91
+msgid "Email sent succeefully."
+msgstr ""
+
+#: CustomFilesController.php:94
+msgid "Failed to send email. Please check smtp details."
+msgstr ""
+
+#: CustomTableTasksController.php:30
+msgid "The custom task has been saved."
+msgstr ""
+
+#: CustomTableTasksController.php:39
+msgid "The custom task could not be saved. Please, try again."
+msgstr ""
+
+#: CustomTableTasksController.php:42
+msgid "Duplicate Task. Please try other options"
+msgstr ""
+
+#: CustomTableTasksController.php:101
+msgid "Invalid custom task"
+msgstr ""
+
+#: CustomTablesController.php:36
+msgid "The submitted form does not match the requested form."
+msgstr ""
+
+#: CustomTablesController.php:42
+msgid "Unlock this form with its password before re-creating or modifying it."
+msgstr ""
+
+#: CustomTablesController.php:272;2948
+msgid "Invalid Table"
+msgstr ""
+
+#: CustomTablesController.php:379;488
+msgid "Invalid request"
+msgstr ""
+
+#: CustomTablesController.php:384
+msgid "Invalid tab"
+msgstr ""
+
+#: CustomTablesController.php:492
+msgid "You are not authorized to rebuild this module."
+msgstr ""
+
+#: CustomTablesController.php:508
+msgid "Main table not found."
+msgstr ""
+
+#: CustomTablesController.php:540
+msgid "Module rebuilt successfully."
+msgstr ""
+
+#: CustomTablesController.php:555
+msgid "You are not authorized to rebuild this form."
+msgstr ""
+
+#: CustomTablesController.php:560
+msgid "The AI rebuild request is invalid."
+msgstr ""
+
+#: CustomTablesController.php:573
+msgid "This AI rebuild request has expired. Please submit it again."
+msgstr ""
+
+#: CustomTablesController.php:576
+msgid "This AI rebuild request belongs to another user."
+msgstr ""
+
+#: CustomTablesController.php:580
+msgid "This AI rebuild request belongs to another company."
+msgstr ""
+
+#: CustomTablesController.php:588
+msgid "Confirm whether the detected child tables should be created."
+msgstr ""
+
+#: CustomTablesController.php:614
+msgid "The saved AI rebuild request is incomplete."
+msgstr ""
+
+#: CustomTablesController.php:617
+msgid "Unlock this form with its password before applying AI changes."
+msgstr ""
+
+#: CustomTablesController.php:627
+msgid "The generated form could not be found."
+msgstr ""
+
+#: CustomTablesController.php:635
+msgid "The form changed after the AI proposal was created. Submit the request again to avoid overwriting newer changes."
+msgstr ""
+
+#: CustomTablesController.php:645
+msgid "The updated form has no usable default field."
+msgstr ""
+
+#: CustomTablesController.php:665
+msgid "The API could not rebuild the form."
+msgstr ""
+
+#: CustomTablesController.php:673
+msgid "The API could not rebuild the form. No generated MVC files were replaced."
+msgstr ""
+
+#: CustomTablesController.php:689
+msgid "The API finished, but the rebuilt field definition could not be verified."
+msgstr ""
+
+#: CustomTablesController.php:707
+msgid "Form rebuilt successfully. Reload this page to use the updated form."
+msgstr ""
+
+#: CustomTablesController.php:729
+msgid "The rebuild returned an unreadable response."
+msgstr ""
+
+#: CustomTablesController.php:813
+msgid "The saved AI form creation request is incomplete."
+msgstr ""
+
+#: CustomTablesController.php:823
+msgid "The source Quality Document could not be found."
+msgstr ""
+
+#: CustomTablesController.php:829
+msgid "The generated form has no usable default field."
+msgstr ""
+
+#: CustomTablesController.php:834
+msgid "FlinkISO could not generate a table name for this document."
+msgstr ""
+
+#: CustomTablesController.php:841
+msgid "Created from Quality Document by FlinkISO AI."
+msgstr ""
+
+#: CustomTablesController.php:864
+msgid "FlinkISO could not save the generated form definition."
+msgstr ""
+
+#: CustomTablesController.php:884
+msgid "The API could not create the form."
+msgstr ""
+
+#: CustomTablesController.php:892
+msgid "The API could not generate the form. The incomplete definition was removed; you can retry this request."
+msgstr ""
+
+#: CustomTablesController.php:902
+msgid "The parent form was created, but FlinkISO could not create its confirmed child table(s): %s"
+msgstr ""
+
+#: CustomTablesController.php:912
+msgid "Form version %s and %s confirmed child table(s) created successfully."
+msgstr ""
+
+#: CustomTablesController.php:913
+msgid "Form version %s created successfully."
+msgstr ""
+
+#: CustomTablesController.php:971
+msgid "A maximum of five child tables can be generated from one document."
+msgstr ""
+
+#: CustomTablesController.php:978
+msgid "A detected child table had an invalid name or field count."
+msgstr ""
+
+#: CustomTablesController.php:984
+msgid "Child table %s has no usable default field."
+msgstr ""
+
+#: CustomTablesController.php:996
+msgid "FlinkISO could not allocate a table name for %s."
+msgstr ""
+
+#: CustomTablesController.php:1013
+msgid "Detected as a repeatable document section by FlinkISO AI."
+msgstr ""
+
+#: CustomTablesController.php:1037
+msgid "FlinkISO could not save child table %s."
+msgstr ""
+
+#: CustomTablesController.php:1054
+msgid "API V2 could not generate child table %s."
+msgstr ""
+
+#: CustomTablesController.php:1061
+msgid "API V2 returned unsafe or incomplete code for child table %s."
+msgstr ""
+
+#: CustomTablesController.php:1082
+msgid "FlinkISO could not create the physical child table %s."
+msgstr ""
+
+#: CustomTablesController.php:1091
+msgid "FlinkISO could not publish the generated files for child table %s."
+msgstr ""
+
+#: CustomTablesController.php:1569
+msgid "Something went wrong"
+msgstr ""
+
+#: CustomTablesController.php:1729;2054;2139;2399
+msgid "Select Document/Process first"
+msgstr ""
+
+#: CustomTablesController.php:1758;1761;2122
+msgid "You are creating HTML form without any document."
+msgstr ""
+
+#: CustomTablesController.php:1780;2199;2643
+msgid "Default field missing"
+msgstr ""
+
+#: CustomTablesController.php:1900
+msgid "Copy file failed"
+msgstr ""
+
+#: CustomTablesController.php:1936;2290
+msgid "API returned invalid linked-field PHP. Generated MVC files were not written."
+msgstr ""
+
+#: CustomTablesController.php:1992;2364
+msgid "Form created"
+msgstr ""
+
+#: CustomTablesController.php:1997
+msgid "Custom Table id folder could not be created"
+msgstr ""
+
+#: CustomTablesController.php:2001
+msgid "Custom Table id folder already exixts"
+msgstr ""
+
+#: CustomTablesController.php:2006;2369;2853;3191
+msgid "The custom table "
+msgstr ""
+
+#: CustomTablesController.php:2059;2404
+msgid "Chose document first to create table. Tables are linked with documents and document must be present before adding table."
+msgstr ""
+
+#: CustomTablesController.php:2114
+msgid "File copy failed"
+msgstr ""
+
+#: CustomTablesController.php:2118
+msgid "Folder creation failed"
+msgstr ""
+
+#: CustomTablesController.php:2433;3444;3484;3515;3545;3575
+msgid "Enter password"
+msgstr ""
+
+#: CustomTablesController.php:2449
+msgid "Can not delete this table due to dependency on "
+msgstr ""
+
+#: CustomTablesController.php:2458;3597
+msgid "Can not recreate/delete locked table"
+msgstr ""
+
+#: CustomTablesController.php:2604;3634
+msgid "Table Deleted"
+msgstr ""
+
+#: CustomTablesController.php:2613
+msgid "Can not delete this table."
+msgstr ""
+
+#: CustomTablesController.php:2721;3101
+msgid "Unable to change directory permissions. Please manually change app/Controller, app/Model & app/View directories to writable.(0777)"
+msgstr ""
+
+#: CustomTablesController.php:2756;3111
+msgid "Something went wrong. Please try again"
+msgstr ""
+
+#: CustomTablesController.php:2774;3118
+msgid "API returned invalid linked-field PHP. Existing MVC files were not overwritten."
+msgstr ""
+
+#: CustomTablesController.php:2845
+msgid "Form updated successfully"
+msgstr ""
+
+#: CustomTablesController.php:2970
+msgid "The child form is not linked to a parent form. It could not be saved."
+msgstr ""
+
+#: CustomTablesController.php:3001
+msgid "Child form has no usable field for its default display value"
+msgstr ""
+
+#: CustomTablesController.php:3052
+msgid "The parent form for this child form was not found. It could not be saved."
+msgstr ""
+
+#: CustomTablesController.php:3184
+msgid "Child form updated successfully"
+msgstr ""
+
+#: CustomTablesController.php:3455
+msgid "Table unlocked"
+msgstr ""
+
+#: CustomTablesController.php:3493
+msgid "Table locked"
+msgstr ""
+
+#: CustomTablesController.php:3523
+msgid "Table published"
+msgstr ""
+
+#: CustomTablesController.php:3553
+msgid "Table unpublished"
+msgstr ""
+
+#: CustomTablesController.php:3699;3708;3720;3789;3798;3810
+msgid "There are duplicate fields"
+msgstr ""
+
+#: CustomTablesController.php:3729;3826
+msgid "Changes Saved."
+msgstr ""
+
+#: CustomTablesController.php:4307
+msgid "Scripts Saved"
+msgstr ""
+
+#: CustomTablesController.php:4327
+msgid "You login password is now password to unlock this table."
+msgstr ""
+
+#: CustomTablesController.php:4332
+msgid "Invalid Credentials."
+msgstr ""
+
+#: CustomTablesController.php:4454
+msgid "Access Updated."
+msgstr ""
+
+#: CustomTablesController.php:4458
+msgid "Invalid Access."
+msgstr ""
+
+#: CustomTablesController.php:4470
+msgid "Invalid access."
+msgstr ""
+
+#: CustomTablesController.php:4480
+msgid "Invalid table access."
+msgstr ""
+
+#: CustomTablesController.php:4486
+msgid "Invalid tab configuration."
+msgstr ""
+
+#: CustomTablesController.php:4568
+msgid "Tab configuration saved."
+msgstr ""
+
+#: CustomTablesController.php:4570
+msgid "Tab configuration could not be saved."
+msgstr ""
+
+#: CustomTablesController.php:4587
+msgid "Dataentry Details Updated."
+msgstr ""
+
+#: CustomTablesController.php:4589
+msgid "Dataentry Details Updated failed"
+msgstr ""
+
+#: CustomTablesController.php:4594
+msgid "Incorrect access."
+msgstr ""
+
+#: CustomTablesController.php:4737
+msgid "Unlock every affected form with its password before re-creating all forms."
+msgstr ""
+
+#: CustomTriggersController.php:49
+msgid "Invalid delivery"
+msgstr ""
+
+#: CustomTriggersController.php:54
+msgid "The email has been queued for retry."
+msgstr ""
+
+#: CustomTriggersController.php:63;226;372
+msgid "Invalid trigger"
+msgstr ""
+
+#: CustomTriggersController.php:83;153;245
+msgid "Please select a valid Custom Form."
+msgstr ""
+
+#: CustomTriggersController.php:163;255
+msgid "Please select a field for the field-change trigger."
+msgstr ""
+
+#: CustomTriggersController.php:167;259
+msgid "Please select a date field for the reminder."
+msgstr ""
+
+#: CustomTriggersController.php:192;284
+msgid "Please select at least one recipient."
+msgstr ""
+
+#: CustomTriggersController.php:199
+msgid "The custom trigger has been saved"
+msgstr ""
+
+#: CustomTriggersController.php:209
+msgid "Please select table first"
+msgstr ""
+
+#: CustomTriggersController.php:224
+msgid "Missing trigger ID"
+msgstr ""
+
+#: CustomTriggersController.php:291
+msgid "The custom trigger has not been updated. The database error was written to the error log."
+msgstr ""
+
+#: CustomTriggersController.php:296
+msgid "The custom trigger has been updated"
+msgstr ""
+
+#: CustomTriggersController.php:302
+msgid "The custom trigger has not been updated. Details were written to the error log."
+msgstr ""
+
+#: DepartmentsController.php:61;166
+msgid "Invalid department"
+msgstr ""
+
+#: DepartmentsController.php:94
+msgid "The department has been saved"
+msgstr ""
+
+#: DepartmentsController.php:98;179
+msgid "The department could not be saved. Please, try again."
+msgstr ""
+
+#: DepartmentsController.php:146
+msgid "The departments saved"
+msgstr ""
+
+#: DepartmentsController.php:149
+msgid "The departments could not be saved. Please, try again."
+msgstr ""
+
+#: DesignationsController.php:73;178
+msgid "Invalid designation"
+msgstr ""
+
+#: DesignationsController.php:106
+msgid "The designation has been saved"
+msgstr ""
+
+#: DesignationsController.php:110;193
+msgid "The designation could not be saved. Please, try again."
+msgstr ""
+
+#: DesignationsController.php:160
+msgid "The designations saved."
+msgstr ""
+
+#: DesignationsController.php:163
+msgid "The designations could not be saved. Please, try again."
+msgstr ""
+
+#: DocumentDownloadsController.php:45
+msgid "The document download has been saved."
+msgstr ""
+
+#: DocumentDownloadsController.php:48
+msgid "The document download could not be saved. Please, try again."
+msgstr ""
+
+#: EmployeesController.php:69;228
+msgid "Invalid employee"
+msgstr ""
+
+#: EmployeesController.php:104
+msgid "The employee has been saved"
+msgstr ""
+
+#: EmployeesController.php:108;254
+msgid "The employee could not be saved. Please, try again."
+msgstr ""
+
+#: EmployeesController.php:167
+msgid "Employees could not be saved. Invalid Email"
+msgstr ""
+
+#: EmployeesController.php:172
+msgid "Employees saved."
+msgstr ""
+
+#: EmployeesController.php:175
+msgid "Employees could not be saved. Please, try again."
+msgstr ""
+
+#: EmployeesController.php:323
+msgid "Incorrect signature file."
+msgstr ""
+
+#: EmployeesController.php:328
+msgid "Signature file is too large"
+msgstr ""
+
+#: EmployeesController.php:360
+msgid "Signature file added"
+msgstr ""
+
+#: EmployeesController.php:363
+msgid "Failed to add signature file."
+msgstr ""
+
+#: EmployeesController.php:373
+msgid "Incorrect Profile Picture."
+msgstr ""
+
+#: EmployeesController.php:377
+msgid "Profile Picture is too large"
+msgstr ""
+
+#: EmployeesController.php:390
+msgid "Profile Picture added"
+msgstr ""
+
+#: EmployeesController.php:393
+msgid "Failed to add Profile Picture."
+msgstr ""
+
+#: EmployeesController.php:454
+msgid "Signature deleted."
+msgstr ""
+
+#: EmployeesController.php:457
+msgid "Unable to find Signature."
+msgstr ""
+
+#: GraphPanelsController.php:300
+msgid "Graph Deleted"
+msgstr ""
+
+#: LanguagesController.php:8
+msgid "Only administrators and super users can manage languages."
+msgstr ""
+
+#: LanguagesController.php:9
+#: UsersController.php:22
+msgid "Run the language database update first."
+msgstr ""
+
+#: LanguagesController.php:14
+#: UsersController.php:27
+msgid "Reload the page and try again."
+msgstr ""
+
+#: LanguagesController.php:31;58
+#: UsersController.php:39
+msgid "Could not save language."
+msgstr ""
+
+#: LanguagesController.php:40
+msgid "Invalid language."
+msgstr ""
+
+#: LanguagesController.php:47
+msgid "The catalog changed. Reload before saving."
+msgstr ""
+
+#: LanguagesController.php:50
+msgid "Invalid plural forms."
+msgstr ""
+
+#: LanguagesController.php:53
+msgid "Enter a language name."
+msgstr ""
+
+#: LanguagesController.php:59
+msgid "Translations saved."
+msgstr ""
+
+#: PdfTemplatesController.php:106
+msgid "Template Created"
+msgstr ""
+
+#: PdfTemplatesController.php:134
+msgid "Header Created"
+msgstr ""
+
+#: PdfTemplatesController.php:694;698
+msgid "Template not found"
+msgstr ""
+
+#: PdfTemplatesController.php:708
+msgid "Template deleted"
+msgstr ""
+
+#: ProcessesController.php:67;453
+#: QcDocumentCategoriesController.php:69;198
+msgid "Invalid qc document category"
+msgstr ""
+
+#: ProcessesController.php:121
+msgid "This process is not linked with any Document"
+msgstr ""
+
+#: ProcessesController.php:330
+msgid "Folder creation failed. Please, try again."
+msgstr ""
+
+#: ProcessesController.php:361
+msgid "Invalid Process"
+msgstr ""
+
+#: ProcessesController.php:423
+msgid "You can not edit this process."
+msgstr ""
+
+#: QcDocumentCategoriesController.php:107
+msgid "The qc document category has been saved"
+msgstr ""
+
+#: QcDocumentCategoriesController.php:111;213
+msgid "The qc document category could not be saved. Please, try again."
+msgstr ""
+
+#: QcDocumentCategoriesController.php:174
+msgid "Some Categories already exists."
+msgstr ""
+
+#: QcDocumentCategoriesController.php:178
+msgid "Categories saved."
+msgstr ""
+
+#: QcDocumentCategoriesController.php:181
+msgid "Categories could not be saved. Please, try again."
+msgstr ""
+
+#: QcDocumentsController.php:46;51;1060;1064
+msgid "You do not have permission to edit this document"
+msgstr ""
+
+#: QcDocumentsController.php:275;397;423;843;985;1026
+msgid "Invalid document"
+msgstr ""
+
+#: QcDocumentsController.php:298;400
+msgid "Approval Saved"
+msgstr ""
+
+#: QcDocumentsController.php:315;912;1869
+msgid "You can not edit this document, its archived."
+msgstr ""
+
+#: QcDocumentsController.php:452
+#: UsersController.php:963
+msgid "Files directory is not writable. Make sure to add 0777 permission (recursive) to \""
+msgstr ""
+
+#: QcDocumentsController.php:456
+msgid "You are not authorized to create new documents"
+msgstr ""
+
+#: QcDocumentsController.php:484;730
+#: TemplatesController.php:51
+msgid "Incorrect File Type"
+msgstr ""
+
+#: QcDocumentsController.php:556
+msgid "Unable to add template."
+msgstr ""
+
+#: QcDocumentsController.php:605
+msgid "Unable to copy template."
+msgstr ""
+
+#: QcDocumentsController.php:612
+msgid "The document has been saved"
+msgstr ""
+
+#: QcDocumentsController.php:615;895;1005;1008
+msgid "The document could not be saved. Please, try again."
+msgstr ""
+
+#: QcDocumentsController.php:748
+msgid "Incorrect document"
+msgstr ""
+
+#: QcDocumentsController.php:765
+msgid "failed folder"
+msgstr ""
+
+#: QcDocumentsController.php:789
+msgid "File Uploaded"
+msgstr ""
+
+#: QcDocumentsController.php:828
+msgid "File move failed...."
+msgstr ""
+
+#: QcDocumentsController.php:904;1861
+msgid "Can not edit this document. This document is under revision."
+msgstr ""
+
+#: QcDocumentsController.php:908;1865
+msgid "You must update this document."
+msgstr ""
+
+#: QcDocumentsController.php:989
+#: RecordsController.php:192
+msgid "Invalid approval id"
+msgstr ""
+
+#: QcDocumentsController.php:1002
+msgid "The document has been saved."
+msgstr ""
+
+#: QcDocumentsController.php:1030
+msgid "document deleted"
+msgstr ""
+
+#: QcDocumentsController.php:1033
+msgid "document was not deleted"
+msgstr ""
+
+#: QcDocumentsController.php:1086
+msgid "Document was not deleted as you are not the creator of the document"
+msgstr ""
+
+#: QcDocumentsController.php:1090
+msgid "Document does not exist"
+msgstr ""
+
+#: QcDocumentsController.php:1116
+msgid "You are not authorized to delete this document"
+msgstr ""
+
+#: QcDocumentsController.php:1379
+msgid "Form linked."
+msgstr ""
+
+#: QcDocumentsController.php:1476
+msgid "Either revision number already exists, OR current revision number is less then existing revision numbers."
+msgstr ""
+
+#: QcDocumentsController.php:1560
+msgid "Change request successfully completed. Document successfully updated."
+msgstr ""
+
+#: QcDocumentsController.php:1563
+msgid "Something went wrong. System cound not find the original document."
+msgstr ""
+
+#: QcDocumentsController.php:1606
+msgid "Document is already archived."
+msgstr ""
+
+#: QcDocumentsController.php:1744
+msgid "Document Added"
+msgstr ""
+
+#: QcDocumentsController.php:1776
+msgid "Document Number already exists."
+msgstr ""
+
+#: QcDocumentsController.php:1811
+msgid "Unable to back the document."
+msgstr ""
+
+#: QcDocumentsController.php:1844
+msgid "Document renamed."
+msgstr ""
+
+#: QcDocumentsController.php:1847;1851
+msgid "Document does not exists."
+msgstr ""
+
+#: RecordLocksController.php:22
+msgid "The record lock has been saved."
+msgstr ""
+
+#: RecordLocksController.php:33
+msgid "The record lock could not be saved. Please, try again."
+msgstr ""
+
+#: RecordLocksController.php:85
+msgid "Invalid record lock"
+msgstr ""
+
+#: RecordsController.php:65;107;188
+msgid "Invalid record"
+msgstr ""
+
+#: RecordsController.php:94
+msgid "Select document first."
+msgstr ""
+
+#: RecordsController.php:120;208;211
+msgid "The record could not be saved. Please, try again."
+msgstr ""
+
+#: RecordsController.php:205
+msgid "The record has been saved."
+msgstr ""
+
+#: SettingsController.php:20;32
+msgid "Invalid company"
+msgstr ""
+
+#: SettingsController.php:49
+msgid "Uploaded file exceeds maximum upload size limit. Please try again."
+msgstr ""
+
+#: SettingsController.php:55
+msgid "Logo file name is too long. Please try again."
+msgstr ""
+
+#: SettingsController.php:60
+msgid "Logo file type is invalid. Please try again."
+msgstr ""
+
+#: SettingsController.php:119
+msgid "Logo uploaded."
+msgstr ""
+
+#: SettingsController.php:121
+msgid "Logo upload was not successful. Please try again."
+msgstr ""
+
+#: SettingsController.php:125
+msgid "The uploaded file exceeds specified maximum file size. Contact your system administrator and try again."
+msgstr ""
+
+#: SettingsController.php:168
+msgid "Email sent successfully"
+msgstr ""
+
+#: SettingsController.php:171
+msgid "Email configuration failed!"
+msgstr ""
+
+#: SettingsController.php:182
+msgid "Only an administrator can configure AI."
+msgstr ""
+
+#: SettingsController.php:186
+msgid "AI settings storage could not be prepared."
+msgstr ""
+
+#: SettingsController.php:201
+msgid "Select a valid AI provider."
+msgstr ""
+
+#: SettingsController.php:203
+msgid "Select a valid document conversion engine."
+msgstr ""
+
+#: SettingsController.php:207
+msgid "Enter a valid HTTP or HTTPS AI API URL."
+msgstr ""
+
+#: SettingsController.php:209
+msgid "Enter an AI model."
+msgstr ""
+
+#: SettingsController.php:211
+msgid "Enter an AI vision model."
+msgstr ""
+
+#: SettingsController.php:213
+msgid "Enter the cloud AI API key."
+msgstr ""
+
+#: SettingsController.php:224
+msgid "PDF to PPM"
+msgstr ""
+
+#: SettingsController.php:229
+msgid "LibreOffice"
+msgstr ""
+
+#: SettingsController.php:260
+msgid "The AI API key could not be encrypted on this server."
+msgstr ""
+
+#: SettingsController.php:270
+msgid "AI setup saved."
+msgstr ""
+
+#: SettingsController.php:273
+msgid "AI setup could not be saved."
+msgstr ""
+
+#: SettingsController.php:295
+msgid "Enter an absolute executable path for %s."
+msgstr ""
+
+#: SettingsController.php:299
+msgid "The configured %s executable was not found or is not executable."
+msgstr ""
+
+#: SettingsController.php:305
+msgid "The configured path does not point to the expected %s executable."
+msgstr ""
+
+#: SettingsController.php:311
+msgid "FlinkISO could not run the configured %s executable."
+msgstr ""
+
+#: StandardsController.php:144;252
+msgid "Invalid standard"
+msgstr ""
+
+#: StandardsController.php:156;313
+msgid "You do not have permission to add standards"
+msgstr ""
+
+#: StandardsController.php:205
+msgid "Unable to save clause."
+msgstr ""
+
+#: StandardsController.php:223
+msgid "The standard has been saved"
+msgstr ""
+
+#: StandardsController.php:227;291
+msgid "The standard could not be saved. Please, try again."
+msgstr ""
+
+#: StandardsController.php:328
+msgid "You are not authorized to delete."
+msgstr ""
+
+#: StandardsController.php:335
+msgid "The standard successfully delete."
+msgstr ""
+
+#: StandardsController.php:338
+msgid "Unable to delete the standard."
+msgstr ""
+
+#: TemplatesController.php:31
+msgid "Duplicate Name."
+msgstr ""
+
+#: TemplatesController.php:87
+msgid "Unable to save file"
+msgstr ""
+
+#: TemplatesController.php:92;97
+msgid "Add template content"
+msgstr ""
+
+#: TemplatesController.php:100
+msgid "Something went wrong."
+msgstr ""
+
+#: TrainingsController.php:54
+msgid "Invoice Added."
+msgstr ""
+
+#: TrainingsController.php:57;61
+msgid "Invoice count not be generated."
+msgstr ""
+
+#: UsersController.php:32
+#: Users/language_preferences.ctp:7
+msgid "Select an available language."
+msgstr ""
+
+#: UsersController.php:37
+msgid "Language saved."
+msgstr ""
+
+#: UsersController.php:93;226;284
+msgid "Invalid user"
+msgstr ""
+
+#: UsersController.php:197
+msgid "Select employee first."
+msgstr ""
+
+#: UsersController.php:239
+msgid "The user could not be saved. Please, try again."
+msgstr ""
+
+#: UsersController.php:275
+#: User.php:35
+msgid "Only administrators can change Super User access."
+msgstr ""
+
+#: UsersController.php:279
+msgid "Invalid Super User access request."
+msgstr ""
+
+#: UsersController.php:288
+msgid "Super User access could not be saved."
+msgstr ""
+
+#: UsersController.php:415;456
+msgid "Your password has been change"
+msgstr ""
+
+#: UsersController.php:419
+msgid "Your current password does not match with the password you have entered. please try again."
+msgstr ""
+
+#: UsersController.php:459
+msgid "Incorrect details or User does not exist or OTP expired."
+msgstr ""
+
+#: UsersController.php:463
+msgid "Incorrect details"
+msgstr ""
+
+#: UsersController.php:546
+msgid "Register your application before you begin"
+msgstr ""
+
+#: UsersController.php:645
+msgid "Already Logged in. Please wait while your earlier session expires."
+msgstr ""
+
+#: UsersController.php:661
+msgid "Your account is locked"
+msgstr ""
+
+#: UsersController.php:667
+msgid "Incorrect login credential"
+msgstr ""
+
+#: UsersController.php:705
+msgid "Can not email OTP Code. Please check SMTP details and email address is correct."
+msgstr ""
+
+#: UsersController.php:715
+msgid "Enter OTP."
+msgstr ""
+
+#: UsersController.php:797
+msgid "Incorrect Login Credentials or your account is locked or already logged in"
+msgstr ""
+
+#: UsersController.php:822
+msgid "Two way authentication Enabled"
+msgstr ""
+
+#: UsersController.php:824
+msgid "Two way authentication Disabled"
+msgstr ""
+
+#: UsersController.php:930
+msgid "Invalid OTP Code."
+msgstr ""
+
+#: UsersController.php:956
+msgid "You have been logged out"
+msgstr ""
+
+#: UsersController.php:1335
+msgid "Already Registred."
+msgstr ""
+
+#: UsersController.php:1376
+msgid "Email not registered."
+msgstr ""
+
+#: UsersController.php:1459
+msgid "Branch could not be saved."
+msgstr ""
+
+#: UsersController.php:1589
+msgid "Account created successfully. Your email address is your username and password."
+msgstr ""
+
+#: UsersController.php:1609
+msgid "Failed to create account. Error while creating user"
+msgstr ""
+
+#: UsersController.php:1617
+msgid "Failed to create account. Error while creating employee"
+msgstr ""
+
+#: UsersController.php:1625
+msgid "Failed to create account. Error while creating branch"
+msgstr ""
+
+#: UsersController.php:1633
+msgid "Failed to create account. Error while creating company"
+msgstr ""
+
+#: UsersController.php:1642
+msgid "Incorrect user."
+msgstr ""
+
+#: ApprovalComments/index.ctp:58
+#: ApprovalProcesses/index.ctp:41
+#: ApprovalSteps/index.ctp:80
+#: Approvals/approved.ctp:78
+#: Branches/index.ctp:63
+#: Clauses/index.ctp:63
+#: CustomFiles/view_file.ctp:42
+#: CustomTables/custom_table_list.ctp:129
+#: CustomTables/index.ctp:157
+#: CustomTriggers/index.ctp:56
+#: Departments/index.ctp:59
+#: Designations/index.ctp:64
+#: DocumentDownloads/index.ctp:48
+#: Elements/paging.ctp:5
+#: Employees/index.ctp:67
+#: GraphPanels/graphs.ctp:241
+#: Histories/read_receipts.ctp:54
+#: PdfTemplates/index.ctp:64
+#: QcDocumentCategories/advanced_search.ctp:147
+#: QcDocumentCategories/box.ctp:91
+#: QcDocumentCategories/index.ctp:66
+#: QcDocumentCategories/search.ctp:127
+#: QcDocuments/document_list.ctp:119
+#: QcDocuments/index.ctp:143
+#: Records/index.ctp:61
+#: Templates/index.ctp:43
+#: Trainings/index.ctp:78
+#: UserSessions/index.ctp:84
+#: Users/index.ctp:244
+#: Users/management_team.ctp:89
+msgid "Page {:page} of {:pages}, showing {:current} records out of {:count} total, starting on record {:start}, ending on {:end}"
+msgstr ""
+
+#: ApprovalComments/index.ctp:62
+#: ApprovalProcesses/index.ctp:47
+#: ApprovalSteps/index.ctp:85
+#: Approvals/approved.ctp:84
+#: Branches/index.ctp:68
+#: Clauses/index.ctp:68
+#: CustomFiles/view_file.ctp:47
+#: CustomTables/custom_table_list.ctp:134
+#: CustomTables/index.ctp:162
+#: CustomTriggers/index.ctp:61
+#: Departments/index.ctp:64
+#: Designations/index.ctp:69
+#: DocumentDownloads/index.ctp:53
+#: Elements/paging.ctp:9
+#: Employees/index.ctp:72
+#: GraphPanels/graphs.ctp:246
+#: Histories/read_receipts.ctp:59
+#: PdfTemplates/index.ctp:69
+#: QcDocumentCategories/advanced_search.ctp:152
+#: QcDocumentCategories/box.ctp:96
+#: QcDocumentCategories/index.ctp:71
+#: QcDocumentCategories/search.ctp:132
+#: QcDocuments/document_list.ctp:124
+#: QcDocuments/index.ctp:148
+#: Records/index.ctp:66
+#: Templates/index.ctp:48
+#: Trainings/index.ctp:83
+#: UserSessions/index.ctp:90
+#: Users/index.ctp:249
+#: Users/management_team.ctp:94
+msgid "previous"
+msgstr ""
+
+#: ApprovalComments/index.ctp:65
+#: ApprovalProcesses/index.ctp:49
+#: ApprovalSteps/index.ctp:87
+#: Approvals/approved.ctp:86
+#: Branches/index.ctp:70
+#: Clauses/index.ctp:70
+#: CustomFiles/view_file.ctp:49
+#: CustomTables/custom_table_list.ctp:136
+#: CustomTables/index.ctp:164
+#: CustomTriggers/index.ctp:63
+#: Departments/index.ctp:66
+#: Designations/index.ctp:71
+#: DocumentDownloads/index.ctp:55
+#: Elements/paging.ctp:11
+#: Employees/index.ctp:74
+#: GraphPanels/graphs.ctp:248
+#: Histories/read_receipts.ctp:61
+#: PdfTemplates/index.ctp:71
+#: QcDocumentCategories/advanced_search.ctp:154
+#: QcDocumentCategories/box.ctp:98
+#: QcDocumentCategories/index.ctp:73
+#: QcDocumentCategories/search.ctp:134
+#: QcDocuments/document_list.ctp:126
+#: QcDocuments/index.ctp:150
+#: Records/index.ctp:68
+#: Templates/index.ctp:50
+#: Trainings/index.ctp:85
+#: UserSessions/index.ctp:92
+#: Users/index.ctp:251
+#: Users/management_team.ctp:96
+msgid "next"
+msgstr ""
+
+#: ApprovalComments/view.ctp:9
+msgid "Approval"
+msgstr ""
+
+#: ApprovalComments/view.ctp:13
+#: Approvals/view.ctp:33
+msgid "User"
+msgstr ""
+
+#: ApprovalComments/view.ctp:17
+#: ApprovalSteps/view.ctp:58
+#: Approvals/view.ctp:38
+#: Records/view.ctp:23
+msgid "Comments"
+msgstr ""
+
+#: ApprovalComments/view.ctp:21
+#: ApprovalSteps/view.ctp:79
+#: Approvals/view.ctp:69
+#: Branches/view.ctp:32
+#: Clauses/view.ctp:84
+#: CustomTables/add.ctp:253
+#: CustomTables/add_child.ctp:118
+#: Departments/view.ctp:34
+#: Designations/view.ctp:39
+#: Elements/document_add.ctp:216
+#: Employees/view.ctp:144
+#: QcDocumentCategories/add_ajax.ctp:29
+#: QcDocumentCategories/approve.ctp:31
+#: QcDocumentCategories/view.ctp:39
+#: Records/add.ctp:38
+#: Records/edit.ctp:91
+#: Records/view.ctp:34
+#: Standards/view.ctp:25
+#: Users/approve.ctp:203
+#: Users/index.ctp:26
+#: Users/management_team.ctp:35
+msgid "Publish"
+msgstr ""
+
+#: ApprovalComments/view.ctp:32
+#: ApprovalSteps/view.ctp:88
+#: Approvals/view.ctp:78
+#: Branches/view.ctp:42
+#: Clauses/view.ctp:93
+#: CustomTriggers/view.ctp:157
+#: Departments/view.ctp:43
+#: Designations/view.ctp:48
+#: DocumentDownloads/view.ctp:99
+#: Employees/view.ctp:153
+#: QcDocumentCategories/view.ctp:48
+#: Records/view.ctp:43
+#: Standards/view.ctp:35
+msgid "Soft Delete"
+msgstr ""
+
+#: ApprovalProcesses/add.ctp:99
+#: ApprovalProcesses/edit.ctp:132
+#: ApprovalSteps/add.ctp:39
+#: ApprovalSteps/edit.ctp:39
+#: Branches/add.ctp:29
+#: Branches/add_bulk.ctp:35
+#: Branches/edit.ctp:28
+#: Clauses/add.ctp:36
+#: CustomTableTasks/add.ctp:184
+#: CustomTables/add.ctp:254
+#: CustomTables/add_child.ctp:121
+#: CustomTables/create_master.ctp:26
+#: CustomTables/create_tasks.ctp:115
+#: CustomTables/recreate.ctp:240
+#: CustomTables/recreate_child.ctp:216
+#: CustomTables/update_child_field.ctp:71
+#: CustomTables/update_field.ctp:71
+#: CustomTriggers/add.ctp:264
+#: Departments/add.ctp:27
+#: Departments/add_bulk.ctp:36
+#: Departments/edit.ctp:27
+#: Designations/add.ctp:29
+#: Designations/add_bulk.ctp:36
+#: Designations/edit.ctp:29
+#: DocumentDownloads/edit.ctp:29
+#: Elements/advance-search.ctp:89
+#: Elements/document_add.ctp:219
+#: Elements/generate_charts.ctp:39;70;100
+#: Employees/add.ctp:54
+#: Employees/add_bulk.ctp:41
+#: Employees/edit.ctp:54
+#: GraphPanels/more.ctp:31
+#: Processes/add.ctp:144
+#: Processes/edit.ctp:112
+#: QcDocumentCategories/add.ctp:29
+#: QcDocumentCategories/add_bulk.ctp:40
+#: QcDocumentCategories/approve.ctp:34
+#: QcDocumentCategories/edit.ctp:29
+#: QcDocuments/add.ctp:374
+#: QcDocuments/add_bulk.ctp:101
+#: QcDocuments/edit.ctp:277
+#: QcDocuments/rename.ctp:57
+#: RecordLocks/add.ctp:173
+#: Records/add.ctp:41
+#: Records/edit.ctp:94
+#: Settings/edit.ctp:55
+#: Standards/add.ctp:36
+#: Standards/edit.ctp:22
+#: Templates/add.ctp:98
+#: Templates/edit.ctp:105
+#: Users/add.ctp:158
+#: Users/appraisal_answers.ctp:48
+#: Users/approve.ctp:207
+#: Users/change_password.ctp:44
+#: Users/edit.ctp:127
+#: Users/login.ctp:65
+#: Users/opt_check.ctp:47
+#: Users/request_password_change.ctp:26
+#: Users/smtp_details.ctp:97;117
+#: Users/test.ctp:204
+#: Users/two_way_authentication.ctp:43
+#: Users/user_access.ctp:276
+#: Users/user_assign.ctp:18
+msgid "Submit"
+msgstr ""
+
+#: ApprovalSteps/view.ctp:13
+msgid "Approval Process"
+msgstr ""
+
+#: ApprovalSteps/view.ctp:18
+#: Clauses/view.ctp:8
+#: Elements/childdocuments.ctp:4
+#: Records/view.ctp:13
+msgid "Title"
+msgstr ""
+
+#: ApprovalSteps/view.ctp:23
+msgid "Process Step"
+msgstr ""
+
+#: ApprovalSteps/view.ctp:28
+msgid "Send To Department Hod"
+msgstr ""
+
+#: ApprovalSteps/view.ctp:33
+msgid "Send To Designation"
+msgstr ""
+
+#: ApprovalSteps/view.ctp:38
+msgid "Send To Admins"
+msgstr ""
+
+#: ApprovalSteps/view.ctp:43
+msgid "Send To Reviwers"
+msgstr ""
+
+#: ApprovalSteps/view.ctp:48
+msgid "Send To Publishers"
+msgstr ""
+
+#: ApprovalSteps/view.ctp:53
+msgid "Send To Users"
+msgstr ""
+
+#: ApprovalSteps/view.ctp:63
+msgid "Approval Mode"
+msgstr ""
+
+#: ApprovalSteps/view.ctp:68
+msgid "Approval Type"
+msgstr ""
+
+#: ApprovalSteps/view.ctp:73
+#: Approvals/view.ctp:63
+#: Branches/view.ctp:24
+#: Clauses/view.ctp:78
+#: CustomTriggers/view.ctp:149
+#: Departments/view.ctp:28
+#: Designations/view.ctp:33
+#: DocumentDownloads/view.ctp:89
+#: Elements/document_view.ctp:43
+#: Employees/view.ctp:138
+#: QcDocumentCategories/view.ctp:33
+#: QcDocuments/view.ctp:155
+#: QcDocuments/view_archived.ctp:141
+#: Records/view.ctp:28
+#: Standards/view.ctp:17
+msgid "Prepared By"
+msgstr ""
+
+#: ApprovalSteps/view.ctp:76
+#: Approvals/view.ctp:66
+#: Branches/view.ctp:28
+#: Clauses/view.ctp:81
+#: CustomTriggers/view.ctp:153
+#: Departments/view.ctp:31
+#: Designations/view.ctp:36
+#: DocumentDownloads/view.ctp:84
+#: Elements/document_view.ctp:45
+#: Employees/view.ctp:141
+#: QcDocumentCategories/view.ctp:36
+#: QcDocuments/view.ctp:161
+#: QcDocuments/view_archived.ctp:143
+#: Records/view.ctp:31
+#: Standards/view.ctp:21
+msgid "Approved By"
+msgstr ""
+
+#: Approvals/approved.ctp:18
+#: Approvals/index.ctp:60
+#: Branches/view.ctp:9
+#: CustomTriggers/view.ctp:16
+#: Departments/view.ctp:13
+#: Designations/view.ctp:13
+#: Employees/view.ctp:28
+#: Languages/edit.ctp:14
+#: Languages/index.ctp:5;13
+#: QcDocumentCategories/view.ctp:13
+#: Standards/view.ctp:9
+msgid "Name"
+msgstr ""
+
+#: Approvals/approved.ctp:62
+#: Approvals/index.ctp:157
+#: Users/index.ctp:229
+#: Users/management_team.ctp:74
+msgid "No results found"
+msgstr ""
+
+#: Approvals/change_user.ctp:36
+#: Approvals/index.ctp:113
+#: Elements/approvals_modal.ctp:20;23
+msgid "Change Approver"
+msgstr ""
+
+#: Approvals/view.ctp:13
+msgid "Model Name"
+msgstr ""
+
+#: Approvals/view.ctp:18
+msgid "Controller Name"
+msgstr ""
+
+#: Approvals/view.ctp:23
+msgid "Record"
+msgstr ""
+
+#: Approvals/view.ctp:28
+msgid "From"
+msgstr ""
+
+#: Approvals/view.ctp:43
+msgid "Approval Step"
+msgstr ""
+
+#: Approvals/view.ctp:48
+#: Users/view.ctp:24
+msgid "Status"
+msgstr ""
+
+#: Approvals/view.ctp:53
+msgid "Approval Status"
+msgstr ""
+
+#: Approvals/view.ctp:58
+msgid "Approver Comments"
+msgstr ""
+
+#: Branches/view.ctp:13
+#: Clauses/view.ctp:33
+#: CustomTriggers/view.ctp:23
+#: Departments/view.ctp:23
+msgid "Details"
+msgstr ""
+
+#: Clauses/view.ctp:13;18
+#: QcDocumentCategories/view.ctp:23
+msgid "Standard"
+msgstr ""
+
+#: Clauses/view.ctp:23
+#: Elements/document_view.ctp:3
+#: QcDocuments/view.ctp:121
+#: QcDocuments/view_archived.ctp:101
+msgid "Clause"
+msgstr ""
+
+#: Clauses/view.ctp:28
+msgid "Sub-clause"
+msgstr ""
+
+#: Clauses/view.ctp:38
+msgid "Additional Details"
+msgstr ""
+
+#: Clauses/view.ctp:43
+msgid "Tabs"
+msgstr ""
+
+#: Clauses/view.ctp:48
+msgid "External Link 1"
+msgstr ""
+
+#: Clauses/view.ctp:53
+msgid "External Link 2"
+msgstr ""
+
+#: Clauses/view.ctp:58
+msgid "External Link 3"
+msgstr ""
+
+#: Clauses/view.ctp:63
+msgid "External Link 4"
+msgstr ""
+
+#: Clauses/view.ctp:68
+msgid "External Link 5"
+msgstr ""
+
+#: Clauses/view.ctp:73
+msgid "System Tables"
+msgstr ""
+
+#: CustomFiles/view_file.ctp:21
+msgid "Date/time"
+msgstr ""
+
+#: CustomTableTasks/add.ctp:101
+#: RecordLocks/add.ctp:99
+msgid "Field Name"
+msgstr ""
+
+#: CustomTableTasks/add.ctp:102
+#: Elements/advance-search.ctp:41;57
+msgid "Condition"
+msgstr ""
+
+#: CustomTableTasks/add.ctp:104
+#: CustomTriggers/add.ctp:125
+#: CustomTriggers/edit.ctp:129
+#: CustomTriggers/view.ctp:121
+#: RecordLocks/add.ctp:100
+msgid "Message"
+msgstr ""
+
+#: CustomTriggers/add.ctp:123
+#: CustomTriggers/edit.ctp:127
+msgid "When"
+msgstr ""
+
+#: CustomTriggers/add.ctp:124
+#: CustomTriggers/edit.ctp:128
+#: CustomTriggers/view.ctp:114
+msgid "Subject"
+msgstr ""
+
+#: CustomTriggers/deliveries.ctp:6
+msgid "All rules"
+msgstr ""
+
+#: CustomTriggers/deliveries.ctp:22
+msgid "Retry"
+msgstr ""
+
+#: CustomTriggers/edit.ctp:256
+msgid "Update"
+msgstr ""
+
+#: CustomTriggers/edit.ctp:257
+msgid "Cancel"
+msgstr ""
+
+#: CustomTriggers/index.ctp:41
+msgid "Disable"
+msgstr ""
+
+#: CustomTriggers/index.ctp:41
+msgid "Enable"
+msgstr ""
+
+#: CustomTriggers/view.ctp:9
+#: DocumentDownloads/view.ctp:19
+msgid "Custom Table"
+msgstr ""
+
+#: CustomTriggers/view.ctp:30
+msgid "File Name"
+msgstr ""
+
+#: CustomTriggers/view.ctp:37
+msgid "Changed Field Value"
+msgstr ""
+
+#: CustomTriggers/view.ctp:44
+msgid "Notify User"
+msgstr ""
+
+#: CustomTriggers/view.ctp:51
+msgid "Notify Users"
+msgstr ""
+
+#: CustomTriggers/view.ctp:58
+msgid "If Added"
+msgstr ""
+
+#: CustomTriggers/view.ctp:65
+msgid "If Edited"
+msgstr ""
+
+#: CustomTriggers/view.ctp:72
+msgid "If Publish"
+msgstr ""
+
+#: CustomTriggers/view.ctp:79
+msgid "If Approved"
+msgstr ""
+
+#: CustomTriggers/view.ctp:86
+msgid "If Soft Delete"
+msgstr ""
+
+#: CustomTriggers/view.ctp:93
+msgid "Recipents"
+msgstr ""
+
+#: CustomTriggers/view.ctp:100
+msgid "Cc"
+msgstr ""
+
+#: CustomTriggers/view.ctp:107
+msgid "Bcc"
+msgstr ""
+
+#: CustomTriggers/view.ctp:128
+#: Employees/view.ctp:48
+#: Users/add.ctp:113
+#: Users/approve.ctp:129
+#: Users/edit.ctp:103
+#: Users/index.ctp:13
+#: Users/issue.ctp:6
+#: Users/management_team.ctp:29
+#: Users/view.ctp:40
+msgid "Branch"
+msgstr ""
+
+#: CustomTriggers/view.ctp:135
+#: Employees/view.ctp:53
+#: Users/add.ctp:112
+#: Users/approve.ctp:128
+#: Users/edit.ctp:102
+#: Users/index.ctp:13
+#: Users/issue.ctp:6
+#: Users/management_team.ctp:28
+#: Users/view.ctp:37
+msgid "Department"
+msgstr ""
+
+#: CustomTriggers/view.ctp:142
+#: Designations/org_chart.ctp:32
+#: Employees/org_chart.ctp:31
+#: Employees/view.ctp:58
+msgid "Designation"
+msgstr ""
+
+#: Departments/view.ctp:18
+msgid "Clauses"
+msgstr ""
+
+#: Designations/org_chart.ctp:31
+#: Employees/org_chart.ctp:30
+#: Users/add.ctp:101
+#: Users/approve.ctp:122
+#: Users/edit.ctp:101
+#: Users/index.ctp:12
+#: Users/management_team.ctp:23
+msgid "Employee"
+msgstr ""
+
+#: Designations/view.ctp:18
+msgid "Parent Designation"
+msgstr ""
+
+#: Designations/view.ctp:23
+msgid "Level"
+msgstr ""
+
+#: Designations/view.ctp:28
+msgid "Division Id"
+msgstr ""
+
+#: DocumentDownloads/add.ctp:32;166
+msgid "Download PDF"
+msgstr ""
+
+#: DocumentDownloads/edit.ctp:4
+#: DocumentDownloads/view.ctp:124
+msgid "Edit Document Download"
+msgstr ""
+
+#: DocumentDownloads/edit.ctp:32
+#: DocumentDownloads/view.ctp:122
+#: Languages/index.ctp:5
+msgid "Actions"
+msgstr ""
+
+#: DocumentDownloads/edit.ctp:35
+#: QcDocumentCategories/advanced_search.ctp:89
+#: QcDocumentCategories/box.ctp:43
+#: QcDocumentCategories/search.ctp:69
+msgid "Delete"
+msgstr ""
+
+#: DocumentDownloads/edit.ctp:35
+#: DocumentDownloads/view.ctp:125
+msgid "Are you sure you want to delete # %s?"
+msgstr ""
+
+#: DocumentDownloads/edit.ctp:36
+#: DocumentDownloads/view.ctp:126
+msgid "List Document Downloads"
+msgstr ""
+
+#: DocumentDownloads/edit.ctp:37
+#: DocumentDownloads/view.ctp:128
+msgid "List Qc Documents"
+msgstr ""
+
+#: DocumentDownloads/edit.ctp:38
+#: DocumentDownloads/view.ctp:129
+msgid "New Qc Document"
+msgstr ""
+
+#: DocumentDownloads/edit.ctp:39
+#: DocumentDownloads/view.ctp:130
+msgid "List Custom Tables"
+msgstr ""
+
+#: DocumentDownloads/edit.ctp:40
+#: DocumentDownloads/view.ctp:131
+msgid "New Custom Table"
+msgstr ""
+
+#: DocumentDownloads/edit.ctp:41
+#: DocumentDownloads/view.ctp:132
+msgid "List Companies"
+msgstr ""
+
+#: DocumentDownloads/edit.ctp:42
+#: DocumentDownloads/view.ctp:133
+msgid "New Company"
+msgstr ""
+
+#: DocumentDownloads/edit.ctp:43
+#: DocumentDownloads/view.ctp:134
+msgid "List Users"
+msgstr ""
+
+#: DocumentDownloads/edit.ctp:44
+#: DocumentDownloads/view.ctp:135
+msgid "New Created By"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:2
+msgid "Document Download"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:4
+msgid "Id"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:9
+msgid "Sr No"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:14
+#: Records/view.ctp:18
+msgid "Qc Document"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:24
+msgid "Reccord Id"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:29
+msgid "Download By"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:34
+msgid "Process Definition"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:39
+msgid "Signature"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:44
+msgid "Digital Signature"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:49
+msgid "Add Cover Page"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:54
+msgid "Add Parent Records"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:59
+msgid "Add Child Records"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:64
+msgid "Add Linked Form Records"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:69
+msgid "Created By"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:74
+msgid "Created"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:79
+msgid "Modified By"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:94
+msgid "Modified"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:104
+msgid "Branchid"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:109
+msgid "Departmentid"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:114
+msgid "Company"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:125
+msgid "Delete Document Download"
+msgstr ""
+
+#: DocumentDownloads/view.ctp:127
+msgid "New Document Download"
+msgstr ""
+
+#: Elements/addsignature.ctp:14
+msgid "Add your signature"
+msgstr ""
+
+#: Elements/addsignature.ctp:28
+msgid "Fetch"
+msgstr ""
+
+#: Elements/addsignature.ctp:49
+#: QcDocumentCategories/advanced_search.ctp:46
+#: QcDocumentCategories/search.ctp:27
+msgid "Add"
+msgstr ""
+
+#: Elements/advance-search.ctp:26
+msgid "Advanced Search"
+msgstr ""
+
+#: Elements/advance-search.ctp:40;56;72
+msgid "Field"
+msgstr ""
+
+#: Elements/advance-search.ctp:42
+msgid "Value"
+msgstr ""
+
+#: Elements/advance-search.ctp:73
+msgid "Asending / Desending"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:85
+msgid "Expand panel"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:88
+#: Elements/custom_form_generation_modal.ctp:41
+msgid "Close"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:88
+msgid "Close FlinkISO AI"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:94
+msgid "AI mode"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:96
+msgid "Ask the configured AI provider general QMS or other questions"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:97
+msgid "Chat"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:100
+msgid "Ask questions using FlinkISO manuals and the current application context"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:101
+msgid "FlinkISO"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:105
+msgid "Create or modify FlinkISO forms through API V2"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:105
+msgid "Forms mode is available only in Quality Documents, Custom Tables, and generated forms"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:106
+#: Elements/header.ctp:50
+msgid "Forms"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:115
+msgid "How can I help?"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:116
+msgid "Ask me a question about QMS or using FlinkISO."
+msgstr ""
+
+#: Elements/ai_assistant.ctp:122
+msgid "AI task in progress"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:123
+msgid "FlinkISO AI is currently processing a request for this instance."
+msgstr ""
+
+#: Elements/ai_assistant.ctp:126
+msgid "Stop"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:131
+msgid "Suggested general chat requests"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:132
+msgid "Ask a general QMS question"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:133
+msgid "Ask another question"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:134;139
+msgid "Get practical guidance"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:136
+msgid "Suggested FlinkISO requests"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:137
+msgid "Help with this module"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:138
+msgid "Ask a QMS question"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:142
+msgid "Suggested form requests"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:144
+msgid "Create a form from this document"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:145
+msgid "Identify fields and rules"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:146
+msgid "Summarize requirements"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:148
+msgid "Add a field to this form"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:149
+msgid "Review this form"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:151
+msgid "Go to Form Builder"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:154
+msgid "Create a new form"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:155
+msgid "Define form requirements"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:163
+msgid "Ask a question about QMS or using FlinkISO..."
+msgstr ""
+
+#: Elements/ai_assistant.ctp:163
+msgid "Message FlinkISO AI"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:167
+msgid "When selected, the current Quality Document is sent to the FlinkISO API for this AI request."
+msgstr ""
+
+#: Elements/ai_assistant.ctp:169
+msgid "When selected, the form field definition and linked Quality Document content are shared with the configured remote AI provider. User names, IDs, and email addresses are not shared."
+msgstr ""
+
+#: Elements/ai_assistant.ctp:170
+msgid "The local AI uses this form field definition and linked Quality Document as read-only reference material."
+msgstr ""
+
+#: Elements/ai_assistant.ctp:173
+msgid "Send current document"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:174
+msgid "Share form context and linked document"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:174
+msgid "Use linked QC document"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:177
+msgid "Secure AI API"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:178
+msgid "Stop AI generation"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:178
+msgid "Stop generation"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:181
+msgid "Send message"
+msgstr ""
+
+#: Elements/ai_assistant.ctp:186
+msgid "AI guidance is provided by your configured AI provider."
+msgstr ""
+
+#: Elements/approvals_modal.ctp:34
+#: Elements/header.ctp:90
+msgid "Approvals"
+msgstr ""
+
+#: Elements/asidebar.ctp:22
+msgid "MAIN NAVIGATION"
+msgstr ""
+
+#: Elements/asidebar.ctp:25;28
+#: Elements/billing_header_lists.ctp:11
+#: Elements/header.ctp:19
+msgid "Dashboard"
+msgstr ""
+
+#: Elements/asidebar.ctp:29
+msgid "Custom Tables"
+msgstr ""
+
+#: Elements/asidebar.ctp:35
+#: Elements/header.ctp:61
+msgid "Masters"
+msgstr ""
+
+#: Elements/asidebar.ctp:42
+#: Elements/header.ctp:69
+msgid "Employee Org Chart"
+msgstr ""
+
+#: Elements/asidebar.ctp:43
+#: Elements/header.ctp:70
+msgid "Designation Org Chart"
+msgstr ""
+
+#: Elements/asidebar.ctp:44
+#: Elements/header.ctp:71
+msgid "Users"
+msgstr ""
+
+#: Elements/asidebar.ctp:50
+#: Elements/header.ctp:24
+msgid "Standards"
+msgstr ""
+
+#: Elements/asidebar.ctp:53
+msgid "Add New Standard"
+msgstr ""
+
+#: Elements/asidebar.ctp:54
+msgid "Add New Clause"
+msgstr ""
+
+#: Elements/asidebar.ctp:55
+msgid "New Document Category"
+msgstr ""
+
+#: Elements/asidebar.ctp:61
+msgid "Document Management"
+msgstr ""
+
+#: Elements/asidebar.ctp:64
+msgid "Add New Document"
+msgstr ""
+
+#: Elements/asidebar.ctp:65
+msgid "List Of Documents"
+msgstr ""
+
+#: Elements/asidebar.ctp:66
+msgid "Add Template"
+msgstr ""
+
+#: Elements/asidebar.ctp:72
+msgid "Processes"
+msgstr ""
+
+#: Elements/asidebar.ctp:75
+msgid "Add New Process"
+msgstr ""
+
+#: Elements/asidebar.ctp:76
+msgid "List Of Processes"
+msgstr ""
+
+#: Elements/asidebar.ctp:82
+msgid "Graph Panels"
+msgstr ""
+
+#: Elements/asidebar.ctp:93
+msgid "Settings"
+msgstr ""
+
+#: Elements/asidebar.ctp:96
+#: Elements/header.ctp:83
+msgid "Add Logo"
+msgstr ""
+
+#: Elements/asidebar.ctp:97
+#: Elements/header.ctp:84
+msgid "Add SMTP Email"
+msgstr ""
+
+#: Elements/asidebar.ctp:98
+#: Elements/header.ctp:85
+msgid "Add Password Policy"
+msgstr ""
+
+#: Elements/asidebar.ctp:99
+#: Elements/header.ctp:87
+msgid "Two Way Authentication"
+msgstr ""
+
+#: Elements/asidebar.ctp:100
+#: Elements/header.ctp:88
+msgid "Define Change History Table"
+msgstr ""
+
+#: Elements/billing_header_lists.ctp:3
+msgid "Billing"
+msgstr ""
+
+#: Elements/billing_header_lists.ctp:16
+msgid "Trainings"
+msgstr ""
+
+#: Elements/billing_header_lists.ctp:22
+msgid "Add Trainings"
+msgstr ""
+
+#: Elements/billing_header_lists.ctp:28
+msgid "Pending Invoices"
+msgstr ""
+
+#: Elements/billing_header_lists.ctp:33
+msgid "Paid Invoices"
+msgstr ""
+
+#: Elements/custom_form_generation_modal.ctp:29
+msgid "Updating form"
+msgstr ""
+
+#: Elements/custom_form_generation_modal.ctp:32;62
+msgid "Saving the form configuration and rebuilding the generated files..."
+msgstr ""
+
+#: Elements/custom_form_generation_modal.ctp:35
+msgid "Update in progress"
+msgstr ""
+
+#: Elements/custom_form_generation_modal.ctp:76
+msgid "The form could not be updated."
+msgstr ""
+
+#: Elements/custom_form_generation_modal.ctp:81
+msgid "Form updated successfully."
+msgstr ""
+
+#: Elements/custom_form_generation_modal.ctp:89
+msgid "The form update failed. Please try again."
+msgstr ""
+
+#: Elements/custom_form_generation_modal.ctp:97
+msgid "The form was not updated."
+msgstr ""
+
+#: Elements/document_view.ctp:5
+#: QcDocuments/view.ctp:123
+#: QcDocuments/view_archived.ctp:103
+msgid "Additional Clauses"
+msgstr ""
+
+#: Elements/document_view.ctp:13
+#: QcDocuments/view.ctp:131
+#: QcDocuments/view_archived.ctp:111
+msgid "Qc Document Category"
+msgstr ""
+
+#: Elements/document_view.ctp:17
+#: QcDocuments/view.ctp:135
+#: QcDocuments/view_archived.ctp:115
+msgid "Issue Number"
+msgstr ""
+
+#: Elements/document_view.ctp:19
+#: QcDocuments/view.ctp:137
+#: QcDocuments/view_archived.ctp:117
+msgid "Date Of Issue"
+msgstr ""
+
+#: Elements/document_view.ctp:21
+#: QcDocuments/view.ctp:139
+#: QcDocuments/view_archived.ctp:119
+msgid "Date Of Next Issue"
+msgstr ""
+
+#: Elements/document_view.ctp:25
+#: QcDocuments/view.ctp:143
+#: QcDocuments/view_archived.ctp:123
+msgid "Effective From Date"
+msgstr ""
+
+#: Elements/document_view.ctp:27
+#: QcDocuments/view.ctp:145
+#: QcDocuments/view_archived.ctp:125
+msgid "Date Of Review"
+msgstr ""
+
+#: Elements/document_view.ctp:29
+#: QcDocuments/view.ctp:147
+#: QcDocuments/view_archived.ctp:127
+msgid "Revision Date"
+msgstr ""
+
+#: Elements/document_view.ctp:33
+#: QcDocuments/view.ctp:151
+#: QcDocuments/view_archived.ctp:131
+msgid "Document Type"
+msgstr ""
+
+#: Elements/document_view.ctp:35
+#: QcDocuments/view.ctp:153
+#: QcDocuments/view_archived.ctp:133
+msgid "Document Security"
+msgstr ""
+
+#: Elements/document_view.ctp:37
+#: QcDocuments/view_archived.ctp:135
+msgid "Issued By"
+msgstr ""
+
+#: Elements/document_view.ctp:41
+#: QcDocuments/view_archived.ctp:139
+msgid "Issuing Authority"
+msgstr ""
+
+#: Elements/header.ctp:29
+msgid "Document Categories"
+msgstr ""
+
+#: Elements/header.ctp:34
+msgid "Auto Approval Process"
+msgstr ""
+
+#: Elements/header.ctp:40
+msgid "Documents"
+msgstr ""
+
+#: Elements/header.ctp:54
+msgid "Pdf Templates"
+msgstr ""
+
+#: Elements/header.ctp:76
+msgid "Setting"
+msgstr ""
+
+#: Elements/header.ctp:81
+#: Languages/edit.ctp:39
+#: Languages/index.ctp:1
+msgid "Languages"
+msgstr ""
+
+#: Elements/header.ctp:86
+#: Settings/ai_setup.ctp:3
+msgid "AI Setup"
+msgstr ""
+
+#: Elements/header.ctp:89
+msgid "Graphs And panels"
+msgstr ""
+
+#: Elements/top-menu.ctp:5
+msgid "Open FlinkISO AI"
+msgstr ""
+
+#: Elements/top-menu.ctp:8
+msgid "Updates"
+msgstr ""
+
+#: Elements/top-menu.ctp:35
+msgid "Application theme"
+msgstr ""
+
+#: Elements/top-menu.ctp:36
+msgid "Modern Azure"
+msgstr ""
+
+#: Elements/top-menu.ctp:37
+msgid "Corporate Blue"
+msgstr ""
+
+#: Elements/top-menu.ctp:38
+msgid "Steel Blue"
+msgstr ""
+
+#: Elements/top-menu.ctp:39
+msgid "Indigo"
+msgstr ""
+
+#: Elements/top-menu.ctp:40
+msgid "Teal"
+msgstr ""
+
+#: Elements/top-menu.ctp:41
+msgid "Navy"
+msgstr ""
+
+#: Elements/top-menu.ctp:42
+msgid "Graphite"
+msgstr ""
+
+#: Elements/top-menu.ctp:47
+#: Employees/view.ctp:25
+#: Users/approve.ctp:123
+#: Users/language_preferences.ctp:2;7
+msgid "Language"
+msgstr ""
+
+#: Elements/top-menu.ctp:51
+msgid "Reset Password"
+msgstr ""
+
+#: Elements/top-menu.ctp:52
+#: Users/language_preferences.ctp:10
+msgid "Profile"
+msgstr ""
+
+#: Elements/top-menu.ctp:55
+msgid "Logout"
+msgstr ""
+
+#: Emails/text/password_reset_request.ctp:2
+#: Layouts/Emails/html/password_reset_request.ctp:2
+#: Users/password_reset_request.ctp:2
+msgid "A request to reset your password was sent. To change your password click the link below."
+msgstr ""
+
+#: Employees/view.ctp:23
+msgid "Employee Profile"
+msgstr ""
+
+#: Employees/view.ctp:33
+msgid "Parent Employee"
+msgstr ""
+
+#: Employees/view.ctp:38
+msgid "Employee Number"
+msgstr ""
+
+#: Employees/view.ctp:43
+msgid "Identification Number"
+msgstr ""
+
+#: Employees/view.ctp:63
+msgid "Qualification"
+msgstr ""
+
+#: Employees/view.ctp:68
+msgid "Joining Date"
+msgstr ""
+
+#: Employees/view.ctp:73
+msgid "Date Of Birth"
+msgstr ""
+
+#: Employees/view.ctp:78
+msgid "Pancard Number"
+msgstr ""
+
+#: Employees/view.ctp:83
+msgid "Personal Telephone"
+msgstr ""
+
+#: Employees/view.ctp:88
+msgid "Office Telephone"
+msgstr ""
+
+#: Employees/view.ctp:93
+msgid "Mobile"
+msgstr ""
+
+#: Employees/view.ctp:98
+msgid "Personal Email"
+msgstr ""
+
+#: Employees/view.ctp:103
+msgid "Office Email"
+msgstr ""
+
+#: Employees/view.ctp:108
+msgid "Residence Address"
+msgstr ""
+
+#: Employees/view.ctp:113
+msgid "Permenant Address"
+msgstr ""
+
+#: Employees/view.ctp:118
+msgid "Maritial Status"
+msgstr ""
+
+#: Employees/view.ctp:123
+msgid "Driving License"
+msgstr ""
+
+#: Employees/view.ctp:128
+msgid "Employment Status"
+msgstr ""
+
+#: Employees/view.ctp:133
+msgid "Is Approvar"
+msgstr ""
+
+#: Languages/edit.ctp:1
+#: Languages/index.ctp:7
+msgid "Edit translations"
+msgstr ""
+
+#: Languages/edit.ctp:5
+msgid "Leave a translation empty to use English. Keep placeholders such as %s and {:page} unchanged."
+msgstr ""
+
+#: Languages/edit.ctp:7;9
+msgid "Search"
+msgstr ""
+
+#: Languages/edit.ctp:16
+#: Languages/index.ctp:16
+msgid "Plural forms"
+msgstr ""
+
+#: Languages/edit.ctp:19
+msgid "Available to users"
+msgstr ""
+
+#: Languages/edit.ctp:20
+msgid "The language code and catalog folder remain fixed after creation."
+msgstr ""
+
+#: Languages/edit.ctp:29
+msgid "Plural form"
+msgstr ""
+
+#: Languages/edit.ctp:34
+msgid "Save translations"
+msgstr ""
+
+#: Languages/edit.ctp:37
+msgid "Previous"
+msgstr ""
+
+#: Languages/edit.ctp:38
+msgid "Next"
+msgstr ""
+
+#: Languages/index.ctp:4
+msgid "Add a language, then translate its catalog. The POT file is the shared source template; each language has its own PO file."
+msgstr ""
+
+#: Languages/index.ctp:5;14
+msgid "Language code"
+msgstr ""
+
+#: Languages/index.ctp:10;17
+msgid "Add language"
+msgstr ""
+
+#: Languages/index.ctp:15
+msgid "Use a three-letter CakePHP language code, for example deu."
+msgstr ""
+
+#: QcDocumentCategories/advanced_search.ctp:30
+#: QcDocumentCategories/search.ctp:11
+msgid "search"
+msgstr ""
+
+#: QcDocumentCategories/advanced_search.ctp:44
+#: QcDocumentCategories/search.ctp:25
+msgid "Qc Document Categories"
+msgstr ""
+
+#: QcDocumentCategories/advanced_search.ctp:45
+#: QcDocumentCategories/approve.ctp:6
+#: QcDocumentCategories/report.ctp:11
+#: QcDocumentCategories/search.ctp:26
+#: Users/approve.ctp:114
+#: Users/user_assign.ctp:6
+msgid "List"
+msgstr ""
+
+#: QcDocumentCategories/advanced_search.ctp:47
+#: QcDocumentCategories/search.ctp:28
+msgid "Export"
+msgstr ""
+
+#: QcDocumentCategories/advanced_search.ctp:87
+msgid "View / Upload Evidance"
+msgstr ""
+
+#: QcDocumentCategories/advanced_search.ctp:88
+#: QcDocumentCategories/box.ctp:42
+#: QcDocumentCategories/search.ctp:68
+msgid "Edit"
+msgstr ""
+
+#: QcDocumentCategories/advanced_search.ctp:89
+#: QcDocumentCategories/box.ctp:43
+#: QcDocumentCategories/search.ctp:69
+msgid "Are you sure you want to delete this record ?"
+msgstr ""
+
+#: QcDocumentCategories/advanced_search.ctp:91
+#: QcDocumentCategories/search.ctp:72
+msgid "Send for Approval"
+msgstr ""
+
+#: QcDocumentCategories/advanced_search.ctp:92
+#: QcDocumentCategories/search.ctp:73
+msgid "Email Record"
+msgstr ""
+
+#: QcDocumentCategories/advanced_search.ctp:92
+#: QcDocumentCategories/box.ctp:45
+#: QcDocumentCategories/search.ctp:73
+msgid "Are you sure ?"
+msgstr ""
+
+#: QcDocumentCategories/approve.ctp:5
+msgid "Approve Qc Document Category"
+msgstr ""
+
+#: QcDocumentCategories/box.ctp:41
+msgid "View / Upload Evidence"
+msgstr ""
+
+#: QcDocumentCategories/box.ctp:45
+msgid "Delete Record"
+msgstr ""
+
+#: QcDocumentCategories/lists.ctp:8
+msgid "New Qc Document Category"
+msgstr ""
+
+#: QcDocumentCategories/search.ctp:29
+msgid "Import"
+msgstr ""
+
+#: QcDocumentCategories/search.ctp:67
+msgid "View"
+msgstr ""
+
+#: QcDocumentCategories/search.ctp:71
+msgid "Upload Evedance"
+msgstr ""
+
+#: QcDocumentCategories/view.ctp:18
+msgid "Short Name"
+msgstr ""
+
+#: QcDocumentCategories/view.ctp:28
+msgid "Parent Qc Document Category"
+msgstr ""
+
+#: QcDocuments/index.ctp:48
+#: RecordLocks/add.ctp:98
+msgid "Tables"
+msgstr ""
+
+#: QcDocuments/view.ctp:159
+msgid "Reviewed By"
+msgstr ""
+
+#: QcDocuments/view.ctp:163
+msgid "Published By"
+msgstr ""
+
+#: Settings/ai_setup.ctp:30
+msgid "Save AI Setup"
+msgstr ""
+
+#: Settings/edit.ctp:31
+msgid "Edit Setting"
+msgstr ""
+
+#: Standards/view.ctp:5
+msgid "View Standard"
+msgstr ""
+
+#: Standards/view.ctp:13
+msgid "Brief Description"
+msgstr ""
+
+#: Users/access_denied.ctp:12
+msgid "Access Denied"
+msgstr ""
+
+#: Users/access_denied.ctp:13
+msgid "You do not have sufficient permissions to access this page. <br/>Contact your administrator for permissions related issues."
+msgstr ""
+
+#: Users/add.ctp:100
+msgid "Login Details"
+msgstr ""
+
+#: Users/add.ctp:104
+#: Users/index.ctp:12
+#: Users/management_team.ctp:24
+msgid "Username"
+msgstr ""
+
+#: Users/add.ctp:105
+#: Users/smtp_details.ctp:80;93
+msgid "Password"
+msgstr ""
+
+#: Users/add.ctp:114
+#: Users/approve.ctp:130
+msgid "Division"
+msgstr ""
+
+#: Users/add.ctp:119
+#: Users/approve.ctp:134
+#: Users/edit.ctp:108
+msgid "Choose User's Privileges"
+msgstr ""
+
+#: Users/add.ctp:120
+#: Users/edit.ctp:109
+#: Users/index.ctp:16
+msgid "Admin"
+msgstr ""
+
+#: Users/add.ctp:122
+msgid "Super User — form building and Form Creation AI"
+msgstr ""
+
+#: Users/add.ctp:124
+msgid "Management team"
+msgstr ""
+
+#: Users/add.ctp:125
+#: Users/edit.ctp:110
+#: Users/index.ctp:21
+msgid "Approver"
+msgstr ""
+
+#: Users/add.ctp:126
+#: Users/approve.ctp:137
+msgid "User who can see other user's records"
+msgstr ""
+
+#: Users/add.ctp:131
+#: Users/approve.ctp:180
+msgid "Copy permission from available user"
+msgstr ""
+
+#: Users/add.ctp:145
+#: Users/approve.ctp:194
+msgid "Copy ACL form User"
+msgstr ""
+
+#: Users/add.ctp:146
+#: Users/approve.ctp:195
+msgid "Select From Group"
+msgstr ""
+
+#: Users/add_formats.ctp:51
+msgid "Go to Dashboard"
+msgstr ""
+
+#: Users/appraisal_answers.ctp:15
+msgid "Add Appraisal Answers"
+msgstr ""
+
+#: Users/approve.ctp:113
+msgid "Approve User"
+msgstr ""
+
+#: Users/approve.ctp:121
+#: Users/edit.ctp:100
+msgid "Login ID: "
+msgstr ""
+
+#: Users/approve.ctp:127
+msgid "Choose Other Details"
+msgstr ""
+
+#: Users/approve.ctp:135
+msgid "New MR User"
+msgstr ""
+
+#: Users/approve.ctp:136
+msgid "New user as management team member"
+msgstr ""
+
+#: Users/approve.ctp:138
+msgid "User who can approve data added by other users"
+msgstr ""
+
+#: Users/approve.ctp:142
+msgid "Benchmark:"
+msgstr ""
+
+#: Users/approve.ctp:170
+msgid "Estimated Data Entry Per Day From This User"
+msgstr ""
+
+#: Users/change_password.ctp:31
+msgid "Reset your Password"
+msgstr ""
+
+#: Users/change_password.ctp:34
+msgid "Current Password"
+msgstr ""
+
+#: Users/change_password.ctp:35
+#: Users/reset_password.ctp:42
+msgid "New Password"
+msgstr ""
+
+#: Users/change_password.ctp:36
+#: Users/reset_password.ctp:43
+msgid "Confirm Password"
+msgstr ""
+
+#: Users/dashboard_files.ctp:2
+msgid "Evidence Files"
+msgstr ""
+
+#: Users/edit.ctp:104
+msgid "This user who can see other user's records."
+msgstr ""
+
+#: Users/edit.ctp:115
+msgid "Super User — create/re-create forms and use Form Creation AI"
+msgstr ""
+
+#: Users/index.ctp:14
+#: Users/management_team.ctp:31
+#: Users/view.ctp:52
+msgid "Last Login"
+msgstr ""
+
+#: Users/index.ctp:17
+msgid "Super User"
+msgstr ""
+
+#: Users/index.ctp:18
+msgid "HoD"
+msgstr ""
+
+#: Users/index.ctp:19
+msgid "Reviewer"
+msgstr ""
+
+#: Users/index.ctp:20
+msgid "Creator"
+msgstr ""
+
+#: Users/index.ctp:22
+msgid "Publisher"
+msgstr ""
+
+#: Users/index.ctp:24
+msgid "Copy Access From"
+msgstr ""
+
+#: Users/index.ctp:76;77
+msgid "Toggle Super User access"
+msgstr ""
+
+#: Users/issue.ctp:6
+msgid "Welcome "
+msgstr ""
+
+#: Users/issue.ctp:9
+msgid "Pending Documents for Issue"
+msgstr ""
+
+#: Users/issue.ctp:14
+msgid "Document Number"
+msgstr ""
+
+#: Users/issue.ctp:15
+msgid "Document Title"
+msgstr ""
+
+#: Users/issue.ctp:16
+msgid "Date/Time"
+msgstr ""
+
+#: Users/issue.ctp:17;26
+msgid "Act"
+msgstr ""
+
+#: Users/issue.ctp:42
+msgid "Issue Document"
+msgstr ""
+
+#: Users/language_preferences.ctp:8
+msgid "Your language preference is saved to your profile. Untranslated text appears in English."
+msgstr ""
+
+#: Users/language_preferences.ctp:9
+msgid "Save"
+msgstr ""
+
+#: Users/lists.ctp:8
+msgid "New User"
+msgstr ""
+
+#: Users/lists.ctp:9
+msgid "New Employee"
+msgstr ""
+
+#: Users/login.ctp:55;57
+msgid "Please Enter username"
+msgstr ""
+
+#: Users/login.ctp:60
+msgid "*********"
+msgstr ""
+
+#: Users/login.ctp:64
+msgid "Forgot password?"
+msgstr ""
+
+#: Users/login.ctp:83
+msgid "Latest News & Updates"
+msgstr ""
+
+#: Users/management_team.ctp:25
+msgid "is MR?"
+msgstr ""
+
+#: Users/management_team.ctp:26
+msgid "is View All?"
+msgstr ""
+
+#: Users/management_team.ctp:27
+msgid "is Approver?"
+msgstr ""
+
+#: Users/management_team.ctp:30
+msgid "Benchmark"
+msgstr ""
+
+#: Users/management_team.ctp:32
+msgid "Last Activity"
+msgstr ""
+
+#: Users/management_team.ctp:46;47;48
+msgid "Yes"
+msgstr ""
+
+#: Users/management_team.ctp:46;47;48
+msgid "No"
+msgstr ""
+
+#: Users/opt_check.ctp:33
+#: Users/two_way_authentication.ctp:26
+msgid "Two way authentication"
+msgstr ""
+
+#: Users/opt_check.ctp:34
+msgid "Please enter the OTP code which you get in your email"
+msgstr ""
+
+#: Users/opt_check.ctp:37
+msgid "OPT Code"
+msgstr ""
+
+#: Users/pending_tasks.ctp:1
+msgid "Pending Tasks"
+msgstr ""
+
+#: Users/pending_tasks.ctp:25
+msgid "Error loading resource."
+msgstr ""
+
+#: Users/pending_tasks.ctp:26
+msgid "Contact Administrator."
+msgstr ""
+
+#: Users/request_password_change.ctp:18
+msgid "Forgot your password?"
+msgstr ""
+
+#: Users/request_password_change.ctp:19
+msgid "Please enter the username you used for registration and you'll get an email with further instructions."
+msgstr ""
+
+#: Users/request_password_change.ctp:23
+msgid "User Name"
+msgstr ""
+
+#: Users/smtp_details.ctp:62;64
+msgid "Email Server Setting"
+msgstr ""
+
+#: Users/smtp_details.ctp:73;86
+msgid "Email Host Name"
+msgstr ""
+
+#: Users/smtp_details.ctp:74;87
+msgid "Email Port"
+msgstr ""
+
+#: Users/smtp_details.ctp:79;92
+msgid "Email Id"
+msgstr ""
+
+#: Users/smtp_details.ctp:99
+msgid "Skip"
+msgstr ""
+
+#: Users/smtp_details.ctp:115
+msgid "From Email Id"
+msgstr ""
+
+#: Users/task_access_denied.ctp:9
+msgid "Record is locked"
+msgstr ""
+
+#: Users/task_access_denied.ctp:10
+msgid "This record is under process and assigned to other user for updation. You can not access this record while its locked. <br/>Contact your administrator for permissions related issues."
+msgstr ""
+
+#: Users/test.ctp:4
+msgid "Set User Access"
+msgstr ""
+
+#: Users/two_way_authentication.ctp:32
+msgid "SMTP Details"
+msgstr ""
+
+#: Users/user_assign.ctp:5
+msgid "Add User"
+msgstr ""
+
+#: Users/user_assign.ctp:10
+msgid "Username : "
+msgstr ""
+
+#: Users/user_assign.ctp:11
+msgid "Name : "
+msgstr ""
+
+#: Users/view.ctp:12
+msgid "Admin User?"
+msgstr ""
+
+#: Users/view.ctp:15
+msgid "Super User?"
+msgstr ""
+
+#: Users/view.ctp:18
+msgid "Can this user see records created by other users?"
+msgstr ""
+
+#: Users/view.ctp:21
+msgid "Is this user Approver?"
+msgstr ""
+
+#: Users/view.ctp:55
+msgid "Published?"
+msgstr ""
+

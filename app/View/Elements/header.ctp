@@ -16,67 +16,70 @@
           <?php 
           echo '<li>'. $this->Html->link('<i class="fa fa-dashboard"></i>',array('controller'=>'users', 'action'=>'dashboard','timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn','escape'=>false,
-              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Dashboard'
+              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Dashboard')
             )).'</li>';
 
           echo '<li>'. $this->Html->link('<i class="fa fa-bookmark"></i>',array('controller'=>'standards', 'action'=>'index','timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn','escape'=>false,
-              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Standards'
+              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Standards')
             )).'</li>';
 
           echo '<li>'. $this->Html->link('<i class="fa fa-navicon"></i>',array('controller'=>'qc_document_categories', 'action'=>'index','timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn','escape'=>false,
-              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Document Categories'
+              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Document Categories')
             )).'</li>';
 
           echo '<li>'. $this->Html->link('<i class="fa fa-random"></i>',array('controller'=>'approval_processes', 'action'=>'index','timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn','escape'=>false,
-              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Auto Approval Process'
+              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Auto Approval Process')
             )).'</li>';
 
 
           echo '<li>'. $this->Html->link('<i class="fa fa-folder-open"></i>',array('controller'=>'qc_documents', 'action'=>'index','timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn','escape'=>false,
-              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Documents'
+              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Documents')
             )).'</li>';
           
         // echo '<li>'. $this->Html->link('<i class="fa fa-chain"></i>',array('controller'=>'processes', 'action'=>'index','timestamp'=>date('ymdhis')),
          // array('class'=>'tooltip1 btn','escape'=>false,
-              // 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Processes'
+              // 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Processes')
         // )).'</li>';
 
           echo '<li>'. $this->Html->link('<i class="fa fa-gears"></i>',array('controller'=>'custom_tables', 'action'=>'index','table_type'=>1, 'timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn','escape'=>false,
-              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Forms'
+              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Forms')
             )).'</li>';
           echo '<li>'. $this->Html->link('<i class="fa fa-file-text"></i>',array('controller'=>'pdf_templates','action'=>'index','timestamp'=>date('ymdhis')),
             array('class'=>'tooltip1 btn','escape'=>false,
-              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> 'Pdf Templates'
+              'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'bottom', 'title'=> __('Pdf Templates')
             )).'</li>';
 
             ?>                
             <li class="dropdown" id="mm">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i  id="mega-menu" class="fa fa-database"></i></a>
               <ul class="dropdown-menu mega-menu get-size">
-                <li class="sub-li"><div class="header-li">Masters</div>
+                <li class="sub-li"><div class="header-li"><?php echo h(__('Masters')); ?></div>
                   <ul class="">
                     <li class="" ><a href="#" class="header-li-sub"><span></span></a>
                       <ul class="no-margin no-padding">
-                        <li><?php echo $this->Html->link('Branches',array('controller'=>'branches','action'=>'index'))?></li>
-                        <li><?php echo $this->Html->link('Departments',array('controller'=>'departments','action'=>'index'))?></li>
-                        <li><?php echo $this->Html->link('Designations',array('controller'=>'designations','action'=>'index'))?></li>
-                        <li><?php echo $this->Html->link('Employees',array('controller'=>'employees','action'=>'index'))?></li>
-                        <li><?php echo $this->Html->link('Employee Org Chart',array('controller'=>'employees','action'=>'org_chart','render'=>'h','timestamp'=>date('ymdhis')))?></li>
-                        <li><?php echo $this->Html->link('Designation Org Chart',array('controller'=>'designations','action'=>'org_chart','render'=>'h','timestamp'=>date('ymdhis')))?></li>
-                        <li><?php echo $this->Html->link('Users',array('controller'=>'users','action'=>'index'))?></li>
+                        <li><?php echo $this->Html->link(__('Branches'),array('controller'=>'branches','action'=>'index'))?></li>
+                        <li><?php echo $this->Html->link(__('Departments'),array('controller'=>'departments','action'=>'index'))?></li>
+                        <li><?php echo $this->Html->link(__('Designations'),array('controller'=>'designations','action'=>'index'))?></li>
+                        <li><?php echo $this->Html->link(__('Employees'),array('controller'=>'employees','action'=>'index'))?></li>
+                        <li><?php echo $this->Html->link(__('Employee Org Chart'),array('controller'=>'employees','action'=>'org_chart','render'=>'h','timestamp'=>date('ymdhis')))?></li>
+                        <li><?php echo $this->Html->link(__('Designation Org Chart'),array('controller'=>'designations','action'=>'org_chart','render'=>'h','timestamp'=>date('ymdhis')))?></li>
+                        <li><?php echo $this->Html->link(__('Users'),array('controller'=>'users','action'=>'index'))?></li>
                       </ul>
                     </li>
                   </ul>
                 </li>                
-                <li class="sub-li"><div class="header-li">Setting</div>
+                <li class="sub-li"><div class="header-li"><?php echo h(__('Setting')); ?></div>
                     <ul class="">
                       <li class="" ><a href="#" class="header-li-sub"><span></span></a>
                         <ul class="no-margin no-padding">
+                          <?php if (($this->Session->read('User.is_mr') || $this->Session->read('User.is_super_user')) && !empty($languagePreferenceAvailable)): ?>
+                          <li><?php echo $this->Html->link(__('Languages'), array('controller' => 'languages', 'action' => 'index')); ?></li>
+                          <?php endif; ?>
                           <li><?php echo $this->Html->link(__('Add Logo'),array('controller'=>'settings','action'=>'edit',$this->Session->read('User.company_id'),'timestamp'=>date('ymdhis'))); ?></li>
                           <li><?php echo $this->Html->link(__('Add SMTP Email'),array('controller'=>'settings','action'=>'smtp_details',$this->Session->read('User.company_id'),'timestamp'=>date('ymdhis'))); ?></li>
                           <li><?php echo $this->Html->link(__('Add Password Policy'),array('controller'=>'settings','action'=>'password_setting',$this->Session->read('User.company_id'),'timestamp'=>date('ymdhis'))); ?></li>
