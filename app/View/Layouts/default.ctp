@@ -26,7 +26,7 @@
   <?php
   echo $this->Html->meta('icon');
   $aiFeatureEnabled = Configure::read('AI.ai_enabled') === true
-    && $this->Session->read('User.is_mr') == true;
+    && (bool)$this->Session->read('User.id');
   $layoutStyles = array('font-awesome.min','icons','allcss');
   if ($aiFeatureEnabled) $layoutStyles[] = 'ai-assistant';
   echo $this->Html->css($layoutStyles);

@@ -14,6 +14,7 @@
                     <th><?php echo $this->Paginator->sort('last_login', __('Last Login')); ?></th>
                     <?php if($this->Session->read('User.is_mr') == true){ ?>
                         <th><?php echo $this->Paginator->sort('is_mr', __('Admin')); ?></th>
+                        <th><?php echo $this->Paginator->sort('is_super_user', __('Super User')); ?></th>
                         <th><?php echo $this->Paginator->sort('is_hod', __('HoD')); ?></th>
                         <th><?php echo $this->Paginator->sort('is_view_all', __('Reviewer')); ?></th>
                         <th><?php echo $this->Paginator->sort('is_creator', __('Creator')); ?></th>                    
@@ -62,6 +63,21 @@
                                     ));
                                 }
                             ?>&nbsp;
+                        </td>
+                        <td>
+                            <?php
+                            $superUserEnabled = !empty($user['User']['is_super_user']);
+                            $nextSuperUserValue = $superUserEnabled ? 0 : 1;
+                            $superUserRequest = base64_encode($user['User']['id'].',is_super_user,'.$nextSuperUserValue);
+                            echo $this->Html->link('<i class="fa '.($superUserEnabled ? 'fa-check' : 'fa-remove').'"></i>', 'javascript:void(0)', array(
+                                'class'=>'btn btn-sm '.($superUserEnabled ? 'text-success' : 'text-danger'),
+                                'onClick'=>'reset_access(\''.$user['User']['id'].'\', \''.$superUserRequest.'\',this.id,\'is_super_user\', '.$nextSuperUserValue.')',
+                                'id'=>$user['User']['id'].'_is_super_user',
+                                'title'=>__('Toggle Super User access'),
+                                'aria-label'=>__('Toggle Super User access'),
+                                'escape'=>false
+                            ));
+                            ?>
                         </td>
                         <td>
                             <?php 
@@ -238,7 +254,8 @@
 </div>
 </div>
 <script>
-    function reset_access(userid,str, id, field, t){        
+    function reset_access(userid,str, id, field, t){
+        if(field === 'is_super_user' && $('#'+id).data('updating')) return;
         $.ajax({
          url: "<?php echo Router::url('/', true); ?>users/reset_access",
          type: "POST",
@@ -246,9 +263,22 @@
          contentType: "application/json; charset=utf-8",
          data: JSON.stringify({str:str}),
          beforeSend: function( xhr ) {
+            if(field === 'is_super_user') $('#'+id).data('updating', true);
             $("#"+id+" i").removeClass('fa-check').removeClass('fa-remove').addClass('fa-refresh fa-spin');
         },                    
         success: function (result) {
+
+            if(field === 'is_super_user'){
+                var enabled = Number(result) === 1;
+                var nextValue = enabled ? 0 : 1;
+                $('#'+id).removeData('updating')
+                    .removeClass('text-success text-danger')
+                    .addClass(enabled ? 'text-success' : 'text-danger')
+                    .attr('onclick', "reset_access('"+userid+"', '"+btoa(userid+',is_super_user,'+nextValue)+"', this.id, 'is_super_user', "+nextValue+")");
+                $('#'+id+' i').removeClass('fa-refresh fa-spin fa-check fa-remove')
+                    .addClass(enabled ? 'fa-check' : 'fa-remove');
+                return;
+            }
 
             if(field == 'is_mr'){
                 if(result == 1){
@@ -294,7 +324,10 @@
             }
         },
         error: function (err) {
-            
+            if(field === 'is_super_user'){
+                $('#'+id).removeData('updating');
+                $('#'+id+' i').removeClass('fa-refresh fa-spin fa-check fa-remove').addClass(t === 1 ? 'fa-remove' : 'fa-check');
+            }
         }
     }); 
 

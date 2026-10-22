@@ -12,6 +12,9 @@
                 <tr><td><?php echo __('Admin User?'); ?></td>
                     <td><?php echo $user['User']['is_mr'] ? 'Yes' : 'No'; ?>&nbsp;</td>
                 </tr>
+                <tr><td><?php echo __('Super User?'); ?></td>
+                    <td><?php echo !empty($user['User']['is_super_user']) ? 'Yes' : 'No'; ?></td>
+                </tr>
                 <tr><td><?php echo __('Can this user see records created by other users?'); ?></td>
                     <td><?php echo $user['User']['is_view_all'] ? 'Yes' : 'No'; ?>&nbsp;</td>
                 </tr>

@@ -18,6 +18,31 @@ class CustomTablesController extends AppController {
     public $components = array('Paginator','AvailableForms','CreateModel', 'CreateView', 'CreateChildModel');
 
     public $reserved_fields = array("id", "prepared_by", "approved_by", "created", "modified", "sr_no", "qc_document_id", "file_id", "file_key", "parent_id", "additional_files", "approval_step_id", "created_by", "modified_by", "status_user_id", "record_status", "branchid", "departmentid", "company_id", "soft_delete", "process_id", "publish", "custom_table_id");
+
+    public function beforeFilter(){
+        $this->_check_login();
+        // These actions concern shared record lists or user access, rather than
+        // executable form definitions. Every builder endpoint requires the role.
+        $nonBuilderActions = array('index', 'child', 'custom_table_list', 'update_access', 'updateaccess', 'last_updated_record', 'reports');
+        if(!in_array($this->action, $nonBuilderActions, true)) $this->_require_super_user();
+        parent::beforeFilter();
+
+        $passwordActions = array('recreate', 'recreate_child', 'add_child', 'update_field', 'update_child_field', 'save_scripts', 'update_tab_settings', 'rebuild_module');
+        if(in_array($this->action, $passwordActions, true)){
+            $id = !empty($this->request->params['pass'][0]) ? $this->request->params['pass'][0] : null;
+            if(!$id && !empty($this->request->data['CustomTable']['id'])) $id = $this->request->data['CustomTable']['id'];
+            if(!$id && !empty($this->request->params['named']['custom_table_id'])) $id = $this->request->params['named']['custom_table_id'];
+            if(!empty($this->request->data['CustomTable']['id']) && (string)$this->request->data['CustomTable']['id'] !== (string)$id){
+                throw new BadRequestException(__('The submitted form does not match the requested form.'));
+            }
+            if(!$this->_has_form_password_access($id)){
+                if($this->request->is('get') && !$this->request->is('ajax')){
+                    return $this->redirect(array('action'=>'unlock', $id, 'next_action'=>$this->action));
+                }
+                throw new ForbiddenException(__('Unlock this form with its password before re-creating or modifying it.'));
+            }
+        }
+    }
     
     public function _get_system_table_id() {
         $this->loadModel('SystemTable');
@@ -172,7 +197,7 @@ class CustomTablesController extends AppController {
             'user_access' => $this->_custom_table_access_virtual_field()
         );
 
-        if($this->Session->read('User.is_mr') == false){
+        if($this->Session->read('User.is_mr') == false && !$this->_is_super_user()){
             $tableAccessConditions = array(
                 'CustomTable.srct >' => 0,
                 'CustomTable.user_access >' => 0
@@ -247,7 +272,7 @@ class CustomTablesController extends AppController {
             throw new NotFoundException(__('Invalid Table'));
         }
 
-        if($this->Session->read('User.is_mr') == false){
+        if($this->Session->read('User.is_mr') == false && !$this->_is_super_user()){
             if($this->request->is('ajax') == false){
                 $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
                 $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
@@ -269,7 +294,7 @@ class CustomTablesController extends AppController {
             $this->set(array('showApprovals' => $this->_show_approvals()));
         }
 
-        if($customTable['CustomTable']['created_by'] != $this->Session->read('User.id')){
+        if(!$this->_is_super_user() && $customTable['CustomTable']['created_by'] != $this->Session->read('User.id')){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -462,7 +487,7 @@ class CustomTablesController extends AppController {
         if (!$this->request->is('post')) {
             throw new MethodNotAllowedException(__('Invalid request'));
         }
-        if ($this->Session->read('User.is_mr') == false) {
+        if ($this->Session->read('User.is_mr') == false && !$this->_is_super_user()) {
             $this->response->statusCode(403);
             echo json_encode(array('success' => false, 'message' => __('You are not authorized to rebuild this module.')));
             return;
@@ -526,7 +551,7 @@ class CustomTablesController extends AppController {
         if (!$this->request->is('post')) {
             return $this->_ai_rebuild_response(false, __('Only POST requests are accepted.'), 405);
         }
-        if ($this->Session->read('User.is_mr') != true) {
+        if ($this->Session->read('User.is_mr') != true && !$this->_is_super_user()) {
             return $this->_ai_rebuild_response(false, __('You are not authorized to rebuild this form.'), 403);
         }
 
@@ -587,6 +612,9 @@ class CustomTablesController extends AppController {
         }
         if (empty($pending['custom_table_id']) || empty($pending['source_controller']) || empty($pending['fields']) || !is_array($pending['fields'])) {
             return $this->_ai_rebuild_response(false, __('The saved AI rebuild request is incomplete.'), 422);
+        }
+        if(!$this->_has_form_password_access($pending['custom_table_id'])){
+            return $this->_ai_rebuild_response(false, __('Unlock this form with its password before applying AI changes.'), 403);
         }
 
         $conditions = array(
@@ -1394,7 +1422,7 @@ class CustomTablesController extends AppController {
     
 
     public function edit($id = null) {
-        if($this->Session->read('User.is_mr') == false){
+        if($this->Session->read('User.is_mr') == false && !$this->_is_super_user()){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -1692,7 +1720,7 @@ class CustomTablesController extends AppController {
      * @return void
      */
     public function add() {
-        if($this->Session->read('User.is_mr') == false){
+        if($this->Session->read('User.is_mr') == false && !$this->_is_super_user()){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -2102,7 +2130,7 @@ class CustomTablesController extends AppController {
      */
     public function add_child() {
 
-        if($this->Session->read('User.is_mr') == false){
+        if($this->Session->read('User.is_mr') == false && !$this->_is_super_user()){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -2395,7 +2423,7 @@ class CustomTablesController extends AppController {
         $this->set('fields', array_keys($this->$model->schema()));
     }
     public function delete($id = null) {
-        if($this->Session->read('User.is_mr') == false){
+        if($this->Session->read('User.is_mr') == false && !$this->_is_super_user()){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -2591,7 +2619,7 @@ class CustomTablesController extends AppController {
     }
     public function recreate($id = null,$skip = false, $data = null) {
         $this->_clear_cake_cache();
-        if($this->Session->read('User.is_mr') == false){
+        if($this->Session->read('User.is_mr') == false && !$this->_is_super_user()){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -2911,7 +2939,7 @@ class CustomTablesController extends AppController {
     
     public function recreate_child($id = null,$skip = null,$data = null) {
         
-        if($this->Session->read('User.is_mr') == false){
+        if($this->Session->read('User.is_mr') == false && !$this->_is_super_user()){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -3418,6 +3446,9 @@ class CustomTablesController extends AppController {
             } else {
                 $customTable = $this->CustomTable->find('first', array('conditions' => array('CustomTable.password' => trim(Security::hash($this->data['CustomTable']['password'], 'md5', true)), 'CustomTable.id' => $this->data['CustomTable']['id'])));
                 if ($customTable) {
+                    $this->Session->write('FormPassword.'.$customTable['CustomTable']['id'], array(
+                        'password_hash'=>$customTable['CustomTable']['password'], 'expires'=>time()+1800
+                    ));
                     $this->CustomTable->read(null, $this->data['CustomTable']['id']);
                     $this->CustomTable->set('table_locked', 1);
                     $this->CustomTable->save();
@@ -3455,6 +3486,7 @@ class CustomTablesController extends AppController {
             } else {
                 $customTable = $this->CustomTable->find('first', array('conditions' => array('CustomTable.password' => trim(Security::hash($this->data['CustomTable']['password'], 'md5', true)), 'CustomTable.id' => $this->data['CustomTable']['id'])));
                 if ($customTable) {
+                    $this->Session->delete('FormPassword.'.$customTable['CustomTable']['id']);
                     $this->CustomTable->read(null, $this->data['CustomTable']['id']);
                     $this->CustomTable->set('table_locked', 0);
                     $this->CustomTable->save();
@@ -3473,7 +3505,7 @@ class CustomTablesController extends AppController {
     }
 
     public function publish($id = null) {
-        if($this->Session->read('User.is_mr') == false){
+        if($this->Session->read('User.is_mr') == false && !$this->_is_super_user()){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -3503,7 +3535,7 @@ class CustomTablesController extends AppController {
     }
 
     public function hold($id = null) {
-        if($this->Session->read('User.is_mr') == false){
+        if($this->Session->read('User.is_mr') == false && !$this->_is_super_user()){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -3533,7 +3565,7 @@ class CustomTablesController extends AppController {
     }
 
     public function delete_child($id = null) {
-        if($this->Session->read('User.is_mr') == false){
+        if($this->Session->read('User.is_mr') == false && !$this->_is_super_user()){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -3611,7 +3643,7 @@ class CustomTablesController extends AppController {
     }
 
     public function update_field() {
-        if($this->Session->read('User.is_mr') == false){
+        if($this->Session->read('User.is_mr') == false && !$this->_is_super_user()){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -3703,7 +3735,7 @@ class CustomTablesController extends AppController {
     }
 
     public function update_child_field() {
-        if($this->Session->read('User.is_mr') == false){
+        if($this->Session->read('User.is_mr') == false && !$this->_is_super_user()){
             $this->Session->setFlash(__('You are not authorized to view this section'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('controller' => 'users', 'action' => 'access_denied',$n));
         }
@@ -4434,7 +4466,7 @@ class CustomTablesController extends AppController {
             $this->redirect(array('action' => 'view', $id, 'timestamp' => date('ymdhis')));
         }
 
-        if ($this->Session->read('User.is_mr') != true) {
+        if ($this->Session->read('User.is_mr') != true && !$this->_is_super_user()) {
             $this->Session->setFlash(__('Invalid access.'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('action' => 'view', $id, 'timestamp' => date('ymdhis')));
         }
@@ -4444,7 +4476,7 @@ class CustomTablesController extends AppController {
             'conditions' => array('CustomTable.id' => $id)
         ));
 
-        if (!$customTable || $customTable['CustomTable']['created_by'] != $this->Session->read('User.id')) {
+        if (!$customTable || (!$this->_is_super_user() && $customTable['CustomTable']['created_by'] != $this->Session->read('User.id'))) {
             $this->Session->setFlash(__('Invalid table access.'), 'default', array('class' => 'alert alert-danger'));
             $this->redirect(array('action' => 'view', $id, 'timestamp' => date('ymdhis')));
         }
@@ -4698,6 +4730,13 @@ class CustomTablesController extends AppController {
     
 
     public function recreate_all_forms($autoupdate = null){
+        $this->_require_super_user();
+        $allForms = $this->CustomTable->find('list', array('recursive'=>-1, 'fields'=>array('CustomTable.id', 'CustomTable.id')));
+        foreach($allForms as $formId){
+            if(!$this->_has_form_password_access($formId)){
+                throw new ForbiddenException(__('Unlock every affected form with its password before re-creating all forms.'));
+            }
+        }
         if($autoupdate == 1){
             $this->autoRender = false;
         }

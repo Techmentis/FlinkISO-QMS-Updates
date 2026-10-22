@@ -1,7 +1,7 @@
 <?php
 $selectedTab = isset($this->request->params['pass'][1]) ? $this->request->params['pass'][1] : 'main';
 $table = $customTable['CustomTable'];
-$isMr = (bool)$this->Session->read('User.is_mr');
+$isMr = (bool)$this->Session->read('User.is_mr') || (bool)$this->Session->read('User.is_super_user');
 ?>
 <?php if($selectedTab === 'main'){ ?>
 	<div class="box box-default">

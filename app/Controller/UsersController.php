@@ -238,6 +238,28 @@ class UsersController extends AppController {
 
     public function reset_access($id = null) {
         $this->autoRender = false;
+        $accessValue = isset($this->request->data['str']) ? base64_decode($this->request->data['str'], true) : '';
+        $accessParts = explode(',', (string)$accessValue);
+        if(isset($accessParts[1]) && $accessParts[1] === 'is_super_user'){
+            $this->response->type('json');
+            if(!$this->Session->read('User.is_mr')){
+                throw new ForbiddenException(__('Only administrators can change Super User access.'));
+            }
+            if(!$this->request->is('post') || !$this->request->is('ajax') || count($accessParts) !== 3 ||
+                !in_array($accessParts[2], array('0', '1'), true)){
+                throw new BadRequestException(__('Invalid Super User access request.'));
+            }
+            $user = $this->User->find('first', array('recursive'=>-1,
+                'fields'=>array('User.id'),
+                'conditions'=>array('User.id'=>$accessParts[0], 'User.company_id'=>$this->Session->read('User.company_id'))));
+            if(!$user) throw new NotFoundException(__('Invalid user'));
+            $this->User->create();
+            $saved = $this->User->save(array('User'=>array('id'=>$user['User']['id'], 'is_super_user'=>(int)$accessParts[2])),
+                array('validate'=>false, 'fieldList'=>array('is_super_user')));
+            if(!$saved) throw new InternalErrorException(__('Super User access could not be saved.'));
+            $this->response->body(json_encode((int)$accessParts[2]));
+            return $this->response;
+        }
         if($this->Session->read('User.is_mr') == true){
             if ($this->request->is('ajax')) {
                 $str = base64_decode($this->request->data['str']);
@@ -518,6 +540,7 @@ class UsersController extends AppController {
                         'User.username',
                         'User.password',
                         'User.is_mr',
+                        'User.is_super_user',
                         'User.is_mt',
                         'User.is_hod',
                         'User.is_approver',
@@ -682,6 +705,7 @@ class UsersController extends AppController {
                         $this->Session->write('User.username', $user['User']['username']);
                         $this->Session->write('User.lastLogin', $user['User']['last_login']);
                         $this->Session->write('User.is_mr', $user['User']['is_mr']);
+                        $this->Session->write('User.is_super_user', !empty($user['User']['is_super_user']));
                         $this->Session->write('User.is_creator', $user['User']['is_creator']);
                         $this->Session->write('User.is_publisher', $user['User']['is_publisher']);
                         $this->Session->write('User.is_mt', $user['User']['is_mt']);
@@ -808,6 +832,7 @@ class UsersController extends AppController {
                 $this->Session->write('User.username', $user['User']['username']);
                 $this->Session->write('User.lastLogin', $user['User']['last_login']);
                 $this->Session->write('User.is_mr', $user['User']['is_mr']);
+                $this->Session->write('User.is_super_user', !empty($user['User']['is_super_user']));
                 $this->Session->write('User.is_creator', $user['User']['is_creator']);
                 $this->Session->write('User.is_publisher', $user['User']['is_publisher']);
                 $this->Session->write('User.is_approver', $user['User']['is_approver']);

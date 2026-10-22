@@ -47,8 +47,45 @@ class AppController  extends Controller {
     public $message_count = null;
     public $notification_count = null;
     public $branchIDYes = false;
+    protected $_superUser = null;
+
+    protected function _is_super_user(){
+        if($this->_superUser !== null) return $this->_superUser;
+        $this->_superUser = false;
+        $userId = $this->Session->read('User.id');
+        if($userId){
+            $this->loadModel('User');
+            if($this->User->hasField('is_super_user')){
+                $this->_superUser = $this->User->find('count', array(
+                    'recursive'=>-1,
+                    'conditions'=>array('User.id'=>$userId, 'User.company_id'=>$this->Session->read('User.company_id'),
+                        'User.is_super_user'=>1, 'User.publish'=>1, 'User.soft_delete'=>0, 'User.status'=>1)
+                )) > 0;
+            }
+        }
+        if($userId) $this->Session->write('User.is_super_user', $this->_superUser);
+        return $this->_superUser;
+    }
+
+    protected function _require_super_user(){
+        if(!$this->_is_super_user()){
+            throw new ForbiddenException(__('Only Super Users can create or re-create application forms.'));
+        }
+    }
+
+    protected function _has_form_password_access($tableId){
+        if(!$this->_is_super_user() || !$tableId) return false;
+        $this->loadModel('CustomTable');
+        $table = $this->CustomTable->find('first', array('recursive'=>-1,
+            'fields'=>array('CustomTable.id', 'CustomTable.password'),
+            'conditions'=>array('CustomTable.id'=>$tableId, 'CustomTable.company_id'=>$this->Session->read('User.company_id'))));
+        $grant = $this->Session->read('FormPassword.'.$tableId);
+        return !empty($table) && is_array($grant) && !empty($grant['expires']) && $grant['expires'] > time()
+            && !empty($grant['password_hash']) && hash_equals((string)$table['CustomTable']['password'], (string)$grant['password_hash']);
+    }
 
     public function _check_login() {
+        $this->_is_super_user();
         Configure::write("files", WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id'));
         Configure::write("files_url", Router::url('/', true) . 'files/' . $this->Session->read('User.company_id'));
         Configure::write("path", WWW_ROOT . 'files' . DS . $this->Session->read('User.company_id') . DS . $this->request->controller);
@@ -587,6 +624,7 @@ class AppController  extends Controller {
     }
 
     public function _check_access() {
+        if($this->request->controller === 'custom_tables' && $this->_is_super_user()) return;
         $this->_customtableacces();
         // if user is not admin
         if($this->Session->read('User.is_mr') == false){
@@ -705,7 +743,7 @@ class AppController  extends Controller {
     }
 
     public function _customtableacces(){
-        if($this->Session->read('User.is_mr') == true) return;
+        if($this->Session->read('User.is_mr') == true || $this->_is_super_user()) return;
 
         if(isset($this->request->params['named']['custom_table_id']) && $this->request->params['named']['custom_table_id'] != -1){
             $this->loadModel('CustomTable');
@@ -2961,6 +2999,7 @@ class AppController  extends Controller {
     }
 
     public function curl($type = null, $api_controller = null, $path = null,$data = null,$linkedTosWithDisplay = null){
+        $this->_require_super_user();
         if(empty($type))$type = $this->request->params['named']['type'];
         if(isset($this->request->data['linkedTosWithDisplay'])) $linkedTosWithDisplay = json_decode($this->request->data['linkedTosWithDisplay']);
         else $linkedTosWithDisplay = isset($this->request->params['named']['linkedTosWithDisplay']) ? json_decode($this->request->params['named']['linkedTosWithDisplay']) : null;

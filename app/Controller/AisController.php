@@ -3,7 +3,6 @@ App::uses('AppController', 'Controller');
 App::uses('Security', 'Utility');
 App::uses('CakeText', 'Utility');
 App::uses('Folder', 'Utility');
-
 /**
 * Authenticated client bridge for the paid API v2 AI service.
 * Local history and rebuild authorization remain tenant-side.
@@ -20,10 +19,6 @@ class AisController extends AppController {
 
     public function beforeFilter() {
         $this->_check_login();
-        if ($this->Session->read('User.is_mr') != true) {
-            throw new ForbiddenException(__('AI functions are available only to administrators.'));
-        }
-
         $this->_loadAiConfiguration();
         if (Configure::read('AI.ai_enabled') !== true) {
             throw new ForbiddenException(__('AI functions are disabled.'));
@@ -46,18 +41,21 @@ class AisController extends AppController {
         $debugStream = !empty($this->request->data['debug_stream']);
         $userId = $this->Session->read('User.id');
         $companyId = $this->Session->read('User.company_id');
-        $canRebuild = $this->Session->read('User.is_mr') == true;
+        $canRebuild = $this->_is_super_user();
         $isGeneratedForm = strpos($sourceController, 'tbl_') === 0 || strpos($sourceController, 'chd_') === 0;
         $isFormAiContext = in_array($sourceController, array('qc_documents', 'custom_tables'), true) || $isGeneratedForm;
-        if ($assistantMode === '') $assistantMode = $isFormAiContext ? 'forms' : 'flinkiso';
+        if ($assistantMode === '') $assistantMode = $isFormAiContext && $canRebuild ? 'forms' : 'flinkiso';
         if (!in_array($assistantMode, array('chat', 'flinkiso', 'forms'), true)) {
             return $this->_jsonResponse(false, array('message' => __('Select Chat, FlinkISO, or Forms mode.')), 422);
         }
         if ($assistantMode === 'forms' && !$isFormAiContext) {
             return $this->_jsonResponse(false, array(
-                'message' => __('Forms mode is available only in Quality Documents, Custom Tables, and generated forms.'),
-                'error_type' => 'forms_mode_unavailable'
+            'message' => __('Forms mode is available only in Quality Documents, Custom Tables, and generated forms.'),
+            'error_type' => 'forms_mode_unavailable'
             ), 403);
+        }
+        if($assistantMode === 'forms' && !$canRebuild){
+            return $this->_jsonResponse(false, array('message'=>__('Only Super Users can use Form Creation AI.')), 403);
         }
         if ($prompt === '') {
             return $this->_jsonResponse(false, array('message' => __('Enter a request for FlinkISO AI.')), 422);
@@ -104,28 +102,28 @@ class AisController extends AppController {
             $formatLabel = strtoupper($requestedArtifactFormat);
             $question = __('What should the %s file contain?', $formatLabel);
             return $this->_jsonResponse(true, array(
-                'message' => $question,
-                'intent' => 'clarification',
-                'operation' => 'clarification',
-                'form_name' => '',
-                'field_details' => array(),
-                'proposed_fields' => array(),
-                'warnings' => array(),
-                'clarification_question' => array(
-                    'type' => 'text',
-                    'question' => $question,
-                    'placeholder' => __('Document topic and requirements'),
-                    'prompt_prefix' => 'Create a '.$formatLabel.' file about ',
-                    'prompt_suffix' => '.'
-                ),
-                'model' => '',
-                'duration_ms' => 0,
-                'read_only' => true,
-                'general_assistance' => true,
-                'assistant_mode' => $assistantMode,
-                'auto_apply' => false,
-                'apply_token' => '',
-                'apply_url' => ''
+            'message' => $question,
+            'intent' => 'clarification',
+            'operation' => 'clarification',
+            'form_name' => '',
+            'field_details' => array(),
+            'proposed_fields' => array(),
+            'warnings' => array(),
+            'clarification_question' => array(
+            'type' => 'text',
+            'question' => $question,
+            'placeholder' => __('Document topic and requirements'),
+            'prompt_prefix' => 'Create a '.$formatLabel.' file about ',
+            'prompt_suffix' => '.'
+            ),
+            'model' => '',
+            'duration_ms' => 0,
+            'read_only' => true,
+            'general_assistance' => true,
+            'assistant_mode' => $assistantMode,
+            'auto_apply' => false,
+            'apply_token' => '',
+            'apply_url' => ''
             ));
         }
 
@@ -142,34 +140,34 @@ class AisController extends AppController {
                         header('X-Accel-Buffering: no');
                         header('Cache-Control: no-cache, no-store, must-revalidate');
                         echo json_encode(array('type' => 'status', 'data' => array(
-                            'message' => 'Loading the current form, sharing rules, and linked document.',
-                            'request_id' => $this->_historyId
+                        'message' => 'Loading the current form, sharing rules, and linked document.',
+                        'request_id' => $this->_historyId
                         )))."\n";
                         if (ob_get_level() > 0) @ob_flush();
                         @flush();
                     }
                     $isLocalProvider = $this->_isLocalAiProvider();
                     $applicationContext = $this->_generatedFormChatContext(
-                        $sourceController,
-                        $customTableId,
-                        $qcDocumentId,
-                        $companyId,
-                        $isLocalProvider || $sendCurrentDocument,
-                        $isLocalProvider
+                    $sourceController,
+                    $customTableId,
+                    $qcDocumentId,
+                    $companyId,
+                    $isLocalProvider || $sendCurrentDocument,
+                    $isLocalProvider
                     );
                 }
                 return $this->_generalAiResponse($prompt, $sourceController, $sourceAction, $debugStream, $applicationContext, $assistantMode);
             } catch (Exception $exception) {
                 CakeLog::write('error', 'Direct AI chat failed: '.$exception->getMessage());
                 return $this->_jsonResponse(false, array(
-                    'message' => __('AI error: FlinkISO could not complete the request to the configured AI provider.'),
-                    'error_type' => 'ai_provider_internal'
+                'message' => __('AI error: FlinkISO could not complete the request to the configured AI provider.'),
+                'error_type' => 'ai_provider_internal'
                 ), 500);
             } catch (Error $error) {
                 CakeLog::write('error', 'Direct AI chat failed: '.$error->getMessage());
                 return $this->_jsonResponse(false, array(
-                    'message' => __('AI error: FlinkISO could not complete the request to the configured AI provider.'),
-                    'error_type' => 'ai_provider_internal'
+                'message' => __('AI error: FlinkISO could not complete the request to the configured AI provider.'),
+                'error_type' => 'ai_provider_internal'
                 ), 500);
             }
         }
@@ -205,11 +203,11 @@ class AisController extends AppController {
                 return $this->_jsonResponse(false, array('message' => __('The current form has an invalid saved field definition.')), 422);
             }
             $existingChildTables = $this->CustomTable->find('all', array(
-                'recursive' => -1,
-                'conditions' => array(
-                    'CustomTable.custom_table_id' => $customTableId,
-                    'CustomTable.company_id' => $companyId
-                )
+            'recursive' => -1,
+            'conditions' => array(
+            'CustomTable.custom_table_id' => $customTableId,
+            'CustomTable.company_id' => $companyId
+            )
             ));
             $formContext = $this->_formContext($customTable, $existingFields, $existingChildTables);
             $guidedAction = isset($this->request->data['guided_action']) ? trim($this->request->data['guided_action']) : '';
@@ -322,7 +320,7 @@ class AisController extends AppController {
                 $referenceDocument = $this->_prepareQcDocumentReference($qcDocumentId, $companyId);
                 if (!$referenceDocument['success']) {
                     return $this->_jsonResponse(false, array(
-                        'message' => $referenceDocument['message']
+                    'message' => $referenceDocument['message']
                     ), $referenceDocument['status']);
                 }
                 $qualityDocumentTitle = $referenceDocument['title'];
@@ -494,18 +492,18 @@ class AisController extends AppController {
         'document_included' => $sendCurrentDocument,
         'general_assistance' => !$isFormAiContext,
         'ai_config' => array(
-            'ai_provider' => Configure::read('AI.ai_provider'),
-            'ai_api' => Configure::read('AI.ai_api'),
-            'ai_api_key' => Configure::read('AI.ai_api_key'),
-            'ai_model' => Configure::read('AI.ai_model'),
-            'ai_vision_model' => Configure::read('AI.ai_vision_model'),
-            'ai_timeout' => (int)Configure::read('AI.ai_timeout'),
-            'ai_vision_context' => (int)Configure::read('AI.ai_vision_context'),
-            'vision_pdf_max_pages' => (int)Configure::read('AI.vision_pdf_max_pages'),
-            'vision_page_pixels' => (int)Configure::read('AI.vision_page_pixels'),
-            'document_converter' => Configure::read('AI.document_converter'),
-            'pdf_to_ppm_path' => Configure::read('AI.pdf_to_ppm_path'),
-            'libreoffice_path' => Configure::read('AI.libreoffice_path')
+        'ai_provider' => Configure::read('AI.ai_provider'),
+        'ai_api' => Configure::read('AI.ai_api'),
+        'ai_api_key' => Configure::read('AI.ai_api_key'),
+        'ai_model' => Configure::read('AI.ai_model'),
+        'ai_vision_model' => Configure::read('AI.ai_vision_model'),
+        'ai_timeout' => (int)Configure::read('AI.ai_timeout'),
+        'ai_vision_context' => (int)Configure::read('AI.ai_vision_context'),
+        'vision_pdf_max_pages' => (int)Configure::read('AI.vision_pdf_max_pages'),
+        'vision_page_pixels' => (int)Configure::read('AI.vision_page_pixels'),
+        'document_converter' => Configure::read('AI.document_converter'),
+        'pdf_to_ppm_path' => Configure::read('AI.pdf_to_ppm_path'),
+        'libreoffice_path' => Configure::read('AI.libreoffice_path')
         )
         );
 
@@ -612,8 +610,8 @@ class AisController extends AppController {
             if (!empty($chunk['error'])) {
                 if (is_array($chunk['error'])) {
                     $streamError = !empty($chunk['error']['message'])
-                        ? (string)$chunk['error']['message']
-                        : json_encode($chunk['error']);
+                    ? (string)$chunk['error']['message']
+                    : json_encode($chunk['error']);
                     if (!empty($chunk['error']['source'])) {
                         $streamErrorSource = (string)$chunk['error']['source'];
                     }
@@ -710,22 +708,22 @@ class AisController extends AppController {
             CakeLog::write('error', 'FlinkISO AI API error: '.$streamError);
             $isBusy = stripos($streamError, 'already processing') !== false;
             $isUnauthorized = stripos($streamError, 'unauthorized') !== false ||
-                stripos($streamError, 'invalid api key') !== false ||
-                stripos($streamError, 'incorrect credentials') !== false;
+            stripos($streamError, 'invalid api key') !== false ||
+            stripos($streamError, 'incorrect credentials') !== false;
             $isProviderError = $streamErrorSource === 'ai_provider' || $streamErrorSource === 'ai_transport';
             return $this->_jsonResponse(false, array(
             'message' => $isBusy
-                ? __('FlinkISO AI is processing another request. Wait for it to finish, or stop it from the panel where it was started.')
-                : ($isProviderError
-                    ? ($isUnauthorized
-                        ? __('AI error: The configured AI provider rejected its API key. Update the AI API key in FlinkISO settings. API v2 was reached successfully.')
-                        : __('AI error: %s', $streamError))
-                    : ($isUnauthorized
-                        ? __('API error: API v2 rejected this FlinkISO instance. Confirm that the company ID is registered and API/AI access is enabled on the API server.')
-                        : __('API error: %s', $streamError))),
+            ? __('FlinkISO AI is processing another request. Wait for it to finish, or stop it from the panel where it was started.')
+            : ($isProviderError
+            ? ($isUnauthorized
+            ? __('AI error: The configured AI provider rejected its API key. Update the AI API key in FlinkISO settings. API v2 was reached successfully.')
+            : __('AI error: %s', $streamError))
+            : ($isUnauthorized
+            ? __('API error: API v2 rejected this FlinkISO instance. Confirm that the company ID is registered and API/AI access is enabled on the API server.')
+            : __('API error: %s', $streamError))),
             'error_type' => $isBusy ? 'busy' : ($isProviderError
-                ? ($isUnauthorized ? 'ai_provider_auth' : 'ai_provider')
-                : ($isUnauthorized ? 'api_v2_auth' : 'ai_api')),
+            ? ($isUnauthorized ? 'ai_provider_auth' : 'ai_provider')
+            : ($isUnauthorized ? 'api_v2_auth' : 'ai_api')),
             'duration_ms' => $durationMs
             ), $isBusy ? 429 : ($isUnauthorized ? 401 : 502));
         }
@@ -1040,13 +1038,14 @@ class AisController extends AppController {
             throw new NotFoundException(__('AI document draft not found.'));
         }
         $row = $this->Ai->find('first', array(
-            'recursive' => -1,
-            'conditions' => array(
-                'Ai.id' => $id,
-                'Ai.company_id' => $this->Session->read('User.company_id'),
-                'Ai.status' => array('completed', 'prepared', 'applied')
-            ),
-            'fields' => array('Ai.id', 'Ai.request', 'Ai.response')
+        'recursive' => -1,
+        'conditions' => array(
+        'Ai.id' => $id,
+        'Ai.company_id' => $this->Session->read('User.company_id'),
+        'Ai.user_id' => $this->Session->read('User.id'),
+        'Ai.status' => array('completed', 'prepared', 'applied')
+        ),
+        'fields' => array('Ai.id', 'Ai.request', 'Ai.response')
         ));
         if (!$row) throw new NotFoundException(__('AI document draft not found.'));
         $savedResponse = !empty($row['Ai']['response']) ? json_decode($row['Ai']['response'], true) : array();
@@ -1075,10 +1074,10 @@ class AisController extends AppController {
             if (is_file($tempFile)) @unlink($tempFile);
         });
         $mimeTypes = array(
-            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'pdf' => 'application/pdf',
-            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'pdf' => 'application/pdf',
+        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
         );
         $this->response->type($mimeTypes[$format]);
         $this->response->file($tempFile, array('download' => true, 'name' => $fileName));
@@ -1106,8 +1105,8 @@ class AisController extends AppController {
         $model = trim((string)Configure::read('AI.ai_model'));
         if (!in_array($provider, array('ollama', 'openai_compatible'), true) || $apiBase === '' || $model === '') {
             return $this->_jsonResponse(false, array(
-                'message' => __('AI is not configured with a customer-managed provider for general assistance.'),
-                'error_type' => 'ai_configuration'
+            'message' => __('AI is not configured with a customer-managed provider for general assistance.'),
+            'error_type' => 'ai_configuration'
             ), 503);
         }
 
@@ -1116,22 +1115,22 @@ class AisController extends AppController {
         $isDocumentDraftRequest = $artifactFormat !== '';
         $manual = $isFlinkisoMode ? $this->_manualContextForController($sourceController, $prompt) : array('context' => '', 'sources' => array(), 'images' => array());
         $systemPromptParts = $isFlinkisoMode ? array(
-            'You are FlinkISO AI, a read-only assistant for quality management systems and the FlinkISO application.',
-            'Answer clearly and practically. The current application area is '.Inflector::humanize($sourceController).'.',
-            'Do not claim to have inspected records or changed application data.',
-            'Read-only applies only to changing FlinkISO application data. You may draft complete policies, procedures, SOPs, manuals, work instructions, plans, templates, and other document content when requested.',
-            'When drafting a document, provide a usable professional draft with an appropriate title, purpose, scope, responsibilities, requirements or procedure, records, and approval or revision sections when relevant. Clearly label it as a draft for organizational review.',
-            'Do not generate form-definition JSON. If exact organization-specific configuration is unknown, say so and provide safe navigation guidance.',
-            'Format the answer with short paragraphs, Markdown headings or lists when useful, and bold important labels.',
-            'Keep the response concise and directly answer the question.'
+        'You are FlinkISO AI, a read-only assistant for quality management systems and the FlinkISO application.',
+        'Answer clearly and practically. The current application area is '.Inflector::humanize($sourceController).'.',
+        'Do not claim to have inspected records or changed application data.',
+        'Read-only applies only to changing FlinkISO application data. You may draft complete policies, procedures, SOPs, manuals, work instructions, plans, templates, and other document content when requested.',
+        'When drafting a document, provide a usable professional draft with an appropriate title, purpose, scope, responsibilities, requirements or procedure, records, and approval or revision sections when relevant. Clearly label it as a draft for organizational review.',
+        'Do not generate form-definition JSON. If exact organization-specific configuration is unknown, say so and provide safe navigation guidance.',
+        'Format the answer with short paragraphs, Markdown headings or lists when useful, and bold important labels.',
+        'Keep the response concise and directly answer the question.'
         ) : array(
-            'You are a helpful general AI assistant.',
-            'Answer the user question clearly and practically. You may answer general QMS questions and questions unrelated to FlinkISO.',
-            'Do not claim to have inspected application records or changed application data.',
-            'You may draft complete policies, procedures, SOPs, manuals, work instructions, plans, templates, and other document content when requested. Read-only means you cannot change application data; it does not prevent you from authoring content.',
-            'When drafting a document, provide a usable professional draft and clearly label it as a draft for review.',
-            'Format the answer with short paragraphs, Markdown headings or lists when useful.',
-            'Keep the response concise and directly answer the question.'
+        'You are a helpful general AI assistant.',
+        'Answer the user question clearly and practically. You may answer general QMS questions and questions unrelated to FlinkISO.',
+        'Do not claim to have inspected application records or changed application data.',
+        'You may draft complete policies, procedures, SOPs, manuals, work instructions, plans, templates, and other document content when requested. Read-only means you cannot change application data; it does not prevent you from authoring content.',
+        'When drafting a document, provide a usable professional draft and clearly label it as a draft for review.',
+        'Format the answer with short paragraphs, Markdown headings or lists when useful.',
+        'Keep the response concise and directly answer the question.'
         );
         $systemPromptParts[] = 'The configured AI provider identifies the model serving this conversation as "'.$model.'". If the user asks which model you are, state this exact configured model identifier. You may separately explain who developed the model family.';
         if ($artifactFormat !== '') {
@@ -1165,14 +1164,14 @@ class AisController extends AppController {
         }
         $systemPrompt = implode("\n", $systemPromptParts);
         $messages = array(
-            array('role' => 'system', 'content' => $systemPrompt),
-            array('role' => 'user', 'content' => $isFlinkisoMode
-                ? 'FlinkISO section: '.$sourceController.'/'.$sourceAction."\nQuestion: ".$prompt
-                : $prompt)
+        array('role' => 'system', 'content' => $systemPrompt),
+        array('role' => 'user', 'content' => $isFlinkisoMode
+        ? 'FlinkISO section: '.$sourceController.'/'.$sourceAction."\nQuestion: ".$prompt
+        : $prompt)
         );
         $headers = array('Content-Type: application/json', 'Accept: application/json');
         $protocol = $provider === 'openai_compatible' || preg_match('#/v1(?:/|$)#i', $apiBase)
-            ? 'openai_compatible' : 'ollama';
+        ? 'openai_compatible' : 'ollama';
         if ($protocol === 'openai_compatible') {
             if ($apiKey !== '') $headers[] = 'Authorization: Bearer '.$apiKey;
             $endpoint = $this->_aiChatEndpoint($apiBase, $protocol);
@@ -1180,7 +1179,7 @@ class AisController extends AppController {
         } else {
             $endpoint = $this->_aiChatEndpoint($apiBase, $protocol);
             $payload = array('model' => $model, 'stream' => false, 'think' => false, 'messages' => $messages,
-                'options' => array('temperature' => 0.2, 'num_ctx' => !empty($applicationContext) || $isDocumentDraftRequest ? 8192 : 4096, 'num_predict' => $isDocumentDraftRequest ? 2500 : 800));
+            'options' => array('temperature' => 0.2, 'num_ctx' => !empty($applicationContext) || $isDocumentDraftRequest ? 8192 : 4096, 'num_predict' => $isDocumentDraftRequest ? 2500 : 800));
         }
 
         @ignore_user_abort(false);
@@ -1209,9 +1208,9 @@ class AisController extends AppController {
         };
         if ($debugStream) {
             $emitStreamEvent('status', array(
-                'message' => 'Connected to the configured AI provider. Waiting for a response.',
-                'model' => $model,
-                'request_id' => $this->_historyId
+            'message' => 'Connected to the configured AI provider. Waiting for a response.',
+            'model' => $model,
+            'request_id' => $this->_historyId
             ));
             $lastHeartbeat = microtime(true);
         }
@@ -1219,15 +1218,15 @@ class AisController extends AppController {
         $startedAt = microtime(true);
         $curl = curl_init();
         curl_setopt_array($curl, array(
-            CURLOPT_URL => $endpoint,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => 5,
-            CURLOPT_TIMEOUT => max(30, min(360, (int)Configure::read('AI.ai_timeout'))),
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => json_encode($payload),
-            CURLOPT_HTTPHEADER => $headers,
-            CURLOPT_ENCODING => '',
-            CURLOPT_NOPROGRESS => false
+        CURLOPT_URL => $endpoint,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_TIMEOUT => max(30, min(360, (int)Configure::read('AI.ai_timeout'))),
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode($payload),
+        CURLOPT_HTTPHEADER => $headers,
+        CURLOPT_ENCODING => '',
+        CURLOPT_NOPROGRESS => false
         ));
         $progressCallback = function () use ($heartbeat) {
             $heartbeat();
@@ -1247,9 +1246,9 @@ class AisController extends AppController {
         if ($raw === false || $curlError !== '') {
             CakeLog::write('warning', 'General AI connection failed. provider='.$provider.' error='.$curlError);
             return $this->_jsonResponse(false, array(
-                'message' => __('AI error: Could not connect to the configured AI provider.'),
-                'error_type' => 'ai_connection',
-                'duration_ms' => $durationMs
+            'message' => __('AI error: Could not connect to the configured AI provider.'),
+            'error_type' => 'ai_connection',
+            'duration_ms' => $durationMs
             ), 503);
         }
         $parsed = $this->_parseAiProviderResponse($raw);
@@ -1264,46 +1263,46 @@ class AisController extends AppController {
                 $message = __('The configured AI provider returned HTTP %s but no readable message content.', $status);
             }
             CakeLog::write('warning', 'General AI response could not be read. provider='.$provider
-                .' status='.$status.' content_type='.$contentType.' format='.$parsed['format']);
+            .' status='.$status.' content_type='.$contentType.' format='.$parsed['format']);
             return $this->_jsonResponse(false, array(
-                'message' => __('AI error: %s', $message),
-                'error_type' => $status === 401 || $status === 403 ? 'ai_provider_auth' : 'ai_provider',
-                'duration_ms' => $durationMs
+            'message' => __('AI error: %s', $message),
+            'error_type' => $status === 401 || $status === 403 ? 'ai_provider_auth' : 'ai_provider',
+            'duration_ms' => $durationMs
             ), $status === 401 || $status === 403 ? 401 : 502);
         }
         $documentDraftReady = $isDocumentDraftRequest && strlen(trim($answer)) >= 80 && $this->_historyId !== '';
         return $this->_jsonResponse(true, array(
-            'message' => $answer,
-            'intent' => 'message',
-            'operation' => 'message',
-            'form_name' => '',
-            'field_details' => array(),
-            'proposed_fields' => array(),
-            'insert_after' => '',
-            'target_field' => '',
-            'new_field_label' => '',
-            'options_to_add' => array(),
-            'options_to_remove' => array(),
-            'field_changes' => array(),
-            'fields_to_remove' => array(),
-            'child_tables' => array(),
-            'warnings' => array(),
-            'model' => $model,
-            'duration_ms' => $durationMs,
-            'read_only' => true,
-            'general_assistance' => true,
-            'assistant_mode' => $assistantMode,
-            'document_draft' => $documentDraftReady,
-            'artifact_ready' => $documentDraftReady,
-            'artifact_format' => $documentDraftReady ? $artifactFormat : '',
-            'artifact_download_url' => $documentDraftReady
-                ? Router::url(array('controller' => 'ais', 'action' => 'download_artifact', $this->_historyId, $artifactFormat), true)
-                : '',
-            'sources' => $manual['sources'],
-            'images' => $manual['images'],
-            'auto_apply' => false,
-            'apply_token' => '',
-            'apply_url' => ''
+        'message' => $answer,
+        'intent' => 'message',
+        'operation' => 'message',
+        'form_name' => '',
+        'field_details' => array(),
+        'proposed_fields' => array(),
+        'insert_after' => '',
+        'target_field' => '',
+        'new_field_label' => '',
+        'options_to_add' => array(),
+        'options_to_remove' => array(),
+        'field_changes' => array(),
+        'fields_to_remove' => array(),
+        'child_tables' => array(),
+        'warnings' => array(),
+        'model' => $model,
+        'duration_ms' => $durationMs,
+        'read_only' => true,
+        'general_assistance' => true,
+        'assistant_mode' => $assistantMode,
+        'document_draft' => $documentDraftReady,
+        'artifact_ready' => $documentDraftReady,
+        'artifact_format' => $documentDraftReady ? $artifactFormat : '',
+        'artifact_download_url' => $documentDraftReady
+        ? Router::url(array('controller' => 'ais', 'action' => 'download_artifact', $this->_historyId, $artifactFormat), true)
+        : '',
+        'sources' => $manual['sources'],
+        'images' => $manual['images'],
+        'auto_apply' => false,
+        'apply_token' => '',
+        'apply_url' => ''
         ));
     }
 
@@ -1313,49 +1312,55 @@ class AisController extends AppController {
         if (!filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) return false;
         $long = sprintf('%u', ip2long($host));
         return ($long >= sprintf('%u', ip2long('127.0.0.0')) && $long <= sprintf('%u', ip2long('127.255.255.255')))
-            || ($long >= sprintf('%u', ip2long('10.0.0.0')) && $long <= sprintf('%u', ip2long('10.255.255.255')))
-            || ($long >= sprintf('%u', ip2long('172.16.0.0')) && $long <= sprintf('%u', ip2long('172.31.255.255')))
-            || ($long >= sprintf('%u', ip2long('192.168.0.0')) && $long <= sprintf('%u', ip2long('192.168.255.255')));
+        || ($long >= sprintf('%u', ip2long('10.0.0.0')) && $long <= sprintf('%u', ip2long('10.255.255.255')))
+        || ($long >= sprintf('%u', ip2long('172.16.0.0')) && $long <= sprintf('%u', ip2long('172.31.255.255')))
+        || ($long >= sprintf('%u', ip2long('192.168.0.0')) && $long <= sprintf('%u', ip2long('192.168.255.255')));
     }
 
     private function _generatedFormChatContext($sourceController, $customTableId, $qcDocumentId, $companyId, $includeSensitiveContext, $isLocalProvider) {
         $conditions = array('CustomTable.table_name' => $sourceController);
         if ($customTableId !== '') $conditions['CustomTable.id'] = $customTableId;
         if ($companyId) $conditions['CustomTable.company_id'] = $companyId;
-        $customTable = $this->CustomTable->find('first', array('recursive' => -1, 'conditions' => $conditions));
+        if(!$this->_is_super_user() && !$this->Session->read('User.is_mr')){
+            $conditions[] = array('OR'=>array(
+                '('.$this->_custom_table_access_virtual_field().') > 0',
+                '('.$this->_qc_document_access_virtual_field().') > 0'
+            ));
+        }
+        $customTable = $this->CustomTable->find('first', array('recursive' => 0, 'conditions' => $conditions));
         if (!$customTable) return array('form_context_warning' => 'The current generated form definition could not be loaded.');
 
         $table = $customTable['CustomTable'];
         $fields = json_decode(isset($table['fields']) ? $table['fields'] : '', true);
         if (!is_array($fields)) $fields = array();
         $context = array(
-            'form' => array(
-                'controller' => $sourceController,
-                'name' => $includeSensitiveContext && isset($table['name']) ? $table['name'] : Inflector::humanize($sourceController),
-                'field_count' => count($fields),
-                'fields_shared_with_ai' => (bool)$includeSensitiveContext
-            )
+        'form' => array(
+        'controller' => $sourceController,
+        'name' => $includeSensitiveContext && isset($table['name']) ? $table['name'] : Inflector::humanize($sourceController),
+        'field_count' => count($fields),
+        'fields_shared_with_ai' => (bool)$includeSensitiveContext
+        )
         );
         if ($includeSensitiveContext) {
             $context['form']['fields'] = array();
             foreach ($fields as $field) {
                 if (empty($field['field_name'])) continue;
                 $context['form']['fields'][] = array(
-                    'name' => $field['field_name'],
-                    'label' => !empty($field['field_label']) ? $this->_decodeFieldLabel($field['field_label']) : Inflector::humanize($field['field_name']),
-                    'type' => isset($field['data_type']) ? $field['data_type'] : '',
-                    'mandatory' => !empty($field['mandatory']) || !empty($field['mandetory']),
-                    'index' => !empty($field['index_show']),
-                    'linked_to' => isset($field['linked_to']) ? $field['linked_to'] : '-1',
-                    'tab' => isset($field['tab_name']) ? trim($field['tab_name']) : '',
-                    'options' => !empty($field['csvoptions']) ? array_values(array_filter(array_map('trim', explode(',', $field['csvoptions'])))) : array()
+                'name' => $field['field_name'],
+                'label' => !empty($field['field_label']) ? $this->_decodeFieldLabel($field['field_label']) : Inflector::humanize($field['field_name']),
+                'type' => isset($field['data_type']) ? $field['data_type'] : '',
+                'mandatory' => !empty($field['mandatory']) || !empty($field['mandetory']),
+                'index' => !empty($field['index_show']),
+                'linked_to' => isset($field['linked_to']) ? $field['linked_to'] : '-1',
+                'tab' => isset($field['tab_name']) ? trim($field['tab_name']) : '',
+                'options' => !empty($field['csvoptions']) ? array_values(array_filter(array_map('trim', explode(',', $field['csvoptions'])))) : array()
                 );
             }
         } else {
             $context['form']['privacy_notice'] = 'The remote AI provider was not given the field schema because the user did not opt in.';
         }
 
-        if ($qcDocumentId === '' && !empty($table['qc_document_id'])) $qcDocumentId = $table['qc_document_id'];
+        $qcDocumentId = !empty($table['qc_document_id']) ? $table['qc_document_id'] : '';
         $document = array();
         if ($qcDocumentId !== '') {
             $documentConditions = array('QcDocument.id' => $qcDocumentId);
@@ -1369,18 +1374,18 @@ class AisController extends AppController {
             $context['document'] = array('available' => false, 'warning' => 'No linked Quality Document was found for this form.');
         } elseif (!$includeSensitiveContext) {
             $context['document'] = array(
-                'available' => true,
-                'content_shared_with_ai' => false,
-                'privacy_notice' => 'The remote AI provider was not given the linked document because the user did not opt in.'
+            'available' => true,
+            'content_shared_with_ai' => false,
+            'privacy_notice' => 'The remote AI provider was not given the linked document because the user did not opt in.'
             );
         } else {
             $context['document'] = array(
-                'available' => true,
-                'title' => isset($documentData['title']) ? $documentData['title'] : '',
-                'document_number' => isset($documentData['document_number']) ? $documentData['document_number'] : '',
-                'revision_number' => isset($documentData['revision_number']) ? $documentData['revision_number'] : '',
-                'file_type' => isset($documentData['file_type']) ? $documentData['file_type'] : '',
-                'content_shared_with_ai' => true
+            'available' => true,
+            'title' => isset($documentData['title']) ? $documentData['title'] : '',
+            'document_number' => isset($documentData['document_number']) ? $documentData['document_number'] : '',
+            'revision_number' => isset($documentData['revision_number']) ? $documentData['revision_number'] : '',
+            'file_type' => isset($documentData['file_type']) ? $documentData['file_type'] : '',
+            'content_shared_with_ai' => true
             );
             $reference = $this->_prepareQcDocumentReference($qcDocumentId, $companyId, false);
             if (!empty($reference['success'])) {
@@ -1395,10 +1400,10 @@ class AisController extends AppController {
 
     private function _generatedFormSharingContext($table, $document, $companyId, $includeNames) {
         $roles = array(
-            'creators' => !empty($table['creators']) ? $table['creators'] : (isset($document['editors']) ? $document['editors'] : ''),
-            'viewers' => !empty($table['viewers']) ? $table['viewers'] : (isset($document['user_id']) ? $document['user_id'] : ''),
-            'editors' => !empty($table['editors']) ? $table['editors'] : (isset($document['editors']) ? $document['editors'] : ''),
-            'approvers' => !empty($table['approvers']) ? $table['approvers'] : (isset($document['editors']) ? $document['editors'] : '')
+        'creators' => !empty($table['creators']) ? $table['creators'] : (isset($document['editors']) ? $document['editors'] : ''),
+        'viewers' => !empty($table['viewers']) ? $table['viewers'] : (isset($document['user_id']) ? $document['user_id'] : ''),
+        'editors' => !empty($table['editors']) ? $table['editors'] : (isset($document['editors']) ? $document['editors'] : ''),
+        'approvers' => !empty($table['approvers']) ? $table['approvers'] : (isset($document['editors']) ? $document['editors'] : '')
         );
         $idsByRole = array();
         $allIds = array();
@@ -1410,8 +1415,8 @@ class AisController extends AppController {
         if (!$includeNames) {
             foreach ($idsByRole as $role => $ids) $result[$role.'_count'] = count(array_unique($ids));
             $result['document_scope'] = array(
-                'branch_count' => count(array_unique($this->_jsonIdList(isset($document['branches']) ? $document['branches'] : ''))),
-                'department_count' => count(array_unique($this->_jsonIdList(isset($document['departments']) ? $document['departments'] : '')))
+            'branch_count' => count(array_unique($this->_jsonIdList(isset($document['branches']) ? $document['branches'] : ''))),
+            'department_count' => count(array_unique($this->_jsonIdList(isset($document['departments']) ? $document['departments'] : '')))
             );
             $result['privacy'] = 'Only sharing counts are provided to remote AI; names and identifiers are excluded.';
             return $result;
@@ -1445,9 +1450,9 @@ class AisController extends AppController {
             $conditions = array($modelName.'.id' => $ids);
             if ($companyId) $conditions[$modelName.'.company_id'] = $companyId;
             $result[$field] = array_values($this->{$modelName}->find('list', array(
-                'recursive' => -1,
-                'fields' => array($modelName.'.id', $modelName.'.name'),
-                'conditions' => $conditions
+            'recursive' => -1,
+            'fields' => array($modelName.'.id', $modelName.'.name'),
+            'conditions' => $conditions
             )));
         }
         return $result;
@@ -1481,67 +1486,67 @@ class AisController extends AppController {
         $json = json_encode($context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         if (is_string($json) && strlen($json) <= $maximumBytes) return $json;
         return json_encode(array(
-            'form' => array(
-                'controller' => isset($context['form']['controller']) ? $context['form']['controller'] : '',
-                'name' => isset($context['form']['name']) ? $context['form']['name'] : '',
-                'field_count' => isset($context['form']['field_count']) ? $context['form']['field_count'] : 0,
-                'fields' => !empty($context['form']['fields']) ? array_slice($context['form']['fields'], 0, 20) : array(),
-                'fields_truncated' => true
-            ),
-            'sharing' => isset($context['sharing']) ? $context['sharing'] : array(),
-            'document' => array(
-                'available' => !empty($context['document']['available']),
-                'title' => isset($context['document']['title']) ? $context['document']['title'] : '',
-                'document_number' => isset($context['document']['document_number']) ? $context['document']['document_number'] : '',
-                'revision_number' => isset($context['document']['revision_number']) ? $context['document']['revision_number'] : '',
-                'content_shared_with_ai' => !empty($context['document']['content_shared_with_ai']),
-                'content' => !empty($context['document']['content']) ? $this->_boundedText($context['document']['content'], 3000) : '',
-                'content_truncated' => true
-            )
+        'form' => array(
+        'controller' => isset($context['form']['controller']) ? $context['form']['controller'] : '',
+        'name' => isset($context['form']['name']) ? $context['form']['name'] : '',
+        'field_count' => isset($context['form']['field_count']) ? $context['form']['field_count'] : 0,
+        'fields' => !empty($context['form']['fields']) ? array_slice($context['form']['fields'], 0, 20) : array(),
+        'fields_truncated' => true
+        ),
+        'sharing' => isset($context['sharing']) ? $context['sharing'] : array(),
+        'document' => array(
+        'available' => !empty($context['document']['available']),
+        'title' => isset($context['document']['title']) ? $context['document']['title'] : '',
+        'document_number' => isset($context['document']['document_number']) ? $context['document']['document_number'] : '',
+        'revision_number' => isset($context['document']['revision_number']) ? $context['document']['revision_number'] : '',
+        'content_shared_with_ai' => !empty($context['document']['content_shared_with_ai']),
+        'content' => !empty($context['document']['content']) ? $this->_boundedText($context['document']['content'], 3000) : '',
+        'content_truncated' => true
+        )
         ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     /**
-     * Select the most relevant source sections from the centrally generated
-     * FlinkISO AI manual. Client installations fetch only this public page and
-     * retain no copy of its content.
-     */
+    * Select the most relevant source sections from the centrally generated
+    * FlinkISO AI manual. Client installations fetch only this public page and
+    * retain no copy of its content.
+    */
     private function _manualContextForController($sourceController, $prompt) {
         $commonMasters = array(
-            array('title' => 'Application Masters', 'url' => 'https://www.flinkiso.com/manual/qms-application-masters.html', 'keywords' => 'branch branches department departments designation designations employee employees master masters')
+        array('title' => 'Application Masters', 'url' => 'https://www.flinkiso.com/manual/qms-application-masters.html', 'keywords' => 'branch branches department departments designation designations employee employees master masters')
         );
         $map = array(
-            'branches' => $commonMasters,
-            'departments' => $commonMasters,
-            'designations' => $commonMasters,
-            'employees' => $commonMasters,
-            'users' => array(
-                array('title' => 'User Creation', 'url' => 'https://www.flinkiso.com/manual/user-creation.html', 'keywords' => 'add create invite user login account employee'),
-                array('title' => 'User Access Controls', 'url' => 'https://www.flinkiso.com/manual/user-access-controls.html', 'keywords' => 'access control permission permissions role roles restrict security')
-            ),
-            'standards' => array(
-                array('title' => 'QMS Standards and Clauses', 'url' => 'https://www.flinkiso.com/manual/qms-standards-clauses.html', 'keywords' => 'standard standards clause clauses add import iso')
-            ),
-            'qc_document_categories' => array(
-                array('title' => 'Document Management', 'url' => 'https://www.flinkiso.com/manual/document-management.html', 'keywords' => 'category categories document documents type classification')
-            ),
-            'approval_processes' => array(
-                array('title' => 'Approval Process', 'url' => 'https://www.flinkiso.com/manual/approval-process.html', 'keywords' => 'approval approve process workflow step steps approver')
-            ),
-            'qc_documents' => array(
-                array('title' => 'Document Management', 'url' => 'https://www.flinkiso.com/manual/document-management.html', 'keywords' => 'add create upload document category approve publish'),
-                array('title' => 'Document Sharing', 'url' => 'https://www.flinkiso.com/manual/document-sharing.html', 'keywords' => 'share sharing access distribute recipient'),
-                array('title' => 'Document Version Control', 'url' => 'https://www.flinkiso.com/manual/document-version-control.html', 'keywords' => 'version revision revise history change control')
-            ),
-            'custom_tables' => array(
-                array('title' => 'Build Custom HTML Forms', 'url' => 'https://www.flinkiso.com/features/build-custom-html-forms.html', 'keywords' => 'build create form forms overview'),
-                array('title' => 'Custom HTML Forms', 'url' => 'https://www.flinkiso.com/manual/custom-html-forms.html', 'keywords' => 'html form forms build create'),
-                array('title' => 'Custom Forms', 'url' => 'https://www.flinkiso.com/manual/custom-forms.html', 'keywords' => 'custom form forms create manage'),
-                array('title' => 'Custom Form Layouts', 'url' => 'https://www.flinkiso.com/manual/custom-form-layouts.html', 'keywords' => 'layout layouts tab tabs width resize position drag'),
-                array('title' => 'Available Fields', 'url' => 'https://www.flinkiso.com/manual/available-fields.html', 'keywords' => 'field fields type types text date dropdown checkbox radio textarea linked'),
-                array('title' => 'Field Settings', 'url' => 'https://www.flinkiso.com/manual/field-settings.html', 'keywords' => 'field setting settings mandatory default index link linked option options edit'),
-                array('title' => 'Adding Data to Forms', 'url' => 'https://www.flinkiso.com/manual/adding-data-to-forms.html', 'keywords' => 'add data record records entry submit fill')
-            )
+        'branches' => $commonMasters,
+        'departments' => $commonMasters,
+        'designations' => $commonMasters,
+        'employees' => $commonMasters,
+        'users' => array(
+        array('title' => 'User Creation', 'url' => 'https://www.flinkiso.com/manual/user-creation.html', 'keywords' => 'add create invite user login account employee'),
+        array('title' => 'User Access Controls', 'url' => 'https://www.flinkiso.com/manual/user-access-controls.html', 'keywords' => 'access control permission permissions role roles restrict security')
+        ),
+        'standards' => array(
+        array('title' => 'QMS Standards and Clauses', 'url' => 'https://www.flinkiso.com/manual/qms-standards-clauses.html', 'keywords' => 'standard standards clause clauses add import iso')
+        ),
+        'qc_document_categories' => array(
+        array('title' => 'Document Management', 'url' => 'https://www.flinkiso.com/manual/document-management.html', 'keywords' => 'category categories document documents type classification')
+        ),
+        'approval_processes' => array(
+        array('title' => 'Approval Process', 'url' => 'https://www.flinkiso.com/manual/approval-process.html', 'keywords' => 'approval approve process workflow step steps approver')
+        ),
+        'qc_documents' => array(
+        array('title' => 'Document Management', 'url' => 'https://www.flinkiso.com/manual/document-management.html', 'keywords' => 'add create upload document category approve publish'),
+        array('title' => 'Document Sharing', 'url' => 'https://www.flinkiso.com/manual/document-sharing.html', 'keywords' => 'share sharing access distribute recipient'),
+        array('title' => 'Document Version Control', 'url' => 'https://www.flinkiso.com/manual/document-version-control.html', 'keywords' => 'version revision revise history change control')
+        ),
+        'custom_tables' => array(
+        array('title' => 'Build Custom HTML Forms', 'url' => 'https://www.flinkiso.com/features/build-custom-html-forms.html', 'keywords' => 'build create form forms overview'),
+        array('title' => 'Custom HTML Forms', 'url' => 'https://www.flinkiso.com/manual/custom-html-forms.html', 'keywords' => 'html form forms build create'),
+        array('title' => 'Custom Forms', 'url' => 'https://www.flinkiso.com/manual/custom-forms.html', 'keywords' => 'custom form forms create manage'),
+        array('title' => 'Custom Form Layouts', 'url' => 'https://www.flinkiso.com/manual/custom-form-layouts.html', 'keywords' => 'layout layouts tab tabs width resize position drag'),
+        array('title' => 'Available Fields', 'url' => 'https://www.flinkiso.com/manual/available-fields.html', 'keywords' => 'field fields type types text date dropdown checkbox radio textarea linked'),
+        array('title' => 'Field Settings', 'url' => 'https://www.flinkiso.com/manual/field-settings.html', 'keywords' => 'field setting settings mandatory default index link linked option options edit'),
+        array('title' => 'Adding Data to Forms', 'url' => 'https://www.flinkiso.com/manual/adding-data-to-forms.html', 'keywords' => 'add data record records entry submit fill')
+        )
         );
 
         $controller = strtolower(trim((string)$sourceController));
@@ -1580,14 +1585,14 @@ class AisController extends AppController {
         $url = 'https://www.flinkiso.com/ai-manual/ai-manual.html';
         $curl = curl_init();
         curl_setopt_array($curl, array(
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_CONNECTTIMEOUT => 3,
-            CURLOPT_TIMEOUT => 12,
-            CURLOPT_ENCODING => '',
-            CURLOPT_HTTPHEADER => array('Accept: text/html'),
-            CURLOPT_USERAGENT => 'FlinkISO-AI-Manual/1.0'
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_CONNECTTIMEOUT => 3,
+        CURLOPT_TIMEOUT => 12,
+        CURLOPT_ENCODING => '',
+        CURLOPT_HTTPHEADER => array('Accept: text/html'),
+        CURLOPT_USERAGENT => 'FlinkISO-AI-Manual/1.0'
         ));
         $html = curl_exec($curl);
         $status = (int)curl_getinfo($curl, CURLINFO_HTTP_CODE);
@@ -1621,8 +1626,8 @@ class AisController extends AppController {
             }
             if ($text === '') continue;
             $text = function_exists('mb_strcut')
-                ? mb_strcut($text, 0, $remaining, 'UTF-8')
-                : substr($text, 0, $remaining);
+            ? mb_strcut($text, 0, $remaining, 'UTF-8')
+            : substr($text, 0, $remaining);
             $parts[] = "OFFICIAL SOURCE: ".$source['title']."\nURL: ".$sourceUrl."\n".$text;
             $remaining -= strlen($text);
         }
@@ -1754,7 +1759,7 @@ class AisController extends AppController {
                 $text .= $block;
             } elseif (is_array($block) && isset($block['text'])) {
                 $text .= is_array($block['text']) && isset($block['text']['value'])
-                    ? (string)$block['text']['value'] : (string)$block['text'];
+                ? (string)$block['text']['value'] : (string)$block['text'];
             } elseif (is_array($block) && isset($block['content'])) {
                 $text .= $this->_aiContentText($block['content']);
             }
@@ -2071,15 +2076,15 @@ class AisController extends AppController {
                 if (empty($childField['field_name'])) continue;
                 $childLabel = isset($childField['field_label']) ? $this->_decodeFieldLabel($childField['field_label']) : '';
                 $contextChildFields[] = array(
-                    'field_name' => $childField['field_name'],
-                    'field_label' => $childLabel !== '' ? $childLabel : Inflector::humanize($childField['field_name']),
-                    'data_type' => isset($childField['data_type']) ? $childField['data_type'] : ''
+                'field_name' => $childField['field_name'],
+                'field_label' => $childLabel !== '' ? $childLabel : Inflector::humanize($childField['field_name']),
+                'data_type' => isset($childField['data_type']) ? $childField['data_type'] : ''
                 );
             }
             $contextChildren[] = array(
-                'name' => isset($child['name']) ? $child['name'] : '',
-                'table_name' => isset($child['table_name']) ? $child['table_name'] : '',
-                'fields' => $contextChildFields
+            'name' => isset($child['name']) ? $child['name'] : '',
+            'table_name' => isset($child['table_name']) ? $child['table_name'] : '',
+            'fields' => $contextChildFields
             );
         }
 
@@ -2201,9 +2206,9 @@ class AisController extends AppController {
 
     private function _isAiVisualDocumentExtension($extension) {
         return in_array(strtolower((string)$extension), array(
-            'pdf', 'doc', 'docx', 'docm', 'dot', 'dotx', 'rtf', 'odt', 'ott',
-            'xls', 'xlsx', 'xlsm', 'xlsb', 'ods', 'csv',
-            'ppt', 'pptx', 'pptm', 'pps', 'ppsx', 'odp'
+        'pdf', 'doc', 'docx', 'docm', 'dot', 'dotx', 'rtf', 'odt', 'ott',
+        'xls', 'xlsx', 'xlsm', 'xlsb', 'ods', 'csv',
+        'ppt', 'pptx', 'pptm', 'pps', 'ppsx', 'odp'
         ), true);
     }
 
@@ -2211,8 +2216,8 @@ class AisController extends AppController {
         $converter = Configure::read('AI.document_converter') === 'local' ? 'local' : 'onlyoffice';
         CakeLog::write('info', 'AI document conversion started with '.$converter.' for '.basename($documentPath).'.');
         $result = $converter === 'local'
-            ? $this->_renderAiDocumentLocally($documentPath)
-            : $this->_renderAiDocumentWithOnlyOffice($documentPath);
+        ? $this->_renderAiDocumentLocally($documentPath)
+        : $this->_renderAiDocumentWithOnlyOffice($documentPath);
         if (!empty($result['success'])) {
             CakeLog::write('info', 'AI document conversion completed with '.$converter.' ('.count($result['images']).' page images).');
         } else {
@@ -2233,29 +2238,29 @@ class AisController extends AppController {
 
         $pixels = max(600, min(2400, (int)Configure::read('AI.vision_page_pixels')));
         $request = array(
-            'async' => false,
-            'url' => $sourceUrl,
-            'outputtype' => 'jpg',
-            'filetype' => strtolower(pathinfo($documentPath, PATHINFO_EXTENSION)),
-            'title' => basename($documentPath),
-            'key' => $this->_generate_onlyoffice_key($this->_historyId.date('YmdHis')),
-            'thumbnail' => array(
-                'aspect' => 1,
-                'first' => false,
-                'height' => $pixels,
-                'width' => $pixels
-            )
+        'async' => false,
+        'url' => $sourceUrl,
+        'outputtype' => 'jpg',
+        'filetype' => strtolower(pathinfo($documentPath, PATHINFO_EXTENSION)),
+        'title' => basename($documentPath),
+        'key' => $this->_generate_onlyoffice_key($this->_historyId.date('YmdHis')),
+        'thumbnail' => array(
+        'aspect' => 1,
+        'first' => false,
+        'height' => $pixels,
+        'width' => $pixels
+        )
         );
         $request['token'] = $this->generateJWT($request);
         $endpoint = $conversionBase.'/ConvertService.ashx';
         $curl = curl_init($endpoint);
         curl_setopt_array($curl, array(
-            CURLOPT_POST => true,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => 10,
-            CURLOPT_TIMEOUT => 180,
-            CURLOPT_HTTPHEADER => array('Accept: application/json', 'Content-Type: application/json'),
-            CURLOPT_POSTFIELDS => json_encode($request)
+        CURLOPT_POST => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_TIMEOUT => 180,
+        CURLOPT_HTTPHEADER => array('Accept: application/json', 'Content-Type: application/json'),
+        CURLOPT_POSTFIELDS => json_encode($request)
         ));
         $response = curl_exec($curl);
         $curlError = curl_error($curl);
@@ -2280,10 +2285,10 @@ class AisController extends AppController {
         if (!$handle) return $this->_aiVisionError(__('FlinkISO could not prepare temporary image storage.'), 500);
         $download = curl_init($fileUrl);
         curl_setopt_array($download, array(
-            CURLOPT_FILE => $handle,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_CONNECTTIMEOUT => 10,
-            CURLOPT_TIMEOUT => 180
+        CURLOPT_FILE => $handle,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_TIMEOUT => 180
         ));
         $downloaded = curl_exec($download);
         $downloadError = curl_error($download);
@@ -2353,8 +2358,8 @@ class AisController extends AppController {
             $output = array();
             $status = 1;
             $command = escapeshellarg($officeTool).' --headless --nologo --nodefault --nofirststartwizard '.
-                escapeshellarg('-env:UserInstallation=file://'.$profile).' --convert-to pdf --outdir '.
-                escapeshellarg($directory).' '.escapeshellarg($documentPath).' 2>&1';
+            escapeshellarg('-env:UserInstallation=file://'.$profile).' --convert-to pdf --outdir '.
+            escapeshellarg($directory).' '.escapeshellarg($documentPath).' 2>&1';
             exec($command, $output, $status);
             $converted = glob($directory.'*.pdf');
             if ($status !== 0 || !$converted) {
@@ -2371,7 +2376,7 @@ class AisController extends AppController {
         $output = array();
         $status = 1;
         $command = escapeshellarg($pdfTool).' -f 1 -l '.$maximumPages.' -jpeg -jpegopt quality=85 -scale-to '.$pixels.' '.
-            escapeshellarg($pdfPath).' '.escapeshellarg($prefix).' 2>&1';
+        escapeshellarg($pdfPath).' '.escapeshellarg($prefix).' 2>&1';
         exec($command, $output, $status);
         $pages = glob($prefix.'-*.jpg');
         if ($status !== 0 || !$pages) {
@@ -2412,8 +2417,8 @@ class AisController extends AppController {
                 return $this->_aiVisionError(__('The selected document produced more than 32 MB of page images.'), 413);
             }
             $images[] = array(
-                'mime_type' => $isPng ? 'image/png' : 'image/jpeg',
-                'data' => base64_encode($bytes)
+            'mime_type' => $isPng ? 'image/png' : 'image/jpeg',
+            'data' => base64_encode($bytes)
             );
         }
         if (!$images) return $this->_aiVisionError(__('The document converter did not produce readable page images.'), 422);
@@ -2427,32 +2432,32 @@ class AisController extends AppController {
     private function _prepareQcDocumentReference($qcDocumentId, $companyId, $includeBinary = true) {
         if ($qcDocumentId === '') {
             return array(
-                'success' => false,
-                'message' => __('This form is not linked to a Quality Document.'),
-                'status' => 422
+            'success' => false,
+            'message' => __('This form is not linked to a Quality Document.'),
+            'status' => 422
             );
         }
 
         $conditions = array('QcDocument.id' => $qcDocumentId);
         if ($companyId) $conditions['QcDocument.company_id'] = $companyId;
         $qcDocument = $this->QcDocument->find('first', array(
-            'recursive' => -1,
-            'conditions' => $conditions
+        'recursive' => -1,
+        'conditions' => $conditions
         ));
         if (!$qcDocument) {
             return array(
-                'success' => false,
-                'message' => __('The linked Quality Document could not be found.'),
-                'status' => 404
+            'success' => false,
+            'message' => __('The linked Quality Document could not be found.'),
+            'status' => 404
             );
         }
 
         $documentPath = $this->_qcDocumentPath($qcDocument);
         if ($documentPath === '') {
             return array(
-                'success' => false,
-                'message' => __('The linked Quality Document file could not be found on the FlinkISO server.'),
-                'status' => 404
+            'success' => false,
+            'message' => __('The linked Quality Document file could not be found on the FlinkISO server.'),
+            'status' => 404
             );
         }
 
@@ -2461,9 +2466,9 @@ class AisController extends AppController {
         $extracted = $this->_extractDocumentText($documentPath);
         if (!$extracted['success'] && !$isVisualDocument) {
             return array(
-                'success' => false,
-                'message' => $extracted['message'],
-                'status' => 422
+            'success' => false,
+            'message' => $extracted['message'],
+            'status' => 422
             );
         }
 
@@ -2473,17 +2478,17 @@ class AisController extends AppController {
             $documentBytes = @filesize($documentPath);
             if ($documentBytes === false || $documentBytes <= 0 || $documentBytes > 25 * 1024 * 1024) {
                 return array(
-                    'success' => false,
-                    'message' => __('The linked Quality Document must be smaller than 25 MB for visual AI analysis.'),
-                    'status' => 413
+                'success' => false,
+                'message' => __('The linked Quality Document must be smaller than 25 MB for visual AI analysis.'),
+                'status' => 413
                 );
             }
             $rendered = $this->_prepareAiVisionImages($documentPath);
             if (!$rendered['success']) {
                 return array(
-                    'success' => false,
-                    'message' => $rendered['message'],
-                    'status' => $rendered['status']
+                'success' => false,
+                'message' => $rendered['message'],
+                'status' => $rendered['status']
                 );
             }
             $documentImages = $rendered['images'];
@@ -2491,22 +2496,22 @@ class AisController extends AppController {
 
         $document = $qcDocument['QcDocument'];
         return array(
-            'success' => true,
-            'message' => '',
-            'status' => 200,
-            'title' => $document['title'],
-            'text' => $extracted['success'] ? $extracted['text'] : '',
-            'file_base64' => $documentFileBase64,
-            'images' => $documentImages,
-            'context' => array(
-                'id' => $document['id'],
-                'title' => $document['title'],
-                'document_number' => $document['document_number'],
-                'revision_number' => $document['revision_number'],
-                'file_type' => $document['file_type'],
-                'source_file' => basename($documentPath),
-                'text_extraction_warning' => $extracted['success'] ? '' : $extracted['message']
-            )
+        'success' => true,
+        'message' => '',
+        'status' => 200,
+        'title' => $document['title'],
+        'text' => $extracted['success'] ? $extracted['text'] : '',
+        'file_base64' => $documentFileBase64,
+        'images' => $documentImages,
+        'context' => array(
+        'id' => $document['id'],
+        'title' => $document['title'],
+        'document_number' => $document['document_number'],
+        'revision_number' => $document['revision_number'],
+        'file_type' => $document['file_type'],
+        'source_file' => basename($documentPath),
+        'text_extraction_warning' => $extracted['success'] ? '' : $extracted['message']
+        )
         );
     }
 
@@ -3363,12 +3368,12 @@ private function _createAiWordDocument($path, $title, $content) {
         }
     }
     $documentXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        .'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'
-        .implode('', $paragraphs)
-        .'<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr>'
-        .'</w:body></w:document>';
+    .'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'
+            .implode('', $paragraphs)
+            .'<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr>'
+            .'</w:body></w:document>';
     $stylesXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        .'<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+    .'<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
         .'<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:rPr><w:sz w:val="22"/></w:rPr></w:style>'
         .'<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:pPr><w:jc w:val="center"/><w:spacing w:after="360"/></w:pPr><w:rPr><w:b/><w:sz w:val="36"/></w:rPr></w:style>'
         .'<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="280" w:after="120"/></w:pPr><w:rPr><w:b/><w:sz w:val="30"/></w:rPr></w:style>'
@@ -3377,18 +3382,18 @@ private function _createAiWordDocument($path, $title, $content) {
         .'<w:style w:type="paragraph" w:styleId="ListParagraph"><w:name w:val="List Paragraph"/><w:basedOn w:val="Normal"/><w:pPr><w:ind w:left="720" w:hanging="360"/></w:pPr></w:style>'
         .'</w:styles>';
     $contentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        .'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    .'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
         .'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
         .'<Default Extension="xml" ContentType="application/xml"/>'
         .'<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'
         .'<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>'
         .'</Types>';
     $rootRelationships = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        .'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    .'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
         .'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'
         .'</Relationships>';
     $documentRelationships = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        .'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    .'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
         .'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
         .'</Relationships>';
 
@@ -3409,10 +3414,10 @@ private function _aiMarkdownHtml($content) {
         $trimmed = trim($line);
         if (preg_match('/^[-*]\s+(.+)$/', $trimmed, $match)) {
             if (!$inList) { $html .= '<ul>'; $inList = true; }
-            $html .= '<li>'.$this->_aiHtmlInline($match[1]).'</li>';
-            continue;
-        }
-        if ($inList) { $html .= '</ul>'; $inList = false; }
+                $html .= '<li>'.$this->_aiHtmlInline($match[1]).'</li>';
+                continue;
+            }
+            if ($inList) { $html .= '</ul>'; $inList = false; }
         if ($trimmed === '') { $html .= '<br>'; continue; }
         if (preg_match('/^(#{1,3})\s+(.+)$/', $trimmed, $match)) {
             $level = min(3, strlen($match[1]));
@@ -3422,7 +3427,7 @@ private function _aiMarkdownHtml($content) {
         }
     }
     if ($inList) $html .= '</ul>';
-    return $html;
+return $html;
 }
 
 private function _aiHtmlInline($text) {
@@ -3504,12 +3509,12 @@ private function _createAiSpreadsheet($path, $title, $content) {
         $sheetRows .= '<row r="'.($rowIndex + 1).'">'.$cells.'</row>';
     }
     $worksheet = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        .'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'.$sheetRows.'</sheetData></worksheet>';
+    .'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'.$sheetRows.'</sheetData></worksheet>';
     $workbook = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        .'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+    .'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
         .'<sheets><sheet name="AI Generated Content" sheetId="1" r:id="rId1"/></sheets></workbook>';
     $contentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        .'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    .'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
         .'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>'
         .'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
         .'<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>';
@@ -3567,7 +3572,7 @@ private function _createAiPresentation($path, $title, $content) {
             .'</draw:page>';
     }
     $fodp = '<?xml version="1.0" encoding="UTF-8"?>'
-        .'<office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:presentation="urn:oasis:names:tc:opendocument:xmlns:presentation:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" office:mimetype="application/vnd.oasis.opendocument.presentation" office:version="1.2">'
+    .'<office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:presentation="urn:oasis:names:tc:opendocument:xmlns:presentation:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" office:mimetype="application/vnd.oasis.opendocument.presentation" office:version="1.2">'
         .'<office:styles><style:style style:name="P1" style:family="paragraph"><style:text-properties fo:font-size="24pt" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" fo:font-weight="bold"/></style:style><style:style style:name="P2" style:family="paragraph"><style:text-properties fo:font-size="18pt" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"/></style:style></office:styles>'
         .'<office:automatic-styles><style:page-layout style:name="PM1"><style:page-layout-properties fo:page-width="28cm" fo:page-height="15.75cm" style:print-orientation="landscape" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"/></style:page-layout><style:style style:name="dp1" style:family="drawing-page"/></office:automatic-styles>'
         .'<office:master-styles><style:master-page style:name="Default" style:page-layout-name="PM1"/></office:master-styles>'
@@ -3586,12 +3591,12 @@ private function _createAiPresentation($path, $title, $content) {
 
 private function _jsonResponse($success, $data, $statusCode = 200) {
     $paidOperations = array(
-        'create_form', 'add_fields', 'update_field_options', 'remove_field_options',
-        'update_field_label', 'update_field_properties', 'reorder_field', 'remove_fields'
+    'create_form', 'add_fields', 'update_field_options', 'remove_field_options',
+    'update_field_label', 'update_field_properties', 'reorder_field', 'remove_fields'
     );
     if ($success && $this->_formApiActive === false &&
-        !empty($data['operation']) && in_array($data['operation'], $paidOperations, true) &&
-        !empty($data['intent']) && $data['intent'] === 'form_preview') {
+    !empty($data['operation']) && in_array($data['operation'], $paidOperations, true) &&
+    !empty($data['intent']) && $data['intent'] === 'form_preview') {
         $data['read_only'] = true;
         $data['auto_apply'] = false;
         $data['requires_child_confirmation'] = false;
@@ -3632,19 +3637,19 @@ private function _loadApiCapabilities($companyId) {
     // Subscription status must fail closed. If API V2 cannot positively
     // confirm paid access, AI remains available but all mutations are read-only.
     $fallback = array(
-        'form_api_active' => false,
-        'payment_url' => 'https://www.flinkiso.com/pricing/qms-api.html'
+    'form_api_active' => false,
+    'payment_url' => 'https://www.flinkiso.com/pricing/qms-api.html'
     );
     if ($companyId === '') return $fallback;
     $base = rtrim((string)Configure::read('ApiPath'), '/');
     if ($base === '') return $fallback;
     $curl = curl_init();
     curl_setopt_array($curl, array(
-        CURLOPT_URL => $base.'/ai_services/capabilities/company_id:'.rawurlencode($companyId).'/api:true',
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_CONNECTTIMEOUT => 3,
-        CURLOPT_TIMEOUT => 8,
-        CURLOPT_HTTPHEADER => array('Accept: application/json')
+    CURLOPT_URL => $base.'/ai_services/capabilities/company_id:'.rawurlencode($companyId).'/api:true',
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_CONNECTTIMEOUT => 3,
+    CURLOPT_TIMEOUT => 8,
+    CURLOPT_HTTPHEADER => array('Accept: application/json')
     ));
     $raw = curl_exec($curl);
     $status = (int)curl_getinfo($curl, CURLINFO_HTTP_CODE);
@@ -3653,8 +3658,8 @@ private function _loadApiCapabilities($companyId) {
     $decoded = json_decode($raw, true);
     if (!is_array($decoded) || empty($decoded['success']) || !array_key_exists('form_api_active', $decoded)) return $fallback;
     return array(
-        'form_api_active' => $decoded['form_api_active'] === true || (string)$decoded['form_api_active'] === '1',
-        'payment_url' => !empty($decoded['payment_url']) ? (string)$decoded['payment_url'] : $fallback['payment_url']
+    'form_api_active' => $decoded['form_api_active'] === true || (string)$decoded['form_api_active'] === '1',
+    'payment_url' => !empty($decoded['payment_url']) ? (string)$decoded['payment_url'] : $fallback['payment_url']
     );
 }
 
@@ -3691,7 +3696,8 @@ public function history() {
 
     $conditions = array(
     'Ai.company_id' => $companyId,
-    'Ai.source_controller' => $sourceController
+    'Ai.source_controller' => $sourceController,
+    'Ai.user_id' => $this->Session->read('User.id')
     );
     if ($customTableId !== '') $conditions['Ai.custom_table_id'] = $customTableId;
     if ($qcDocumentId !== '') $conditions['Ai.qc_document_id'] = $qcDocumentId;
@@ -3706,7 +3712,7 @@ public function history() {
     if (!is_array($rows)) {
         CakeLog::write('error', 'AI history query failed after schema verification.');
         return $this->_jsonResponse(false, array(
-            'message' => __('AI history could not be loaded from the database.')
+        'message' => __('AI history could not be loaded from the database.')
         ), 503);
     }
     $hasMore = count($rows) === 30;
@@ -3749,6 +3755,7 @@ public function status() {
     if (!$this->request->is('get')) {
         return $this->_jsonResponse(false, array('message' => __('Only GET requests are accepted.')), 405);
     }
+    if(!$this->_is_super_user()) return $this->_jsonResponse(true, array('active'=>false));
     if (!$this->_ensureAiTable()) {
         return $this->_jsonResponse(false, array('message' => __('AI status storage is not available.')), 503);
     }
@@ -3865,7 +3872,7 @@ public function cancel() {
     'Ai.id' => $id,
     'Ai.company_id' => $this->Session->read('User.company_id')
     );
-    if ($this->Session->read('User.is_mr') != true) {
+    if (!$this->_is_super_user()) {
         $conditions['Ai.user_id'] = $this->Session->read('User.id');
     }
     $row = $this->Ai->find('first', array('recursive' => -1, 'conditions' => $conditions));
@@ -3919,21 +3926,21 @@ private function _startAiHistory($prompt, $sourceController, $sourceAction, $cus
         $usesConfiguredProvider = $assistantMode === 'chat' || $assistantMode === 'flinkiso';
         $modelName = $usesConfiguredProvider ? (string)Configure::read('AI.ai_model') : 'API v2';
         $historyData = array(
-            'id' => $id,
-            'company_id' => $this->_historyCompanyId,
-            'user_id' => $userId,
-            'user_name' => (string)$this->Session->read('User.name'),
-            'source_controller' => $sourceController,
-            'source_action' => $sourceAction,
-            'custom_table_id' => $customTableId,
-            'qc_document_id' => $qcDocumentId,
-            'record_id' => $recordId,
-            'request' => $prompt,
-            'status' => 'processing',
-            'operation' => $usesConfiguredProvider ? 'chat' : '',
-            'model' => $modelName,
-            'created' => date('Y-m-d H:i:s'),
-            'modified' => date('Y-m-d H:i:s')
+        'id' => $id,
+        'company_id' => $this->_historyCompanyId,
+        'user_id' => $userId,
+        'user_name' => (string)$this->Session->read('User.name'),
+        'source_controller' => $sourceController,
+        'source_action' => $sourceAction,
+        'custom_table_id' => $customTableId,
+        'qc_document_id' => $qcDocumentId,
+        'record_id' => $recordId,
+        'request' => $prompt,
+        'status' => 'processing',
+        'operation' => $usesConfiguredProvider ? 'chat' : '',
+        'model' => $modelName,
+        'created' => date('Y-m-d H:i:s'),
+        'modified' => date('Y-m-d H:i:s')
         );
         // The original `ais` table has mandatory audit/question columns.
         // Populate them when present so upgraded installations retain their
@@ -4029,22 +4036,22 @@ private function _ensureAiTable() {
         // Protect installations that received application files without the
         // matching updater SQL, and safely upgrade the legacy `ais` table.
         $requiredColumns = array(
-            'user_id' => "char(36) NOT NULL DEFAULT ''",
-            'user_name' => "varchar(255) NOT NULL DEFAULT ''",
-            'source_controller' => "varchar(255) NOT NULL DEFAULT ''",
-            'source_action' => "varchar(100) NOT NULL DEFAULT ''",
-            'custom_table_id' => "char(36) DEFAULT NULL",
-            'qc_document_id' => "char(36) DEFAULT NULL",
-            'record_id' => "char(36) DEFAULT NULL",
-            'request' => "text NULL",
-            'raw_response' => "longtext NULL",
-            'rebuild_response' => "longtext NULL",
-            'operation' => "varchar(64) NOT NULL DEFAULT ''",
-            'status' => "varchar(32) NOT NULL DEFAULT 'completed'",
-            'model' => "varchar(100) NOT NULL DEFAULT ''",
-            'duration_ms' => "int unsigned NOT NULL DEFAULT 0",
-            'http_status' => "smallint unsigned NOT NULL DEFAULT 0",
-            'error_details' => "text NULL"
+        'user_id' => "char(36) NOT NULL DEFAULT ''",
+        'user_name' => "varchar(255) NOT NULL DEFAULT ''",
+        'source_controller' => "varchar(255) NOT NULL DEFAULT ''",
+        'source_action' => "varchar(100) NOT NULL DEFAULT ''",
+        'custom_table_id' => "char(36) DEFAULT NULL",
+        'qc_document_id' => "char(36) DEFAULT NULL",
+        'record_id' => "char(36) DEFAULT NULL",
+        'request' => "text NULL",
+        'raw_response' => "longtext NULL",
+        'rebuild_response' => "longtext NULL",
+        'operation' => "varchar(64) NOT NULL DEFAULT ''",
+        'status' => "varchar(32) NOT NULL DEFAULT 'completed'",
+        'model' => "varchar(100) NOT NULL DEFAULT ''",
+        'duration_ms' => "int unsigned NOT NULL DEFAULT 0",
+        'http_status' => "smallint unsigned NOT NULL DEFAULT 0",
+        'error_details' => "text NULL"
         );
         $schema = (array)$this->Ai->schema(true);
         foreach ($requiredColumns as $column => $definition) {

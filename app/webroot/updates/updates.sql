@@ -115,3 +115,7 @@ ALTER TABLE `ais` ADD `user_id` varchar(36) NOT NULL DEFAULT '', ADD `user_name`
 ALTER TABLE `ais` MODIFY `response` longtext NULL;
 ALTER TABLE `ais` ADD KEY `context_lookup` (`company_id`,`source_controller`,`custom_table_id`,`qc_document_id`,`created`);
 ALTER TABLE `ais` ADD KEY `user_lookup` (`company_id`,`user_id`,`created`);
+
+-- Super User is explicitly assigned by administrators; existing admins are
+-- not automatically granted form-builder or Form Creation AI access.
+ALTER TABLE `users` ADD COLUMN `is_super_user` TINYINT(1) NOT NULL DEFAULT 0 AFTER `is_mr`;

@@ -113,9 +113,9 @@ $pptarray = array('ppt','pptx');
                                 <?php echo $this->Html->link('<i class="fa fa-edit"></i>',array('controller'=>'qc_documents','action'=>'edit',$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Edit'));?>
 
                                 <?php
-                                if($qcDocument['QcDocument']['tables'] == 0){
+                                if($qcDocument['QcDocument']['tables'] == 0 && $this->Session->read('User.is_super_user')){
                                     echo $this->Html->link('<i class="fa fa-database"></i>',array('controller'=>'custom_tables','action'=>'add','qc_document_id'=>$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'Create Table'));
-                                }else{
+                                }elseif($qcDocument['QcDocument']['tables'] > 0){
                                     echo $this->Html->link('<i class="fa fa-database"></i>',array('controller'=>'custom_tables','action'=>'index','qc_document_id'=>$qcDocument['QcDocument']['id']),array('class'=>'tooltip1 btn btn-sm btn-default','escape'=>false, 'data-toggle'=>'tooltip', 'data-trigger'=>'hover', 'data-placement'=>'left', 'title'=> 'View Table'));
                                 }
 

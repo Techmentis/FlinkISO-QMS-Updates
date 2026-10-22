@@ -6,7 +6,7 @@ $aiCustomTableId = isset($aiNamed['custom_table_id']) ? $aiNamed['custom_table_i
 $aiQcDocumentId = isset($aiNamed['qc_document_id']) ? $aiNamed['qc_document_id'] : '';
 $aiRecordId = !empty($this->request->params['pass']) ? $this->request->params['pass'][0] : '';
 $aiIsGeneratedForm = strpos($aiController, 'tbl_') === 0 || strpos($aiController, 'chd_') === 0;
-$aiIsFormContext = in_array($aiController, array('qc_documents', 'custom_tables'), true) || $aiIsGeneratedForm;
+$aiIsFormContext = $this->Session->read('User.is_super_user') && (in_array($aiController, array('qc_documents', 'custom_tables'), true) || $aiIsGeneratedForm);
 $aiProviderHost = strtolower((string)parse_url(trim((string)Configure::read('AI.ai_api')), PHP_URL_HOST));
 $aiProviderIsLocal = $aiProviderHost === '' || in_array($aiProviderHost, array('localhost', '::1'), true);
 if (!$aiProviderIsLocal && filter_var($aiProviderHost, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
@@ -71,7 +71,7 @@ if ((strpos($aiController, 'tbl_') === 0 || strpos($aiController, 'chd_') === 0)
        data-status-url="<?php echo h(Router::url(array('controller' => 'ais', 'action' => 'status'), true)); ?>"
        data-history-url="<?php echo h(Router::url(array('controller' => 'ais', 'action' => 'history'), true)); ?>"
        data-cancel-url="<?php echo h(Router::url(array('controller' => 'ais', 'action' => 'cancel'), true)); ?>"
-       data-form-builder-url="<?php echo $aiCustomTableId !== '' ? h(Router::url(array('controller' => 'custom_tables', 'action' => 'recreate', $aiCustomTableId), true)) : ''; ?>"
+       data-form-builder-url="<?php echo $aiCustomTableId !== '' && $this->Session->read('User.is_super_user') ? h(Router::url(array('controller' => 'custom_tables', 'action' => 'recreate', $aiCustomTableId), true)) : ''; ?>"
        data-custom-table-id="<?php echo h($aiCustomTableId); ?>"
        data-qc-document-id="<?php echo h($aiQcDocumentId); ?>"
        data-record-id="<?php echo h($aiRecordId); ?>">
@@ -100,10 +100,12 @@ if ((strpos($aiController, 'tbl_') === 0 || strpos($aiController, 'chd_') === 0)
             title="<?php echo __('Ask questions using FlinkISO manuals and the current application context'); ?>">
       <i class="fa fa-magic" aria-hidden="true"></i> <?php echo __('FlinkISO'); ?>
     </button>
+    <?php if($this->Session->read('User.is_super_user')) { ?>
     <button type="button" class="fi-ai-mode-button" data-ai-mode="forms" aria-pressed="false"<?php echo $aiIsFormContext ? '' : ' disabled'; ?>
             title="<?php echo $aiIsFormContext ? __('Create or modify FlinkISO forms through API V2') : __('Forms mode is available only in Quality Documents, Custom Tables, and generated forms'); ?>">
       <i class="fa fa-wpforms" aria-hidden="true"></i> <?php echo __('Forms'); ?>
     </button>
+    <?php } ?>
   </div>
 
   <div id="fi-ai-messages" class="fi-ai-messages" aria-live="polite">

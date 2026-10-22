@@ -104,12 +104,16 @@
                 <div class="col-md-3"><br /><?php echo $this->Form->input('is_view_all', array('label' => __('This user who can see other user\'s records.'))); ?></div>
             </div>
             <div class="row hide">
+                <?php /* Admin and Super User are independent privileges. */ ?>
                 <!-- <div class="col-md-12"><legend><h5><?php echo __('Choose User\'s Privileges'); ?></h5></legend></div> -->
                 <div class="col-md-4"><?php echo $this->Form->input('is_mr', array('label' => __('Admin'))); ?></div>
                 <div class="col-md-4"><?php echo $this->Form->input('is_approver', array('label' => __('Approver'))); ?></div>                
             </div>
             <div class="row">
                 <div class="col-md-12">
+                <?php if($this->Session->read('User.is_mr')){ ?>
+                    <?php echo $this->Form->input('is_super_user', array('type'=>'checkbox', 'label'=>__('Super User — create/re-create forms and use Form Creation AI'))); ?>
+                <?php } ?>
                 <?php
                 echo $this->Form->input('assigned_branches', array('name'=>'data[User][assigned_branches][]', 'type'=>'select', 'label' => 'Select Branches', 'id' => 'AssignedBranches', 'multiple', 'options' => $PublishedBranchList, 'selected' => json_decode($this->request->data['User']['assigned_branches'],true)));
                 ?>            
@@ -127,6 +131,12 @@
             ?>
     </div>        
 </div>
+<?php echo $this->element('master_duplicate_validation', array(
+    'recordIdSelector'=>'#UserId',
+    'fields'=>array(
+        '#UserEmployeeId'=>array('field'=>'employee_id', 'message'=>'This employee already has another user account.')
+    )
+)); ?>
 <div id="loaddoclist"></div>
 <div id="loadtablelist"></div>
 <script>
@@ -136,9 +146,3 @@ $.ajaxSetup({beforeSend: function() {$("#busy-indicator").show();}, complete: fu
 </script>
 
 </div>
-<?php echo $this->element('master_duplicate_validation', array(
-    'recordIdSelector'=>'#UserId',
-    'fields'=>array(
-        '#UserEmployeeId'=>array('field'=>'employee_id', 'message'=>'This employee already has another user account.')
-    )
-)); ?>

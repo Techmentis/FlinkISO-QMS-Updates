@@ -23,6 +23,23 @@ App::uses('AppModel', 'Model');
  */
 class User extends AppModel {
 
+public function beforeSave($options = array()) {
+    if(isset($this->data[$this->alias]['is_super_user'])){
+        App::uses('CakeSession', 'Model/Datasource');
+        $recordId = !empty($this->data[$this->alias]['id']) ? $this->data[$this->alias]['id'] : $this->id;
+        $previous = $recordId ? $this->find('first', array('recursive'=>-1,
+            'fields'=>array($this->alias.'.is_super_user'), 'conditions'=>array($this->alias.'.id'=>$recordId))) : array();
+        $oldValue = !empty($previous[$this->alias]['is_super_user']);
+        $newValue = !empty($this->data[$this->alias]['is_super_user']);
+        if($oldValue !== $newValue && !CakeSession::read('User.is_mr')){
+            $this->invalidate('is_super_user', __('Only administrators can change Super User access.'));
+            return false;
+        }
+        $this->data[$this->alias]['is_super_user'] = $newValue ? 1 : 0;
+    }
+    return parent::beforeSave($options);
+}
+
 /**
  * Validation rules
  *

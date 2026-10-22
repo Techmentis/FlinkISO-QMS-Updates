@@ -118,7 +118,10 @@
                     <div class="row"><br />
                         <div class="col-md-12"><legend><h5><?php echo __('Choose User\'s Privileges'); ?></h5></legend></div>
                         <div class="col-md-6"><?php echo $this->Form->input('is_mr', array('label' => __('Admin'))); ?></div>
-                        <div class="col-md-6"><?php echo $this->Form->input('is_mt', array('label' => __('Can create custom tables'))); ?></div>
+                        <?php if($this->Session->read('User.is_mr')){ ?>
+                        <div class="col-md-6"><?php echo $this->Form->input('is_super_user', array('type'=>'checkbox', 'label'=>__('Super User — form building and Form Creation AI'))); ?></div>
+                        <?php } ?>
+                        <div class="col-md-6"><?php echo $this->Form->input('is_mt', array('label' => __('Management team'))); ?></div>
                         <div class="col-md-6"><?php echo $this->Form->input('is_approver', array('label' => __('Approver'))); ?></div>  
                         <div class="col-md-6"><?php echo $this->Form->input('is_view_all', array('label' => __('User who can see other user\'s records'))); ?></div>
                     </div>

@@ -790,7 +790,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 		else $approvers = json_decode($qcDocument['QcDocument']['editors'],true);
 		?>
 		
-		<?php if($this->Session->read('User.is_mr') == true){ ?>
+		<?php if($this->Session->read('User.is_mr') == true || $this->Session->read('User.is_super_user')){ ?>
 		<?php echo $this->Form->create('CustomTable',array('url'=>'updatedataentry/'.$customTable['CustomTable']['qc_document_id'].'/'.$customTable['CustomTable']['id'],'id'=>'updatedataentry','class'=>'form','role' => 'form', ),array('class' => 'form'));?>
 		<div class='row'>
 			<div class='col-md-12'>
@@ -866,7 +866,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 
 		<?php } ?>
 
-		<?php if($this->Session->read('User.is_mr') == true){ ?>
+		<?php if($this->Session->read('User.is_mr') == true || $this->Session->read('User.is_super_user')){ ?>
 		<?php echo $this->Form->create('CustomTable',array('url'=>'updateaccess/'.$customTable['CustomTable']['id'],'id'=>'updateaccess'),array());?>
 			<div class="row">
 				<div class="col-md-12">
