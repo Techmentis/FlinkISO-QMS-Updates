@@ -16208,6 +16208,7 @@ svg {
 }
 
 .chosen-container-multi .chosen-choices .search-choice .search-choice-close {
+  background: url("chosen-sprite.png") no-repeat right top;
   display: block;
   font-size: 1px;
   height: 10px;
