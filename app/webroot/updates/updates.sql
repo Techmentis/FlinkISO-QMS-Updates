@@ -108,6 +108,34 @@ ALTER TABLE `email_trigger_outboxes` ADD `created_by` varchar(36) NOT NULL DEFAU
 ALTER TABLE `email_trigger_outboxes` ADD `modified_by` varchar(36) NOT NULL DEFAULT '0' AFTER `created`;
 ALTER TABLE `email_trigger_outboxes` MODIFY `sr_no` int(11) NOT NULL AUTO_INCREMENT, MODIFY `created_by` varchar(36) NOT NULL DEFAULT '0', MODIFY `modified_by` varchar(36) NOT NULL DEFAULT '0';
 
+-- Create AI history for installations that do not yet have the ais table.
+CREATE TABLE IF NOT EXISTS `ais` (
+  `id` char(36) NOT NULL,
+  `company_id` char(36) NOT NULL,
+  `user_id` char(36) NOT NULL,
+  `user_name` varchar(255) NOT NULL DEFAULT '',
+  `source_controller` varchar(255) NOT NULL,
+  `source_action` varchar(100) NOT NULL DEFAULT '',
+  `custom_table_id` char(36) DEFAULT NULL,
+  `qc_document_id` char(36) DEFAULT NULL,
+  `record_id` char(36) DEFAULT NULL,
+  `request` text NOT NULL,
+  `response` longtext,
+  `raw_response` longtext,
+  `rebuild_response` longtext,
+  `operation` varchar(64) NOT NULL DEFAULT '',
+  `status` varchar(32) NOT NULL DEFAULT 'processing',
+  `model` varchar(100) NOT NULL DEFAULT '',
+  `duration_ms` int unsigned NOT NULL DEFAULT 0,
+  `http_status` smallint unsigned NOT NULL DEFAULT 0,
+  `error_details` text,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `context_lookup` (`company_id`,`source_controller`,`custom_table_id`,`qc_document_id`,`created`),
+  KEY `user_lookup` (`company_id`,`user_id`,`created`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Upgrade the legacy question/response AI table for the persistent assistant
 -- history. Each ADD is split by the updater, so an already-present column does
 -- not prevent any remaining columns from being installed.

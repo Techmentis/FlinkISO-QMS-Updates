@@ -278,3 +278,141 @@
   padding: 20px;
   color: #666;
 }
+
+/*
+ * Field Settings freezes the page while it is open.  Scroll the settings
+ * panel itself, using the viewport height calculated by recreate/add JS.
+ */
+#fieldSettingsPanelBody.has-settings {
+  max-height: var(--field-panel-available-height, 65vh);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#fieldSettingsPanelBody.has-settings > .field-settings-content {
+  display: block;
+  overflow: visible;
+}
+
+#fieldSettingsPanelBody.has-settings > .field-settings-content > .field-settings-header {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: #fff;
+}
+
+#fieldSettingsPanelBody.has-settings > .field-settings-content > .field-settings-body {
+  overflow: visible;
+}
+
+#fieldSettingsPanelBody.has-settings > .field-settings-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  background: #fff;
+}
+
+/* Independent Child Tables panel and its field accordion. */
+#childTablesPanel {
+  margin-top: 14px;
+  border: 1px solid #d7d7d7;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+}
+
+#childTablesPanel .child-tables-panel-header {
+  border-bottom: 1px solid #d7d7d7;
+}
+
+#childTablesPanel .child-tables-panel-body {
+  padding: 12px;
+  max-height: 65vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+#childTablesPanel .child-table-accordion-item {
+  margin-bottom: 10px;
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+}
+
+#childTablesPanel .child-table-accordion-item:last-child {
+  margin-bottom: 0;
+}
+
+#childTablesPanel .child-table-accordion-heading {
+  display: flex;
+  align-items: center;
+  background-image: linear-gradient(to bottom, #fff 0, #eee 100%);
+}
+
+#childTablesPanel .child-table-edit-link {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 9px 10px;
+  color: #333;
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+#childTablesPanel .child-table-edit-link:hover,
+#childTablesPanel .child-table-edit-link:focus {
+  color: #23527c;
+  background: #eef6fc;
+  outline: none;
+}
+
+#childTablesPanel .child-table-accordion-toggle {
+  flex: 0 0 38px;
+  align-self: stretch;
+  border: 0;
+  border-left: 1px solid #d9d9d9;
+  background: transparent;
+  color: #555;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+#childTablesPanel .child-table-accordion-toggle:hover,
+#childTablesPanel .child-table-accordion-toggle:focus {
+  color: #23527c;
+  background: #eef6fc;
+  outline: none;
+}
+
+#childTablesPanel .child-table-fields-panel {
+  border-top: 1px solid #e5e5e5;
+  background: #fff;
+}
+
+#childTablesPanel .child-table-fields {
+  margin: 0;
+  padding: 5px 10px 8px 28px;
+}
+
+#childTablesPanel .child-table-fields li {
+  padding: 3px 0;
+  overflow-wrap: anywhere;
+}
+
+#childTablesPanel .child-table-field-label {
+  color: #444;
+}
+
+#childTablesPanel .child-table-fields small {
+  display: block;
+  color: #888;
+}
+
+#childTablesPanel .child-table-fields-empty {
+  color: #888;
+  font-style: italic;
+}

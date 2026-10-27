@@ -401,7 +401,17 @@ class AppController  extends Controller {
         $this->Session->write('Config.language', $code);
         Configure::write('Config.language', $code);
         App::uses('ApplicationL10n', 'Lib');
-        ApplicationL10n::apply($code);
+        // Older deployments may have a stale Cake class map or an incomplete update.
+        $localeFile = APP . 'Lib' . DS . 'ApplicationL10n.php';
+        if (!class_exists('ApplicationL10n') && is_readable($localeFile)) require_once $localeFile;
+        if (class_exists('ApplicationL10n', false)) {
+            ApplicationL10n::apply($code);
+        } else {
+            $this->Session->write('Config.language', 'eng');
+            Configure::write('Config.language', 'eng');
+            $this->set('languagePreferenceAvailable', false);
+            CakeLog::write('error', 'ApplicationL10n is unavailable; using English. Deploy app/Lib/ApplicationL10n.php.');
+        }
     }
 
     public function beforeFilter() {
@@ -3843,6 +3853,29 @@ class AppController  extends Controller {
         }
     }
 
+    protected function _custom_record_save_redirect(){
+        $named = isset($this->request->params['named']) ? $this->request->params['named'] : array();
+        // Editing/approving a record does not necessarily grant table-list access.
+        if(!empty($named['custom_table_id']) && $named['custom_table_id'] != -1
+            && !$this->Session->read('User.is_mr') && !$this->_is_super_user()){
+            $this->loadModel('CustomTable');
+            $table = $this->CustomTable->find('first', array(
+                'recursive' => -1,
+                'fields' => array('CustomTable.id', 'CustomTable.viewers'),
+                'conditions' => array('CustomTable.id' => $named['custom_table_id'])
+            ));
+            $viewers = !empty($table['CustomTable']['viewers']) ? json_decode($table['CustomTable']['viewers'], true) : array();
+            if(!is_array($viewers) || !in_array($this->Session->read('User.id'), $viewers)){
+                return array('controller' => 'users', 'action' => 'dashboard');
+            }
+        }
+        $target = array('action' => 'index');
+        foreach(array('custom_table_id', 'qc_document_id', 'process_id') as $key){
+            if(isset($named[$key])) $target[$key] = $named[$key];
+        }
+        return $target;
+    }
+
     public function _add(){
         $modelName = $this->modelClass;
         $this->loadModel($modelName);
@@ -4067,7 +4100,7 @@ class AppController  extends Controller {
                     }
                 }
             }
-            $this->redirect(array('action' => 'index','custom_table_id'=>$this->request->params['named']['custom_table_id'],'qc_document_id'=>$this->request->params['named']['qc_document_id'],'process_id'=>$this->request->params['named']['process_id']));
+            $this->redirect($this->_custom_record_save_redirect());
         } else {
             $this->Session->setFlash(__('Record could not be saved. Please, try again.'));
         }

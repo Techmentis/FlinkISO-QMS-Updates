@@ -15968,6 +15968,14 @@ svg {
   vertical-align: middle
 }
 
+
+/* Hidden form tabs cannot provide a useful pixel width during Chosen setup.
+   Override that inline width so controls fill their column when shown. */
+.custom-form-tabs .chosen-container,
+.linked-child-form .chosen-container {
+  width: 100% !important;
+}
+
 .chosen-container .chosen-drop {
   -moz-border-bottom-colors: none;
   -moz-border-left-colors: none;

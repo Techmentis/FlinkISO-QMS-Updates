@@ -449,7 +449,8 @@ if($approvalComment['Approval']['status'] != 1 && empty($approvalComment['Approv
 <?php } ?>
 <script type="text/javascript">
     $().ready(function(){
-        $('select').chosen();
+        // Approval fields can be hidden at initialization; avoid a zero-width Chosen control.
+        $('select').chosen({ width: '100%' });
         $('[id*="submit_id"]').hide();
     });
 </script>
