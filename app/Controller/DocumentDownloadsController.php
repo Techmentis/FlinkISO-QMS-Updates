@@ -160,6 +160,9 @@ public function record_list(){
 					),
 					'conditions'=>array($model.'.id'=>$this->request->data['DocumentDownload']['record_id'])));
 				if($record){
+                    // Regenerated forms can replace the definition row while
+                    // existing records retain the original custom_table_id.
+                    $record['CustomTable'] = $customTable['CustomTable'];
 					$this->set('record',$record);
 					$this->set('fields',json_decode($customTable['CustomTable']['fields'],true));
 				}
@@ -186,6 +189,10 @@ public function record_list(){
 									$childModel.'.file_id',$childModel.'.file_key',$childModel.'.custom_table_id','CustomTable.id','CustomTable.table_name'
 								)
 							));
+                            foreach($childRecords[$additionalTable['CustomTable']['name']] as &$childRecord) {
+                                $childRecord['CustomTable'] = $additionalTable['CustomTable'];
+                            }
+                            unset($childRecord);
 						}						
 						$this->set('childRecords',$childRecords);
 					}else{
@@ -239,6 +246,12 @@ public function record_list(){
 }
 
 public function _add_cover($data = null,$id = null){
+    $polling = !empty($data['DocumentDownload']['conversion_request'])
+        && $this->request->controller === 'document_downloads'
+        && $this->request->action === 'download';
+    $workPath = WWW_ROOT.'files'.DS.'pdf'.DS.$this->Session->read('User.id').DS.$id;
+    if($polling && is_file($workPath.DS.'cover-pdf.pdf') && filesize($workPath.DS.'cover-pdf.pdf') > 0) return true;
+
 	if(isset($data['DocumentDownload']['qc_document_id']) && ($data['DocumentDownload']['qc_document_id'] != '-1' || $data['DocumentDownload']['qc_document_id'] != 0)){
 		$this->loadModel('QcDocument');
 		$qcDocument = $this->QcDocument->find('first',array('conditions'=>array('QcDocument.id'=>$id)));		
@@ -280,7 +293,7 @@ public function _add_cover($data = null,$id = null){
 			    }
 
 				
-				if($id){
+				if($id && !$polling){
 					$path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $id;
 					$folderToEmpty = New Folder($path);
 					$folderToEmpty->delete();	
@@ -292,7 +305,7 @@ public function _add_cover($data = null,$id = null){
 				// ($folder = null, $file = null, $content = null){
 				
 					
-				$this->_write_html_file('template',$contents,$id);
+				if(!$polling || !is_file($workPath.DS.'template.html')) $this->_write_html_file('template',$contents,$id);
 
 				// $this->_write_to_file(
 				// 	WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $id,
@@ -310,10 +323,28 @@ public function _add_cover($data = null,$id = null){
 	return true;
 }
 public function download(){
+    try {
+    $type = isset($this->request->params['named']['type']) ? $this->request->params['named']['type'] : '';
+    $id = isset($this->request->params['named']['id']) ? $this->request->params['named']['id'] : '';
+    if(!in_array($type, array('qc','rec'), true) || !is_string($id) || !preg_match('/^[a-zA-Z0-9_-]+$/D', $id)) {
+        throw new RuntimeException('The PDF request is missing a valid document or record ID. Reopen the PDF dialog and retry.');
+    }
+    if($type === 'rec' && (empty($this->request->params['named']['model'])
+        || !preg_match('/^[a-zA-Z][a-zA-Z0-9_]*$/D', $this->request->params['named']['model']))) {
+        throw new RuntimeException('The PDF request is missing the record type. Reopen the PDF dialog and retry.');
+    }
+    $preservePdfWork = false;
+    if(!empty($this->request->data['DocumentDownload']['conversion_request'])) {
+        $conversionRequest = $this->request->data['DocumentDownload']['conversion_request'];
+        if(!is_string($conversionRequest) || !preg_match('/^[a-zA-Z0-9_-]{16,80}$/D', $conversionRequest)) throw new RuntimeException('Invalid PDF conversion request.');
+        $workKey = 'PdfDownloadWork.'.hash('sha256', $conversionRequest.'|'.$this->request->params['named']['id']);
+        $preservePdfWork = (bool)$this->Session->read($workKey);
+        if(!$preservePdfWork) $this->Session->write($workKey, time());
+    }
 	if ($this->request->is('post')) {	
 		$this->set('addwatermark',false);
 		if($this->request->params['named']['type'] == 'rec'){			
-			if($this->request->params['named']['id']){
+			if($this->request->params['named']['id'] && !$preservePdfWork){
 				$path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $this->request->params['named']['id'];
 				$folderToEmpty = New Folder($path);
 				$folderToEmpty->delete();
@@ -329,7 +360,8 @@ public function download(){
 				$this->loadModel($model);
 				$record = $this->$model->find('first',array('conditions'=>array($model.'.id'=>$this->request->params['named']['id'])));
 				if($record){
-					$customTable = $this->$model->CustomTable->find('first',array('conditions'=>array('CustomTable.id'=>$record[$model]['custom_table_id'])));				
+                    $customTable = $this->_record_pdf_table_context($model, $record);
+                    $record['CustomTable'] = $customTable['CustomTable'];
 					//check if file is available for this record
 					
 					$this->loadModel('DownloadFile');
@@ -403,7 +435,7 @@ public function download(){
 			}
 		}else if($this->request->params['named']['type'] == 'qc'){
 			
-			if($this->request->params['named']['id']){
+			if($this->request->params['named']['id'] && !$preservePdfWork){
 				$path = WWW_ROOT .'files' . DS . 'pdf' . DS . $this->Session->read('User.id') . DS . $this->request->params['named']['id'];
 				$folderToEmpty = New Folder($path);
 				$folderToEmpty->delete();
@@ -439,8 +471,17 @@ public function download(){
 			$this->set('id',$qcDocument['QcDocument']['id']);
 		}
 	}
+    if(empty($this->viewVars['pdfs'])) throw new RuntimeException('No PDF was generated. Reopen the PDF dialog and retry.');
 	$this->set('signature',$this->request->data['DocumentDownload']['signature']);
-
+    } catch(RuntimeException $e) {
+        $this->autoRender = false;
+        $this->response->type('json');
+        $pending = $e->getCode() === 202;
+        $this->response->statusCode($pending ? 202 : 400);
+        $this->response->body(json_encode(array('pending'=>$pending, 'message'=>$e->getMessage())));
+        if(!$pending) $this->log('PDF download failed: '.$e->getMessage(), 'error');
+        return $this->response;
+    }
 }
 
 /**
@@ -604,11 +645,10 @@ protected function _generate_record_only_pdf($customTableId, $recordId){
 
 	$model = Inflector::classify($customTable['CustomTable']['table_name']);
 	$this->loadModel($model);
+    $recordConditions = array($model.'.id'=>$recordId);
+    if(!empty($customTable['CustomTable']['qc_document_id'])) $recordConditions[$model.'.qc_document_id'] = $customTable['CustomTable']['qc_document_id'];
 	$record = $this->$model->find('first', array(
-		'conditions' => array(
-			$model.'.id' => $recordId,
-			$model.'.custom_table_id' => $customTableId,
-		),
+		'conditions' => $recordConditions,
 		'recursive' => 0,
 	));
 	if(empty($record[$model])){
@@ -1298,7 +1338,12 @@ public function _generate_pdf_file($header_file = null,$content = null,$fileName
 		$safe_name = trim($this->_clean_table_names(str_replace(' ', '-', (string)$fileName)), '-');
 		if($safe_name === '') $safe_name = 'record-report';
 		$temp_name = 'onlyoffice-'.$safe_name.'-'.date('YmdHis').'-'.substr(md5(microtime(true)), 0, 8);
-		$temp_file = $this->_write_html_file($temp_name, $html, $record_id);
+        $conversionRequest = isset($this->request->data['DocumentDownload']['conversion_request']) ? $this->request->data['DocumentDownload']['conversion_request'] : null;
+        $pollingRecord = $this->request->action === 'download' && is_string($conversionRequest)
+            && preg_match('/^[a-zA-Z0-9_-]{16,80}$/D', $conversionRequest);
+        if($pollingRecord) $temp_name = 'onlyoffice-'.$safe_name.'-'.substr(hash('sha256', $conversionRequest.'|'.$record_id.'|'.$safe_name), 0, 20);
+        $temp_file = WWW_ROOT.'files'.DS.'pdf'.DS.$this->Session->read('User.id').DS.$record_id.DS.$temp_name.'.html';
+        if(!$pollingRecord || !is_file($temp_file)) $temp_file = $this->_write_html_file($temp_name, $html, $record_id);
 		$temp_url = rtrim(Router::url('/', true), '/').'/files/pdf/'
 			.rawurlencode($this->Session->read('User.id')).'/'
 			.rawurlencode($record_id).'/'.rawurlencode($temp_name).'.html';
@@ -1306,7 +1351,7 @@ public function _generate_pdf_file($header_file = null,$content = null,$fileName
 		try{
 			$output_file = $this->_generate_onlyoffice_pdf($temp_url, 'html', 'pdf', null, $safe_name, $record_id, false);
 		}catch(Exception $e){
-			if($temp_file && file_exists($temp_file)) @unlink($temp_file);
+			if($e->getCode() !== 202 && $temp_file && file_exists($temp_file)) @unlink($temp_file);
 			throw $e;
 		}
 
@@ -1344,26 +1389,30 @@ public function _generate_pdf_file($header_file = null,$content = null,$fileName
 		return $html;
 	}
 
-	public function _fetch_signature($id = null){
-		$this->loadModel('User');
-		$user = $this->User->find('first', array(
-			'fields'=>array(
-				'User.id',
-				'User.password',
-				'User.employee_id',
-				'Employee.id',
-				'Employee.signature',
-			),
-			'conditions' => array('User.status' => 1, 'User.soft_delete' => 0, 'User.publish' => 1, 'User.employee_id' => $id)));
+	public function _fetch_signature($employee_id = null){
+        // Let the converter fetch the saved image over HTTP. Keep this
+        // instance's existing 100px signature width.
+        $signature = parent::_fetch_signature($employee_id);
+        if(strpos($signature, '<img') !== false){
+            $signature = preg_replace('/<img\b/', '<img style="width:100px !important;height:auto !important"', $signature, 1);
+        }
+        return $signature;
+    }
 
-			$img = WWW_ROOT. DS. 'img'. DS . $this->Session->read('User.company_id'). DS .'signature'. DS. $user['Employee']['id']. DS. 'sign.png';
-			if(file_exists($img)){
-				$response = "<img src='".$img."' width=100><br />";
-			}else if($user['Employee']['signature']){
-				$response = "<img src='".$user['Employee']['signature']."' width=100><br />";
-			}else{
-				$response = 'Signature not available';
-			}			
-		return $response;
-	}
+    protected function _record_pdf_table_context($model, $record) {
+    $this->loadModel('CustomTable');
+    $tableName = !empty($this->$model->useTable) ? $this->$model->useTable : Inflector::tableize($model);
+    $storedId = isset($record[$model]['custom_table_id']) ? $record[$model]['custom_table_id'] : null;
+    $table = $storedId ? $this->CustomTable->find('first', array('recursive'=>-1,
+        'conditions'=>array('CustomTable.id'=>$storedId, 'CustomTable.table_name'=>$tableName))) : array();
+    if(!empty($table['CustomTable']['id'])) return $table;
+    $conditions = array('CustomTable.table_name'=>$tableName, 'CustomTable.soft_delete'=>0);
+    $selectedId = isset($this->request->data['DocumentDownload']['custom_table_id']) ? $this->request->data['DocumentDownload']['custom_table_id'] : null;
+    if($selectedId) $conditions['CustomTable.id'] = $selectedId;
+    if(!empty($record[$model]['qc_document_id'])) $conditions['CustomTable.qc_document_id'] = $record[$model]['qc_document_id'];
+    if($this->Session->read('User.company_id')) $conditions['CustomTable.company_id'] = $this->Session->read('User.company_id');
+    $table = $this->CustomTable->find('first', array('recursive'=>-1, 'conditions'=>$conditions, 'order'=>array('CustomTable.modified'=>'DESC')));
+    if(empty($table['CustomTable']['id'])) throw new RuntimeException('The form definition for this record is unavailable. Reopen the PDF dialog from the current form.');
+    return $table;
+}
 }

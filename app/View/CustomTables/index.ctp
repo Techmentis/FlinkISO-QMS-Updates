@@ -100,7 +100,7 @@ $formSearchUrl = Router::url($formSearchRoute, true);
 						<tbody>
 						<?php foreach ($customTables as $customTable): ?>							
 							<tr>
-								<td><?php echo $customTable['CustomTable']['name'];?></td>
+								<td><?php echo h($customTable['CustomTable']['name']); ?><?php if (isset($customTable['QcDocument']['schedule_id'], $schedules[$customTable['QcDocument']['schedule_id']])): ?><br><small><?php echo h($schedules[$customTable['QcDocument']['schedule_id']]); ?></small><?php endif; ?></td>
 								<td><?php echo $customTable['CustomTable']['table_name'];?></td>
 								<td><?php echo $customTable['QcDocument']['document_number'];?> - <?php echo $customTable['QcDocument']['name'];?></td>
 								<!-- <td><?php echo $customTable['CustomTable']['table_version'];?></td> -->

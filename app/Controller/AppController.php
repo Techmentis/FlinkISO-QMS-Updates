@@ -871,7 +871,10 @@ class AppController  extends Controller {
             }
         }
 
-        $ignoredParams = array('search','strict','published','sort','page','direction','limit','timestamp');
+        // These IDs carry form/navigation context, not user-selected row filters.
+        // Regenerated forms can have a new custom_table_id while their records
+        // retain the original ID.
+        $ignoredParams = array('search','strict','published','sort','page','direction','limit','timestamp','qc_document_id','custom_table_id','process_id','soft_delete');
         if ($this->request->controller == 'custom_tables') {
             $ignoredParams[] = 'table_type';
         }
@@ -947,32 +950,23 @@ class AppController  extends Controller {
             )
             );
         }
-        $pubCon = array($modelName.'.publish'=>1);
-        if($this->request->params['named'])
-        {
-            if(isset($this->request->params['named']['published']) && $this->request->params['named']['published'] == 0){
-                $pubCon = array(
-                'or'=>array(
+                $namedParams = $this->request->params['named'];
+        $pubCon = array($modelName.'.publish' => 1);
+        if (isset($namedParams['published']) && (string)$namedParams['published'] === '0') {
+            $pubCon = array('OR' => array(
                 $modelName.'.publish' => 0,
-                $modelName.'.publish is NULL'
-                )
-                );
-            }else{
-
-            }
-            if(isset($this->request->params['named']['published']) && $this->request->params['named']['published'] === null)$con1 = null ; else $con1 = $pubCon;
-            if(isset($this->request->params['named']['published']))$conditions=array($onlyBranch,$onlyOwn,$con1);
-            else $conditions=array($onlyBranch,$onlyOwn,$con1);
-        }else{
-            $conditions=array($onlyBranch,$onlyOwn,null,$pubCon,$modelName.'.soft_delete'=>0);
+                $modelName.'.publish IS NULL'
+            ));
+        } elseif (isset($namedParams['published']) && $namedParams['published'] === '') {
+            $pubCon = null;
         }
 
+        // Keep publication and deletion constraints independent of search and
+        // pagination parameters. An explicit trash view replaces the default.
+        $softDelete = isset($namedParams['soft_delete']) && (string)$namedParams['soft_delete'] === '1' ? 1 : 0;
+        $conditions = array($onlyBranch, $onlyOwn, $pubCon, array($modelName.'.soft_delete' => $softDelete));
         $indexSearch = $this->_index_search_conditions($modelName);
-        if ($indexSearch['active']) {
-            if (!isset($this->request->params['named']['published'])) $conditions[] = $pubCon;
-            $conditions[] = array($modelName.'.soft_delete' => 0);
-            $conditions = array_merge($conditions, $indexSearch['conditions']);
-        }
+        $conditions = array_merge($conditions, $indexSearch['conditions']);
         return array_filter($conditions);
 
     }
@@ -5297,9 +5291,28 @@ class AppController  extends Controller {
     public function _generate_onlyoffice_pdf($url = null,$filetype = null,$outputtype = null, $password = null, $title = null,$record_id = null,$cover = null,$attach_cover = null){
         $path = rtrim(Configure::read('OnlyofficeConversionApi'), '/') . '/ConvertService.ashx';
         $key = $this->_generate_onlyoffice_key($record_id . date('YmdHis'));
+        $polling = !empty($this->request->data['DocumentDownload']['conversion_request'])
+            && $this->request->controller === 'document_downloads'
+            && $this->request->action === 'download'
+            && isset($this->request->params['named']['type']) && in_array($this->request->params['named']['type'], array('qc','rec'), true);
+        if($polling) {
+            $requestId = $this->request->data['DocumentDownload']['conversion_request'];
+            if(!is_string($requestId) || !preg_match('/^[a-zA-Z0-9_-]{16,80}$/D', $requestId)) throw new RuntimeException('Invalid PDF conversion request.');
+            $jobPath = 'OnlyofficePdfJobs.'.hash('sha256', $requestId.'|'.$record_id.'|'.$url.'|'.$outputtype.'|'.(int)$cover);
+            $job = $this->Session->read($jobPath);
+            if(!$job) {
+                $job = array('key'=>'pdf_'.bin2hex(random_bytes(10)), 'started'=>time());
+                $this->Session->write($jobPath, $job);
+            }
+            $key = $job['key'];
+            $securityHash = hash('sha256', json_encode(array($password, $this->request->data['DocumentDownload'])));
+            if(!empty($job['output']) && isset($job['security_hash']) && $job['security_hash'] === $securityHash
+                && is_file($job['output']) && filesize($job['output']) > 0) return $job['output'];
+            if(time() - $job['started'] > 240) throw new RuntimeException('PDF conversion did not finish within four minutes. Retry the download.');
+        }
 
         $arr = array(
-            'async' => false,
+            'async' => $polling,
             'url' => $url,
             'outputtype' => $outputtype,
             'filetype' => $filetype,
@@ -5347,36 +5360,18 @@ class AppController  extends Controller {
 
         // Sign the final payload, including the watermark options.
         $arr['token'] = $this->generateJWT($arr);
-        $data = json_encode($arr);
-
-        $opts = array('http' => array(
-            'method' => 'POST',
-            'timeout' => 60,
-            'ignore_errors' => true,
-            'header' => "Content-type: application/json\r\nAccept: application/json\r\n",
-            'content' => $data
-        ));
-
-        $context = stream_context_create($opts);
-        $response_data = @file_get_contents($path, false, $context);
-        if($response_data === false){
-            throw new RuntimeException(__('ONLYOFFICE conversion service could not be reached.'));
-        }
-
-        $response = json_decode($response_data, true);
-        if(!is_array($response)){
-            throw new RuntimeException(__('Invalid response received from ONLYOFFICE conversion service.'));
-        }
+        $response = $this->_onlyoffice_conversion_request($path, $arr, $polling ? 15 : 60);
         if(!empty($response['error'])){
-            throw new RuntimeException(__('ONLYOFFICE conversion failed. Error code: ') . $response['error']);
+            throw new RuntimeException('ONLYOFFICE conversion failed. Error code: ' . $response['error']);
         }
+        if($polling && empty($response['endConvert'])) throw new RuntimeException('PDF conversion is in progress.', 202);
         if(empty($response['fileUrl'])){
-            throw new RuntimeException(__('ONLYOFFICE conversion did not return a file URL.'));
+            throw new RuntimeException('ONLYOFFICE conversion did not return a file URL.');
         }
 
         $new_data = @file_get_contents($response['fileUrl']);
         if($new_data === false){
-            throw new RuntimeException(__('Unable to download the converted PDF from ONLYOFFICE.'));
+            throw new RuntimeException('Unable to download the converted PDF from ONLYOFFICE.');
         }
 
         $savepath = WWW_ROOT . 'files' . DS . 'pdf' . DS .
@@ -5385,7 +5380,7 @@ class AppController  extends Controller {
         if(!file_exists($savepath)){
             $folder = new Folder();
             if(!$folder->create($savepath, 0777)){
-                throw new RuntimeException(__('PDF folder creation failed.'));
+                throw new RuntimeException('PDF folder creation failed.');
             }
         }
 
@@ -5394,7 +5389,7 @@ class AppController  extends Controller {
                 $title . '-' . date('His') . '.' . $outputtype;
 
             if(file_put_contents($file_for_save, $new_data, LOCK_EX) === false){
-                throw new RuntimeException(__('Unable to save the ONLYOFFICE generated PDF.'));
+                throw new RuntimeException('Unable to save the ONLYOFFICE generated PDF.');
             }
 
             // Password comes from the existing DocumentDownload form when present.
@@ -5402,13 +5397,19 @@ class AppController  extends Controller {
                 $password = $this->request->data['DocumentDownload']['password'];
             }
 
-            return $this->add_password($file_for_save, $password, $record_id);
+            $secured = $this->add_password($file_for_save, $password, $record_id);
+            if($polling) {
+                $job['output'] = $secured;
+                $job['security_hash'] = $securityHash;
+                $this->Session->write($jobPath, $job);
+            }
+            return $secured;
         }
 
         // Compatibility path for callers that separately generate a cover.
         $file_for_save = $savepath . DS . 'cover-pdf.' . $outputtype;
         if(file_put_contents($file_for_save, $new_data, LOCK_EX) === false){
-            throw new RuntimeException(__('Unable to save the ONLYOFFICE generated cover PDF.'));
+            throw new RuntimeException('Unable to save the ONLYOFFICE generated cover PDF.');
         }
 
         $template = $savepath . DS . 'template.html';
@@ -5482,6 +5483,11 @@ class AppController  extends Controller {
             !empty($this->request->params['named']['id']) &&
             !empty($record_id)){
             $output = str_replace($record_id, $this->request->params['named']['id'], $output);
+        }
+
+        $outputDirectory = dirname($output);
+        if(!is_dir($outputDirectory) && !mkdir($outputDirectory, 0777, true) && !is_dir($outputDirectory)) {
+            throw new RuntimeException('Unable to create the PDF download folder.');
         }
 
         // Existing core.php installations may deliberately include a trailing
@@ -6212,4 +6218,26 @@ class AppController  extends Controller {
         }
         return $response;
    }    
+
+    protected function _onlyoffice_conversion_request($path, $payload, $timeout) {
+        $opts = array('http' => array(
+            'method' => 'POST',
+            'timeout' => $timeout,
+            'ignore_errors' => true,
+            'header' => "Content-type: application/json\r\nAccept: application/json\r\n",
+            'content' => json_encode($payload)
+        ));
+
+        $context = stream_context_create($opts);
+        $response_data = @file_get_contents($path, false, $context);
+        if($response_data === false){
+            throw new RuntimeException('ONLYOFFICE conversion service could not be reached.');
+        }
+
+        $response = json_decode($response_data, true);
+        if(!is_array($response)){
+            throw new RuntimeException('Invalid response received from ONLYOFFICE conversion service.');
+        }
+        return $response;
+    }
 }

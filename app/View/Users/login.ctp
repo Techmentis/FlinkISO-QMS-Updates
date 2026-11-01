@@ -78,6 +78,7 @@
     </div>
     <div class="row">
         <div class="col-md-12 col-xs-12  hidden-xs">
+            <div class="row">
             <div class="col-md-6 col-xs-12">
                 <div class="panel panel-default"  style="margin-top:12px">
                     <div class="panel-heading"><div class="panel-title"><?php echo __('Latest News & Updates');?></div></div>
@@ -120,6 +121,7 @@
                     </script>
             </div>
             <div class="col-md-6"><?php echo $this->element('display_policy', array(), array('plugin' => 'PasswordSettingManager'));?></div>
+            </div>
         </div>
     </div>
     <?php

@@ -77,5 +77,6 @@
   </footer>
 
 </div>
+<?php echo $this->element('session_keepalive'); ?>
 </body>
 </html>

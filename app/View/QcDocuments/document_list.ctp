@@ -1,4 +1,4 @@
-<?php if($qcDocuments && $this->Session->read('User.is_mr')){ ?>
+<?php if($qcDocuments && $this->Session->read('User.is_mr') && !empty($user['User']['id'])){ ?>
     <?php if (isset($hide) && $hide == false) { ?>
     <div class="row">
         <div class="col-md-12">
@@ -131,29 +131,31 @@
         </div>    
         <script>
             function updateaccess(qc_document_id,user_id,action,thisid,typ){
-                $.ajax({
-                 url: "<?php echo Router::url('/', true); ?>qc_documents/update_access",
-                 type: "POST",
-                 dataType: "json",
-                 contentType: "application/json; charset=utf-8",
-                 data: JSON.stringify({qc_document_id:qc_document_id,user_id:user_id,action:action,typ:typ}),
-                 beforeSend: function( xhr ) {
-                    $("#"+thisid).removeClass('fa-check').removeClass('fa-remove').addClass('fa-refresh fa-spin');
-                },
-                success: function (result) {
-                    $("#"+thisid).removeClass('fa-refresh fa-spin');
-                    if(typ == 0){                    
-                        $("#"+thisid).removeClass('text-success fa-check ').addClass('fa-remove text-danger link');
-                        $("#"+thisid).attr('onclick','updateaccess(\''+qc_document_id+'\',\''+user_id+'\',\''+action+'\',this.id,1)');
-                    }
-                    if(typ == 1){                        
-                        $("#"+thisid).removeClass('text-danger ').addClass('fa-check text-success link');
-                        $("#"+thisid).attr('onclick','updateaccess(\''+qc_document_id+'\',\''+user_id+'\',\''+action+'\',this.id,0)');
-                    }                    
-                },
-                error: function (err) {
+                var icon = $('#' + thisid);
+                if (icon.data('accessSaving')) return false;
+                if (!qc_document_id || !user_id) { alert('Select a user before changing document access.'); return false; }
+                var previousClass = icon.attr('class');
+                function failed(message) {
+                    icon.attr('class', previousClass);
+                    alert(message || 'The access change could not be saved. Please retry.');
                 }
-            });
+                icon.data('accessSaving', true);
+                $.ajax({
+                    url: "<?php echo Router::url('/', true); ?>qc_documents/update_access",
+                    // Form encoding is available before beforeFilter records History.
+                    type: 'POST', dataType: 'json',
+                    data: {qc_document_id:qc_document_id,user_id:user_id,action:action,typ:typ},
+                    beforeSend: function(){icon.removeClass('fa-check fa-remove').addClass('fa-refresh fa-spin');},
+                    success: function(result){
+                        if (!result || result.saved !== true) { failed(result && result.message); return; }
+                        icon.removeClass('fa-refresh fa-spin text-success text-danger fa-check fa-remove')
+                            .addClass(typ === 1 ? 'fa-check text-success link' : 'fa-remove text-danger link');
+                        icon.attr('onclick', 'updateaccess(\''+qc_document_id+'\',\''+user_id+'\',\''+action+'\',this.id,'+(typ === 1 ? 0 : 1)+')');
+                    },
+                    error: function(response){failed(response.responseJSON && response.responseJSON.message);},
+                    complete: function(){icon.data('accessSaving', false);}
+                });
+                return false;
             }
 
         </script>
@@ -172,7 +174,7 @@
         }
 
         $.ajax({
-            url: '<?php echo Router::url('/', true); ?>/qc_documents/document_list/',
+            url: '<?php echo Router::url('/', true); ?>qc_documents/document_list/<?php echo rawurlencode((string)$user['User']['id']); ?>',
             type: 'POST',
             data: {
                 search: search

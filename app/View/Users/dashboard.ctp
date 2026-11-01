@@ -10,6 +10,11 @@ $pptarray = array('ppt','pptx');
   .box-header>.box-tools{top: 10px;}
   .small-box .icon{font-size: 60px; top:10px}
   .small-box:hover .icon {font-size: 70px;}
+  #shared-custom-forms > .box-header {display:flex;align-items:center;flex-wrap:wrap;}
+  #shared-custom-forms > .box-header > .box-tools {position:static;margin-left:auto;display:flex;flex-wrap:wrap;gap:4px;}
+  #shared-custom-forms .form-schedule-filter {border-radius:0;padding:3px 12px;font-weight:600;color:#777;background:transparent !important;box-shadow:none;opacity:1;}
+  #shared-custom-forms .form-schedule-filter[aria-pressed="true"] {border-color:var(--site-blue, #00c0ef);}
+  #shared-custom-forms .form-schedule-count {margin-left:4px;}
 </style>
 <?php echo $this->Session->flash();?>
 <div class="row">
@@ -70,11 +75,48 @@ $pptarray = array('ppt','pptx');
   <?php } ?>
   <div class="row">
     <div class="col-xs-12">
-      <div class="box box-info">
+      <?php
+      $formSchedules = array();
+      $formScheduleKeys = array();
+      foreach ((array)$schedules as $scheduleKey => $scheduleName) {
+        $normalizedName = strtolower(trim($scheduleName));
+        $groupKey = in_array($normalizedName, array('', 'none', 'unscheduled'), true) ? '__none' : (string)$scheduleKey;
+        $formScheduleKeys[(string)$scheduleKey] = $groupKey;
+        $formSchedules[$groupKey] = $groupKey === '__none' ? __('None') : $scheduleName;
+      }
+      $formScheduleCounts = array_fill_keys(array_keys($formSchedules), 0);
+      foreach ((array)$customTables as $scheduledForm) {
+        $rawScheduleKey = isset($scheduledForm['QcDocument']['schedule_id']) ? (string)$scheduledForm['QcDocument']['schedule_id'] : '';
+        $scheduleKey = isset($formScheduleKeys[$rawScheduleKey]) ? $formScheduleKeys[$rawScheduleKey] : '__none';
+        if (!isset($formSchedules[$scheduleKey])) {
+          $formSchedules[$scheduleKey] = __('None');
+          $formScheduleCounts[$scheduleKey] = 0;
+        }
+        $formScheduleCounts[$scheduleKey]++;
+      }
+      $activeFormSchedule = null;
+      foreach ($formSchedules as $scheduleKey => $scheduleName) {
+        if ($formScheduleCounts[$scheduleKey] > 0) {
+          if ($activeFormSchedule === null) $activeFormSchedule = (string)$scheduleKey;
+          if (strcasecmp(trim($scheduleName), 'Daily') === 0) {
+            $activeFormSchedule = (string)$scheduleKey;
+            break;
+          }
+        }
+      }
+      ?>
+      <div class="box box-info" id="shared-custom-forms">
         <div class="box-header">
-          <h3 class="box-title"><?php echo h(__('Shared Custom Forms')); ?></h3> <i class="fa fa-database pull-right"></i>
+          <h3 class="box-title"><?php echo h(__('Shared Custom Forms')); ?></h3>
           <div class="box-tools">
-            <!-- <?php echo $this->Html->link('<i class="fa fa-database fa-lg"></i>',array('controller'=>'custom_tables','action'=>'index'),array('escape'=>false));?> -->
+            <?php foreach ($formSchedules as $scheduleKey => $scheduleName):
+              $scheduleCount = $formScheduleCounts[$scheduleKey];
+              if ($scheduleCount === 0) continue;
+              $scheduleSelected = (string)$scheduleKey === $activeFormSchedule;
+            ?>
+              <button type="button" class="btn btn-default btn-xs form-schedule-filter"
+                data-form-schedule="<?php echo h($scheduleKey); ?>" aria-pressed="<?php echo $scheduleSelected ? 'true' : 'false'; ?>"><?php echo h($scheduleName); ?> <span class="form-schedule-count"><?php echo (int)$scheduleCount; ?></span></button>
+            <?php endforeach; ?>
           </div>
         </div>
         <!-- /.box-header -->
@@ -82,7 +124,6 @@ $pptarray = array('ppt','pptx');
           <table class="table table-hover">
             <tbody><tr>
               <th><?php echo h(__('Document')); ?></th>
-              <th><?php echo h(__('Schedule')); ?></th>
               <!-- <th>Data Update Type</th> -->
               <th><?php echo h(__('Last Updated')); ?></th>
               <th><?php echo h(__('Updated By')); ?></th>
@@ -122,10 +163,13 @@ $pptarray = array('ppt','pptx');
               }
 
               ?>
-              <tr>
+              <?php
+              $rawScheduleKey = isset($customTable['QcDocument']['schedule_id']) ? (string)$customTable['QcDocument']['schedule_id'] : '';
+              $rowScheduleKey = isset($formScheduleKeys[$rawScheduleKey]) ? $formScheduleKeys[$rawScheduleKey] : '__none';
+              ?>
+              <tr data-form-schedule-row="<?php echo h($rowScheduleKey); ?>"<?php echo $rowScheduleKey === $activeFormSchedule ? '' : ' style="display:none"'; ?>>
                 <td>
                     <strong><?php echo $customTable['CustomTable']['name'];?></strong><br /><small><?php echo $customTable['QcDocument']['name'];?> : <?php echo $customTable['QcDocument']['document_number'];?>-<?php echo $customTable['QcDocument']['revision_number'];?>.<?php echo $customTable['QcDocument']['file_type'];?></small></td>
-                    <td><?php echo $schedules[$customTable['QcDocument']['schedule_id']];?></td>
                     <!-- <td><small><?php echo $dataUpdateType[$customTable['QcDocument']['data_update_type']];?></small></td> -->
                     <td><?php
                     if($last_updated['created']){
@@ -169,7 +213,7 @@ $pptarray = array('ppt','pptx');
               </tr>
             <?php } ?>
               <tr>
-                <td colspan="6"><small><?php echo h(__('To add new record click')); ?> <i class="fa fa-plus"></i> <?php echo h(__('button. To Updated last added record click')); ?> <i class="fa fa-edit"></i>  <?php echo h(__('button or to view the record click')); ?> <i class="fa fa-desktop"></i> <?php echo h(__('button.')); ?>
+                <td colspan="5"><small><?php echo h(__('To add new record click')); ?> <i class="fa fa-plus"></i> <?php echo h(__('button. To Updated last added record click')); ?> <i class="fa fa-edit"></i>  <?php echo h(__('button or to view the record click')); ?> <i class="fa fa-desktop"></i> <?php echo h(__('button.')); ?>
                 <!-- To see all records added by you click <?php echo $this->Html->link(__('here'),array('controller'=>'records','action'=>'index'));?> -->
                     </small>
                 </td>
@@ -182,6 +226,11 @@ $pptarray = array('ppt','pptx');
           <!-- /.box -->
     </div>
   </div>
+    <?php
+    $scheduleFilterScript = $this->webroot . 'js/dashboard-schedule-filters.js';
+    $scheduleFilterScript .= '?v=' . filemtime(WWW_ROOT . 'js' . DS . 'dashboard-schedule-filters.js');
+    ?>
+    <script src="<?php echo h($scheduleFilterScript); ?>" defer></script>
     <?php if($approvals){ ?>
       <div class="row">
         <div class="col-md-12">

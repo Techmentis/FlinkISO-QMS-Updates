@@ -195,7 +195,7 @@ if(($this->action == 'index' || $this->action == 'advance_search' || $this->acti
     <?php if(($this->action == 'index' || $this->action == 'quick_search' ) && $this->request->controller != 'usage_details'  && $this->request->controller != 'invoices') { ?>
         <div class=" btn-group" style="width:100%;">
             <?php 
-            echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_src_button', 'autocomplete'=>'off',  'label'=>false,'placeholder'=>__('Quick search...'),'style'=>'margin-top: -12px'));
+            echo $this->Form->input('src',array('class'=>'form-control','id'=>'quick_src_button', 'autocomplete'=>'off',  'label'=>false,'placeholder'=>__('Quick search... use space, tab or enter to search'),'style'=>'margin-top: -12px'));
             ?>
         </div>
     <?php } } ?>
@@ -263,16 +263,15 @@ $str .= 'timestamp:'.date('ymdhis');
     <?php } ?>
     
     $().ready(function(){
-        var quickSearchContext = [];
-        <?php if(isset($this->request->params['named']['custom_table_id'])) { ?>
-            quickSearchContext.push('custom_table_id:<?php echo rawurlencode($this->request->params['named']['custom_table_id']); ?>');
-        <?php } ?>
-        <?php if(isset($this->request->params['named']['qc_document_id'])) { ?>
-            quickSearchContext.push('qc_document_id:<?php echo rawurlencode($this->request->params['named']['qc_document_id']); ?>');
-        <?php } ?>
-        <?php if(isset($this->request->params['named']['process_id'])) { ?>
-            quickSearchContext.push('process_id:<?php echo rawurlencode($this->request->params['named']['process_id']); ?>');
-        <?php } ?>
+        var quickSearchContext = <?php
+            $quickSearchContext = array();
+            foreach (array('custom_table_id','qc_document_id','process_id','published','soft_delete','table_type') as $contextParam) {
+                if (isset($this->request->params['named'][$contextParam])) {
+                    $quickSearchContext[] = $contextParam . ':' . rawurlencode($this->request->params['named'][$contextParam]);
+                }
+            }
+            echo json_encode($quickSearchContext);
+        ?>;
 
         function selectedQuickSearchOptions(){
             var options = [];
@@ -296,7 +295,7 @@ $str .= 'timestamp:'.date('ymdhis');
                 return field.name !== 'strict';
             });
             if(search === '' && !hasDropdownOption){
-                return action + '/timestamp:' + new Date().getTime();
+                return action + '/' + quickSearchContext.concat(['timestamp:' + new Date().getTime()]).join('/');
             }
 
             var segments = quickSearchContext.slice(0);
@@ -312,9 +311,6 @@ $str .= 'timestamp:'.date('ymdhis');
             var searchInput = $('#quick_src_button');
             var search = $.trim(searchInput.val());
             var options = selectedQuickSearchOptions();
-            var keepFocus = searchInput.is(':focus');
-
-            if(search.length === 1) return;
 
             if(window.navHeaderSearchRequest){
                 window.navHeaderSearchRequest.abort();
@@ -326,9 +322,16 @@ $str .= 'timestamp:'.date('ymdhis');
                 success: function(response){
                     var responseMain = $('<div>').append($.parseHTML(response, document, false)).find('#main').first();
                     if(!responseMain.length) return;
+                    // Keep spaces and any text typed while this request ran.
+                    var currentInput = $('#quick_src_button');
+                    var currentText = currentInput.val() || '';
+                    var keepFocus = currentInput.is(':focus');
+                    var inputNode = currentInput.get(0);
+                    var cursorStart = inputNode && inputNode.selectionStart != null ? inputNode.selectionStart : currentText.length;
+                    var cursorEnd = inputNode && inputNode.selectionEnd != null ? inputNode.selectionEnd : cursorStart;
 
                     $('#main').html(responseMain.html());
-                    $('#quick_src_button').val(search);
+                    $('#quick_src_button').val(currentText);
                     options.forEach(function(field){
                         $('#indexsort [name="' + field.inputName + '"]').val(field.value);
                     });
@@ -349,7 +352,7 @@ $str .= 'timestamp:'.date('ymdhis');
                     if(keepFocus){
                         var refreshedInput = $('#quick_src_button').focus().get(0);
                         if(refreshedInput && refreshedInput.setSelectionRange){
-                            refreshedInput.setSelectionRange(search.length, search.length);
+                            refreshedInput.setSelectionRange(cursorStart, cursorEnd);
                         }
                     }
                 },
@@ -366,9 +369,16 @@ $str .= 'timestamp:'.date('ymdhis');
                 $('#srcdivhideshow').removeClass('hidden', 200);
             })
             .off('input.navHeaderQuickSearch', '#quick_src_button')
-            .on('input.navHeaderQuickSearch', '#quick_src_button', function(){
+            .off('keydown.navHeaderQuickSearch', '#quick_src_button')
+            .on('keydown.navHeaderQuickSearch', '#quick_src_button', function(event){
+                if(event.isComposing || (event.originalEvent && event.originalEvent.isComposing)
+                    || event.keyCode === 229 || event.repeat || event.ctrlKey || event.altKey || event.metaKey) return;
+                var key = event.key || ({9:'Tab',13:'Enter',32:' '})[event.which || event.keyCode];
+                if(key !== ' ' && key !== 'Spacebar' && key !== 'Tab' && key !== 'Enter') return;
+                if(key === 'Enter') event.preventDefault();
                 clearTimeout(window.navHeaderSearchTimer);
-                window.navHeaderSearchTimer = setTimeout(loadQuickSearchResults, 300);
+                // Run after the space is inserted or Tab moves focus onward.
+                window.navHeaderSearchTimer = setTimeout(loadQuickSearchResults, 0);
             })
             .off('change.navHeaderQuickSearch', '#indexsort select, #indexsort input[type="radio"]')
             .on('change.navHeaderQuickSearch', '#indexsort select, #indexsort input[type="radio"]', function(){
@@ -410,15 +420,6 @@ $str .= 'timestamp:'.date('ymdhis');
         $("#history_open").load("<?php echo Router::url('/', true); ?>document_downloads/index/custom_table_id:"+c+"/record_id:"+id);
     }
 
-    $(document).ready(function(){
-        <?php if($this->request->controller == 'custom_tables'){ ?>
-            $("#quick_src_button").on('change', function(){
-                $("#quick_src_button").val($("#quick_src_button").val().replace(/ /g,"+"));
-                $('#main').load("<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/quick_search/<?php echo $str;?>/search:" + $("#quick_src_button").val());
-                return false;
-            });
-        <?php } ?>                
-    });    
 </script>
 <div id="pdf_open"></div>
 <div id="history_open"></div>

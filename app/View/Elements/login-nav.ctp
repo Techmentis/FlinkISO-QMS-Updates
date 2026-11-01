@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <!-- Logo -->
       <div class="navbar-header">
-        <a class="navbar-brand" href="https://www.flinkiso.com">FlinkISO</a>
+        <?php echo $this->Html->link('FlinkISO', array('controller' => 'users', 'action' => 'dashboard', 'plugin' => null), array('class' => 'navbar-brand')); ?>
       </div>
     </div>
   </nav>

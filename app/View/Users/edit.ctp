@@ -140,7 +140,7 @@
 <div id="loaddoclist"></div>
 <div id="loadtablelist"></div>
 <script>
-    $("#loaddoclist").load("<?php echo Router::url('/', true); ?>qc_documents/document_list");
+    $("#loaddoclist").load("<?php echo Router::url('/', true); ?>qc_documents/document_list/<?php echo rawurlencode((string)$this->request->data['User']['id']); ?>");
     $("#loadtablelist").load("<?php echo Router::url('/', true); ?>custom_tables/custom_table_list");
 $.ajaxSetup({beforeSend: function() {$("#busy-indicator").show();}, complete: function() {$("#busy-indicator").hide();}});
 </script>

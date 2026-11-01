@@ -408,9 +408,12 @@
                                                 <th><?php echo h(__('Shared with Users/ Employees')); ?></th>
                                                 <td><?php
                                                     $users = json_decode($qcDocument['QcDocument']['user_id'],true);
-                                                    foreach($users as $user){
-                                                        echo $PublishedUserList[$user].',';
-                                                    }
+                                                    $sharingNames = array();
+                                        foreach((array)$users as $sharedId){
+                                            if (!is_scalar($sharedId) || trim((string)$sharedId) === '') continue;
+                                            $sharingNames[] = isset($PublishedUserList[$sharedId]) ? $PublishedUserList[$sharedId] : __('Unavailable user');
+                                        }
+                                        echo h(implode(', ', $sharingNames));
                                                     ?></td>
                                             </tr>
                                         <?php } ?>
@@ -419,9 +422,12 @@
                                                 <th><?php echo h(__('Document Editors')); ?></th>
                                                 <td><?php
                                                     $editors = json_decode($qcDocument['QcDocument']['editors'],true);
-                                                    foreach($editors as $editor){
-                                                        echo $PublishedUserList[$editor].',';
-                                                    }
+                                                    $sharingNames = array();
+                                        foreach((array)$users as $sharedId){
+                                            if (!is_scalar($sharedId) || trim((string)$sharedId) === '') continue;
+                                            $sharingNames[] = isset($PublishedUserList[$sharedId]) ? $PublishedUserList[$sharedId] : __('Unavailable user');
+                                        }
+                                        echo h(implode(', ', $sharingNames));
                                                     ?></td>
                                             </tr>
                                         <?php } ?>

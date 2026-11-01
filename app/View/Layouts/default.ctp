@@ -142,7 +142,7 @@ echo $this->fetch('script');
 	$(".get-size").attr("style","left:-"+pos+"px");
 	$(".get-size").width(width + 'px');
 
-	$("#mm").hover(function(){$(this).find('.dropdown-menu').first().toggle();});
+	// Top navigation dropdowns use Bootstrap click toggles.
 
 	$('.tooltip1').tooltip();
 	$('select').chosen( { width:'100%' } );
@@ -360,5 +360,6 @@ if($this->action == 'index'){?>
 		}
 	}
 </script>
+<?php echo $this->element('session_keepalive'); ?>
 </body>
 </html>

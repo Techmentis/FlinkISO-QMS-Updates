@@ -201,26 +201,47 @@
 		});
 	}
 
-	function postvalues(id,type,model){
-		$('.li_a').click(function () {return false;});
-		$("#"+id+"_fa").removeClass('fa-download').addClass('fa-refresh fa-spin');		
-		$("#DocumentDownloadRecordListForm").ajaxSubmit({
-			url: "<?php echo Router::url('/', true); ?><?php echo $this->request->params['controller'] ?>/download/type:"+type+"/id:"+id+"/model:"+model,
-			type: 'POST',
-			target: '#'+id+"_li_div",			
-			beforeSend: function(){
-				
-			},
-			complete: function(data,response) {				
-				$("#"+id+"_fa").removeClass('fa-refresh fa-spin').addClass('fa-check text-success');
-				$("#"+id+"_li_div").html(data.responseText);				
-				$(".modal-title").html(<?php echo json_encode(__('Your PDFs files are ready for download.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
-				$('.li_a').unbind('click');
-			},
-			error: function(request, status, error) {                    
-				alert(<?php echo json_encode(__('Action failed!'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
-			}
-		});
+    var pdfDownloadRequests = {};
+    function postvalues(id,type,model){
+        if(pdfDownloadRequests[id]) return false;
+        pdfDownloadRequests[id] = true;
+        var requestId = 'pdf_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+        var started = Date.now();
+        var resultBox = $('#'+id+'_li_div');
+        var icon = $('#'+id+'_fa');
+        icon.removeClass('fa-download fa-check text-success').addClass('fa-refresh fa-spin');
+        function failed(message){
+            delete pdfDownloadRequests[id];
+            icon.removeClass('fa-refresh fa-spin').addClass('fa-download');
+            resultBox.empty().append($('<div/>', {'class':'alert alert-danger', text:message}));
+        }
+        function poll(){
+            if(Date.now() - started > 240000){
+                failed('PDF conversion did not finish within four minutes. Retry the download.');
+                return;
+            }
+            $('#DocumentDownloadRecordListForm').ajaxSubmit({
+                url: <?php echo json_encode(Router::url(array('controller'=>'document_downloads','action'=>'download'), true)); ?>+'/type:'+encodeURIComponent(type)+'/id:'+encodeURIComponent(id)+'/model:'+encodeURIComponent(model),
+                type:'POST',
+                data:{'data[DocumentDownload][conversion_request]':requestId},
+                success:function(data, status, xhr){
+                    if(xhr.status === 202 && data.pending){
+                        resultBox.empty().append($('<div/>', {'class':'text-info', text:'Generating PDF. Please wait…'}));
+                        window.setTimeout(poll, 2000);
+                        return;
+                    }
+                    delete pdfDownloadRequests[id];
+                    resultBox.html(data);
+                    icon.removeClass('fa-refresh fa-spin').addClass('fa-check text-success');
+                    $('.modal-title').text(<?php echo json_encode(__('Your PDFs files are ready for download.')); ?>);
+                },
+                error:function(xhr){
+                    failed(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'PDF generation failed. Please retry.');
+                }
+            });
+        }
+        poll();
+        return false;
+    }
 
-	}
 </script>

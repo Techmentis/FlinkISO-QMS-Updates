@@ -1217,114 +1217,60 @@ class QcDocumentsController extends AppController {
 
     public function update_access(){
         $this->autoRender = false;
-        if ($this->request->is('post') || $this->request->is('put')) {
-            $qcDocuments = $this->QcDocument->find('all',array(
-                'recursive'=>-1,
-                'conditions'=>array(
-                    'OR'=>array(
-                        'QcDocument.id'=>$this->request->data['qc_document_id'],
-                        'QcDocument.parent_document_id'=>$this->request->data['qc_document_id']
-                        )                    
-                    )
-            ));
-
-            if($this->request->data['typ'] == 0){
-                $action = 'remove'.$this->request->data['action'];
-            }else{
-                $action = 'add'.$this->request->data['action'];
+        $this->response->type('json');
+        $this->response->disableCache();
+        $transaction = false;
+        try {
+            if (!$this->Session->read('User.is_mr')) throw new RuntimeException('Only an administrator can manage document access.', 403);
+            if (!$this->request->is('post') && !$this->request->is('put')) throw new RuntimeException('Submit an access change to continue.', 405);
+            $data = $this->request->data;
+            foreach (array('qc_document_id','user_id') as $key) {
+                if (empty($data[$key]) || !is_string($data[$key]) || trim($data[$key]) === '') throw new RuntimeException('A document and a valid target user are required.', 400);
             }
-            
-            if($qcDocuments){
-                foreach($qcDocuments as $qcDocument){
-                    switch ($action) {
-                        case 'addview' :
-                            $users = json_decode($qcDocument['QcDocument']['user_id'],true);
-                            $users[] = $this->request->data['user_id'];
-                            $qcDocument['QcDocument']['user_id'] = json_encode($users);
-                        break;
-
-                        case 'removeview' :
-                            $qcDocument['QcDocument']['user_id'] = str_replace($this->request->data['user_id'], '', $qcDocument['QcDocument']['user_id']);
-                            $users = json_decode($qcDocument['QcDocument']['user_id'],true);
-                            foreach($users as $user){
-                                if($user)$newView[] = $user;
-                            }
-                            $qcDocument['QcDocument']['user_id'] = json_encode($newView);
-                        break;
-
-                        case 'addedit' :
-                            $users = json_decode($qcDocument['QcDocument']['editors'],true);
-                            $users[] = $this->request->data['user_id'];
-                            $qcDocument['QcDocument']['editors'] = json_encode($users);
-                        break;
-
-                        case 'removeedit' :
-                            $qcDocument['QcDocument']['editors'] = str_replace($this->request->data['user_id'], '', $qcDocument['QcDocument']['editors']);
-                            $users = json_decode($qcDocument['QcDocument']['editors'],true);
-                            foreach($users as $user){
-                                if($user)$newEdit[] = $user;
-                            }
-                            $qcDocument['QcDocument']['editors'] = json_encode($newEdit);
-                        break;
-                    }
-                    
-                    $this->QcDocument->create();
-                    if($this->QcDocument->save($qcDocument,false)){
-                        // remove copy_acl_from
-                        $this->loadModel('User');
-                        $user = $this->User->find('first',array('recursive'=>-1,'conditions'=>array('User.id'=>$this->request->data['user_id'])));
-                        if($user){
-                            $user['User']['copy_acl_from'] = NULL;
-                            $this->User->create();
-                            $this->User->save($user,false);
-                        }
-                        // return true;
-                    }else{
-                        // return false;
-                    }
+            if (!isset($data['action']) || !in_array($data['action'], array('view','edit'), true)
+                || !isset($data['typ']) || !in_array($data['typ'], array(0,1,'0','1'), true)) throw new RuntimeException('Invalid document access change.', 400);
+            $companyId = $this->Session->read('User.company_id');
+            if (!$companyId) throw new RuntimeException('Sign in again before changing access.', 403);
+            $this->loadModel('User');
+            $user = $this->User->find('first', array('recursive'=>-1, 'conditions'=>array('User.id'=>$data['user_id'], 'User.company_id'=>$companyId)));
+            if (empty($user['User']['id'])) throw new RuntimeException('The selected user was not found in this company.', 400);
+            $docs = $this->QcDocument->find('all', array('recursive'=>-1, 'conditions'=>array(
+                'QcDocument.company_id'=>$companyId,
+                'OR'=>array('QcDocument.id'=>$data['qc_document_id'], 'QcDocument.parent_document_id'=>$data['qc_document_id'])
+            )));
+            $found = false;
+            foreach ($docs as $doc) if ($doc['QcDocument']['id'] === $data['qc_document_id']) $found = true;
+            if (!$found) throw new RuntimeException('The selected document was not found in this company.', 400);
+            $field = $data['action'] === 'view' ? 'user_id' : 'editors';
+            $source = $this->QcDocument->getDataSource();
+            if (!$source->begin()) throw new RuntimeException('Unable to start the access update.', 500);
+            $transaction = true;
+            foreach ($docs as $doc) {
+                $raw = isset($doc['QcDocument'][$field]) ? $doc['QcDocument'][$field] : null;
+                $ids = is_array($raw) ? $raw : json_decode((string)$raw, true);
+                if (!is_array($ids)) $ids = $raw !== null && $raw !== '' && $raw !== 'null' ? array($raw) : array();
+                $clean = array();
+                foreach ($ids as $id) {
+                    if (is_scalar($id) && trim((string)$id) !== '' && (string)$id !== $data['user_id']) $clean[] = (string)$id;
                 }
-                return true;
-            }else{
-                return false;
+                if ((int)$data['typ'] === 1) $clean[] = $data['user_id'];
+                $clean = array_values(array_unique($clean));
+                $this->QcDocument->create();
+                if (!$this->QcDocument->save(array('QcDocument'=>array('id'=>$doc['QcDocument']['id'], $field=>json_encode($clean))), false, array('id',$field))) throw new RuntimeException('The document access change could not be saved.', 500);
             }
+            $this->User->create();
+            if (!$this->User->save(array('User'=>array('id'=>$user['User']['id'], 'copy_acl_from'=>null)), false, array('id','copy_acl_from'))) throw new RuntimeException('The user access change could not be saved.', 500);
+            if (!$source->commit()) throw new RuntimeException('The access update could not be completed.', 500);
+            $transaction = false;
+            $this->response->body(json_encode(array('saved'=>true)));
+        } catch (Exception $exception) {
+            if ($transaction) $source->rollback();
+            $status = in_array($exception->getCode(), array(400,403,405,500), true) ? $exception->getCode() : 500;
+            $this->response->statusCode($status);
+            $this->response->body(json_encode(array('saved'=>false, 'message'=>$status===500 ? 'The access change could not be saved. Please retry.' : $exception->getMessage())));
+            if ($status === 500) $this->log('Document access update failed: '.$exception->getMessage(), 'error');
         }
-
-        // if($qcDocument){
-        //     if($this->request->data['action'] == 'addview'){
-        //         $users = json_decode($qcDocument['QcDocument']['user_id'],true);
-        //         $users[] = $this->request->data['user_id'];
-        //         $qcDocument['QcDocument']['user_id'] = json_encode($users);
-        //     }
-        //     if($this->request->data['action'] == 'removeview'){
-        //         $qcDocument['QcDocument']['user_id'] = str_replace($this->request->data['user_id'], '', $qcDocument['QcDocument']['user_id']);
-        //         $users = json_decode($qcDocument['QcDocument']['user_id'],true);
-        //         foreach($users as $user){
-        //             if($user)$newView[] = $user;
-        //         }
-        //         $qcDocument['QcDocument']['user_id'] = json_encode($newView);
-        //     }
-        //     if($this->request->data['action'] == 'removeedit'){
-        //         $qcDocument['QcDocument']['editors'] = str_replace($this->request->data['user_id'], '', $qcDocument['QcDocument']['editors']);
-        //         $users = json_decode($qcDocument['QcDocument']['editors'],true);
-        //         foreach($users as $user){
-        //             if($user)$newEdit[] = $user;
-        //         }
-        //         $qcDocument['QcDocument']['editors'] = json_encode($newEdit);
-        //     }
-        //     if($this->request->data['action'] == 'addedit'){
-        //         $users = json_decode($qcDocument['QcDocument']['editors'],true);
-        //         $users[] = $this->request->data['user_id'];
-        //         $qcDocument['QcDocument']['editors'] = json_encode($users);
-        //     }
-        //     $this->QcDocument->create();
-        //     if($this->QcDocument->save($qcDocument,false)){
-        //         return true;
-        //     }else{
-        //         return false;
-        //     }
-        // }else{
-        //     return false;
-        // }
+        return $this->response;
     }
 
     public function reloaddocument($docid = null,$action = null){
@@ -1873,6 +1819,15 @@ class QcDocumentsController extends AppController {
     }
 
     public function document_list($user_id = null){
+        if (!$this->Session->read('User.is_mr')) throw new ForbiddenException('Only an administrator can manage document access.');
+        if (!is_string($user_id) || trim($user_id) === '') throw new BadRequestException('Select a user before managing document access.');
+        $this->loadModel('User');
+        $accessUser = $this->User->find('first', array('recursive'=>-1, 'conditions'=>array(
+            'User.id'=>$user_id, 'User.company_id'=>$this->Session->read('User.company_id')
+        )));
+        if (!$accessUser) throw new NotFoundException('The selected user was not found.');
+        $this->set('user', $accessUser);
+
         $limit = 25;
         $src = array();
         $this->set('hide',false);
@@ -1890,17 +1845,12 @@ class QcDocumentsController extends AppController {
             }
         }
 
-        if($user_id){
-            $this->loadModel('User');
-            $user = $this->User->find('first',array('recursive'=>-1,'conditions'=>array('User.id'=>$user_id)));
-            $this->set('user',$user);
-        }
-
         $this->paginate = array(
             'recursive'=>0,
             'limit'=>$limit,
             'conditions'=>array($src, 
                 'QcDocument.archived'=>0,
+                'QcDocument.company_id'=>$this->Session->read('User.company_id'),
                 'QcDocument.parent_document_id'=>array(NULL,-1,'')
             ),
             'fields'=>array(
