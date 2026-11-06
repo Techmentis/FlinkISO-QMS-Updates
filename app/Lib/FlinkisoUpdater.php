@@ -256,7 +256,8 @@ class FlinkisoUpdater {
             $this->event($step, 0, 'Publishing application files...');
             $this->publish($incoming);
             $this->event($step, 100, 'Application files installed.');
-            $this->event('complete', 100, 'Update completed successfully. Backup: ' . $backup);
+            $this->event('complete', 100, 'Update completed successfully. Backup: ' . $backup
+                . ($sqlWarnings ? ' SQL warnings: '.$sqlWarnings.'. Review the update log.' : ''), false, $sqlWarnings > 0);
         } catch (Throwable $e) {
             $message = $e->getMessage();
             if (!empty($this->config['pat'])) $message = str_replace($this->config['pat'], '[REDACTED]', $message);
@@ -320,6 +321,14 @@ class FlinkisoUpdater {
     }
 
     private function extract($archive, $stage, $repo) {
+        // Validate original entry names before unzip can normalize traversal
+        // paths, and before writing any extracted application files.
+        $entries = array(); $listStatus = 0;
+        exec('unzip -Z1 ' . escapeshellarg($archive) . ' 2>/dev/null', $entries, $listStatus);
+        if($listStatus !== 0 || !$entries) throw new RuntimeException(__('Cannot read the update archive.'));
+        foreach($entries as $entry) {
+            if(!self::safeArchivePath($entry)) throw new RuntimeException(__('Unsafe path in update archive.'));
+        }
         $this->mkdirChecked($stage);
         $output = array(); $status = 0;
         exec('unzip -oq ' . escapeshellarg($archive) . ' -d ' . escapeshellarg($stage) . ' 2>&1', $output, $status);
@@ -369,7 +378,7 @@ class FlinkisoUpdater {
                 foreach (array_reverse($missing) as $dir) { if (!mkdir($dir, 0755)) throw new RuntimeException(__('Cannot create: ') . $dir); $dirs[] = $dir; }
                 $ownedTemporary = false;
                 $temporary = $dest . '.flinkiso-new';
-                if ((file_exists($temporary) || is_link($temporary)) && !unlink($temporary)) throw new RuntimeException(__('Cannot replace temporary file: ') . $temporary);
+                if (file_exists($temporary) || is_link($temporary)) throw new RuntimeException(__('An existing temporary file must be reviewed before publishing: ') . $temporary);
                 $ownedTemporary = true;
                 $this->copyChecked($this->work . '/new/' . $rel, $temporary);
                 $mode = is_file($dest) ? (fileperms($dest) & 0777) : 0644;

@@ -2,10 +2,21 @@
 <style>#checkout-button{display: none;}</style>
 <?php 
 $str = 'company_id:'.$this->Session->read('User.company_id');
+$builderChildTables = array();
+foreach ((array)$childTables as $childTable) {
+  if (empty($childTable['CustomTable']['id'])) continue;
+  $childTable['CustomTable']['edit_url'] = Router::url(array(
+    'controller' => 'custom_tables',
+    'action' => 'unlock',
+    $childTable['CustomTable']['id'],
+    'next_action' => 'recreate_child'
+  ), true);
+  $builderChildTables[] = $childTable;
+}
 $recreatePayload = json_encode(array(
     $existingFields,
     $fieldDetails,
-    $childTables,
+    $builderChildTables,
     $thisTable,
     $linkedTosWithDisplay,
     $hasMany,

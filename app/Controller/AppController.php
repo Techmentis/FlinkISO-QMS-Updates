@@ -80,8 +80,16 @@ class AppController  extends Controller {
             'fields'=>array('CustomTable.id', 'CustomTable.password'),
             'conditions'=>array('CustomTable.id'=>$tableId, 'CustomTable.company_id'=>$this->Session->read('User.company_id'))));
         $grant = $this->Session->read('FormPassword.'.$tableId);
-        return !empty($table) && is_array($grant) && !empty($grant['expires']) && $grant['expires'] > time()
+        $valid = !empty($table) && is_array($grant) && !empty($grant['expires']) && $grant['expires'] > time()
             && !empty($grant['password_hash']) && hash_equals((string)$table['CustomTable']['password'], (string)$grant['password_hash']);
+        if(!$valid) return false;
+        if(!empty($grant['module_id']) && (string)$grant['module_id'] !== (string)$tableId){
+            $parent = $this->CustomTable->find('first',array('recursive'=>-1,'fields'=>array('CustomTable.password'),
+                'conditions'=>array('CustomTable.id'=>$grant['module_id'],'CustomTable.company_id'=>$this->Session->read('User.company_id'))));
+            return !empty($parent['CustomTable']['password']) && !empty($grant['module_password_hash'])
+                && hash_equals((string)$parent['CustomTable']['password'],(string)$grant['module_password_hash']);
+        }
+        return true;
     }
 
     public function _check_login() {
@@ -136,6 +144,34 @@ class AppController  extends Controller {
             if($this->action == 'json')$this->_json();
             // $this->_get_approver_list();
             $this->_find_parent();
+            if(in_array($this->action, array('add', 'edit'), true) && !empty($this->modelClass) && isset($this->{$this->modelClass})){
+                $tableName = $this->{$this->modelClass}->useTable;
+                if(is_string($tableName) && preg_match('/^(tbl|chd)_/', $tableName)){
+                    $this->loadModel('CustomTable');
+                    $table = $this->CustomTable->find('first', array(
+                        'recursive' => -1,
+                        'fields' => array('CustomTable.id', 'CustomTable.fields', 'CustomTable.tab_settings',
+                            'CustomTable.custom_table_id', 'CustomTable.approval_process_id'),
+                        'conditions' => array('CustomTable.table_name' => $tableName,
+                            'CustomTable.company_id' => $this->Session->read('User.company_id'))
+                    ));
+                    if(!empty($table['CustomTable'])){
+                        $config = $table['CustomTable'];
+                        App::uses('TabAccessPolicy', 'Lib');
+                        $settings = TabAccessPolicy::decode($config['tab_settings']);
+                        $childRules = isset($settings['child_tables']) && is_array($settings['child_tables'])
+                            ? $settings['child_tables'] : array();
+                        $record = $this->action === 'edit' && isset($this->request->data[$this->modelClass])
+                            ? $this->request->data[$this->modelClass] : array();
+                        $actor = $this->_availability_actor($record, $config);
+                        $this->set('liveChildTableRules', $childRules);
+                        $this->set('availabilityWorkflowStep', $actor['approval_step_id']);
+                        if($this->action === 'add'){
+                            $this->set('restrictedAddFields', $this->_restricted_add_fields($config['fields']));
+                        }
+                    }
+                }
+            }
             $ignoreControllerSotList = array('custom_tables','standards','qc_document_categories','branches','departments','designations');
             if(!in_array($this->request->controller, $ignoreControllerSotList)){
                 $this->_sort();
@@ -417,6 +453,7 @@ class AppController  extends Controller {
     public function beforeFilter() {
         $this->_check_login();
         $this->_applyUserLanguage();
+        $this->_guard_readonly_child_delete();
         if ($this->request->controller === 'users' && $this->action === 'change_language') return;
         $this->_loadAiConfiguration();
         if($this->Session->read('User')){
@@ -3609,22 +3646,50 @@ class AppController  extends Controller {
         $employeeId = $this->Session->read('User.employee_id');
         $designationId = $this->Session->read('User.designation_id');
         if(!empty($designationId) && in_array($designationId, $designations)) return true;
+        $roleFlags = array('role:publisher'=>'is_publisher', 'role:admin'=>'is_mr', 'role:hod'=>'is_hod');
         foreach($editors as $editor){
+            if(!is_string($editor)) continue;
+            if(isset($roleFlags[$editor]) && (int)$this->Session->read('User.'.$roleFlags[$editor]) === 1) return true;
+            if($editor === 'role:super_admin' && $this->_is_super_user()) return true;
+            if(strpos($editor, 'role:') === 0) continue;
             if($editor === 'created_by' && !empty($record['created_by']) && $record['created_by'] == $userId) return true;
             if($editor === 'prepared_by' && !empty($record['prepared_by']) && in_array($record['prepared_by'], array($employeeId, $userId))) return true;
             if($editor === 'approved_by' && !empty($record['approved_by']) && in_array($record['approved_by'], array($employeeId, $userId))) return true;
-            if(isset($record[$editor]) && in_array($record[$editor], array($employeeId, $userId))) return true;
+            if(!empty($record[$editor]) && in_array($record[$editor], array($employeeId, $userId))) return true;
         }
         return false;
     }
 
-    private function _enforce_child_custom_field_editor_rules($modelName, &$submittedData, $existingData, $customTableId){
-        if(empty($existingData) || empty($customTableId)) return;
+    private function _restricted_add_fields($fields){
+        if(is_string($fields)) $fields = json_decode($fields, true);
+        $record = array(
+            'created_by' => $this->Session->read('User.id'),
+            'prepared_by' => $this->Session->read('User.employee_id')
+        );
+        foreach((array)$fields as $field){
+            if(empty($field['field_name']) || empty($field['session_value']) || empty($field['linked_to'])) continue;
+            $linkedModel = Inflector::classify(Inflector::singularize(trim($field['linked_to'])));
+            if($linkedModel === 'Employee' || $linkedModel === 'User'){
+                $record[$field['field_name']] = $this->Session->read($linkedModel === 'Employee' ? 'User.employee_id' : 'User.id');
+            }
+        }
+        $restricted = array();
+        foreach((array)$fields as $field){
+            if(!empty($field['field_name']) && !$this->_current_user_can_edit_custom_field($field, $record)){
+                $restricted[$field['field_name']] = $field;
+            }
+        }
+        return $restricted;
+    }
+
+    private function _enforce_child_custom_field_editor_rules($modelName, &$submittedData, $existingData){
+        if(empty($existingData) || empty($this->$modelName->useTable)) return;
         $this->loadModel('CustomTable');
         $customTable = $this->CustomTable->find('first', array(
-        'recursive' => -1,
-        'fields' => array('CustomTable.fields'),
-        'conditions' => array('CustomTable.id' => $customTableId)
+            'recursive' => -1,
+            'fields' => array('CustomTable.fields'),
+            'conditions' => array('CustomTable.table_name' => $this->$modelName->useTable,
+                'CustomTable.company_id' => $this->Session->read('User.company_id'))
         ));
         $fields = !empty($customTable['CustomTable']['fields']) ? json_decode($customTable['CustomTable']['fields'], true) : array();
         if(!is_array($fields)) return;
@@ -3847,6 +3912,226 @@ class AppController  extends Controller {
         }
     }
 
+    /** Resolve the same assigned/default workflow for configuration and rule enforcement. */
+    protected function _availability_approval_steps($table){
+        if(empty($table)) return array();
+        $this->loadModel('ApprovalProcess');
+        $this->loadModel('ApprovalStep');
+        if(!isset($this->ApprovalProcess, $this->ApprovalStep)) return array();
+        $companyId = $this->Session->read('User.company_id');
+        if(!empty($table['custom_table_id'])){
+            $this->loadModel('CustomTable');
+            $parent = $this->CustomTable->find('first',array('recursive'=>-1,
+                'fields'=>array('CustomTable.id','CustomTable.approval_process_id'),
+                'conditions'=>array('CustomTable.id'=>$table['custom_table_id'],'CustomTable.company_id'=>$companyId)));
+            if(empty($parent['CustomTable'])) return array();
+            $table = $parent['CustomTable'];
+        }
+        // Legacy assigned processes have NULL publish but are used by the approval engine.
+        $conditions = array('ApprovalProcess.company_id'=>$companyId,'ApprovalProcess.soft_delete'=>0,
+            'OR'=>array('ApprovalProcess.publish'=>1,'ApprovalProcess.publish IS NULL'));
+        if(!empty($table['approval_process_id'])){
+            $conditions['ApprovalProcess.id'] = $table['approval_process_id'];
+            $process = $this->ApprovalProcess->find('first',array('recursive'=>-1,'fields'=>array('ApprovalProcess.id'),'conditions'=>$conditions));
+        }else{
+            $process = array();
+            if(!empty($table['id'])) $process = $this->ApprovalProcess->find('first',array('recursive'=>-1,
+                'fields'=>array('ApprovalProcess.id'),'conditions'=>array_merge($conditions,array('ApprovalProcess.applicable_to LIKE'=>'%'.$table['id'].'%'))));
+            if(empty($process)) $process = $this->ApprovalProcess->find('first',array('recursive'=>-1,
+                'fields'=>array('ApprovalProcess.id'),'conditions'=>array_merge($conditions,array('ApprovalProcess.sr_no'=>1))));
+        }
+        if(empty($process['ApprovalProcess']['id'])) return array();
+        return $this->ApprovalStep->find('all',array('recursive'=>-1,
+            'fields'=>array('ApprovalStep.id','ApprovalStep.title','ApprovalStep.process_step'),
+            'conditions'=>array('ApprovalStep.approval_process_id'=>$process['ApprovalProcess']['id'],
+                'ApprovalStep.company_id'=>$companyId,'ApprovalStep.publish'=>1,'ApprovalStep.soft_delete'=>0),
+            'order'=>array('ApprovalStep.process_step'=>'ASC')));
+    }
+
+    protected function _availability_actor($record = array(), $table = array()){
+        $actor = array('id'=>$this->Session->read('User.id'), 'department_id'=>$this->Session->read('User.department_id'), 'designation_id'=>$this->Session->read('User.designation_id'));
+        // Use the saved step; never a posted next-step selector or hidden field.
+        $actor['approval_step_id'] = !empty($record['approval_step_id']) ? $record['approval_step_id'] : '';
+        if($actor['approval_step_id'] === ''){
+            $steps = $this->_availability_approval_steps($table);
+            if(!empty($steps[0]['ApprovalStep']['id'])) $actor['approval_step_id'] = $steps[0]['ApprovalStep']['id'];
+        }
+        return $actor;
+    }
+
+    /** Independent child Add/Edit endpoints must honour the saved parent configuration. */
+    protected function _guard_configured_child_write($modelName, $table, $existingRecord){
+        if(empty($table['custom_table_id']) || !isset($table['table_type']) || (int)$table['table_type'] !== 2) return;
+        $parent = $this->CustomTable->find('first', array('recursive'=>-1,
+            'fields'=>array('CustomTable.id','CustomTable.fields','CustomTable.tab_settings','CustomTable.table_name','CustomTable.approval_process_id','CustomTable.custom_table_id'),
+            'conditions'=>array('CustomTable.id'=>$table['custom_table_id'], 'CustomTable.company_id'=>$this->Session->read('User.company_id'))));
+        if(empty($parent['CustomTable'])) return;
+        $parent = $parent['CustomTable'];
+        $settings = TabAccessPolicy::decode(isset($parent['tab_settings']) ? $parent['tab_settings'] : array());
+        $tabs = isset($settings['tabs']) ? $settings['tabs'] : $settings;
+        $relevant = isset($settings['child_tables'][$table['table_name']]) ? array($settings['child_tables'][$table['table_name']]) : array();
+        foreach(TabAccessPolicy::decode($parent['fields']) as $field){
+            if(empty($field['tab_name']) || !isset($field['display_type']) || (int)$field['display_type'] !== 10) continue;
+            if(in_array($table['table_name'], TabAccessPolicy::decode(isset($field['child_tables']) ? $field['child_tables'] : array()), true)
+                && isset($tabs[trim($field['tab_name'])])) $relevant[] = $tabs[trim($field['tab_name'])];
+        }
+        if(!$relevant) return;
+        $old = isset($existingRecord[$modelName]) ? $existingRecord[$modelName] : array();
+        $posted = $this->request->data[$modelName];
+        $parentId = isset($old['parent_id']) ? $old['parent_id'] : (isset($posted['parent_id']) ? $posted['parent_id'] : null);
+        if(!$parentId || (isset($old['parent_id'], $posted['parent_id']) && $old['parent_id'] !== $posted['parent_id'])) throw new ForbiddenException(__('Cannot verify child form availability.'));
+        $parentModel = Inflector::classify($parent['table_name']);
+        $this->loadModel($parentModel);
+        $record = $this->$parentModel->find('first',array('recursive'=>-1,'conditions'=>array($parentModel.'.id'=>$parentId, $parentModel.'.company_id'=>$this->Session->read('User.company_id'))));
+        if(empty($record[$parentModel])) throw new ForbiddenException(__('Cannot verify child form availability.'));
+        // Standalone child forms edit an existing parent record, even for a new child row.
+        $locked = TabAccessPolicy::protectedChildTables($parent['fields'],$settings,'edit',$record[$parentModel],$this->_availability_actor($record[$parentModel], $parent));
+        if(in_array($table['table_name'],$locked,true)) throw new ForbiddenException(__('This child form is hidden or read-only.'));
+    }
+
+    /** Protect data even when a client bypasses the disabled tab controls. */
+    protected function _enforce_readonly_tabs($modelName, $existingRecord = array()){
+        if(!in_array($this->action, array('add', 'edit'), true) || empty($this->request->data[$modelName])) return;
+        App::uses('TabAccessPolicy', 'Lib');
+        $this->loadModel('CustomTable');
+        // Resolve configuration by the actual model, never a client-supplied table ID.
+        $customTable = $this->CustomTable->find('first', array('recursive' => -1,
+            'fields' => array('CustomTable.id', 'CustomTable.fields', 'CustomTable.tab_settings', 'CustomTable.table_type', 'CustomTable.custom_table_id', 'CustomTable.table_name', 'CustomTable.approval_process_id'),
+            'conditions' => array('CustomTable.table_name' => $this->$modelName->useTable,
+                'CustomTable.company_id' => $this->Session->read('User.company_id'))));
+        if(empty($customTable['CustomTable'])) return;
+        $table = $customTable['CustomTable'];
+        $this->_guard_configured_child_write($modelName, $table, $existingRecord);
+        $fields = isset($table['fields']) ? $table['fields'] : array();
+        $settings = isset($table['tab_settings']) ? $table['tab_settings'] : array();
+        $before = isset($existingRecord[$modelName]) ? $existingRecord[$modelName] : array();
+        $actor = $this->_availability_actor($before, $table);
+        // A locked condition field cannot be forged to unlock its own tab.
+        // Editable condition fields can change access immediately, as in the browser.
+        if($before){
+            $conditionFields = array();
+            $collectConditions = function($node) use (&$collectConditions, &$conditionFields){
+                if(!is_array($node)) return;
+                if(isset($node['source'], $node['field']) && $node['source'] === 'record') $conditionFields[$node['field']] = true;
+                foreach($node as $value) if(is_array($value)) $collectConditions($value);
+            };
+            $collectConditions(TabAccessPolicy::decode($settings));
+            foreach(TabAccessPolicy::protectedFields($fields, $settings, $this->action, $before, $actor) as $name=>$field){
+                if(!isset($conditionFields[$name])) continue;
+                if(array_key_exists($name,$before)) $this->request->data[$modelName][$name] = $before[$name];
+                else unset($this->request->data[$modelName][$name]);
+            }
+        }
+        $restrictedAddFields = $this->action === 'add' ? $this->_restricted_add_fields($fields) : array();
+        foreach($restrictedAddFields as $fieldName => $field){
+            unset($this->request->data[$modelName][$fieldName]);
+        }
+        $candidate = array_merge($before, $this->request->data[$modelName]);
+        $protected = TabAccessPolicy::protectedFields($fields, $settings, $this->action, $candidate, $actor);
+        $protected += $restrictedAddFields;
+        foreach($protected as $fieldName => $field){
+            if(isset($existingRecord[$modelName]) && array_key_exists($fieldName, $existingRecord[$modelName])){
+                $this->request->data[$modelName][$fieldName] = $existingRecord[$modelName][$fieldName];
+            }else{
+                // Add defaults are populated server-side after this filter. Never accept a locked value from POST.
+                unset($this->request->data[$modelName][$fieldName]);
+            }
+        }
+        if($protected) unset($this->request->data['Files']); // Rebuilt from permitted upload fields by _add().
+        foreach((array)$this->$modelName->belongsTo as $association){
+            if(!empty($association['foreignKey']) && isset($protected[$association['foreignKey']]) && !empty($association['className'])){
+                unset($this->request->data['belongsTos'][$association['className']]);
+            }
+        }
+        $context = isset($existingRecord[$modelName]) ? $existingRecord[$modelName] : array();
+        $context = array_merge($context, $this->request->data[$modelName]);
+        $protectedChildren = TabAccessPolicy::protectedChildTables($fields, $settings, $this->action, $context, $actor);
+        if(!$protectedChildren) return;
+        foreach((array)$this->$modelName->hasMany as $childModel => $association){
+            if(!isset($this->request->data[$childModel])) continue;
+            $this->loadModel($childModel);
+            if(in_array($this->$childModel->useTable, $protectedChildren, true)) unset($this->request->data[$childModel]);
+        }
+    }
+
+    private function _enforce_new_child_role_fields($modelName){
+        $roles = array('role:publisher', 'role:admin', 'role:super_admin', 'role:hod');
+        foreach((array)$this->$modelName->hasMany as $childModel => $association){
+            if(empty($this->request->data[$childModel]) || !is_array($this->request->data[$childModel])) continue;
+            $this->loadModel($childModel);
+            if(empty($this->$childModel->useTable) || strpos($this->$childModel->useTable, 'chd_') !== 0) continue;
+            $this->loadModel('CustomTable');
+            $table = $this->CustomTable->find('first', array(
+                'recursive' => -1,
+                'fields' => array('CustomTable.fields'),
+                'conditions' => array('CustomTable.table_name' => $this->$childModel->useTable,
+                    'CustomTable.company_id' => $this->Session->read('User.company_id'))
+            ));
+            if(empty($table['CustomTable']['fields'])) continue;
+            $restricted = $this->_restricted_add_fields($table['CustomTable']['fields']);
+            foreach($restricted as $fieldName => $field){
+                if(!array_intersect($roles, $this->_custom_field_editors($field))) continue;
+                foreach($this->request->data[$childModel] as $index => $row){
+                    if(is_array($row) && empty($row['id'])) unset($this->request->data[$childModel][$index][$fieldName]);
+                }
+            }
+        }
+    }
+
+    /** Child rows can also be deleted through their own generated controller. */
+    protected function _guard_readonly_child_delete(){
+        if($this->action !== 'delete' || empty($this->modelClass) || !isset($this->{$this->modelClass})) return;
+        App::uses('TabAccessPolicy', 'Lib');
+        $this->loadModel('CustomTable');
+        $child = $this->CustomTable->find('first', array('recursive' => -1,
+            'fields' => array('CustomTable.id', 'CustomTable.table_name', 'CustomTable.table_type', 'CustomTable.custom_table_id'),
+            'conditions' => array('CustomTable.table_name' => $this->{$this->modelClass}->useTable,
+                'CustomTable.company_id' => $this->Session->read('User.company_id'))));
+        if(empty($child['CustomTable']['custom_table_id']) || (int)$child['CustomTable']['table_type'] !== 2) return;
+        $parent = $this->CustomTable->find('first', array('recursive' => -1,
+            'fields' => array('CustomTable.id', 'CustomTable.fields', 'CustomTable.tab_settings', 'CustomTable.table_name', 'CustomTable.approval_process_id', 'CustomTable.custom_table_id'),
+            'conditions' => array('CustomTable.id' => $child['CustomTable']['custom_table_id'],
+                'CustomTable.company_id' => $this->Session->read('User.company_id'))));
+        if(empty($parent['CustomTable'])) return;
+        $table = $parent['CustomTable'];
+        $settings = TabAccessPolicy::decode(isset($table['tab_settings']) ? $table['tab_settings'] : array());
+        $childName = $child['CustomTable']['table_name'];
+        $setting = isset($settings['child_tables'][$childName]) ? $settings['child_tables'][$childName] : array();
+        $rules = array($setting);
+        $tabs = isset($settings['tabs']) ? TabAccessPolicy::decode($settings['tabs']) : $settings;
+        foreach(TabAccessPolicy::decode($table['fields']) as $field){
+            if(!isset($field['display_type']) || (int)$field['display_type'] !== 10 || empty($field['tab_name'])) continue;
+            if(in_array($childName, TabAccessPolicy::decode(isset($field['child_tables']) ? $field['child_tables'] : array()), true)){
+                $rules[] = isset($tabs[trim($field['tab_name'])]) ? $tabs[trim($field['tab_name'])] : array();
+            }
+        }
+        $needsContext = false;
+        foreach($rules as $rule){
+            if(!empty($rule['rules'])) $needsContext = true;
+            $mode = isset($rule['action_visibility']) ? $rule['action_visibility'] : 'always';
+            if(!TabAccessPolicy::isReadonly($rule, 'edit') && !in_array($mode, array('hide_edit','hide_both'), true)
+                && !empty($rule['visibility_field']) && !empty($rule['visible_when'])) $needsContext = true;
+        }
+        $context = array();
+        if($needsContext){
+            $recordId = !empty($this->request->params['pass'][0]) ? $this->request->params['pass'][0] : null;
+            if(!$recordId) throw new ForbiddenException(__('Cannot verify child form availability.'));
+            $row = $this->{$this->modelClass}->find('first', array('recursive'=>-1, 'conditions'=>array($this->modelClass.'.id'=>$recordId)));
+            $parentId = isset($row[$this->modelClass]['parent_id']) ? $row[$this->modelClass]['parent_id'] : null;
+            if(!$parentId || empty($table['table_name'])) throw new ForbiddenException(__('Cannot verify child form availability.'));
+            $parentModel = Inflector::classify($table['table_name']);
+            $this->loadModel($parentModel);
+            $record = $this->$parentModel->find('first', array('recursive'=>-1,
+                'conditions'=>array($parentModel.'.id'=>$parentId, $parentModel.'.company_id'=>$this->Session->read('User.company_id'))));
+            if(empty($record[$parentModel])) throw new ForbiddenException(__('Cannot verify child form availability.'));
+            $context = $record[$parentModel];
+        }
+        $protected = TabAccessPolicy::protectedChildTables($table['fields'], $settings, 'edit', $context, $this->_availability_actor($context, $table));
+        if(in_array($child['CustomTable']['table_name'], $protected, true)){
+            throw new ForbiddenException(__('Rows in a hidden or read-only form cannot be deleted.'));
+        }
+    }
+
     protected function _custom_record_save_redirect(){
         $named = isset($this->request->params['named']) ? $this->request->params['named'] : array();
         // Editing/approving a record does not necessarily grant table-list access.
@@ -3873,6 +4158,13 @@ class AppController  extends Controller {
     public function _add(){
         $modelName = $this->modelClass;
         $this->loadModel($modelName);
+        $existingRecord = array();
+        if($this->action === 'edit' && !empty($this->request->data[$modelName]['id'])){
+            $existingRecord = $this->$modelName->find('first', array('recursive' => -1,
+                'conditions' => array($modelName.'.id' => $this->request->data[$modelName]['id'])));
+        }
+        $this->_enforce_readonly_tabs($modelName, $existingRecord);
+        $this->_enforce_new_child_role_fields($modelName);
         $this->_apply_session_field_defaults($modelName);
         foreach($this->request->data[$modelName] as $key => $value){
             if(is_array($value)){
@@ -3897,7 +4189,6 @@ class AppController  extends Controller {
 
         if($this->action == 'edit'){
             // get exisiting record
-            $existingRecord = $this->$modelName->find('first',array('conditions'=>array($modelName.'.id'=>$this->request->data[$modelName]['id']),'recursive'=>-1));
             $this->request->data[$modelName]['prepared_by'] = $existingRecord[$modelName]['prepared_by'];
         }
 
@@ -3985,8 +4276,7 @@ class AppController  extends Controller {
                             if(!empty($existingChild[$model])) $existingChildRecord = $existingChild[$model];
                         }
                         if(!empty($existingChildRecord)){
-                            $childCustomTableId = !empty($cdata['custom_table_id']) ? $cdata['custom_table_id'] : (!empty($existingChildRecord['custom_table_id']) ? $existingChildRecord['custom_table_id'] : null);
-                            $this->_enforce_child_custom_field_editor_rules($model, $cdata, $existingChildRecord, $childCustomTableId);
+                            $this->_enforce_child_custom_field_editor_rules($model, $cdata, $existingChildRecord);
                             $cdata['created'] = !empty($existingChildRecord['created']) ? $existingChildRecord['created'] : date('Y-m-d H:i:s');
                             $cdata['prepared_by'] = !empty($existingChildRecord['prepared_by']) ? $existingChildRecord['prepared_by'] : $this->Session->read('User.employee_id');
                             $cdata['created_by'] = !empty($existingChildRecord['created_by']) ? $existingChildRecord['created_by'] : $this->Session->read('User.id');
@@ -5578,11 +5868,32 @@ class AppController  extends Controller {
     }
 
     public function _write_to_file($folder = null, $file = null, $content = null){
-        if($content){
-            chmod($folder,0777);
-            $fp = fopen($file, 'w');
-            fwrite($fp, $content);
-            fclose($fp);
+        if(!$content) return;
+        if(!is_dir($folder)){
+            throw new InternalErrorException(__('Generated-file directory does not exist: ') . $folder);
+        }
+        if(!is_writable($folder)){
+            throw new InternalErrorException(__('PHP cannot write to the generated-file directory. Check its ownership and permissions: ') . $folder);
+        }
+        if(file_exists($file) && (!is_file($file) || !is_writable($file))){
+            throw new InternalErrorException(__('PHP cannot update the generated file. Check its ownership and permissions: ') . $file);
+        }
+        // Stage the entire replacement before publishing it; never truncate the live file on failure.
+        $temporary = @tempnam($folder, '.flinkiso-generated-');
+        if($temporary === false){
+            throw new InternalErrorException(__('Cannot create a temporary generated file in: ') . $folder);
+        }
+        try{
+            $written = @file_put_contents($temporary, $content, LOCK_EX);
+            if($written === false || $written !== strlen($content)){
+                throw new InternalErrorException(__('Cannot write the complete generated file. Check free disk space and filesystem permissions: ') . $file);
+            }
+            $mode = file_exists($file) ? (fileperms($file) & 0777) : 0644;
+            if(!@chmod($temporary, $mode) || !@rename($temporary, $file)){
+                throw new InternalErrorException(__('Cannot publish the generated file. Check directory ownership and permissions: ') . $file);
+            }
+        }finally{
+            if(is_file($temporary)) @unlink($temporary);
         }
     }
 

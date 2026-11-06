@@ -15,12 +15,7 @@ echo $this->Html->script(array(
 ));
 echo $this->fetch('script');
 
-/*
- * Tab settings belong to the form as a whole, while the field JSON remains the
- * source of truth for which tabs already exist.  This panel is deliberately a
- * front-end preview for now; persistence and generated-form behaviour will be
- * added after the workflow is approved.
- */
+// Tab settings are shared by the configuration UI and generated forms.
 $customTableFields = json_decode($customTable['CustomTable']['fields'], true);
 if (!is_array($customTableFields)) $customTableFields = array();
 $savedTabSettings = isset($customTable['CustomTable']['tab_settings']) ? json_decode($customTable['CustomTable']['tab_settings'], true) : array();
@@ -239,6 +234,9 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 		}
 		$('#custom-table-configuration-tabs').tabs({
 			beforeLoad: function(event, ui){
+				ui.ajaxSettings.cache = false;
+				ui.jqXHR.setRequestHeader('Cache-Control', 'no-cache');
+				ui.jqXHR.setRequestHeader('Pragma', 'no-cache');
 				ui.jqXHR.fail(function(){
 					ui.panel.html(<?php echo json_encode(__('<div class="alert alert-danger">Unable to load this configuration panel. Please refresh the page and try again.</div>'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
 				});
@@ -494,86 +492,17 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 						<h3 class="box-title" style="width:100%"><?php echo h(__('Tab Configuration')); ?> <span class="pull-right"><i class="fa fa-folder-o"></i></span></h3>
 					</div>
 					<div class="box-body">
-						<p class="tab-configuration-note"><?php echo h(__('Define when each main-form tab or child document is available. Normal child forms are rendered independently and are not controlled here. Leave the visibility rule as')); ?> <strong><?php echo h(__('Always visible')); ?></strong><?php echo h(__(', or leave its values unselected, to apply no field-value restriction.')); ?></p>
+						<?php echo $this->element('tab_configuration_help'); ?>
 						<?php echo $this->Form->create('CustomTable', array('url' => array('action' => 'update_tab_settings', $customTable['CustomTable']['id']), 'id' => 'update-tab-settings', 'class' => 'form')); ?>
 						<?php echo $this->Form->hidden('tab_settings', array('id' => 'CustomTableTabSettings')); ?>
 						<?php if($tabConfigurationRows){ ?>
-							<div class="table-responsive">
-								<table class="table table-bordered tab-configuration-table" id="tab-configuration-table">
-									<thead>
-										<tr>
-											<th><?php echo h(__('Tab')); ?></th>
-											<th><?php echo h(__('Position')); ?></th>
-											<th><?php echo h(__('Action visibility')); ?></th>
-											<th><?php echo h(__('Visibility rule')); ?></th>
-										</tr>
-										</thead>
-									<tbody>
-										<?php foreach($tabConfigurationRows as $formTab){
-											$settingsGroup = $formTab['type'] === 'child_document' ? (array)$childDocumentSettings : (array)$tabSettings;
-											$formTabSetting = isset($settingsGroup[$formTab['key']]) && is_array($settingsGroup[$formTab['key']]) ? $settingsGroup[$formTab['key']] : array();
-											$actionVisibility = isset($formTabSetting['action_visibility']) ? $formTabSetting['action_visibility'] : 'always';
-											$visibilityFieldName = isset($formTabSetting['visibility_field']) ? $formTabSetting['visibility_field'] : '';
-											$visibilityValues = isset($formTabSetting['visible_when']) && is_array($formTabSetting['visible_when']) ? $formTabSetting['visible_when'] : array();
-											$visibilityMode = ($visibilityFieldName !== '' && $visibilityValues) ? 'field' : 'always';
-											$visibilityOptions = array();
-											foreach($visibilityFields as $visibilityFieldOption){
-												if($visibilityFieldOption['name'] === $visibilityFieldName){
-													$visibilityOptions = $visibilityFieldOption['options'];
-													break;
-												}
-											}
-										?>
-											<tr class="tab-configuration-row" data-tab-name="<?php echo h($formTab['key']); ?>" data-tab-type="<?php echo h($formTab['type']); ?>">
-												<td><strong class="tab-name"><?php echo h($formTab['name']); ?></strong></td>
-												<td><small class="tab-position"><?php echo h($formTab['position']); ?></small></td>
-												<td>
-													<select class="form-control input-sm tab-action-visibility">
-														<option value="always"<?php echo $actionVisibility === 'always' ? ' selected' : ''; ?>><?php echo h(__('Always visible')); ?></option>
-														<option value="hide_add"<?php echo $actionVisibility === 'hide_add' ? ' selected' : ''; ?>><?php echo h(__('Hide on Add')); ?></option>
-														<option value="hide_edit"<?php echo $actionVisibility === 'hide_edit' ? ' selected' : ''; ?>><?php echo h(__('Hide on Edit')); ?></option>
-														<option value="hide_both"<?php echo $actionVisibility === 'hide_both' ? ' selected' : ''; ?>><?php echo h(__('Hide on Add')); ?> &amp; <?php echo h(__('Edit')); ?></option>
-													</select>
-												</td>
-												<td>
-													<div class="form-group">
-														<select class="form-control input-sm tab-visibility-mode">
-															<option value="always"<?php echo $visibilityMode === 'always' ? ' selected' : ''; ?>><?php echo h(__('Always visible')); ?></option>
-															<option value="field"<?php echo $visibilityMode === 'field' ? ' selected' : ''; ?>><?php echo h(__('Only for a field value')); ?></option>
-														</select>
-													</div>
-													<div class="tab-configuration-rule row" style="margin-top:8px;<?php echo $visibilityMode === 'field' ? 'display:block' : ''; ?>">
-														<div class="col-xs-6">
-															<select class="form-control input-sm tab-visibility-field">
-																<option value=""><?php echo h(__('Choose field')); ?></option>
-																<?php foreach($visibilityFields as $visibilityField){ ?>
-																	<option value="<?php echo h($visibilityField['name']); ?>" data-options="<?php echo h(json_encode($visibilityField['options'])); ?>"<?php echo $visibilityFieldName === $visibilityField['name'] ? ' selected' : ''; ?>><?php echo h($visibilityField['label']); ?></option>
-																<?php } ?>
-															</select>
-														</div>
-														<div class="col-xs-6">
-															<select class="form-control input-sm tab-visibility-values" multiple<?php echo $visibilityOptions ? '' : ' disabled'; ?>>
-																<?php foreach($visibilityOptions as $visibilityOption){ ?>
-																	<option value="<?php echo h($visibilityOption); ?>"<?php echo in_array($visibilityOption, $visibilityValues) ? ' selected' : ''; ?>><?php echo h($visibilityOption); ?></option>
-																<?php } ?>
-															</select>
-														</div>
-													</div>
-												</td>
-											</tr>
-										<?php } ?>
-									</tbody>
-								</table>
-							</div>
-							<?php if(!$visibilityFields){ ?>
-								<p class="help-block"><?php echo h(__('Add a radio or single-select field, such as Audit Status, before configuring a field-value rule.')); ?></p>
-							<?php } ?>
+							<?php echo $this->element('tab_availability_table'); ?>
 						<?php }else{ ?>
 							<div class="alert alert-info" style="margin-bottom:0"><?php echo h(__('No tabs or child forms have been defined. Assign a Tab Name to fields or link a child form first.')); ?></div>
 						<?php } ?>
 					</div>
-					<div class="box-footer text-right">
-						<?php echo $this->Form->submit(__('Save Tab Configuration'), array('class' => 'btn btn-sm btn-success', 'id' => 'save-tab-settings')); ?>
+					<div class="text-right" style="clear:both;padding:20px 10px 10px;background:#fff;border:0">
+						<?php echo $this->Form->submit(__('Save Rules & Apply'), array('class' => 'btn btn-sm btn-success', 'id' => 'save-tab-settings', 'div'=>false)); ?>
 						<?php echo $this->Form->end(); ?>
 					</div>
 				</div>
@@ -646,6 +575,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 			</div>
 	</div>		
 	<?php if($childs){ ?>
+		<?php echo $this->element('child_form_availability'); ?>
 		<div class="row">	
 			<div class="col-md-12"><h4><?php echo h(__('Child Tables')); ?> <small><i class="fa fa-chain"></i></small></h4></div>
 			<?php foreach($childs as $child){ ?>
@@ -728,51 +658,7 @@ foreach ((array)$childDocumentForms as $childDocumentForm) {
 	$().ready(function(){
 		$(".table-body-div").width($("#table-body-div").width()-20).css('overflow-y','scroll');
 
-		$('#tab-configuration-panel').on('change', '.tab-visibility-mode', function(){
-			var rule = $(this).closest('.tab-configuration-row').find('.tab-configuration-rule');
-			rule.toggle($(this).val() === 'field');
-		});
 
-		$('#tab-configuration-panel').on('change', '.tab-visibility-field', function(){
-			var values = $(this).closest('.tab-configuration-row').find('.tab-visibility-values');
-			var selected = $(this).find('option:selected');
-			var options = [];
-
-			try {
-				options = JSON.parse(selected.attr('data-options') || '[]');
-			} catch (error) {
-				options = [];
-			}
-
-			values.empty();
-			$.each(options, function(index, option){
-				$('<option/>', { value: option, text: option }).appendTo(values);
-			});
-			values.prop('disabled', options.length === 0);
-			values.trigger('chosen:updated');
-		});
-
-		$('#update-tab-settings').on('submit', function(){
-			var settings = {tabs: {}, child_documents: {}};
-
-			$('#tab-configuration-table .tab-configuration-row').each(function(){
-				var row = $(this);
-				var tabName = row.attr('data-tab-name');
-				var visibilityMode = row.find('.tab-visibility-mode').val();
-				var visibilityField = visibilityMode === 'field' ? row.find('.tab-visibility-field').val() : '';
-				var visibleWhen = visibilityMode === 'field' ? (row.find('.tab-visibility-values').val() || []) : [];
-
-				var setting = {
-					action_visibility: row.find('.tab-action-visibility').val(),
-					visibility_field: visibilityField || '',
-					visible_when: visibleWhen
-				};
-				var settingsGroup = row.attr('data-tab-type') === 'child_document' ? settings.child_documents : settings.tabs;
-				settingsGroup[tabName] = setting;
-			});
-
-			$('#CustomTableTabSettings').val(JSON.stringify(settings));
-		});
 	})
 </script>
 <?php

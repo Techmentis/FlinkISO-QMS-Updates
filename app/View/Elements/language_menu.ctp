@@ -19,7 +19,7 @@
         <?php endforeach; ?>
         <?php if ($this->Session->read('User.is_mr') || $this->Session->read('User.is_super_user')): ?>
         <li role="separator" class="divider"></li>
-        <li><?php echo $this->Html->link(__('Add language'), array('controller' => 'languages', 'action' => 'index', '#' => 'add-language')); ?></li>
+        <li><?php echo $this->Html->link(__('Languages'), array('controller' => 'languages', 'action' => 'index')); ?></li>
         <li><?php echo $this->Html->link(__('Update PO file'), array('controller' => 'languages', 'action' => 'index')); ?></li>
         <?php endif; ?>
     </ul>

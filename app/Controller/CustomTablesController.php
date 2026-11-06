@@ -17,6 +17,8 @@ class CustomTablesController extends AppController {
      */
     public $components = array('Paginator','AvailableForms','CreateModel', 'CreateView', 'CreateChildModel');
 
+    protected $_moduleRuleRebuild = false;
+
     public $reserved_fields = array("id", "prepared_by", "approved_by", "created", "modified", "sr_no", "qc_document_id", "file_id", "file_key", "parent_id", "additional_files", "approval_step_id", "created_by", "modified_by", "status_user_id", "record_status", "branchid", "departmentid", "company_id", "soft_delete", "process_id", "publish", "custom_table_id");
 
     public function beforeFilter(){
@@ -27,7 +29,7 @@ class CustomTablesController extends AppController {
         if(!in_array($this->action, $nonBuilderActions, true)) $this->_require_super_user();
         parent::beforeFilter();
 
-        $passwordActions = array('recreate', 'recreate_child', 'add_child', 'update_field', 'update_child_field', 'save_scripts', 'update_tab_settings', 'rebuild_module');
+        $passwordActions = array('recreate', 'recreate_child', 'add_child', 'update_field', 'update_child_field', 'save_scripts', 'update_tab_settings', 'update_child_form_settings', 'rebuild_module');
         if(in_array($this->action, $passwordActions, true)){
             $id = !empty($this->request->params['pass'][0]) ? $this->request->params['pass'][0] : null;
             if(!$id && !empty($this->request->data['CustomTable']['id'])) $id = $this->request->data['CustomTable']['id'];
@@ -375,6 +377,7 @@ class CustomTablesController extends AppController {
     }
     
     public function view_tab($id = null, $tab = 'main') {
+        $this->response->disableCache();
         if (!$this->request->is('ajax')) {
             throw new NotFoundException(__('Invalid request'));
         }
@@ -420,11 +423,9 @@ class CustomTablesController extends AppController {
             if ($tabName !== '' && $tabName !== '-1' && !isset($formTabs[$tabName])) {
                 $formTabs[$tabName] = array('name' => $tabName, 'group' => isset($field['tab_group']) ? $field['tab_group'] : '', 'sequence' => isset($field['tab_sequence']) ? $field['tab_sequence'] : '');
             }
-            if (!empty($field['field_name']) && in_array(isset($field['data_type']) ? $field['data_type'] : '', array('radio', 'dropdown-s'))) {
-                $options = !empty($field['csvoptions']) ? array_values(array_filter(array_map('trim', explode(',', $field['csvoptions'])))) : array();
-                $visibilityFields[] = array('name' => $field['field_name'], 'label' => Inflector::humanize($field['field_name']), 'options' => $options);
-            }
         }
+        $visibilityFields = $this->_tab_visibility_fields($customTableFields);
+        $availabilityRuleFields = $this->_availability_rule_fields($customTableFields, $customTable['CustomTable']);
         $tabConfigurationRows = array();
         foreach ($formTabs as $formTab) {
             $tabConfigurationRows[] = array('type' => 'tab', 'key' => $formTab['name'], 'name' => $formTab['name'], 'position' => 'Group '.($formTab['group'] !== '' ? $formTab['group'] : '-').' / #'.($formTab['sequence'] !== '' ? $formTab['sequence'] : '-'));
@@ -432,7 +433,7 @@ class CustomTablesController extends AppController {
         foreach ($childDocumentForms as $childDocumentForm) {
             $tabConfigurationRows[] = array('type' => 'child_document', 'key' => $childDocumentForm['CustomTable']['id'], 'name' => $childDocumentForm['CustomTable']['name'], 'position' => 'Child document');
         }
-        $this->set(compact('tabSettings', 'childDocumentSettings', 'visibilityFields', 'tabConfigurationRows'));
+        $this->set(compact('tabSettings', 'childDocumentSettings', 'visibilityFields', 'tabConfigurationRows', 'availabilityRuleFields'));
         $this->set('schedules', $this->CustomTable->QcDocument->Schedule->find('list'));
         $this->set('customArray', $this->CustomTable->customArray);
         $this->loadModel('User');
@@ -497,6 +498,7 @@ class CustomTablesController extends AppController {
             'recursive' => -1,
             'conditions' => array(
                 'CustomTable.id' => $id,
+                'CustomTable.company_id'=>$this->Session->read('User.company_id'),
                 'OR' => array(
                     array('CustomTable.custom_table_id' => null),
                     array('CustomTable.custom_table_id' => '')
@@ -511,39 +513,46 @@ class CustomTablesController extends AppController {
 
         $childForms = $this->CustomTable->find('all', array(
             'recursive' => -1,
-            'conditions' => array('CustomTable.custom_table_id' => $mainTable['CustomTable']['id']),
+            'conditions' => array('CustomTable.custom_table_id' => $mainTable['CustomTable']['id'], 'CustomTable.company_id'=>$this->Session->read('User.company_id')),
             'order' => array('CustomTable.table_version' => 'ASC', 'CustomTable.name' => 'ASC')
         ));
         $childDocumentForms = $this->CustomTable->find('all', array(
             'recursive' => 0,
             'conditions' => array(
                 'QcDocument.parent_document_id' => $mainTable['CustomTable']['qc_document_id'],
-                'CustomTable.table_type !=' => 2
+                'CustomTable.table_type !=' => 2,
+                'CustomTable.company_id'=>$this->Session->read('User.company_id')
             ),
             'order' => array('QcDocument.title' => 'ASC', 'CustomTable.name' => 'ASC')
         ));
 
         $rebuilt = array();
-        $this->_rebuild_saved_table($mainTable, false);
-        $rebuilt[] = array('type' => 'Main table', 'name' => $mainTable['CustomTable']['name']);
+        $this->_moduleRuleRebuild = true;
+        @set_time_limit(300);
+        try{
+            $this->_rebuild_saved_table($mainTable, false);
+            $rebuilt[] = array('type' => 'Main table', 'name' => $mainTable['CustomTable']['name']);
 
-        foreach ($childForms as $childForm) {
-            $this->_rebuild_saved_table($childForm, true);
-            $rebuilt[] = array('type' => 'Child form', 'name' => $childForm['CustomTable']['name']);
-        }
-        foreach ($childDocumentForms as $childDocumentForm) {
-            $this->_rebuild_saved_table($childDocumentForm, false);
-            $rebuilt[] = array('type' => 'Child document form', 'name' => $childDocumentForm['CustomTable']['name']);
-        }
+            foreach ($childForms as $childForm) {
+                $this->_rebuild_saved_table($childForm, true);
+                $rebuilt[] = array('type' => 'Child form', 'name' => $childForm['CustomTable']['name']);
+            }
+            foreach ($childDocumentForms as $childDocumentForm) {
+                $this->_rebuild_saved_table($childDocumentForm, false);
+                $rebuilt[] = array('type' => 'Child document form', 'name' => $childDocumentForm['CustomTable']['name']);
+            }
 
-        $this->_clear_cake_cache();
-        echo json_encode(array('success' => true, 'message' => __('Module rebuilt successfully.'), 'rebuilt' => $rebuilt));
+            $this->_clear_cake_cache();
+            return $this->_availability_json(true,__('Module rebuilt successfully.'),200,array('rebuilt'=>$rebuilt));
+        }catch(Throwable $e){
+            CakeLog::write('error','Module rebuild failed: '.$e->getMessage());
+            return $this->_availability_json(false,__('Module rebuild failed: ').$e->getMessage(),500,array('rebuilt'=>$rebuilt));
+        }finally{
+            $this->_moduleRuleRebuild = false;
+        }
     }
 
-    /**
-     * Apply a server-side AI proposal and rebuild the affected generated form
-     * through the established FlinkISO API/MVC generation pipeline.
-     */
+
     public function ai_rebuild() {
         $this->autoRender = false;
         $this->response->type('json');
@@ -1365,6 +1374,7 @@ class CustomTablesController extends AppController {
     }
 
     private function _ajax_generation_response($success, $message, $statusCode = 200) {
+        if($this->_moduleRuleRebuild && !$success) throw new InternalErrorException($message);
         if (!$this->request->is('ajax')) return false;
         $this->autoRender = false;
         $this->response->type('json');
@@ -2720,7 +2730,7 @@ class CustomTablesController extends AppController {
                 if($dir_writable_controller == false || $dir_writable_model == false || $dir_writable_view == false){
                     $this->Session->setFlash(__('Unable to change directory permissions. Please manually change app/Controller, app/Model & app/View directories to writable.(0777)'));
                     if($skip == false) $this->redirect(array('action' => 'recreate',$this->request->data['CustomTable']['id']));
-                    else echo __("Unable to change directory permissions. Please manually change app/Controller, app/Model & app/View directories to writable.(0777)");exit;
+                    else { if($this->_moduleRuleRebuild) throw new InternalErrorException(__('Generated form directories are not writable.')); echo __("Unable to change directory permissions. Please manually change app/Controller, app/Model & app/View directories to writable.(0777)"); }exit;
                 }else{
 
                 }
@@ -2759,6 +2769,7 @@ class CustomTablesController extends AppController {
                     $this->redirect(array('action' => 'recreate',$this->request->data['CustomTable']['id']));
                 }else{
                     $result = json_decode($result['response']['finalResult'],true);
+                    if($this->_moduleRuleRebuild && (!is_array($result) || empty($result['controller']) || empty($result['model']) || empty($result['formFile']))) throw new InternalErrorException(__('The API returned incomplete generated form files.'));
                     if (!empty($result['formFile'])) {
                         $generatedForms = json_decode($result['formFile'], true);
                         if (is_array($generatedForms)) {
@@ -2854,6 +2865,7 @@ class CustomTablesController extends AppController {
                     $this->Session->setFlash($message);
                     if ($this->_ajax_generation_response(false, $message, 422)) return $this->response;
                 }else{
+                    if($this->_moduleRuleRebuild) throw new InternalErrorException(__("The custom table could not be saved. Please, try again."));
                     echo __("The custom table ").$this->request->data['CustomTable']['table_name']." could not be saved. Please, try again.";
                 }
             }
@@ -3114,6 +3126,7 @@ class CustomTablesController extends AppController {
                     $this->redirect(array('action' => 'recreate_child',$this->request->data['CustomTable']['id']));
                 }else{
                     $result = json_decode($result['response']['finalResult'],true);
+                    if($this->_moduleRuleRebuild && (!is_array($result) || empty($result['controller']) || empty($result['model']) || empty($result['formFile']))) throw new InternalErrorException(__('The API returned incomplete generated form files.'));
                     if (!$this->_generated_code_is_safe($result)) {
                         $message = __('API returned invalid linked-field PHP. Existing MVC files were not overwritten.');
                         CakeLog::write('error', $message . ' Table: ' . $table_name);
@@ -4461,6 +4474,183 @@ class CustomTablesController extends AppController {
         }
     }
 
+    /** Use the same record IDs as generated dropdowns, with readable option labels. */
+    protected function _tab_visibility_fields($fields){
+        $result = array();
+        foreach((array)$fields as $field){
+            if(empty($field['field_name']) || !in_array(isset($field['data_type']) ? $field['data_type'] : '', array('radio','dropdown-s'), true)) continue;
+            $options = array();
+            $linked = isset($field['linked_to']) ? trim($field['linked_to']) : '';
+            if($linked !== '' && $linked !== '-1'){
+                $modelName = Inflector::classify(Inflector::singularize($linked));
+                if(preg_match('/^[A-Za-z][A-Za-z0-9_]*$/D', $modelName)){
+                    try{
+                        $this->loadModel($modelName);
+                        $model = $this->$modelName;
+                        $conditions = array();
+                        if($model->hasField('company_id')) $conditions[$modelName.'.company_id'] = $this->Session->read('User.company_id');
+                        if($model->hasField('publish')) $conditions[$modelName.'.publish'] = 1;
+                        if($model->hasField('soft_delete')) $conditions[$modelName.'.soft_delete'] = 0;
+                        $records = $model->find('list', array('recursive'=>-1, 'conditions'=>$conditions));
+                        foreach((array)$records as $value=>$label) $options[] = array('value'=>(string)$value, 'label'=>(string)$label);
+                    }catch(Exception $e){
+                        CakeLog::write('error', 'Tab visibility options for '.$modelName.': '.$e->getMessage());
+                    }
+                }
+            }else{
+                foreach(!empty($field['csvoptions']) ? array_filter(array_map('trim', explode(',', $field['csvoptions'])), 'strlen') : array() as $value){
+                    $options[] = array('value'=>$value, 'label'=>$value);
+                }
+            }
+            $result[] = array('name'=>$field['field_name'], 'label'=>Inflector::humanize(preg_replace('/_id$/', '', $field['field_name'])), 'options'=>$options);
+        }
+        return $result;
+    }
+
+    /** Keep logged-in identity separate from similarly named record fields. */
+    protected function _availability_rule_fields($fields, $table = array()){
+        $result = array(array('source'=>'page','name'=>'action','label'=>'Action','options'=>array(
+            array('value'=>'add','label'=>'Add'),array('value'=>'edit','label'=>'Edit'))));
+        foreach($this->_tab_visibility_fields($fields) as $field){
+            $field['source'] = 'record';
+            $field['label'] = 'Record: '.$field['label'];
+            $result[] = $field;
+        }
+        foreach(array('id'=>array('User','Logged-in user'), 'department_id'=>array('Department','Logged-in user department'), 'designation_id'=>array('Designation','Logged-in user designation')) as $name=>$definition){
+            $options = array();
+            try{
+                $modelName = $definition[0];
+                $this->loadModel($modelName);
+                if(isset($this->$modelName)){
+                    $model = $this->$modelName;
+                    $conditions = array();
+                    if($model->hasField('company_id')) $conditions[$modelName.'.company_id'] = $this->Session->read('User.company_id');
+                    if($model->hasField('publish')) $conditions[$modelName.'.publish'] = 1;
+                    if($model->hasField('soft_delete')) $conditions[$modelName.'.soft_delete'] = 0;
+                    foreach((array)$model->find('list',array('recursive'=>-1,'conditions'=>$conditions)) as $value=>$label) $options[] = array('value'=>(string)$value,'label'=>(string)$label);
+                }
+            }catch(Exception $e){ CakeLog::write('error','Availability rule options: '.$e->getMessage()); }
+            $result[] = array('source'=>'actor','name'=>$name,'label'=>$definition[1],'options'=>$options);
+        }
+        $stepOptions = array();
+        foreach($this->_availability_approval_steps($table) as $row){
+            $step = $row['ApprovalStep'];
+            $label = (!empty($step['process_step']) ? 'Step '.$step['process_step'].': ' : '').$step['title'];
+            $stepOptions[] = array('value'=>(string)$step['id'],'label'=>$label);
+        }
+        $result[] = array('source'=>'workflow','name'=>'approval_step_id','label'=>'Approval process: Current step','options'=>$stepOptions);
+        return $result;
+    }
+
+    protected function _clean_availability_setting($setting, $fields, $allowedOptions){
+        App::uses('TabAccessPolicy','Lib');
+        try{ return TabAccessPolicy::cleanSetting($setting,$fields,$allowedOptions); }
+        catch(InvalidArgumentException $e){ throw new BadRequestException(__($e->getMessage())); }
+    }
+
+    protected function _tab_visibility_allowed_values($fields, $table = array()){
+        $values = array();
+        foreach($this->_availability_rule_fields($fields, $table) as $field){
+            $key = $field['source'] === 'record' ? $field['name'] : '@'.$field['source'].'.'.$field['name'];
+            $values[$key] = array();
+            foreach($field['options'] as $option) $values[$key][] = $option['value'];
+        }
+        return $values;
+    }
+
+    protected function _availability_json($success, $message, $status = 200, $extra = array()){
+        $this->autoRender = false;
+        $this->response->type('json');
+        $this->response->statusCode($status);
+        $this->response->body(json_encode(array_merge(array('success'=>(bool)$success,'message'=>$message),$extra)));
+        return $this->response;
+    }
+
+    /** The parent password authorizes only this company's parent and its module forms. */
+    protected function _rule_module_tables($id){
+        $companyId = $this->Session->read('User.company_id');
+        $root = $this->CustomTable->find('first',array('recursive'=>-1,
+            'conditions'=>array('CustomTable.id'=>$id,'CustomTable.company_id'=>$companyId)));
+        if(empty($root['CustomTable'])) throw new NotFoundException(__('Module not found.'));
+        if(!empty($root['CustomTable']['custom_table_id'])){
+            $root = $this->CustomTable->find('first',array('recursive'=>-1,
+                'conditions'=>array('CustomTable.id'=>$root['CustomTable']['custom_table_id'],'CustomTable.company_id'=>$companyId)));
+            if(empty($root['CustomTable']) || !empty($root['CustomTable']['custom_table_id'])) throw new NotFoundException(__('Parent module not found.'));
+        }
+        $main = $root['CustomTable'];
+        $tables = array($main['id']=>$main);
+        $children = $this->CustomTable->find('all',array('recursive'=>-1,
+            'conditions'=>array('CustomTable.custom_table_id'=>$main['id'],'CustomTable.company_id'=>$companyId)));
+        $documents = empty($main['qc_document_id']) ? array() : $this->CustomTable->find('all',array('recursive'=>0,
+            'conditions'=>array('QcDocument.parent_document_id'=>$main['qc_document_id'],'CustomTable.table_type !='=>2,'CustomTable.company_id'=>$companyId)));
+        foreach(array_merge($children,$documents) as $row){
+            if(!empty($row['CustomTable']['id'])) $tables[$row['CustomTable']['id']]=$row['CustomTable'];
+        }
+        return array('root'=>$main,'tables'=>$tables);
+    }
+
+    public function unlock_rule_module($id = null){
+        if(!$this->request->is('post')) throw new MethodNotAllowedException(__('Use POST to unlock a module.'));
+        $this->_require_super_user();
+        $module = $this->_rule_module_tables($id);
+        $main = $module['root'];
+        $password = isset($this->request->data['CustomTable']['password']) ? $this->request->data['CustomTable']['password'] : '';
+        if(!is_string($password)) throw new BadRequestException(__('Invalid password.'));
+        if($password !== ''){
+            $hash = Security::hash($password,'md5',true);
+            if(empty($main['password']) || !hash_equals((string)$main['password'],(string)$hash)){
+                return $this->_availability_json(false,__('Incorrect parent form password.'),403,array('password_required'=>true));
+            }
+            $expires = time()+1800;
+        }else{
+            if(!$this->_has_form_password_access($main['id'])){
+                return $this->_availability_json(false,__('Enter the parent form password to unlock this module.'),403,array('password_required'=>true));
+            }
+            $grant = $this->Session->read('FormPassword.'.$main['id']);
+            $expires = $grant['expires']; // A status check must not extend the unlock.
+        }
+        foreach($module['tables'] as $table){
+            $this->Session->write('FormPassword.'.$table['id'],array('password_hash'=>isset($table['password'])?$table['password']:'',
+                'expires'=>$expires,'module_id'=>$main['id'],'module_password_hash'=>$main['password']));
+        }
+        return $this->_availability_json(true,__('Module unlocked for this session.'),200,array(
+            'module_id'=>$main['id'],'expires'=>$expires,'rebuild_url'=>Router::url(array('controller'=>'custom_tables','action'=>'rebuild_module',$main['id']))));
+    }
+
+    public function update_child_form_settings($id = null){
+        if(!$this->request->is('post')) throw new MethodNotAllowedException(__('Use POST to save child form settings.'));
+        if($this->Session->read('User.is_mr') != true && !$this->_is_super_user()) throw new ForbiddenException(__('Invalid access.'));
+        $customTable = $this->CustomTable->find('first', array('recursive'=>-1, 'conditions'=>array('CustomTable.id'=>$id, 'CustomTable.company_id'=>$this->Session->read('User.company_id'))));
+        if(empty($customTable['CustomTable']) || (!$this->_is_super_user() && $customTable['CustomTable']['created_by'] != $this->Session->read('User.id'))){
+            throw new ForbiddenException(__('Invalid table access.'));
+        }
+        $submitted = isset($this->request->data['CustomTable']['child_form_settings']) ? json_decode($this->request->data['CustomTable']['child_form_settings'], true) : null;
+        if(!is_array($submitted)) throw new BadRequestException(__('Invalid child form configuration.'));
+        App::uses('TabAccessPolicy', 'Lib');
+        $table = $customTable['CustomTable'];
+        $fields = TabAccessPolicy::decode($table['fields']);
+        $allowedVisibilityFields = $this->_tab_visibility_allowed_values($fields, $table);
+        $children = $this->CustomTable->find('all', array('recursive'=>-1,
+            'fields'=>array('CustomTable.table_name'), 'conditions'=>array('CustomTable.custom_table_id'=>$id)));
+        $clean = array();
+        foreach($children as $child){
+            $name = $child['CustomTable']['table_name'];
+            if(isset($submitted[$name]) && is_array($submitted[$name])) $clean[$name] = $this->_clean_availability_setting($submitted[$name], $fields, $allowedVisibilityFields);
+        }
+        $settings = TabAccessPolicy::decode(isset($table['tab_settings']) ? $table['tab_settings'] : array());
+        if(!isset($settings['tabs'])) $settings = array('tabs'=>$settings);
+        $settings['child_tables'] = $clean;
+        $dataSource = $this->CustomTable->getDataSource();
+        if($this->CustomTable->updateAll(array('CustomTable.tab_settings'=>$dataSource->value(json_encode($settings))), array('CustomTable.id'=>$id))){
+            if($this->request->is('ajax')) return $this->_availability_json(true,__('Rules saved.'),200,array('settings'=>$settings));
+            $this->Session->setFlash(__('Child form settings saved. Rebuild Module to apply the changes.'));
+        }else{
+            if($this->request->is('ajax')) return $this->_availability_json(false,__('Child form settings could not be saved.'),500);
+            $this->Session->setFlash(__('Child form settings could not be saved.'), 'default', array('class'=>'alert alert-danger'));
+        }
+        $this->redirect(array('action'=>'view', $id, 'timestamp'=>date('ymdhis')));
+    }
+
     public function update_tab_settings($id = null){
         if (!$this->request->is('post')) {
             $this->redirect(array('action' => 'view', $id, 'timestamp' => date('ymdhis')));
@@ -4473,7 +4663,7 @@ class CustomTablesController extends AppController {
 
         $customTable = $this->CustomTable->find('first', array(
             'recursive' => -1,
-            'conditions' => array('CustomTable.id' => $id)
+            'conditions' => array('CustomTable.id' => $id, 'CustomTable.company_id'=>$this->Session->read('User.company_id'))
         ));
 
         if (!$customTable || (!$this->_is_super_user() && $customTable['CustomTable']['created_by'] != $this->Session->read('User.id'))) {
@@ -4499,39 +4689,15 @@ class CustomTablesController extends AppController {
             $tabName = isset($field['tab_name']) ? trim($field['tab_name']) : '';
             if ($tabName !== '' && $tabName !== '-1') $allowedTabs[$tabName] = true;
 
-            if (
-                !empty($field['field_name']) &&
-                in_array(isset($field['data_type']) ? $field['data_type'] : '', array('radio', 'dropdown-s'))
-            ) {
-                $allowedVisibilityFields[$field['field_name']] = !empty($field['csvoptions'])
-                    ? array_values(array_filter(array_map('trim', explode(',', $field['csvoptions']))))
-                    : array();
-            }
+
         }
 
-        $allowedActionVisibility = array('always', 'hide_add', 'hide_edit', 'hide_both');
+        $allowedVisibilityFields = $this->_tab_visibility_allowed_values($fields, $customTable['CustomTable']);
         $cleanSettings = array();
         foreach ($submittedTabSettings as $tabName => $setting) {
             if (!isset($allowedTabs[$tabName]) || !is_array($setting)) continue;
 
-            $actionVisibility = isset($setting['action_visibility']) ? $setting['action_visibility'] : 'always';
-            if (!in_array($actionVisibility, $allowedActionVisibility)) $actionVisibility = 'always';
-
-            $visibilityField = isset($setting['visibility_field']) ? $setting['visibility_field'] : '';
-            $visibleWhen = isset($setting['visible_when']) && is_array($setting['visible_when']) ? $setting['visible_when'] : array();
-            if (!isset($allowedVisibilityFields[$visibilityField])) {
-                $visibilityField = '';
-                $visibleWhen = array();
-            } else {
-                $visibleWhen = array_values(array_intersect($allowedVisibilityFields[$visibilityField], $visibleWhen));
-                if (!$visibleWhen) $visibilityField = '';
-            }
-
-            $cleanSettings[$tabName] = array(
-                'action_visibility' => $actionVisibility,
-                'visibility_field' => $visibilityField,
-                'visible_when' => $visibleWhen,
-            );
+            $cleanSettings[$tabName] = $this->_clean_availability_setting($setting, $fields, $allowedVisibilityFields);
         }
 
         $childDocumentForms = $this->CustomTable->find('all', array(
@@ -4544,29 +4710,23 @@ class CustomTablesController extends AppController {
         $cleanChildDocumentSettings = array();
         foreach ($submittedChildDocumentSettings as $childDocumentId => $setting) {
             if (!isset($allowedChildDocuments[$childDocumentId]) || !is_array($setting)) continue;
-            $actionVisibility = isset($setting['action_visibility']) ? $setting['action_visibility'] : 'always';
-            if (!in_array($actionVisibility, $allowedActionVisibility)) $actionVisibility = 'always';
-            $visibilityField = isset($setting['visibility_field']) ? $setting['visibility_field'] : '';
-            $visibleWhen = isset($setting['visible_when']) && is_array($setting['visible_when']) ? $setting['visible_when'] : array();
-            if (!isset($allowedVisibilityFields[$visibilityField])) {
-                $visibilityField = '';
-                $visibleWhen = array();
-            } else {
-                $visibleWhen = array_values(array_intersect($allowedVisibilityFields[$visibilityField], $visibleWhen));
-                if (!$visibleWhen) $visibilityField = '';
-            }
-            $cleanChildDocumentSettings[$childDocumentId] = array('action_visibility' => $actionVisibility, 'visibility_field' => $visibilityField, 'visible_when' => $visibleWhen);
+            $cleanChildDocumentSettings[$childDocumentId] = $this->_clean_availability_setting($setting, $fields, $allowedVisibilityFields);
         }
+
+        App::uses('TabAccessPolicy', 'Lib');
+        $existingSettings = TabAccessPolicy::decode(isset($customTable['CustomTable']['tab_settings']) ? $customTable['CustomTable']['tab_settings'] : array());
 
         // updateAll intentionally avoids a stale Cake schema cache after the
         // tab_settings column is introduced on an already-running MAMP site.
         $dataSource = $this->CustomTable->getDataSource();
         if ($this->CustomTable->updateAll(
-            array('CustomTable.tab_settings' => $dataSource->value(json_encode(array('tabs' => $cleanSettings, 'child_documents' => $cleanChildDocumentSettings)))),
+            array('CustomTable.tab_settings' => $dataSource->value(json_encode(array('tabs' => $cleanSettings, 'child_documents' => $cleanChildDocumentSettings, 'child_tables' => isset($existingSettings['child_tables']) ? $existingSettings['child_tables'] : array())))),
             array('CustomTable.id' => $id)
         )) {
+            if($this->request->is('ajax')) return $this->_availability_json(true,__('Rules saved.'),200,array('settings'=>array('tabs'=>$cleanSettings,'child_documents'=>$cleanChildDocumentSettings,'child_tables'=>isset($existingSettings['child_tables'])?$existingSettings['child_tables']:array())));
             $this->Session->setFlash(__('Tab configuration saved.'), 'default', array('class' => 'alert alert-success'));
         } else {
+            if($this->request->is('ajax')) return $this->_availability_json(false,__('Tab configuration could not be saved.'),500);
             $this->Session->setFlash(__('Tab configuration could not be saved.'), 'default', array('class' => 'alert alert-danger'));
         }
         $this->redirect(array('action' => 'view', $id, 'timestamp' => date('ymdhis')));

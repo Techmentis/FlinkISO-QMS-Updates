@@ -81,6 +81,22 @@ class LanguagesController extends AppController {
         return $this->response;
     }
 
+    public function set_enabled($id = null) {
+        $this->request->onlyAllow('post');
+        $record = $this->Language->find('first', array('recursive' => -1, 'conditions' => array('Language.id' => $id)));
+        if (!$record) throw new NotFoundException(__('Invalid language.'));
+        $enabled = isset($this->request->data['enabled']) ? $this->request->data['enabled'] : null;
+        if (!is_scalar($enabled) || !in_array((string)$enabled, array('0', '1'), true)) throw new BadRequestException(__('Invalid language status.'));
+        if ($record['Language']['code'] === 'eng' && (string)$enabled === '0') throw new BadRequestException(__('English is the default language and cannot be disabled.'));
+        $this->Language->id = $record['Language']['id'];
+        if ($this->Language->saveField('enabled', (int)$enabled, false)) {
+            $this->Session->setFlash((string)$enabled === '1' ? __('Language enabled.') : __('Language disabled.'));
+        } else {
+            $this->Session->setFlash(__('Could not save language status.'));
+        }
+        return $this->redirect(array('action' => 'index'));
+    }
+
     public function index() {
         App::uses('LanguageReference', 'Lib');
         $languageCodes = LanguageReference::all();

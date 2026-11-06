@@ -13,37 +13,17 @@
 	<?php echo __d('cake', 'An Internal Error Has Occurred.'); ?>
 </p>
 
-<p><hr /></p>
+<hr />
 <h4><?php echo h(__('Possible Causes:')); ?></h4>
-<p>
-	<ul>
-		<li><?php echo h(__('Database is not connected.')); ?>
-			<ul>
-				<li><?php echo h(__('Make sure that you have imported app/webroot/schema/flinkiso-on-premise.sql')); ?></li>
-				<li><?php echo h(__('Make sure to add database configuration at app/Config/Database.php under default config.')); ?></li>
-			</ul>
-		</li>
-		<li><?php echo h(__('Directory permissions are not correct')); ?>
-			<ul>
-				<li><?php echo h(__('Following folders must have read-write-execute permissions (recursive)')); ?>
-					<ul>
-						<li><?php echo h(__('app/webtoot')); ?></li>
-						<li><?php echo h(__('app/tmp')); ?></li>
-						<li><?php echo h(__('lib/Cake/Cache')); ?></li>						
-					</ul>
-				</li>
-				
-			</ul>
-		</li>
-		<li><?php echo h(__('Missing tables or incorrect models.')); ?></li>
-	</ul>
-</p>
-<p><?php echo h(__('If this error is occuring during the installation, visit:')); ?> <a href="https://www.flinkiso.com/manual/installation.html">https://www.flinkiso.com/manual/installation.html</a> <?php echo h(__('and follow the installation instructions.')); ?></p>
-<p><?php echo h(__('You can also use FlinkISO Forum :')); ?> <a href="https://forum.flinkiso.com/">https://forum.flinkiso.com/</a> <?php echo h(__('for possible resolution.')); ?></p>
-
-<p><?php echo h(__('If you have successfully installed the application and error is occuring after creating a custom HTML form, this error can be resolved by recreating the form.')); ?></p>
-<p><?php echo h(__('If this error is coming after creating a child form or a form linked to a child document,')); ?> <strong class="text-warning"><?php echo h(__('recreate')); ?></strong> <?php echo h(__('the parent form.')); ?></p>
-<p><strong><?php echo h(__('Additional Info:')); ?></strong><?php echo h(__('Remove "STRICT_TRANS_TABLES" for sql_mode from MySQL configuration file.')); ?></p>
+<p><?php echo h(__('Check the message above first. The following checks are for an administrator; they do not all apply to every error.')); ?></p>
+<ul>
+    <li><strong><?php echo h(__('Access permissions')); ?></strong> — <?php echo h(__('The signed-in account may not have permission for this action. Creating or rebuilding application forms requires a Super User.')); ?></li>
+    <li><strong><?php echo h(__('Database connection or schema')); ?></strong> — <?php echo h(__('Verify the connection settings in app/Config/database.php and check that the required database updates have been applied.')); ?></li>
+    <li><strong><?php echo h(__('Incomplete application update')); ?></strong> — <?php echo h(__('Check that all files required by the installed version were copied, including application libraries, helpers, language files and assets.')); ?></li>
+    <li><strong><?php echo h(__('File permissions')); ?></strong> — <?php echo h(__('The web server must be able to write to app/tmp and any files or folders used by the failed operation. Form rebuilding also needs write access to the generated controllers, models and views.')); ?></li>
+    <li><strong><?php echo h(__('Generated form files')); ?></strong> — <?php echo h(__('If the error started after changing a form, check for missing or outdated generated files. A Super User can rebuild the parent module after correcting the underlying error.')); ?></li>
+</ul>
+<p><?php echo h(__('For the exact cause, ask an administrator to check app/tmp/logs/error.log and the web server error log at the time of this request.')); ?></p>
 <hr />
 <p>
 	<?php

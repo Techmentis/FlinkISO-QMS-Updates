@@ -12,9 +12,19 @@ document.addEventListener('click', function (event) {
 <?php endif; ?>
 
 <p><?php echo __('Add a language, then translate its catalog. The POT file is the shared source template; each language has its own PO file.'); ?></p>
-<table class="table"><thead><tr><th><?php echo __('Name'); ?></th><th><?php echo __('Language code'); ?></th><th><?php echo __('Actions'); ?></th></tr></thead><tbody>
+<table class="table"><thead><tr><th><?php echo __('Name'); ?></th><th><?php echo __('Language code'); ?></th><th><?php echo __('Status'); ?></th><th><?php echo __('Actions'); ?></th></tr></thead><tbody>
 <?php foreach ($languages as $record): $item = $record['Language']; ?>
-<tr><td><?php echo h($item['name']); ?></td><td><?php echo h($item['code']); ?></td><td><?php echo $this->Html->link(__('Update PO file'), array('action' => 'edit', $item['id'])); ?></td></tr>
+<tr><td><?php echo h($item['name']); ?></td><td><?php echo h($item['code']); ?></td>
+<td><?php echo $item['code'] === 'eng' ? __('Default') : (!empty($item['enabled']) ? __('Enabled') : __('Disabled')); ?></td>
+<td><?php echo $this->Html->link(__('Update PO file'), array('action' => 'edit', $item['id'])); ?>
+<?php if ($item['code'] !== 'eng'): ?>
+<form method="post" action="<?php echo h($this->Html->url(array('action' => 'set_enabled', $item['id']))); ?>" style="display:inline-block;margin:0 0 0 12px">
+<input type="hidden" name="data[token]" value="<?php echo h($languageToken); ?>">
+<input type="hidden" name="data[enabled]" value="<?php echo empty($item['enabled']) ? '1' : '0'; ?>">
+<button type="submit" class="btn btn-default btn-sm"><?php echo empty($item['enabled']) ? __('Enable') : __('Disable'); ?></button>
+</form>
+<?php endif; ?>
+</td></tr>
 <?php endforeach; ?>
 </tbody></table>
 <h4><?php echo __('Add language'); ?></h4>

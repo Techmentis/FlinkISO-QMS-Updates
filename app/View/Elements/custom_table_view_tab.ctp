@@ -51,20 +51,10 @@ $isMr = (bool)$this->Session->read('User.is_mr') || (bool)$this->Session->read('
 <?php }elseif($selectedTab === 'child_tables'){ ?>
 	<div class="box box-default">
 		<div class="box-header with-border"><h3 class="box-title"><?php echo h(__('Child Forms')); ?></h3></div>
-		<div class="box-body table-responsive">
-			<table class="table table-bordered table-hover">
-				<thead><tr><th><?php echo h(__('Name')); ?></th><th><?php echo h(__('Table Name')); ?></th><th><?php echo h(__('Version')); ?></th><th><?php echo h(__('Description')); ?></th><th><?php echo h(__('Status')); ?></th><th class="text-right"><?php echo h(__('Actions')); ?></th></tr></thead>
-				<tbody><?php foreach((array)$childs as $child){ $childTable = $child['CustomTable']; ?>
-					<tr>
-						<td><?php echo h($childTable['name']); ?></td><td><?php echo h($childTable['table_name']); ?></td><td><?php echo h($childTable['table_version']); ?></td><td><?php echo h($childTable['description']); ?></td><td><?php echo $childTable['publish'] ? 'Published' : 'Unpublished'; ?></td>
-						<td class="text-right">
-							<?php echo $this->Html->link('<i class="fa fa-cogs text-warning"></i>', array('action' => 'view', $childTable['id'], 'timestamp' => date('ymdhis')), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => __('Open child table'))); ?>
-							<?php echo $this->Html->link('<i class="fa fa-refresh text-warning"></i>', array('action' => 'unlock', $childTable['id'], 'next_action' => 'recreate_child', 'timestamp' => date('ymdhis')), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => __('Recreate child form'))); ?>
-							<?php if($childTable['table_locked']) echo $this->Html->link('<i class="fa fa-trash-o text-danger"></i>', array('action' => 'delete_child', $childTable['id']), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => __('Delete child table'))); ?>
-						</td>
-					</tr>
-				<?php } ?></tbody>
-			</table>
+		<div class="box-body">
+			<?php if(!empty($childs)){ echo $this->element('child_form_availability'); }else{ ?>
+				<p class="text-muted"><?php echo h(__('No child forms have been linked.')); ?></p>
+			<?php } ?>
 		</div>
 	</div>
 
@@ -101,7 +91,16 @@ $isMr = (bool)$this->Session->read('User.is_mr') || (bool)$this->Session->read('
 					if(response.success){ result.html('<span class="text-success">' + $('<div>').text(response.message).html() + ' ' + (response.rebuilt || []).length + ' form(s) rebuilt.</span>'); }
 					else result.html('<div class="alert alert-danger">' + $('<div>').text(response.message || <?php echo json_encode(__('Module rebuild failed.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>).html() + '</div>');
 				})
-				.fail(function(){ result.html(<?php echo json_encode(__('<div class="alert alert-danger">Module rebuild failed. Please check the API connection and try again.</div>'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>); })
+				.fail(function(xhr){
+					var message = <?php echo json_encode(__('Module rebuild failed.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+					var response = xhr.responseJSON;
+					if(!response && xhr.responseText){
+						try { response = JSON.parse(xhr.responseText); } catch(ignore) {}
+					}
+					if(response && response.message) message = response.message;
+					else if(xhr.status) message += ' HTTP ' + xhr.status + '.';
+					result.html('<div class="alert alert-danger">' + $('<div>').text(message).html() + '</div>');
+				})
 				.always(function(){ button.prop('disabled', false).text(<?php echo json_encode(__('Rebuild Module'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>); });
 		});
 	})();
@@ -132,33 +131,14 @@ $isMr = (bool)$this->Session->read('User.is_mr') || (bool)$this->Session->read('
 		<?php echo $this->Form->create('CustomTable', array('url' => array('action' => 'update_tab_settings', $table['id']), 'id' => 'update-tab-settings', 'class' => 'form')); ?>
 		<?php echo $this->Form->hidden('tab_settings', array('id' => 'CustomTableTabSettings')); ?>
 		<div class="box-body">
-			<p class="text-muted"><?php echo h(__('Choose when each main-form tab or child document is available. Normal child forms are rendered independently and are not controlled here.')); ?></p>
-			<table class="table table-bordered tab-configuration-table" id="tab-configuration-table"><thead><tr><th><?php echo h(__('Tab')); ?></th><th><?php echo h(__('Position')); ?></th><th><?php echo h(__('Action visibility')); ?></th><th><?php echo h(__('Visibility rule')); ?></th></tr></thead><tbody>
-			<?php foreach((array)$tabConfigurationRows as $formTab){
-				$settingsGroup = $formTab['type'] === 'child_document' ? (array)$childDocumentSettings : (array)$tabSettings;
-				$setting = isset($settingsGroup[$formTab['key']]) ? $settingsGroup[$formTab['key']] : array();
-				$action = isset($setting['action_visibility']) ? $setting['action_visibility'] : 'always';
-				$fieldName = isset($setting['visibility_field']) ? $setting['visibility_field'] : '';
-				$values = isset($setting['visible_when']) ? (array)$setting['visible_when'] : array();
-			?>
-				<tr class="tab-configuration-row" data-tab-name="<?php echo h($formTab['key']); ?>" data-tab-type="<?php echo h($formTab['type']); ?>" data-selected-values="<?php echo h(json_encode($values)); ?>">
-					<td><strong><?php echo h($formTab['name']); ?></strong></td><td><?php echo h($formTab['position']); ?></td>
-					<td><select class="form-control input-sm tab-action-visibility"><option value="always"<?php echo $action === 'always' ? ' selected' : ''; ?>><?php echo h(__('Always visible')); ?></option><option value="hide_add"<?php echo $action === 'hide_add' ? ' selected' : ''; ?>><?php echo h(__('Hide on Add')); ?></option><option value="hide_edit"<?php echo $action === 'hide_edit' ? ' selected' : ''; ?>><?php echo h(__('Hide on Edit')); ?></option><option value="hide_both"<?php echo $action === 'hide_both' ? ' selected' : ''; ?>><?php echo h(__('Hide on Add')); ?> &amp; <?php echo h(__('Edit')); ?></option></select></td>
-					<td><select class="form-control input-sm tab-visibility-field"><option value=""><?php echo h(__('No field-value rule')); ?></option><?php foreach((array)$visibilityFields as $visibilityField){ ?><option value="<?php echo h($visibilityField['name']); ?>" data-options="<?php echo h(json_encode($visibilityField['options'])); ?>"<?php echo $fieldName === $visibilityField['name'] ? ' selected' : ''; ?>><?php echo h($visibilityField['label']); ?></option><?php } ?></select><select class="form-control input-sm tab-visibility-values" multiple style="margin-top:6px"></select></td>
-				</tr>
-			<?php } ?></tbody></table>
+			<?php echo $this->element('tab_configuration_help'); ?>
+			<?php echo $this->element('tab_availability_table'); ?>
 		</div>
-		<div class="box-footer text-right"><?php echo $this->Form->submit(__('Save Tab Configuration'), array('class' => 'btn btn-sm btn-success')); ?><?php echo $this->Form->end(); ?></div>
+		<div class="text-right" style="clear:both;padding:20px 10px 10px;background:#fff;border:0">
+            <?php echo $this->Form->submit(__('Save Rules & Apply'), array('class'=>'btn btn-sm btn-success', 'div'=>false)); ?>
+        </div>
+        <?php echo $this->Form->end(); ?>
 	</div>
-	<script>
-	(function(){
-		function loadValues(row){ var field=row.find('.tab-visibility-field option:selected'), values=row.find('.tab-visibility-values'), options=[], selected=[]; try{options=JSON.parse(field.attr('data-options')||'[]'); selected=JSON.parse(row.attr('data-selected-values')||'[]');}catch(e){} values.empty(); $.each(options,function(i,item){ $('<option/>',{value:item,text:item,selected:($.inArray(item,selected)>-1)}).appendTo(values); }); values.prop('disabled',!options.length).trigger('chosen:updated'); }
-		$('#tab-configuration-table .tab-configuration-row').each(function(){ loadValues($(this)); });
-		$('#tab-configuration-table').on('change','.tab-visibility-field',function(){ loadValues($(this).closest('tr')); });
-		$('#update-tab-settings').on('submit',function(){ var settings={tabs:{},child_documents:{}}; $('#tab-configuration-table .tab-configuration-row').each(function(){ var row=$(this), setting={action_visibility:row.find('.tab-action-visibility').val(),visibility_field:row.find('.tab-visibility-field').val()||'',visible_when:row.find('.tab-visibility-values').val()||[]}; var group=row.attr('data-tab-type')==='child_document'?settings.child_documents:settings.tabs; group[row.attr('data-tab-name')]=setting; }); $('#CustomTableTabSettings').val(JSON.stringify(settings)); });
-	})();
-	</script>
-
 <?php }elseif($selectedTab === 'data_entry'){ ?>
 	<?php if($isMr){ echo $this->Form->create('CustomTable', array('url' => 'updatedataentry/'.$table['qc_document_id'].'/'.$table['id'], 'class' => 'form')); ?>
 	<div class="box box-default"><div class="box-header with-border"><h3 class="box-title"><?php echo h(__('Data Entry')); ?></h3></div><div class="box-body">

@@ -86,16 +86,27 @@
 				if(!response && xhr.responseText){
 					try { response = JSON.parse(xhr.responseText); } catch(ignore) {}
 				}
+				if(xhr.status === 403){
+					var action = $form.attr('action') || '';
+					var nextAction = action.indexOf('/recreate_child/') !== -1 ? 'recreate_child' : 'recreate';
+					var unlockUrl = action.replace('/' + nextAction + '/', '/unlock/') + '/next_action:' + nextAction;
+					showGenerationError('<?php echo addslashes(__('This form must be unlocked with its form password before it can be updated.')); ?>', unlockUrl);
+					return;
+				}
 				showGenerationError(response && response.message ? response.message : '<?php echo addslashes(__('The form update failed. Please try again.')); ?>');
 			}
 		});
 
-		function showGenerationError(message){
+		function showGenerationError(message, unlockUrl){
 			$submit.prop('disabled', false);
 			$('#submit-indicator').hide();
 			$progress.hide().removeClass('active');
 			$message.text('<?php echo addslashes(__('The form was not updated.')); ?>');
-			$error.text(message).show();
+			$error.text(message);
+			if(unlockUrl){
+				$error.append('<br>').append($('<a class="btn btn-sm btn-warning" style="margin-top:8px"></a>').attr('href', unlockUrl).text('<?php echo addslashes(__('Unlock Form')); ?>'));
+			}
+			$error.show();
 			$footer.show();
 		}
 	};
