@@ -889,7 +889,11 @@ class AppController  extends Controller {
         }
 
         $namedParams = $this->request->params['named'];
-        $modelFields = array_keys($this->$modelName->schema());
+        $schema = $this->$modelName->schema();
+        if (!is_array($schema)) {
+            return $result;
+        }
+        $modelFields = array_keys($schema);
         $searchFields = array('name','title','document_number','clause','sub-clause','employee_number');
         $displayField = $this->$modelName->displayField;
         if ($displayField && !in_array($displayField, $searchFields)) $searchFields[] = $displayField;
