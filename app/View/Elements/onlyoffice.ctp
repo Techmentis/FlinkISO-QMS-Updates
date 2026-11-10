@@ -125,7 +125,12 @@ if($filetype != null){
         <?php
         // add reload document script as a function for each IF.
         $comarray = array('qc_documents','custom_tables','processes','pdf_templates');
-        if($this->request->controller == 'custom_tables' && $this->action == 'view'){
+        if ($this->request->controller === 'custom_tables' && $this->action === 'add' && $controller === 'custom_tables') {
+            $callbackUrl = Router::url('/', true) . 'custom_tables/save_doc/record_id:' . $record_id
+                . '/company_id:' . $company_id . '/builder_file:' . bin2hex($file)
+                . '/builder_signature:' . hash_hmac('sha256', 'builder-document:' . $company_id . ':' . $record_id . ':' . $file, Configure::read('Security.salt'));
+            $url = Configure::read('url') . '/' . $path . '/' . rawurlencode($file);
+        }else if($this->request->controller == 'custom_tables' && $this->action == 'view'){
             echo '<div class=\'data_type_notification\'>' . h(__('Loading file in view mode.')) . '</div>';
             $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/custom_tables'. '/' . $record_id . '/' . $file;
             $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/custom_tables'. '/' . $record_id . '/' . 'diff.zip';
@@ -134,7 +139,12 @@ if($filetype != null){
             echo '<div class=\'data_type_notification\'>' . h(__('Loading Custom Table File.')) . '</div>';
             $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/custom_tables'. '/' . $record_id . '/' . $file;
             $historyurl = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/custom_tables'. '/' . $record_id . '/' . 'diff.zip';
-            $callbackUrl = Router::url('/',true) ."custom_tables/save_custom_table_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller ;            
+            $callbackUrl = Router::url('/',true) ."custom_tables/save_custom_table_doc/record_id:". $record_id .'/company_id:'.$company_id .'/controller:'.$controller ;
+            if ($controller === 'custom_tables' && $mode === 'edit') {
+                $userId = $this->Session->read('User.id');
+                $callbackUrl .= '/builder_file:' . bin2hex($file)
+                    . '/builder_signature:' . hash_hmac('sha256', 'recreate-document:' . $company_id . ':' . $record_id . ':' . $userId . ':' . $file, Configure::read('Security.salt'));
+            }
         }else if($this->request->controller == 'templates' && $this->action == 'edit'){
             echo '<div class=\'data_type_notification\'>' . h(__('Loading Template file.')) . '</div>';
             $url = Router::url('/', true) . 'files/' . $this->Session->read('User.company_id') . '/templates'. '/' . $record_id . '/' . $file;

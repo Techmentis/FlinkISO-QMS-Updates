@@ -243,10 +243,10 @@
 			<?php } ?>
 
 			<div class="col-md-12">	
-				<div class="btn-group" role="group" aria-label="<?php echo h(__('Form actions')); ?>">
+				<div id="recreate-submit-home" class="btn-group pull-right" role="group" aria-label="<?php echo h(__('Form actions')); ?>">
 				    <?php echo $this->Html->link(__('Cancel'),
 				        array('action' => 'recreate', $this->request->params['pass'][0]) + $this->request->params['named'],
-				        array('class' => 'btn btn-warning btn-sm tooltip1', 'data-toggle' => 'tooltip',
+				        array('class' => 'btn btn-default btn-sm tooltip1', 'data-toggle' => 'tooltip',
 				            'title' => __('Discard unsaved changes and reload the editor.'))); ?>
 				    <button type="submit" form="close-recreate-form" class="btn btn-default btn-sm tooltip1"
 				        data-toggle="tooltip" title="<?php echo h(__('Exit without saving and lock the form.')); ?>"><?php echo h(__('Close')); ?></button>

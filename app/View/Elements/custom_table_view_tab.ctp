@@ -38,13 +38,20 @@ $isMr = (bool)$this->Session->read('User.is_mr') || (bool)$this->Session->read('
 				echo $this->Html->link('<i class="fa fa-unlock text-danger fa-lg"></i>', array('action' => 'lock', $table['id']), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => __('Lock table')));
 			} ?>
 			<?php if($table['table_locked']){
-				echo $this->Html->link('<i class="fa fa-refresh text-warning fa-lg"></i>', array('action' => $table['custom_table_id'] ? 'recreate_child' : 'recreate', $table['id'], 'timestamp' => date('ymdhis')), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => __('Recreate this table')));
 				echo $this->Html->link('<i class="fa fa-trash-o text-danger fa-lg"></i>', array('action' => $table['custom_table_id'] ? 'delete_child' : 'delete', $table['id']), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => __('Delete this table')));
 			} ?>
 			<?php if(!$table['custom_table_id']){
 				echo $this->Html->link('<i class="fa fa-list-ol fa-lg"></i>', array('action' => 'add_child', 'custom_table_id' => $table['id'], 'qc_document_id' => $table['qc_document_id'], 'process_id' => $table['process_id']), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => __('Link new child table')));
 				echo $this->Html->link('<i class="fa fa-chain fa-lg"></i>', array('controller' => 'approval_processes', 'action' => 'add', 'controller_name' => Inflector::classify($table['table_name']), 'timestamp' => date('ymdhis'), 'custom_table_id' => $table['id']), array('class' => 'btn btn-sm tooltip1', 'escape' => false, 'title' => __('Add Auto Approval Process')));
 			} ?>
+            <?php if ($this->Session->read('User.is_super_user')) {
+                $recreateAction = empty($table['custom_table_id']) ? 'recreate' : 'recreate_child';
+                echo $this->Html->link('<i class="fa fa-refresh text-warning fa-lg" aria-hidden="true"></i>',
+                    array('action' => $recreateAction, $table['id'], 'qc_document_id' => $table['qc_document_id'],
+                        'process_id' => $table['process_id'], 'timestamp' => date('ymdhis')),
+                    array('class' => 'btn btn-sm tooltip1', 'escape' => false,
+                        'title' => __('Re-create this table'), 'aria-label' => __('Re-create this table')));
+            } ?>
 		</div>
 	</div>
 
@@ -79,29 +86,45 @@ $isMr = (bool)$this->Session->read('User.is_mr') || (bool)$this->Session->read('
 			<div id="rebuild-module-result" class="text-right" style="margin-top:8px"></div>
 		</div>
 	</div>
-	<script type="text/javascript">
+	<?php echo $this->element('module_password_dialog'); ?>
+<script type="text/javascript">
 	(function(){
 		$('#rebuild-module-form').on('submit', function(event){
 			event.preventDefault();
 			var form = $(this), button = $('#rebuild-module-submit'), result = $('#rebuild-module-result');
-			button.prop('disabled', true).text(<?php echo json_encode(__('Rebuilding...'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
-			result.html(<?php echo json_encode(__('<p class="text-muted"><i class="fa fa-refresh fa-spin"></i> Rebuilding generated files...</p>'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>);
-			$.ajax({url: form.attr('action'), type: 'POST', data: form.serialize(), dataType: 'json'})
-				.done(function(response){
-					if(response.success){ result.html('<span class="text-success">' + $('<div>').text(response.message).html() + ' ' + (response.rebuilt || []).length + ' form(s) rebuilt.</span>'); }
-					else result.html('<div class="alert alert-danger">' + $('<div>').text(response.message || <?php echo json_encode(__('Module rebuild failed.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>).html() + '</div>');
-				})
-				.fail(function(xhr){
-					var message = <?php echo json_encode(__('Module rebuild failed.'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
-					var response = xhr.responseJSON;
-					if(!response && xhr.responseText){
-						try { response = JSON.parse(xhr.responseText); } catch(ignore) {}
-					}
-					if(response && response.message) message = response.message;
-					else if(xhr.status) message += ' HTTP ' + xhr.status + '.';
-					result.html('<div class="alert alert-danger">' + $('<div>').text(message).html() + '</div>');
-				})
-				.always(function(){ button.prop('disabled', false).text(<?php echo json_encode(__('Rebuild Module'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>); });
+			button.prop('disabled', true).text('Rebuilding...');
+			result.html('<p class="text-muted"><i class="fa fa-refresh fa-spin"></i> Rebuilding generated files...</p>');
+            var unlockUrl = <?php echo json_encode(Router::url(array('action' => 'unlock_rule_module', $table['id'])), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+            function finish() {
+                button.prop('disabled', false).text('Rebuild Module');
+            }
+            function rebuild(retry) {
+                $.ajax({url: form.attr('action'), type: 'POST', data: form.serialize(), dataType: 'json'})
+                    .done(function(response){
+                        var message = response.message || 'Module rebuild failed.';
+                        if (response.success) message += ' ' + (response.rebuilt || []).length + ' form(s) rebuilt.';
+                        result.empty().append($('<div>', {
+                            'class': response.success ? 'text-success' : 'alert alert-danger',
+                            text: message
+                        }));
+                        finish();
+                    })
+                    .fail(function(xhr){
+                        var response = xhr.responseJSON;
+                        if (!retry && xhr.status === 403 && response && response.password_required === true) {
+                            result.empty();
+                            window.FlinkisoModulePasswordDialog(unlockUrl)
+                                .done(function(){ rebuild(true); })
+                                .fail(finish);
+                            return;
+                        }
+                        var message = response && response.message ? response.message : 'Module rebuild failed.';
+                        if ((!response || !response.message) && xhr.status) message += ' HTTP ' + xhr.status + '.';
+                        result.empty().append($('<div>', {'class': 'alert alert-danger', text: message}));
+                        finish();
+                    });
+            }
+            rebuild(false);
 		});
 	})();
 	</script>

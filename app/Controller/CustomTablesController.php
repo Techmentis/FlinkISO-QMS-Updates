@@ -22,6 +22,9 @@ class CustomTablesController extends AppController {
     public $reserved_fields = array("id", "prepared_by", "approved_by", "created", "modified", "sr_no", "qc_document_id", "file_id", "file_key", "parent_id", "additional_files", "approval_step_id", "created_by", "modified_by", "status_user_id", "record_status", "branchid", "departmentid", "company_id", "soft_delete", "process_id", "publish", "custom_table_id");
 
     public function beforeFilter(){
+        // ONLYOFFICE sends signed callbacks outside the editor's browser session.
+        if (in_array($this->action, array('save_doc', 'save_custom_table_doc'), true)
+            && isset($this->request->params['named']['builder_signature'])) return;
         $this->_check_login();
         // These actions concern shared record lists or user access, rather than
         // executable form definitions. Every builder endpoint requires the role.
@@ -40,6 +43,17 @@ class CustomTablesController extends AppController {
             $isRecreate = in_array($this->action, array('recreate', 'recreate_child'), true);
             $recreateSubmit = $isRecreate && ($this->request->is('post') || $this->request->is('put'));
             if(!$this->_has_form_password_access($id, $recreateSubmit)){
+                if ($id && $this->action === 'rebuild_module' && $this->request->is('ajax') && $this->request->is('post')) {
+                    $this->response->type('json');
+                    $this->response->statusCode(403);
+                    $this->response->body(json_encode(array(
+                        'success' => false,
+                        'message' => __('Unlock this form with its password, then retry Rebuild Module.'),
+                        'password_required' => true
+                    )));
+                    $this->response->send();
+                    $this->_stop();
+                }
                 if($this->request->is('get') && !$this->request->is('ajax')){
                     return $this->redirect(array('action'=>'unlock', $id, 'next_action'=>$this->action));
                 }
@@ -3311,6 +3325,95 @@ class CustomTablesController extends AppController {
         $this->_commons($this->Session->read('User.id'));
     }
     
+    public function save_doc() {
+        $named = $this->request->params['named'];
+        if (!isset($named['builder_signature'])) return parent::save_doc();
+
+        return $this->_save_builder_document($named, false);
+    }
+
+    private function _save_builder_document($named, $recreate) {
+        $this->autoRender = false;
+        $this->response->type('json');
+        $this->response->body('{"error":1}');
+        $companyId = $named['company_id'] ?? '';
+        $recordId = $named['record_id'] ?? '';
+        $encodedFile = $named['builder_file'] ?? '';
+        if (!$this->request->is('post') || !preg_match('/^[a-f0-9-]{36}$/iD', $companyId)
+            || !preg_match('/^[a-f0-9-]{36}$/iD', $recordId) || !ctype_xdigit($encodedFile)
+            || strlen($encodedFile) % 2 !== 0) return $this->response;
+
+        $file = hex2bin($encodedFile);
+        $expected = hash_hmac('sha256', 'builder-document:' . $companyId . ':' . $recordId . ':' . $file, Configure::read('Security.salt'));
+        if ($recreate) {
+            $userId = $named['user'] ?? '';
+            if (!preg_match('/^[a-f0-9-]{36}$/iD', $userId)) return $this->response;
+            $expected = hash_hmac('sha256', 'recreate-document:' . $companyId . ':' . $recordId . ':' . $userId . ':' . $file, Configure::read('Security.salt'));
+        }
+        if ($file !== basename($file) || !hash_equals($expected, $named['builder_signature'])) return $this->response;
+
+        $data = json_decode($this->request->input(), true);
+        $status = (int)($data['status'] ?? 0);
+        if (in_array($status, array(1, 3, 4, 7), true)) {
+            $this->response->body('{"error":0}');
+            return $this->response;
+        }
+        if (!in_array($status, array(2, 6), true)) return $this->response;
+
+        if ($recreate) {
+            $table = $this->CustomTable->find('first', array(
+                'recursive' => -1,
+                'conditions' => array('CustomTable.id' => $recordId, 'CustomTable.company_id' => $companyId)
+            ));
+            if (!$table) return $this->response;
+        }
+
+        $url = $data['url'] ?? '';
+        $download = is_string($url) ? parse_url($url) : false;
+        $server = parse_url(Configure::read('OnlyofficePath'));
+        if (empty($download['host']) || empty($server['host']) || isset($download['user']) || isset($download['pass'])
+            || strtolower($download['host']) !== strtolower($server['host'])
+            || ($download['scheme'] ?? '') !== ($server['scheme'] ?? '')
+            || ($download['port'] ?? null) !== ($server['port'] ?? null)
+            || !in_array($download['scheme'], array('http', 'https'), true)) return $this->response;
+
+        $path = WWW_ROOT . 'files' . DS . $companyId . DS . 'custom_tables' . DS . $recordId . DS . $file;
+        if (!is_file($path)) return $this->response;
+
+        $context = stream_context_create(array('http' => array('follow_location' => 0, 'timeout' => 30)));
+        $contents = @file_get_contents($url, false, $context);
+        if ($contents === false || $contents === '') return $this->response;
+
+        $temporary = tempnam(dirname($path), '.builder-save-');
+        if ($temporary === false) return $this->response;
+        try {
+            if (file_put_contents($temporary, $contents, LOCK_EX) === strlen($contents)
+                && chmod($temporary, fileperms($path) & 0777) && rename($temporary, $path)) {
+                if (!$recreate || $this->_record_builder_document_save($table['CustomTable'], $status, $userId)) {
+                    $this->response->body('{"error":0}');
+                }
+            }
+        } finally {
+            if (is_file($temporary)) unlink($temporary);
+        }
+        return $this->response;
+    }
+
+    private function _record_builder_document_save($table, $status, $userId) {
+        $modified = date('Y-m-d H:i:s');
+        $changes = array('id' => $table['id'], 'last_saved' => $modified, 'file_status' => 1);
+        if ($status === 2) {
+            $key = $this->_generate_onlyoffice_key($table['id'] . $modified);
+            $versions = json_decode($table['version_keys'] ?? '', true);
+            if (!is_array($versions)) $versions = array();
+            $versions[] = array('version_key' => $key, 'modified' => $modified, 'by' => $userId);
+            $changes['version_keys'] = json_encode($versions);
+            $changes['file_key'] = $key;
+        }
+        $this->CustomTable->id = $table['id'];
+        return (bool)$this->CustomTable->save(array('CustomTable' => $changes), false);
+    }
+
     public function save_rec_doc() {
         $this->autoRender = false;
         $local = $this->request->params['named'];
@@ -3427,6 +3530,9 @@ class CustomTablesController extends AppController {
         echo __("{\"error\":0}");
     }
     public function save_custom_table_doc() {
+        $named = $this->request->params['named'];
+        if (isset($named['builder_signature'])) return $this->_save_builder_document($named, true);
+
         $this->autoRender = false;
         $local = $this->request->params['named'];
         
