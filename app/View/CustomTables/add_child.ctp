@@ -86,7 +86,8 @@
 				</div>
 				<div class="">
 					<div class="col-md-12">						
-						<?php echo $this->element('custom_forms');?>						
+						<?php echo $this->element('custom_forms');?>
+						<?php echo $this->element('custom_form_builder_actions'); ?>
 					</div>
 				</div>
 			</div>

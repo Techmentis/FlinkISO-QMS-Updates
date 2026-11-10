@@ -29,10 +29,10 @@
 					<?php echo $this->Form->create('CustomTable',array('role'=>'form','class'=>'form')); ?>
 					<div class="row">
 						<?php 
-						if($this->request->params['named']['qc_document_id'])
+						if(!empty($qcDocument))
 							echo "<div class='col-md-12'>".$this->element('qc_doc_header',array('document'=>$qcDocument))."</div>"; 
-						else if($this->request->params['named']['process_id'])
-							echo "<div class='col-md-12'>".$this->element('process_doc_header',array('document'=>$process))."</div>"; 
+						else if(!empty($process))
+							echo "<div class='col-md-12'>".$this->element('process_doc_header',array('process'=>$process))."</div>";
 						?>	
 						
 						<?php echo "<div class='col-md-4'>".$this->Form->input('name',array('class'=>'form-control','required')) . '</div>'; ?>						
@@ -78,10 +78,6 @@
 					</div>
 				<?php } ?>	
 
-				<div class="row">
-					<?php if($qcDocument)echo "<div class='col-md-12'>".$this->element('qc_doc_header',array('document'=>$qcDocument))."</div>"; ?>
-					<?php if($process)echo "<div class='col-md-12'>".$this->element('process_doc_header',array('process'=>$process))."</div>"; ?>
-				</div>
 				<div class="row">
 				<?php if($qcDocument){ ?>					
 						<div class="col-md-12">
@@ -201,6 +197,7 @@
 						$existingFields = json_decode($this->request->data['CustomTable']['fields'],true);			
 						?>
 						<?php echo $this->element('recreate_custom_forms',array('existingFields'=>$existingFields,'fieldDetails'=>$fieldDetails,'childTables'=>$this->request->data['ChildTables'],'thisTable'=>Inflector::Classify($this->request->data['CustomTable']['table_name']),'approvalSteps'=>$approvalSteps));?>
+						<?php echo $this->element('custom_form_builder_actions'); ?>
 					</div>
 				
 				</div>
