@@ -39,9 +39,19 @@
 						<?php echo "<div class='col-md-3 hide'>".$this->Form->input('table_name',array('class'=>'form-control', 'readonly', 'default'=>$table_name)) . '</div>'; ?>
 						<?php echo "<div class='col-md-1'>".$this->Form->input('table_version',array('label'=>__('Version'), 'class'=>'form-control', 'readonly', 'default'=>$table_version)) . '</div>'; ?>
 						
-						<?php unset($this->request->data['CustomTable']['password']);?>
-						<?php echo "<div class='col-md-2'>".$this->Form->input('password',array('type'=>'password', 'class'=>'form-control','default'=>false)) . '</div>'; ?>
-						<?php echo "<div class='col-md-2'>".$this->Form->input('re-password',array('type'=>'password', 'class'=>'form-control','default'=>false)) . '</div>'; ?>
+						<?php unset($this->request->data['CustomTable']['password'], $this->request->data['CustomTable']['re-password']); ?>
+                        <div class="col-md-2">
+                            <?php echo $this->Form->input('password', array(
+                                'type' => 'password', 'label' => __('New password'), 'class' => 'form-control',
+                                'required' => false, 'value' => '', 'autocomplete' => 'new-password'
+                            )); ?>
+                        </div>
+                        <div class="col-md-2">
+                            <?php echo $this->Form->input('re-password', array(
+                                'type' => 'password', 'label' => __('Confirm new password'), 'class' => 'form-control',
+                                'required' => false, 'value' => '', 'autocomplete' => 'new-password'
+                            )); ?>
+                        </div>
 
 						<?php echo "<div class='hide'>".$this->Form->hidden('fields',array('class'=>'form-control',)) . '</div>'; ?>
 						<?php echo "<div class='col-md-3'>".$this->Form->input('approval_process_id',array( 'class'=>'form-control',)) . '</div>'; ?>
@@ -233,14 +243,28 @@
 			<?php } ?>
 
 			<div class="col-md-12">	
-				<div class="btn-group pull-left">
-					<?php echo $this->Html->link(__('Back'),array('action'=>'index',$this->request->params['pass'][0]),array('class'=>'btn btn-default btn-sm'));?>
-					<?php echo $this->Html->link(__('Cancel'),array('action'=>'recreate',$this->request->params['pass'][0]),array('class'=>'btn btn-warning btn-sm'));?>
-				</div>	
-				<?php echo $this->Form->submit(__('Submit'), array('div' => false, 'class' => 'btn btn-success pull-right','id'=>'submit_id')); ?>
+				<div class="btn-group" role="group" aria-label="<?php echo h(__('Form actions')); ?>">
+				    <?php echo $this->Html->link(__('Cancel'),
+				        array('action' => 'recreate', $this->request->params['pass'][0]) + $this->request->params['named'],
+				        array('class' => 'btn btn-warning btn-sm tooltip1', 'data-toggle' => 'tooltip',
+				            'title' => __('Discard unsaved changes and reload the editor.'))); ?>
+				    <button type="submit" form="close-recreate-form" class="btn btn-default btn-sm tooltip1"
+				        data-toggle="tooltip" title="<?php echo h(__('Exit without saving and lock the form.')); ?>"><?php echo h(__('Close')); ?></button>
+				    <?php echo $this->Form->submit(__('Submit'), array(
+				        'div' => false, 'class' => 'btn btn-success btn-sm tooltip1', 'id' => 'submit_id',
+				        'data-toggle' => 'tooltip', 'title' => __('Save changes and regenerate the form.')
+				    )); ?>
+				</div>
 			</div>
 			<?php echo $this->Html->image('indicator.gif', array('id' => 'submit-indicator')); ?>
 			<?php echo $this->Form->end(); ?>
+                <?php
+                echo $this->Form->create('CustomTable', array(
+                    'url' => array('action' => 'close_recreate', $this->request->params['pass'][0]),
+                    'id' => 'close-recreate-form', 'type' => 'post'
+                ));
+                echo $this->Form->end();
+                ?>
 			<?php echo $this->element('custom_form_generation_modal'); ?>
 
 			<?php echo $this->Js->writeBuffer();?>

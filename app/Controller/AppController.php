@@ -73,23 +73,17 @@ class AppController  extends Controller {
         }
     }
 
-    protected function _has_form_password_access($tableId){
+    protected function _has_form_password_access($tableId, $recreateSubmit = false){
         if(!$this->_is_super_user() || !$tableId) return false;
         $this->loadModel('CustomTable');
         $table = $this->CustomTable->find('first', array('recursive'=>-1,
             'fields'=>array('CustomTable.id', 'CustomTable.password'),
             'conditions'=>array('CustomTable.id'=>$tableId, 'CustomTable.company_id'=>$this->Session->read('User.company_id'))));
         $grant = $this->Session->read('FormPassword.'.$tableId);
-        $valid = !empty($table) && is_array($grant) && !empty($grant['expires']) && $grant['expires'] > time()
+        $validForOpenEditor = $recreateSubmit && !empty($grant['recreate_open']);
+        $unexpired = !empty($grant['expires']) && $grant['expires'] > time();
+        return !empty($table) && is_array($grant) && ($unexpired || $validForOpenEditor)
             && !empty($grant['password_hash']) && hash_equals((string)$table['CustomTable']['password'], (string)$grant['password_hash']);
-        if(!$valid) return false;
-        if(!empty($grant['module_id']) && (string)$grant['module_id'] !== (string)$tableId){
-            $parent = $this->CustomTable->find('first',array('recursive'=>-1,'fields'=>array('CustomTable.password'),
-                'conditions'=>array('CustomTable.id'=>$grant['module_id'],'CustomTable.company_id'=>$this->Session->read('User.company_id'))));
-            return !empty($parent['CustomTable']['password']) && !empty($grant['module_password_hash'])
-                && hash_equals((string)$parent['CustomTable']['password'],(string)$grant['module_password_hash']);
-        }
-        return true;
     }
 
     public function _check_login() {

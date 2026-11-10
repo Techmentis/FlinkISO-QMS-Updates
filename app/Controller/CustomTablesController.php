@@ -37,11 +37,23 @@ class CustomTablesController extends AppController {
             if(!empty($this->request->data['CustomTable']['id']) && (string)$this->request->data['CustomTable']['id'] !== (string)$id){
                 throw new BadRequestException(__('The submitted form does not match the requested form.'));
             }
-            if(!$this->_has_form_password_access($id)){
+            $isRecreate = in_array($this->action, array('recreate', 'recreate_child'), true);
+            $recreateSubmit = $isRecreate && ($this->request->is('post') || $this->request->is('put'));
+            if(!$this->_has_form_password_access($id, $recreateSubmit)){
                 if($this->request->is('get') && !$this->request->is('ajax')){
                     return $this->redirect(array('action'=>'unlock', $id, 'next_action'=>$this->action));
                 }
                 throw new ForbiddenException(__('Unlock this form with its password before re-creating or modifying it.'));
+            }
+            if ($isRecreate) {
+                $grantKey = 'FormPassword.' . $id;
+                $grant = $this->Session->read($grantKey);
+                if ($this->request->is('get')) {
+                    $grant['recreate_open'] = true;
+                } elseif ($recreateSubmit) {
+                    $grant['expires'] = time() + 1800;
+                }
+                $this->Session->write($grantKey, $grant);
             }
         }
     }
@@ -2627,6 +2639,28 @@ class CustomTablesController extends AppController {
         }        
         
     }
+    private function _prepare_recreate_password() {
+        $table = &$this->request->data['CustomTable'];
+        $password = $table['password'] ?? '';
+        $confirmation = $table['re-password'] ?? '';
+        unset($table['password'], $table['re-password']);
+        if ($password === '' && $confirmation === '') return null;
+        if (!is_string($password) || trim($password) === '' || $password !== $confirmation) {
+            throw new BadRequestException(__('Enter matching new passwords or leave both fields blank.'));
+        }
+        $table['password'] = Security::hash($password, 'md5', true);
+        return $table['password'];
+    }
+
+    private function _refresh_recreate_password_grant($id, $passwordHash) {
+        if ($passwordHash === null) return;
+        $key = 'FormPassword.'.$id;
+        $grant = $this->Session->read($key);
+        if (!is_array($grant)) return;
+        $grant['password_hash'] = $passwordHash;
+        $this->Session->write($key, $grant);
+    }
+
     public function recreate($id = null,$skip = false, $data = null) {
         $this->_clear_cake_cache();
         if($this->Session->read('User.is_mr') == false && !$this->_is_super_user()){
@@ -2639,6 +2673,16 @@ class CustomTablesController extends AppController {
         }
 
         if ($this->request->is('post') || $this->request->is('put') || $skip == true) {
+            $newPasswordHash = null;
+            if (!$skip) {
+                try {
+                    $newPasswordHash = $this->_prepare_recreate_password();
+                } catch (BadRequestException $e) {
+                    if ($this->_ajax_generation_response(false, $e->getMessage(), 400)) return $this->response;
+                    $this->Session->setFlash($e->getMessage());
+                    return $this->redirect(array('action' => 'recreate', $id) + $this->request->params['named']);
+                }
+            }
 
             $updatesql = '';
             $dropsql = '';
@@ -2688,17 +2732,14 @@ class CustomTablesController extends AppController {
             }
             
             $this->request->data['CustomTable']['system_table_id'] = $this->_get_system_table_id();
-            if($skip == true){
-                
-            }else{
-                $this->request->data['CustomTable']['password'] = Security::hash($this->request->data['CustomTable']['password'], 'md5', true);
-            }
+
             
             $this->CustomTable->create();
 
             $this->request->data['CustomTable']['belongs_to'] = json_encode($belongsTo);
             $belongsTo = null;
             if ($this->CustomTable->save($this->request->data,false)) {
+                $this->_refresh_recreate_password_grant($id, $newPasswordHash);
 
                 // update approval process 
                 $this->loadModel('ApprovalProcess');
@@ -2974,6 +3015,16 @@ class CustomTablesController extends AppController {
 
 
         if ($this->request->is('post') || $this->request->is('put')  || $skip == true) {
+            $newPasswordHash = null;
+            if (!$skip) {
+                try {
+                    $newPasswordHash = $this->_prepare_recreate_password();
+                } catch (BadRequestException $e) {
+                    if ($this->_ajax_generation_response(false, $e->getMessage(), 400)) return $this->response;
+                    $this->Session->setFlash($e->getMessage());
+                    return $this->redirect(array('action' => 'recreate_child', $id) + $this->request->params['named']);
+                }
+            }
 
             $parentTableId = !empty($childTableDefinition['CustomTable']['custom_table_id'])
                 ? $childTableDefinition['CustomTable']['custom_table_id']
@@ -3053,11 +3104,7 @@ class CustomTablesController extends AppController {
             
             $this->request->data['CustomTable']['system_table_id'] = $this->_get_system_table_id();
             
-            if($skip == true){
-                
-            }else{
-                $this->request->data['CustomTable']['password'] = Security::hash($this->request->data['CustomTable']['password'], 'md5', true);
-            }
+
             
             $customTable = $this->CustomTable->find('first', array('recursive'=>-1, 'conditions' => array('CustomTable.id' => $parentTableId)));
             if (empty($customTable['CustomTable']['table_name'])) {
@@ -3080,6 +3127,7 @@ class CustomTablesController extends AppController {
             $this->CustomTable->create();
             
             if ($this->CustomTable->save($this->request->data,false)) {
+                $this->_refresh_recreate_password_grant($id, $newPasswordHash);
                 unset($this->request->data['History']);
                 unset($this->request->data['CustomTable']['pre_fields']);
                 
@@ -3451,6 +3499,8 @@ class CustomTablesController extends AppController {
     }
 
     public function unlock($id = null) {
+        if ($this->request->is('get')) return;
+        if (!$this->request->is('post') && !$this->request->is('put')) throw new MethodNotAllowedException();
         if ($this->request->is('post') || $this->request->is('put')) {
             $nextAction = !empty($this->request->data['CustomTable']['next_action']) ? $this->request->data['CustomTable']['next_action'] : '';
             if (empty($this->request->data['CustomTable']['password'])) {
@@ -3462,9 +3512,10 @@ class CustomTablesController extends AppController {
                     $this->Session->write('FormPassword.'.$customTable['CustomTable']['id'], array(
                         'password_hash'=>$customTable['CustomTable']['password'], 'expires'=>time()+1800
                     ));
-                    $this->CustomTable->read(null, $this->data['CustomTable']['id']);
-                    $this->CustomTable->set('table_locked', 1);
-                    $this->CustomTable->save();
+                    $this->CustomTable->id = $customTable['CustomTable']['id'];
+                    if (!$this->CustomTable->saveField('table_locked', 1, false)) {
+                        throw new InternalErrorException(__('The form could not be unlocked. Please try again.'));
+                    }
                     $this->Session->setFlash(__('Table unlocked'));
                     if($nextAction === 'recreate'){
                         $this->redirect(array('action' => 'recreate',$this->data['CustomTable']['id']));    
@@ -3484,11 +3535,22 @@ class CustomTablesController extends AppController {
                     $this->redirect(array('action' => 'unlock', $this->request->data['CustomTable']['id'], 'next_action' => $nextAction));
                 }
             }
-        } else {
-            $customTable = $this->CustomTable->find('first', array('conditions' => array('CustomTable.id' => $id)));
-            if ($customTable) {
-            }
         }
+    }
+
+    public function close_recreate($id = null) {
+        if (!$this->request->is('post')) throw new MethodNotAllowedException();
+        if (!$this->_has_form_password_access($id, true)) {
+            throw new ForbiddenException(__('The form is already locked or unavailable.'));
+        }
+
+        $this->CustomTable->id = $id;
+        if (!$this->CustomTable->saveField('table_locked', 0, false)) {
+            throw new InternalErrorException(__('The form could not be locked. Please try again.'));
+        }
+        $this->Session->delete('FormPassword.'.$id);
+        $this->Session->setFlash(__('Form locked.'));
+        return $this->redirect(array('action' => 'view', $id));
     }
 
     public function lock($id = null) {
