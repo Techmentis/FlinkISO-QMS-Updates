@@ -5,7 +5,7 @@ $str = 'company_id:'.$this->Session->read('User.company_id');
 $response =  $this->requestAction(array('action'=>'curl','post','custom_forms','elements','data'=>json_encode(array(
   $existingFields,
   $fieldDetails,
-  array('has_type_ii_forms'=>!empty($hasTypeIIForms)),
+  array('has_type_ii_forms'=>!empty($hasTypeIIForms), 'departments' => isset($departments) ? $departments : array()),
   isset($designations) ? $designations : array()
 ))));
 $result = json_decode($response,true);

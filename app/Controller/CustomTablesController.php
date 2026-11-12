@@ -804,6 +804,9 @@ class CustomTablesController extends AppController {
             $field['who_can_edit_designations'] = $this->_encode_field_editors(
                 isset($field['who_can_edit_designations']) ? $field['who_can_edit_designations'] : array()
             );
+            $field['who_can_edit_departments'] = $this->_encode_field_editors(
+                isset($field['who_can_edit_departments']) ? $field['who_can_edit_departments'] : array()
+            );
             if (array_key_exists('approval_step_rules', $field)) {
                 $field['approval_step_rules'] = $this->_encode_field_approval_step_rules($field['approval_step_rules']);
             }
@@ -1289,6 +1292,7 @@ class CustomTablesController extends AppController {
             if (!empty($field['field_label'])) $field['field_label'] = base64_decode($field['field_label']);
             $field['who_can_edit'] = json_decode($this->_encode_field_editors(isset($field['who_can_edit']) ? $field['who_can_edit'] : array()), true);
             $field['who_can_edit_designations'] = json_decode($this->_encode_field_editors(isset($field['who_can_edit_designations']) ? $field['who_can_edit_designations'] : array()), true);
+            $field['who_can_edit_departments'] = json_decode($this->_encode_field_editors(isset($field['who_can_edit_departments']) ? $field['who_can_edit_departments'] : array()), true);
             if(isset($field['approval_step_rules'])) $field['approval_step_rules'] = json_decode($this->_encode_field_approval_step_rules($field['approval_step_rules']), true);
             if(isset($field['child_tables']) && is_string($field['child_tables'])){
                 $decodedChildTables = json_decode($field['child_tables'], true);
@@ -1878,6 +1882,7 @@ class CustomTablesController extends AppController {
                 }else{
                     $fields['who_can_edit'] = $this->_encode_field_editors(isset($fields['who_can_edit']) ? $fields['who_can_edit'] : array());
                     $fields['who_can_edit_designations'] = $this->_encode_field_editors(isset($fields['who_can_edit_designations']) ? $fields['who_can_edit_designations'] : array());
+                    $fields['who_can_edit_departments'] = $this->_encode_field_editors(isset($fields['who_can_edit_departments']) ? $fields['who_can_edit_departments'] : array());
                     if(isset($fields['approval_step_rules'])) $fields['approval_step_rules'] = $this->_encode_field_approval_step_rules($fields['approval_step_rules']);
                     if((int)$fields['display_type'] === 7 && !empty($fields['show_comments'])) $fields['show_comments'] = base64_encode($fields['show_comments']);
                     if(isset($fields['child_tables']) && is_array($fields['child_tables'])) $fields['child_tables'] = json_encode($fields['child_tables']);
@@ -2283,6 +2288,7 @@ class CustomTablesController extends AppController {
                 }else{
                     $fields['who_can_edit'] = $this->_encode_field_editors(isset($fields['who_can_edit']) ? $fields['who_can_edit'] : array());
                     $fields['who_can_edit_designations'] = $this->_encode_field_editors(isset($fields['who_can_edit_designations']) ? $fields['who_can_edit_designations'] : array());
+                    $fields['who_can_edit_departments'] = $this->_encode_field_editors(isset($fields['who_can_edit_departments']) ? $fields['who_can_edit_departments'] : array());
                     if(isset($fields['approval_step_rules'])) $fields['approval_step_rules'] = $this->_encode_field_approval_step_rules($fields['approval_step_rules']);
                     if((int)$fields['display_type'] === 7 && !empty($fields['show_comments'])) $fields['show_comments'] = base64_encode($fields['show_comments']);
                     if(isset($fields['child_tables']) && is_array($fields['child_tables'])) $fields['child_tables'] = json_encode($fields['child_tables']);
@@ -2725,6 +2731,7 @@ class CustomTablesController extends AppController {
                 }else{
                     $fields['who_can_edit'] = $this->_encode_field_editors(isset($fields['who_can_edit']) ? $fields['who_can_edit'] : array());
                     $fields['who_can_edit_designations'] = $this->_encode_field_editors(isset($fields['who_can_edit_designations']) ? $fields['who_can_edit_designations'] : array());
+                    $fields['who_can_edit_departments'] = $this->_encode_field_editors(isset($fields['who_can_edit_departments']) ? $fields['who_can_edit_departments'] : array());
                     if(isset($fields['approval_step_rules'])) $fields['approval_step_rules'] = $this->_encode_field_approval_step_rules($fields['approval_step_rules']);
                     if($fields['show_comments'])$fields['show_comments'] = base64_encode($fields['show_comments']);
                     if(isset($fields['child_tables']) && is_array($fields['child_tables'])) $fields['child_tables'] = json_encode($fields['child_tables']);
@@ -3092,6 +3099,7 @@ class CustomTablesController extends AppController {
                 }else{
                     $fields['who_can_edit'] = $this->_encode_field_editors(isset($fields['who_can_edit']) ? $fields['who_can_edit'] : array());
                     $fields['who_can_edit_designations'] = $this->_encode_field_editors(isset($fields['who_can_edit_designations']) ? $fields['who_can_edit_designations'] : array());
+                    $fields['who_can_edit_departments'] = $this->_encode_field_editors(isset($fields['who_can_edit_departments']) ? $fields['who_can_edit_departments'] : array());
                     if(isset($fields['approval_step_rules'])) $fields['approval_step_rules'] = $this->_encode_field_approval_step_rules($fields['approval_step_rules']);
                     if($fields['show_comments'])$fields['show_comments'] = base64_encode($fields['show_comments']);
                     if(isset($fields['child_tables']) && is_array($fields['child_tables'])) $fields['child_tables'] = json_encode($fields['child_tables']);

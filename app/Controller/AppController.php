@@ -3623,25 +3623,28 @@ class AppController  extends Controller {
         return array_values(array_filter($editors, function($editor){ return $editor !== '' && $editor !== 0 && $editor !== '0'; }));
     }
 
-    private function _custom_field_editor_designations($field){
-        $designations = isset($field['who_can_edit_designations']) ? $field['who_can_edit_designations'] : array();
-        for($decodePass = 0; $decodePass < 3 && is_string($designations); $decodePass++){
-            $decodedDesignations = json_decode($designations, true);
+    private function _custom_field_editor_group($field, $scope){
+        $groupIds = $field['who_can_edit_'.$scope] ?? array();
+        for($decodePass = 0; $decodePass < 3 && is_string($groupIds); $decodePass++){
+            $decodedGroupIds = json_decode($groupIds, true);
             if(json_last_error() !== JSON_ERROR_NONE) break;
-            $designations = $decodedDesignations;
+            $groupIds = $decodedGroupIds;
         }
-        if(!is_array($designations)) return array();
-        return array_values(array_filter($designations, function($designation){
-            return $designation !== '' && $designation !== 0 && $designation !== '0' && $designation !== -1 && $designation !== '-1';
+        if(!is_array($groupIds)) return array();
+        return array_values(array_filter($groupIds, function($groupId){
+            return $groupId !== '' && $groupId !== 0 && $groupId !== '0' && $groupId !== -1 && $groupId !== '-1';
         }));
     }
 
     private function _current_user_can_edit_custom_field($field, $record){
         $editors = $this->_custom_field_editors($field);
-        $designations = $this->_custom_field_editor_designations($field);
-        if(empty($editors) && empty($designations)) return true;
+        $designations = $this->_custom_field_editor_group($field, 'designations');
+        $departments = $this->_custom_field_editor_group($field, 'departments');
+        if(empty($editors) && empty($designations) && empty($departments)) return true;
         $userId = $this->Session->read('User.id');
         $employeeId = $this->Session->read('User.employee_id');
+        $departmentId = $this->Session->read('User.department_id');
+        if (!empty($departmentId) && in_array($departmentId, $departments, true)) return true;
         $designationId = $this->Session->read('User.designation_id');
         if(!empty($designationId) && in_array($designationId, $designations)) return true;
         $roleFlags = array('role:publisher'=>'is_publisher', 'role:admin'=>'is_mr', 'role:hod'=>'is_hod');
@@ -4068,7 +4071,8 @@ class AppController  extends Controller {
             if(empty($table['CustomTable']['fields'])) continue;
             $restricted = $this->_restricted_add_fields($table['CustomTable']['fields']);
             foreach($restricted as $fieldName => $field){
-                if(!array_intersect($roles, $this->_custom_field_editors($field))) continue;
+                if(!array_intersect($roles, $this->_custom_field_editors($field))
+                    && !$this->_custom_field_editor_group($field, 'departments')) continue;
                 foreach($this->request->data[$childModel] as $index => $row){
                     if(is_array($row) && empty($row['id'])) unset($this->request->data[$childModel][$index][$fieldName]);
                 }

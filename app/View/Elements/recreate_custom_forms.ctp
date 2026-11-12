@@ -20,7 +20,7 @@ $recreatePayload = json_encode(array(
     $thisTable,
     $linkedTosWithDisplay,
     $hasMany,
-    array('has_type_ii_forms' => !empty($hasTypeIIForms)),
+    array('has_type_ii_forms' => !empty($hasTypeIIForms), 'departments' => isset($departments) ? $departments : array()),
     isset($approvalSteps) ? $approvalSteps : array(),
     isset($designations) ? $designations : array()
   ));
