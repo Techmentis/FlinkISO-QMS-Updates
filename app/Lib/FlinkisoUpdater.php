@@ -190,9 +190,8 @@ class FlinkisoUpdater {
             $step = 'validate';
             $this->event($step, 0, 'Preparing update files...');
             $errors = array();
-            // Preserve installation-specific settings and data. Updater code is intentionally
-            // installable so fixes in the update repository reach existing installations.
-            $skip = array('Config/core.php', 'Config/database.php', 'Config/installed.txt', 'tmp', 'webroot/files', 'webroot/updates');
+            // Preserve installation settings, data and the separately installed updater.
+            $skip = array('Config/core.php', 'Config/database.php', 'Config/installed.txt', 'tmp', 'webroot/files', 'webroot/updates', 'Controller/BillingController.php', 'Lib/FlinkisoUpdater.php', 'View/Billing/update.ctp');
             $incoming = $this->inventory($source, '', $skip, $errors);
             // Installed translations belong to the customer. Keep them when updating the master template.
             foreach ($incoming as $relative => $unused) {
