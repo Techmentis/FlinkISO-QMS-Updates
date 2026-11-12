@@ -279,38 +279,33 @@
   color: #666;
 }
 
-/*
- * Field Settings freezes the page while it is open.  Scroll the settings
- * panel itself, using the viewport height calculated by recreate/add JS.
- */
+/* Scroll the fields between the header and the footer. */
 #fieldSettingsPanelBody.has-settings {
+  display: flex;
+  flex-direction: column;
   max-height: var(--field-panel-available-height, 65vh);
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow: hidden;
 }
 
 #fieldSettingsPanelBody.has-settings > .field-settings-content {
-  display: block;
-  overflow: visible;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
-#fieldSettingsPanelBody.has-settings > .field-settings-content > .field-settings-header {
-  position: sticky;
-  top: 0;
-  z-index: 4;
-  background: #fff;
+#fieldSettingsPanelBody.has-settings > .field-settings-content > .field-settings-header,
+#fieldSettingsPanelBody.has-settings > .field-settings-footer {
+  flex: 0 0 auto;
+  position: static;
 }
 
 #fieldSettingsPanelBody.has-settings > .field-settings-content > .field-settings-body {
-  overflow: visible;
-}
-
-#fieldSettingsPanelBody.has-settings > .field-settings-footer {
-  position: sticky;
-  bottom: 0;
-  z-index: 4;
-  background: #fff;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 /* Independent Child Tables panel and its field accordion. */
