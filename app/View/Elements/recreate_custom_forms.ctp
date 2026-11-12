@@ -31,9 +31,12 @@ $response = $this->requestAction(
     'linkedTosWithDisplay'=>json_encode($linkedTosWithDisplay)
   ))
 );
-$result = json_decode($response,true);
-if($result['error']==1 or $response == null){ 
-  if($result['message'] == 'Incorrect credentials'){ ?>
+$result = is_string($response) ? json_decode($response, true) : null;
+$hasBuilder = is_string($response) && strpos($response, 'id="fieldSettingsPanelBody"') !== false;
+if (!$hasBuilder) {
+  $apiMessage = is_array($result) && isset($result['message']) && is_string($result['message'])
+    ? $result['message'] : '';
+  if ($apiMessage === 'Incorrect credentials') { ?>
     <div class="row">
       <div class="col-md-12">
         <!-- <div class="alert alert-danger">FlinkISO API Subscription Has Expired.</div> -->
@@ -93,26 +96,15 @@ if($result['error']==1 or $response == null){
       </div>
     </div>
   </div>
-<?php }else{ ?>
-  <div class="row">
-    <div class="col-md-12">
-      <div class="alert alert-danger"><?php echo h(__('FlinkISO API is not available.')); ?></div>
-      <div class="panel panel-default">
-        <div class="panel-body">
-          <p><?php echo h(__('Make sure that our API server is accesible from your server.')); ?></p>
-          <p><?php echo h(__('Make sure that you have renewed your API subscription. Contact')); ?> <strong><?php echo h(__('sales@flinkiso.com')); ?></strong> <?php echo h(__('for renewal.')); ?></p>
-          <p class="text-danger"><?php echo h(__('If you are seeing this alert, Do not click Submit button. Click Back to goback to previouse page.')); ?></p>
-          <p><a href="https://www.paypal.com/ncp/payment/HUWKVKPWAQPH2" target="_blank" class="btn btn-success btn-lg"><?php echo h(__('Pay Now!')); ?></a></p>
-          <p><?php echo h(__('Please make sure to use the same registered email address while making the payment.')); ?></p>
-          <p><?php echo h(__('To know more about FlinkISO API:')); ?> <a href="https://www.flinkiso.com/pricing/qms-api.html" target="_blank"><?php echo h(__('Click Here.')); ?></a></p>
-        </div>
-      </div>
-    </div>      
+<?php } else { ?>
+  <div class="alert alert-danger" role="alert">
+    <strong><?php echo h(__('The form builder could not load.')); ?></strong>
+    <?php echo h($apiMessage !== '' ? $apiMessage : __('The configured FlinkISO API did not return a form builder. Reload this page to retry.')); ?>
   </div>
 <?php }?>
 <script>
   $().ready(function(){
-    $("#submit_id").hide();
+    $("#submit_id").prop("disabled", true).hide();
   })
 </script>
 <?php }else{

@@ -71,6 +71,7 @@
 			data: $form.serialize(),
 			dataType: 'json',
 			timeout: 0,
+			beforeSend: function(){ $form.triggerHandler('builder:save-started'); },
 			success: function(response){
 				if(!response || response.success !== true){
 					showGenerationError(response && response.message ? response.message : '<?php echo addslashes(__('The form could not be updated.')); ?>');

@@ -108,6 +108,7 @@ class FlinkisoUpdater {
 
     public function run($repeatBackup, $confirmedDate, $executeSql) {
         $lock = null;
+        $scratch = null;
         $step = 'connect';
         try {
             $repo = $this->repository();
@@ -118,7 +119,6 @@ class FlinkisoUpdater {
             if ($unzipCheckStatus !== 0 || !$unzipCheck) throw new RuntimeException(__('Command-line unzip is required.'));
             $errors = array();
             $this->writableErrors($this->root . '/backup', $errors);
-            $this->writableErrors($this->root . '/app/webroot/updates', $errors);
             $this->failErrors($errors);
             $this->mkdirChecked($this->root . '/backup');
             $this->mkdirChecked($this->root . '/backup/.updater');
@@ -172,28 +172,16 @@ class FlinkisoUpdater {
             }
 
             $step = 'download';
-            $updates = $this->root . '/app/webroot/updates';
-            $this->event($step, 0, 'Removing previous downloads...');
-            $this->mkdirChecked($updates);
-            $errors = array();
-            $old = $this->inventory($updates, '', array(), $errors);
-            foreach ($old as $path) { $this->writableErrors($path, $errors); $this->writableErrors(dirname($path), $errors); }
-            $this->failErrors($errors);
-            // Deny HTTP access to SQL, archives and extracted PHP on Apache/IIS.
-            if (file_put_contents($updates . '/.htaccess', "Require all denied\n") === false ||
-                file_put_contents($updates . '/web.config', '<configuration><system.webServer><security><authorization><remove users="*" roles="" verbs=""/><add accessType="Deny" users="*"/></authorization></security></system.webServer></configuration>') === false) {
-                throw new RuntimeException(__('Cannot protect updates directory.'));
-            }
-            foreach ($old as $rel => $path) {
-                if ($rel !== '.htaccess' && $rel !== 'web.config' && !unlink($path)) throw new RuntimeException(__('Cannot remove previous download: ') . $path);
-            }
-            $archive = $updates . '/update.zip';
+            // Keep downloads isolated from previous runs and outside webroot.
+            $scratch = $this->work . '/download';
+            $this->mkdirChecked($scratch);
+            $archive = $scratch . '/update.zip';
             $this->download($repo, $archive);
             $this->event($step, 100, 'Latest archive downloaded.');
 
             $step = 'extract';
             $this->event($step, 0, 'Extracting update archive...');
-            $stage = $updates . '/stage-' . basename($this->work);
+            $stage = $scratch . '/stage';
             $this->extract($archive, $stage, $repo);
             $source = $stage . '/' . $repo['folder'] . '/app';
             if (!is_dir($source)) throw new RuntimeException(__('Archive does not contain the configured folder/app directory.'));
@@ -266,8 +254,24 @@ class FlinkisoUpdater {
                 if ($this->emit) call_user_func($this->emit, array('step' => $step, 'percent' => 0, 'message' => $message . '\nCannot write the updater log.', 'error' => true));
             }
         } finally {
+            if ($scratch !== null) $this->discardDownload($scratch);
             if (is_resource($lock)) { flock($lock, LOCK_UN); fclose($lock); }
         }
+    }
+
+    /** Best-effort cleanup of this run only. Never follow extracted links. */
+    private function discardDownload($path) {
+        if (is_link($path) || is_file($path)) {
+            @unlink($path);
+            return;
+        }
+        if (!is_dir($path)) return;
+        $entries = @scandir($path);
+        if ($entries === false) return;
+        foreach ($entries as $name) {
+            if ($name !== '.' && $name !== '..') $this->discardDownload($path . '/' . $name);
+        }
+        @rmdir($path);
     }
 
     private function findCompletedBackup($directory) {
