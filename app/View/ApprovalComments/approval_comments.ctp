@@ -1,5 +1,6 @@
 <style type="text/css">.response-table{margin-left: 10px;}.response-table div{margin: 0 !important;padding: 0;}.timeline{margin-top: 20px;}</style>
 <?php
+$approvalRecipientIds = array_filter(array($this->Session->read('User.id'), $this->Session->read('User.employee_id')));
 if(!$currentStep['ApprovalStep']['id'])$approval_step_id = $this->request->params['named']['approval_step_id'];
 else $approval_step_id = $currentStep['ApprovalStep']['id'];
 ?>
@@ -69,7 +70,7 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
                                 }
                             } ?>
                         </div>
-                        <?php if($approvalComment['Approval']['status'] != 1 && $approvalComment['ApprovalComment']['response_status'] == 0  && $this->Session->read('User.is_approver') && ($approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.id') || $approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.employee_id'))){
+                        <?php if($approvalComment['Approval']['status'] != 1 && $approvalComment['ApprovalComment']['response_status'] == 0  && $canDecideApproval && ($approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.id') || $approvalComment['ApprovalComment']['user_id'] == $this->Session->read('User.employee_id'))){
                             ?>
                             <div class="col-md-12">
                                 <?php echo $this->Form->hidden('comments',
@@ -83,50 +84,15 @@ else $approval_step_id = $currentStep['ApprovalStep']['id'];
 
                                 ));?>
                                 <?php
-                                if(isset($this->request->params['named']['custom_table_id']) && $this->request->params['named']['custom_table_id'] != -1){
-                                    if(isset($approversLists)){
-                                        if(in_array($this->Session->read('User.employee_id'), array_keys($approversLists))){
-                                            if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
-                                                unset($approvalStatuses[1]);
-                                            }
-                                            if($approvalStatuses){
-                                                echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
-                                                'type'=>'radio',
-                                                'options'=>$approvalStatuses,
-                                                'default'=>$approvalComment['Approval']['approval_status']
-                                                ));
-                                            }
-                                        }else{
-                                            if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
-                                                unset($approvalStatuses[1]);
-                                            }
-                                            if($approvalStatuses){
-                                                echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
-                                                'type'=>'radio',
-                                                'options'=>$approvalStatuses,
-                                                'default'=>$approvalComment['Approval']['approval_status']
-                                                ));
-                                            }
-                                        }
-                                    }
-                                }else{
-                                    if($this->Session->read('User.is_approver') == true){
-                                        if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
-                                            unset($approvalStatuses[1]);
-                                        }
-
-                                        if($approvalStatuses){
-                                            echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status',array(
-                                            // 'id'=>$approvalComment['ApprovalComment']['id'].'ResponseTxt',
-                                            'type'=>'radio',
-                                            'options'=>$approvalStatuses,
-                                            'default'=>$approvalComment['Approval']['approval_status']
-                                            ));
-                                        }
-                                    }else{
-                                        echo "<br />";
-                                    }
+                                $rowStatuses = $approvalStatuses;
+                                if (in_array($prepared_by, $approvalRecipientIds, true)) {
+                                    unset($rowStatuses[1]);
                                 }
+                                echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.approval_status', array(
+                                    'type' => 'radio',
+                                    'options' => $rowStatuses,
+                                    'default' => $approvalComment['Approval']['approval_status'],
+                                ));
                                 if(!empty($nextApprovalStep['ApprovalStep'])){
                                     echo '<div id="'.$approvalComment['ApprovalComment']['id'].'NextApproverWrap" style="display:'.(!empty($nextApproverRequired) ? 'block' : 'none').'">';
                                         echo $this->Form->input('ApprovalComment.'.$approvalComment['ApprovalComment']['id'].'.next_approver_ids',array(
@@ -277,53 +243,16 @@ if($approvalComment['Approval']['status'] != 1 && empty($approvalComment['Approv
                             <div class="col-md-12">
 
                                 <?php
-                                if(isset($this->request->params['named']['custom_table_id']) && $this->request->params['named']['custom_table_id'] != -1){
-                                    if(isset($approversLists)){
-                                        if(in_array($this->Session->read('User.employee_id'), array_keys($approversLists))){
-                                            if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
-                                                unset($approvalStatuses[1]);
-                                            }
-
-                                            if($approvalStatuses){
-                                                echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.approval_status',array(
-                                                'type'=>'radio',
-                                                'options'=>$approvalStatuses,
-                                                'default'=>0
-                                                ));
-                                            }
-                                        }else{
-                                            // $approvalStatuses = array(0=>'Pending',2=>'Not Approved');
-                                            if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
-                                                unset($approvalStatuses[1]);
-                                            }
-
-                                            if($approvalStatuses){
-                                                echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.approval_status',array(
-                                                'type'=>'radio',
-                                                'options'=>$approvalStatuses,
-                                                'default'=>0
-                                                ));
-                                            }
-                                        }
+                                if ($canDecideApproval && in_array($approval['Approval']['user_id'], $approvalRecipientIds, true)) {
+                                    $rowStatuses = $approvalStatuses;
+                                    if (in_array($prepared_by, $approvalRecipientIds, true)) {
+                                        unset($rowStatuses[1]);
                                     }
-                                }else{
-                                    if($this->Session->read('User.is_approver') == true){
-                                        // $approvalStatuses = array(0=>'Pending',1=>'Approved',2=>'Not Approved');
-                                        if($prepared_by == $this->Session->read('User.id') || $prepared_by == $this->Session->read('User.employee_id')){
-                                            unset($approvalStatuses[1]);
-                                        }
-
-                                        if($approvalStatuses){
-                                            echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.approval_status',array(
-                                            // 'id'=>$approval['Approval']['id'].'ResponseTxt',
-                                            'type'=>'radio',
-                                            'options'=>$approvalStatuses,
-                                            'default'=>0
-                                            ));
-                                        }
-                                    }else{
-                                        echo "<br />";
-                                    }
+                                    echo $this->Form->input('ApprovalComment.'.$approval['Approval']['id'].'.approval_status', array(
+                                        'type' => 'radio',
+                                        'options' => $rowStatuses,
+                                        'default' => 0,
+                                    ));
                                 }
                                 if(!empty($nextApprovalStep['ApprovalStep']) && ($approval['Approval']['user_id'] == $this->Session->read('User.id') || $approval['Approval']['user_id'] == $this->Session->read('User.employee_id'))){
                                     echo '<div id="'.$approval['Approval']['id'].'NextApproverWrap" style="display:'.(!empty($nextApproverRequired) ? 'block' : 'none').'">';

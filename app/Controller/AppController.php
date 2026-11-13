@@ -4083,6 +4083,23 @@ class AppController  extends Controller {
     /** Child rows can also be deleted through their own generated controller. */
     protected function _guard_readonly_child_delete(){
         if($this->action !== 'delete' || empty($this->modelClass) || !isset($this->{$this->modelClass})) return;
+        $model = $this->{$this->modelClass};
+        if ($model->useTable === 'chd_annexure_i_change_control_child_1_v1s') {
+            $recordId = $this->request->params['pass'][0] ?? null;
+            $userId = $this->Session->read('User.id');
+            $companyId = $this->Session->read('User.company_id');
+            $owned = $recordId && $userId && $companyId && $model->find('count', array(
+                'recursive' => -1,
+                'conditions' => array(
+                    $model->alias . '.id' => $recordId,
+                    $model->alias . '.created_by' => $userId,
+                    $model->alias . '.company_id' => $companyId,
+                ),
+            ));
+            if (!$owned) {
+                throw new ForbiddenException(__('Only the creator can delete this department assessment.'));
+            }
+        }
         App::uses('TabAccessPolicy', 'Lib');
         $this->loadModel('CustomTable');
         $child = $this->CustomTable->find('first', array('recursive' => -1,

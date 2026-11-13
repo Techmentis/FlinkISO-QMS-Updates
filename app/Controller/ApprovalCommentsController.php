@@ -36,6 +36,7 @@ class ApprovalCommentsController extends AppController {
             $approval = $this->ApprovalComment->Approval->find('first', array('conditions' => array('Approval.id' => $this->request->params['named']['approval_id'])));
             $this->set('approval', $approval);
         }
+        $this->set('canDecideApproval', $this->_can_decide_approval($approval));
         $approversLists = $this->_get_approver_list();        
         $approversLists[$approval['Approval']['from']] = $approval['From']['name'];
         $this->set('approversLists', $approversLists);
@@ -87,6 +88,35 @@ class ApprovalCommentsController extends AppController {
 		$this->set(compact('nextApprovalStep','previousApprovalStep','nextApproversList','nextApproverRequired','nextApprovalUserLabel'));
         $this->set('prepared_by',$this->request->params['named']['prepared_by']);
         $this->set('approval_step_id',$approval_step_id);
+    }
+
+    protected function _can_decide_approval($approval) {
+        $userId = $this->Session->read('User.id');
+        $companyId = $this->Session->read('User.company_id');
+        if (!$userId || !$companyId || empty($approval['Approval'])
+            || $approval['Approval']['company_id'] !== $companyId) {
+            return false;
+        }
+        if ($this->Session->read('User.is_approver')) {
+            return true;
+        }
+
+        $tableName = Inflector::tableize($approval['Approval']['model_name']);
+        if ($tableName !== $approval['Approval']['controller_name']) {
+            return false;
+        }
+        $this->loadModel('CustomTable');
+        $table = $this->CustomTable->find('first', array(
+            'recursive' => -1,
+            'fields' => array('CustomTable.approvers'),
+            'conditions' => array(
+                'CustomTable.table_name' => $tableName,
+                'CustomTable.company_id' => $companyId,
+                'CustomTable.soft_delete' => 0,
+            ),
+        ));
+        $approvers = json_decode(isset($table['CustomTable']['approvers']) ? $table['CustomTable']['approvers'] : '[]', true);
+        return is_array($approvers) && in_array($userId, $approvers, true);
     }
 
     public function next_step_status($approvalId = null) {
@@ -158,11 +188,15 @@ class ApprovalCommentsController extends AppController {
 
     public function add_response($id = null, $response = null, $to = null, $approval_step_id = null) {
         
-        $id = $this->request->data['id'];
+        $id = $this->request->data('id');
         $response = $this->request->data['response'];
         $to = $this->request->data['to'];
         $approval_id = $this->request->data['approval_id'];
-        $approval_status = $this->request->data['approval_status'];
+        $approval_status = $this->request->data('approval_status');
+        if ($approval_status !== null && !in_array($approval_status, array(0, 1, 2, 3, '0', '1', '2', '3'), true)) {
+            $this->set('responseresult', __('Invalid approval status.'));
+            return;
+        }
         $approval_step_id = $this->request->data['approval_step_id'];
 		$nextApproverIds = isset($this->request->data['next_approver_ids']) ? $this->request->data['next_approver_ids'] : (isset($this->request->data['next_approver_id']) ? $this->request->data['next_approver_id'] : array());
 		if(!is_array($nextApproverIds)) $nextApproverIds = array($nextApproverIds);
@@ -171,11 +205,34 @@ class ApprovalCommentsController extends AppController {
 		$activeApproval = $this->ApprovalComment->Approval->find('first',array('recursive'=>-1,'conditions'=>array('Approval.id'=>$approval_id)));
 		$currentUserIds = array_filter(array($this->Session->read('User.id'), $this->Session->read('User.employee_id')));
 
-        // if(empty($activeApproval['Approval']) || !in_array($activeApproval['Approval']['user_id'], $currentUserIds) || !in_array($activeApproval['Approval']['approval_status'], array(0, null))){
-		// 	$this->set('responseresult',__('This approval is no longer pending for the current user.'));
-		// 	return;
-		// }
-        
+        if (in_array((string)$approval_status, array('1', '2', '3'), true)) {
+            $pendingApproval = !empty($activeApproval['Approval'])
+                && (int)$activeApproval['Approval']['soft_delete'] === 0
+                && (int)$activeApproval['Approval']['status'] !== 1
+                && (int)$activeApproval['Approval']['approval_status'] === 0
+                && $activeApproval['Approval']['approval_step_id'] === $approval_step_id;
+            $recipientId = $pendingApproval ? $activeApproval['Approval']['user_id'] : null;
+            if ($pendingApproval && $id) {
+                $pendingComment = $this->ApprovalComment->find('first', array(
+                    'recursive' => -1,
+                    'fields' => array('ApprovalComment.user_id'),
+                    'conditions' => array(
+                        'ApprovalComment.id' => $id,
+                        'ApprovalComment.approval_id' => $approval_id,
+                        'ApprovalComment.response_status' => 0,
+                        'ApprovalComment.soft_delete' => 0,
+                    ),
+                ));
+                $recipientId = isset($pendingComment['ApprovalComment']['user_id'])
+                    ? $pendingComment['ApprovalComment']['user_id'] : null;
+            }
+            if (!$pendingApproval || !in_array($recipientId, $currentUserIds, true)
+                || !$this->_can_decide_approval($activeApproval)) {
+                $this->set('responseresult', __('This approval is no longer pending for the current user.'));
+                return;
+            }
+        }
+
         if($to == -1 || $id == -1 || $approval_id == -1 || $approval_step_id == ''){
             $this->set('responseresult','Approval process step is missing.');            
         }
